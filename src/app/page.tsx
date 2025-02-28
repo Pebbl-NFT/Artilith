@@ -1,6 +1,6 @@
 'use client';
 
-import { Section, Cell, Image, List, Button, Avatar } from '@telegram-apps/telegram-ui';
+import { Section, Cell, Image, List, Button, Avatar, Icon20Copy } from '@telegram-apps/telegram-ui';
 import { useTranslations } from 'next-intl';
 import { Link } from '@/components/Link/Link';
 import { LocaleSwitcher } from '@/components/LocaleSwitcher/LocaleSwitcher';
