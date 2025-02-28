@@ -12,6 +12,16 @@ export default function Home() {
 
   return (
     <Page back={false}>
+<Placeholder
+      header="Title"
+      description="Description"
+    >
+      <img
+        alt="Telegram sticker"
+        src="https://xelene.me/telegram.gif"
+        style={{ display: 'block', width: '144px', height: '144px' }}
+      />
+    </Placeholder>
       <div className="flex justify-end space-x-4 p-4">
         <Avatar acronym="IS" size={96} />
         <Button mode="filled" size="s">
