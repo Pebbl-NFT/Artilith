@@ -4,6 +4,7 @@ import { Button, Image } from '@telegram-apps/telegram-ui';
 import tonSvg from '../app/_assets/ton.svg';
 import { useMemo } from 'react';
 import { useSignal, initData } from '@telegram-apps/sdk-react';
+import Link from 'next/link';
 
 export default function TopBar() {
   const initDataState = useSignal(initData.state);
@@ -31,14 +32,12 @@ export default function TopBar() {
         Hi {username}
       </Button>
       <Button
-        href="/ton-connect"
         mode="filled"
         size="s"
         target="_blank"
         style={{
           background: 'var(--tgui--secondary_bg_color)',
           padding: 10,
-          width: '30%',
           margin: 20,
           borderRadius: 50,
           border: '0px solid rgb(0, 123, 255)',
@@ -53,7 +52,7 @@ export default function TopBar() {
           />
         }
       >
-        Connect wallet
+        Connect Wallet
       </Button>
     </div>
   );
