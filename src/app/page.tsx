@@ -11,7 +11,8 @@ export default function Home() {
   const t = useTranslations('i18n');
 
   return (
-    <Page back={false}>
+      <div className="flex justify-end space-x-4 p-4">
+        <Page back={false}>
       <Avatar
   acronym="IS"
   size={96}
@@ -23,13 +24,6 @@ export default function Home() {
 >
   Create channel
 </Button>
-      <div className="flex justify-end space-x-4 p-4">
-        <Button className="bg-blue-500 text-white px-4 py-2 rounded">
-          <Link href="/user">User</Link>
-        </Button>
-        <Button className="bg-blue-500 text-white px-4 py-2 rounded">
-          <Link href="/connect">Connect</Link>
-        </Button>
       </div>
       <List>
         <Section
