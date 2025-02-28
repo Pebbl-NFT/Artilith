@@ -12,6 +12,10 @@ export default function Home() {
 
   return (
     <Page back={false}>
+      <Avatar
+  acronym="IS"
+  size={96}
+/>
       <div className="flex justify-end space-x-4 p-4">
         <Button className="bg-blue-500 text-white px-4 py-2 rounded">
           <Link href="/user">User</Link>
