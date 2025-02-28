@@ -1,6 +1,6 @@
 'use client';
 
-import { Section, Cell, Image, List, Button, Avatar, Icon19Copy } from '@telegram-apps/telegram-ui';
+import { Section, Cell, Image, List, Button, Avatar } from '@telegram-apps/telegram-ui';
 import { useTranslations } from 'next-intl';
 import { Link } from '@/components/Link/Link';
 import { LocaleSwitcher } from '@/components/LocaleSwitcher/LocaleSwitcher';
@@ -14,7 +14,7 @@ export default function Home() {
     <Page back={false}>
       <div className="flex justify-end space-x-4 p-4">
         <Avatar acronym="IS" size={96} />
-        <Button before={<Icon19Copy />} mode="filled" size="s">
+        <Button mode="filled" size="s">
           Create channel
         </Button>
       </div>
