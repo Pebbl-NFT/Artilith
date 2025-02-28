@@ -1,6 +1,6 @@
 'use client';
 
-import { Section, Cell, Image, List, Button } from '@telegram-apps/telegram-ui';
+import { List, Placeholder,Button } from '@telegram-apps/telegram-ui';
 import { useTranslations } from 'next-intl';
 import { Link } from '@/components/Link/Link';
 import { LocaleSwitcher } from '@/components/LocaleSwitcher/LocaleSwitcher';
@@ -15,14 +15,23 @@ export default function Home() {
     <Page back={false}>
       <List>
         <TopBar />
-        <Section
-          header="Application Launch Data"
-          footer="These pages help developer to learn more about current launch information"
-        >
-        </Section>
-        <Section header={t('header')} footer={t('footer')}>
-          <LocaleSwitcher/>
-        </Section>
+        <div className="HIJtihMA8FHczS02iWF5">
+          <Placeholder
+            action={<Button size="l" stretched>Join group</Button>}
+            description="We are sorry, but the page building is in progress. Please come back later."
+            header="Hmmm, something went wrong"
+          >
+            <img
+              alt="Telegram sticker"
+              className="blt0jZBzpxuR4oDhJc8s"
+              src="https://xelene.me/telegram.gif"
+              style={{  width: '40%', 
+                height: 'auto', 
+                marginTop: '30%',
+              }}
+            />
+          </Placeholder>
+        </div>
       </List>
       <BottomBar />
     </Page>
