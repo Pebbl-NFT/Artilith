@@ -11,19 +11,12 @@ export default function Home() {
   const t = useTranslations('i18n');
 
   return (
+    <Page back={false}>
       <div className="flex justify-end space-x-4 p-4">
-        <Page back={false}>
-      <Avatar
-  acronym="IS"
-  size={96}
-/>
-<Button
-  before={<Icon20Copy />}
-  mode="filled"
-  size="s"
->
-  Create channel
-</Button>
+        <Avatar acronym="IS" size={96} />
+        <Button before={<Icon20Copy />} mode="filled" size="s">
+          Create channel
+        </Button>
       </div>
       <List>
         <Section
