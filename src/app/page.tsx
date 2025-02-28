@@ -27,7 +27,8 @@ export default function Home() {
               src="https://xelene.me/telegram.gif"
               style={{  width: '40%', 
                 height: 'auto', 
-                marginTop: '30%',
+                margin: '0 auto',
+                display: 'block'
               }}
             />
           </Placeholder>
