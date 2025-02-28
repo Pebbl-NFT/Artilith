@@ -7,9 +7,6 @@ import { LocaleSwitcher } from '@/components/LocaleSwitcher/LocaleSwitcher';
 import { Page } from '@/components/Page';
 import tonSvg from './_assets/ton.svg';
 
-// Додайте імпорт Placeholder, якщо це необхідно
-// import { Placeholder } from 'some-placeholder-library';
-
 export default function Home() {
   const t = useTranslations('i18n');
 
