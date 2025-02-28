@@ -4,7 +4,7 @@ import { Section, Cell, Image, List, Button, Avatar, Placeholder } from '@telegr
 import { useTranslations } from 'next-intl';
 import { Link } from '@/components/Link/Link';
 import { LocaleSwitcher } from '@/components/LocaleSwitcher/LocaleSwitcher';
-import { Page } from '@/components/Page';
+import Page from '@/components/Page'; // Імпорт компонента Page
 import tonSvg from './_assets/ton.svg';
 
 export default function Home() {
