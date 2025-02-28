@@ -28,7 +28,7 @@ export default function Home() {
       <Placeholder
         <Avatar acronym="IS" size={96} />
         <Button mode="filled" size="s">
-          Create channel
+          TON Connect
         </Button>
       <Placeholder
       <List>
