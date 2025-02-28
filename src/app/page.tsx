@@ -22,12 +22,12 @@ export default function Home() {
           style={{ display: 'block', width: '144px', height: '144px' }}
         />
       </Placeholder>
-      <Placeholder
+      <div className="flex justify-end space-x-4 p-4">
         <Avatar acronym="IS" size={96} />
         <Button mode="filled" size="s">
-          TON Connect
+          Create channel
         </Button>
-      <Placeholder
+      </div>
       <List>
         <Section
           header="Features"
