@@ -1,27 +1,30 @@
 'use client';
 
-import { Section, Cell, Image, List, Button, Avatar } from '@telegram-apps/telegram-ui';
+import { Section, Cell, Image, List, Button, Avatar, Placeholder } from '@telegram-apps/telegram-ui';
 import { useTranslations } from 'next-intl';
 import { Link } from '@/components/Link/Link';
 import { LocaleSwitcher } from '@/components/LocaleSwitcher/LocaleSwitcher';
 import { Page } from '@/components/Page';
 import tonSvg from './_assets/ton.svg';
 
+// Додайте імпорт Placeholder, якщо це необхідно
+// import { Placeholder } from 'some-placeholder-library';
+
 export default function Home() {
   const t = useTranslations('i18n');
 
   return (
     <Page back={false}>
-<Placeholder
-      header="Title"
-      description="Description"
-    >
-      <img
-        alt="Telegram sticker"
-        src="https://xelene.me/telegram.gif"
-        style={{ display: 'block', width: '144px', height: '144px' }}
-      />
-    </Placeholder>
+      <Placeholder
+        header="Title"
+        description="Description"
+      >
+        <img
+          alt="Telegram sticker"
+          src="https://xelene.me/telegram.gif"
+          style={{ display: 'block', width: '144px', height: '144px' }}
+        />
+      </Placeholder>
       <div className="flex justify-end space-x-4 p-4">
         <Avatar acronym="IS" size={96} />
         <Button mode="filled" size="s">
@@ -39,6 +42,7 @@ export default function Home() {
                 <Image
                   src={tonSvg.src}
                   style={{ backgroundColor: '#007AFF' }}
+                  alt="TON Connect"
                 />
               }
               subtitle="Connect your TON wallet"
