@@ -16,6 +16,13 @@ export default function Home() {
   acronym="IS"
   size={96}
 />
+<Button
+  before={<Icon20Copy />}
+  mode="filled"
+  size="s"
+>
+  Create channel
+</Button>
       <div className="flex justify-end space-x-4 p-4">
         <Button className="bg-blue-500 text-white px-4 py-2 rounded">
           <Link href="/user">User</Link>
