@@ -1,6 +1,6 @@
 'use client';
 
-import { Section, Cell, Image, List } from '@telegram-apps/telegram-ui';
+import { Section, Cell, Image, List, Button } from '@telegram-apps/telegram-ui';
 import { useTranslations } from 'next-intl';
 import { Link } from '@/components/Link/Link';
 import { LocaleSwitcher } from '@/components/LocaleSwitcher/LocaleSwitcher';
@@ -12,6 +12,14 @@ export default function Home() {
 
   return (
     <Page back={false}>
+      <div className="flex justify-end space-x-4 p-4">
+        <Button>
+          <Link href="/user">User</Link>
+        </Button>
+        <Button>
+          <Link href="/connect">Connect</Link>
+        </Button>
+      </div>
       <List>
         <Section
           header="Features"
