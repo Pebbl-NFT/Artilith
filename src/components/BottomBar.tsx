@@ -1,6 +1,6 @@
 'use client';
 
-import { Button, Image, Text,Placeholder } from '@telegram-apps/telegram-ui';
+import { Button,  Placeholder } from '@telegram-apps/telegram-ui';
 import cube from '../app/_assets/cube.svg';
 import banknotes from '../app/_assets/banknotes.svg';
 
