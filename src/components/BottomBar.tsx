@@ -1,7 +1,6 @@
 'use client';
 
 import { Button, Image } from '@telegram-apps/telegram-ui';
-import tonSvg from '../app/_assets/ton.svg';
 
 export default function BottomBar() {
   return (
@@ -38,7 +37,7 @@ export default function BottomBar() {
 
         }}
       >
-        1
+        2
       </Button>
       <Button
         Component="a"
@@ -55,7 +54,7 @@ export default function BottomBar() {
 
         }}
       >
-        1
+        3
       </Button>
       <Button
         Component="a"
@@ -73,7 +72,7 @@ export default function BottomBar() {
 
         }}
       >
-        1
+        4
       </Button>
     </div>
   );
