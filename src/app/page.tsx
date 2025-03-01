@@ -17,7 +17,7 @@ export default function Home() {
         <TopBar />
         <div className="HIJtihMA8FHczS02iWF5">
           <Placeholder
-            action={<Button size="l" stretched>Join group</Button>}
+            action={<Button href='https://t.me/artilith_official' size="l" stretched>Join group</Button>}
             description="We are sorry, but the page building is in progress. Please come back later."
             header="Hmmm, something went wrong"
           >
