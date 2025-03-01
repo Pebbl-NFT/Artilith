@@ -5,6 +5,7 @@ import tonSvg from '../app/_assets/ton.svg';
 import { useMemo } from 'react';
 import { useSignal, initData } from '@telegram-apps/sdk-react';
 import Link from 'next/link';
+import { RGB } from './RGB/RGB';
 
 export default function TopBar() {
   const initDataState = useSignal(initData.state);
@@ -15,6 +16,15 @@ export default function TopBar() {
 
   return (
     <div className='top-bar' style={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}>
+      <p
+        style={{
+          position: 'absolute',
+          top: 0,
+          right: 0,
+          fontSize: 8,
+          color: 'var(--tgui--secondary_text_color)',
+          width: '50%',
+        }}> 0.11.4 </p>
       <Button
         href=" "
         mode="filled"
