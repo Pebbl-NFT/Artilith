@@ -24,7 +24,7 @@ export default function TopBar() {
           fontSize: 8,
           color: 'var(--tgui--secondary_text_color)',
           width: '50%',
-        }}> 0.11.4 </p>
+        }}> 0.11.5 </p>
       <Button
         href=" "
         mode="filled"
