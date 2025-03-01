@@ -22,7 +22,7 @@ export default function TopBar() {
           fontSize: 8,
           color: 'var(--tgui--secondary_text_color)',
           width: '52%',
-        }}> 0.11.5 </p>
+        }}> 0.11.6 </p>
       <Button
         href=" "
         mode="filled"
