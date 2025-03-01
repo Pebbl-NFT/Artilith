@@ -17,6 +17,59 @@ export default function BottomBar() {
           width: '25%',
           borderRadius: 10,
           display: 'flex',
+          margin: 5,
+          marginLeft: -5
+        }}
+      >
+        1
+      </Button>
+      <Button
+        Component="a"
+        mode="filled"
+        size="l"
+        target="_blank"
+        style={{
+          background: 'var(--tgui--secondary_bg_color)',
+          borderTop: '1px solid rgb(0, 123, 255)',
+          width: '25%',
+          borderRadius: 10,
+          display: 'flex',
+          margin: 5,
+
+        }}
+      >
+        1
+      </Button>
+      <Button
+        Component="a"
+        mode="filled"
+        size="l"
+        target="_blank"
+        style={{
+          background: 'var(--tgui--secondary_bg_color)',
+          borderTop: '1px solid rgb(0, 123, 255)',
+          width: '25%',
+          borderRadius: 10,
+          display: 'flex',
+          margin: 5,
+
+        }}
+      >
+        1
+      </Button>
+      <Button
+        Component="a"
+        mode="filled"
+        size="l"
+        target="_blank"
+        style={{
+          background: 'var(--tgui--secondary_bg_color)',
+          borderTop: '1px solid rgb(0, 123, 255)',
+          width: '25%',
+          borderRadius: 10,
+          display: 'flex',
+          margin: 5,
+          marginRight: 15
 
         }}
       >
