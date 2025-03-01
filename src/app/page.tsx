@@ -1,6 +1,5 @@
-'use client';
-
-import { List, Placeholder,Button } from '@telegram-apps/telegram-ui';
+import React from 'react';
+import { List, Placeholder, Button } from '@telegram-apps/telegram-ui';
 import { useTranslations } from 'next-intl';
 import { Link } from '@/components/Link/Link';
 import { LocaleSwitcher } from '@/components/LocaleSwitcher/LocaleSwitcher';
@@ -10,7 +9,6 @@ import BottomBar from '@/components/BottomBar';
 
 export default function Home() {
   const t = useTranslations('i18n');
-
   return (
     <Page back={false}>
       <List>
@@ -18,25 +16,27 @@ export default function Home() {
         <div className="HIJtihMA8FHczS02iWF5">
           <Placeholder
             action={
-              <Link href='https://t.me/artilith_official' 
-                    size="l" 
-                    stretched
-                    style={{
-                      width: '40%',
-                      margin: '0 auto',
-                      display: 'block',
-                      textAlign: 'center',
-                      marginTop: '20px',
-                      backgroundColor: '#007AFF',
-                      color: '#fff',
-                      borderRadius: '50px',
-                      padding: '10px',
-                      border: '1px solid #007AFF',
-                      textDecoration: 'none',
-                      cursor: 'pointer'
-                    }}
-              >Join group
-              </Link>}
+              <a
+                href='https://t.me/artilith_official'
+                target="_blank" // Цей атрибут відкриває посилання в новій вкладці
+                style={{
+                  width: '45%',
+                  margin: '0 auto',
+                  display: 'block',
+                  textAlign: 'center',
+                  marginTop: '20px',
+                  backgroundColor: '#007AFF',
+                  color: '#fff',
+                  borderRadius: '50px',
+                  padding: '10px',
+                  border: '1px solid #007AFF',
+                  textDecoration: 'none',
+                  cursor: 'pointer'
+                }}
+              >
+                Join group
+              </a>
+            }
             description="We are sorry, but the page building is in progress. Please come back later."
             header="Hmmm, something went wrong"
           >
@@ -45,6 +45,7 @@ export default function Home() {
               className="blt0jZBzpxuR4oDhJc8s"
               src="https://xelene.me/telegram.gif"
               style={{  
+                marginBlockStart: '60px',
                 width: '40%', 
                 height: 'auto', 
                 margin: '0 auto',
