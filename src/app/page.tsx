@@ -17,7 +17,26 @@ export default function Home() {
         <TopBar />
         <div className="HIJtihMA8FHczS02iWF5">
           <Placeholder
-            action={<Button href='https://t.me/artilith_official' size="l" stretched>Join group</Button>}
+            action={
+              <Link href='https://t.me/artilith_official' 
+                    size="l" 
+                    stretched
+                    style={{
+                      width: '40%',
+                      margin: '0 auto',
+                      display: 'block',
+                      textAlign: 'center',
+                      marginTop: '20px',
+                      backgroundColor: '#007AFF',
+                      color: '#fff',
+                      borderRadius: '50px',
+                      padding: '10px',
+                      border: '1px solid #007AFF',
+                      textDecoration: 'none',
+                      cursor: 'pointer'
+                    }}
+              >Join group
+              </Link>}
             description="We are sorry, but the page building is in progress. Please come back later."
             header="Hmmm, something went wrong"
           >
@@ -25,7 +44,8 @@ export default function Home() {
               alt="Telegram sticker"
               className="blt0jZBzpxuR4oDhJc8s"
               src="https://xelene.me/telegram.gif"
-              style={{  width: '40%', 
+              style={{  
+                width: '40%', 
                 height: 'auto', 
                 margin: '0 auto',
                 display: 'block'
