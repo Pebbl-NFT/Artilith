@@ -6,7 +6,7 @@ import banknotes from '../app/_assets/banknotes.svg';
 
 export default function BottomBar() {
   return (
-    <div className='bottom-bar' style={{ display: 'flex', justifyContent: 'space-between', width: '100%', position: 'fixed', bottom: -10, background: 'var(--tgui--secondary_bg_color)', padding: 10 }}>
+    <div className='bottom-bar' style={{ display: 'flex', justifyContent: 'space-between', width: '100%', position: 'fixed', bottom: 0, padding: 10 }}>
       <Button
         Component="a"
         mode="filled"
@@ -15,11 +15,13 @@ export default function BottomBar() {
         style={{
           background: 'var(--tgui--secondary_bg_color)',
           borderTop: '1px solid rgb(0, 123, 255)',
-          width: '25%',
+          width: '90%',
+          height: '50%',
           borderRadius: 10,
           display: 'flex',
           margin: 5,
-
+          marginTop : 20,
+          marginBottom  : -30,
         }}
         >
         <img
@@ -27,11 +29,11 @@ export default function BottomBar() {
           src={banknotes.src}
           style={{
             flex: '1',
-            width: '30%',  
+            width: '20%',  
             margin: '0 auto',
             display: 'block',
             marginBlockStart: '10px',
-            marginBlockEnd: '-30px',
+            marginBlockEnd: '-20px',
             borderRadius: '100%',
             border: '1px solid #007AFF',
             blockSize: 'fit-content',
@@ -40,7 +42,14 @@ export default function BottomBar() {
             backgroundColor: '#007AFF'
           }}
         />
-        <Placeholder>???</Placeholder>
+        <Placeholder
+        style={{
+          textAnchor: 'middle',
+          fontSize: '14px',
+          fontWeight: 'lighter',
+        }}>
+          Soon
+        </Placeholder>
       </Button>
       <Button
         Component="a"
@@ -50,11 +59,13 @@ export default function BottomBar() {
         style={{
           background: 'var(--tgui--secondary_bg_color)',
           borderTop: '1px solid rgb(0, 123, 255)',
-          width: '25%',
+          width: '90%',
+          height: '50%',
           borderRadius: 10,
           display: 'flex',
           margin: 5,
-
+          marginTop : 20,
+          marginBottom  : -30,
         }}
         >
         <img
@@ -62,11 +73,11 @@ export default function BottomBar() {
           src={cube.src}
           style={{
             flex: '1',
-            width: '30%',  
+            width: '20%',  
             margin: '0 auto',
             display: 'block',
             marginBlockStart: '10px',
-            marginBlockEnd: '-30px',
+            marginBlockEnd: '-20px',
             borderRadius: '100%',
             border: '1px solid #007AFF',
             blockSize: 'fit-content',
@@ -75,7 +86,14 @@ export default function BottomBar() {
             backgroundColor: '#007AFF'
           }}
         />
-        <Placeholder>Home</Placeholder>
+        <Placeholder
+        style={{
+          textAnchor: 'middle',
+          fontSize: '14px',
+          fontWeight: 'lighter',
+        }}>
+      Home
+        </Placeholder>
       </Button>
       <Button
         Component="a"
@@ -85,11 +103,14 @@ export default function BottomBar() {
         style={{
           background: 'var(--tgui--secondary_bg_color)',
           borderTop: '1px solid rgb(0, 123, 255)',
-          width: '25%',
+          width: '90%',
+          height: '50%',
           borderRadius: 10,
           display: 'flex',
           margin: 5,
-
+          marginRight: 25,
+          marginTop : 20,
+          marginBottom  : -30,
         }}
         >
         <img
@@ -97,20 +118,27 @@ export default function BottomBar() {
           src={banknotes.src}
           style={{
             flex: '1',
-            width: '30%',  
+            width: '20%',  
             margin: '0 auto',
             display: 'block',
             marginBlockStart: '10px',
-            marginBlockEnd: '-30px',
+            marginBlockEnd: '-20px',
             borderRadius: '100%',
             border: '1px solid #007AFF',
             blockSize: 'fit-content',
             padding: '5px', 
             cursor: 'pointer',
-            backgroundColor: '#007AFF'
+            backgroundColor: '#007AFF',
           }}
         />
-        <Placeholder>???</Placeholder>
+        <Placeholder
+        style={{
+          textAnchor: 'middle',
+          fontSize: '14px',
+          fontWeight: 'lighter',
+        }}>
+          Soon
+        </Placeholder>
       </Button>
     </div>
   );

@@ -33,6 +33,7 @@ export default function TopBar() {
           padding: 10,
           margin: 20,
           borderRadius: 50,
+          textOverflow: 'ellipsis',
         }}
       >
         👋 {username}
