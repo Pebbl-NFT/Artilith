@@ -36,10 +36,9 @@ export default function TopBar() {
           width: '30%',
           margin: 20,
           borderRadius: 50,
-          border: '1px solid rgb(0, 123, 255)',
         }}
       >
-        Hi {username}
+        👋 {username}
       </Button>
       <Button
         mode="filled"
@@ -52,7 +51,7 @@ export default function TopBar() {
           borderRadius: 50,
           border: '0px solid rgb(0, 123, 255)',
         }}
-        before={
+        after={
           <Image
             src={tonSvg.src}
             style={{ 
@@ -62,7 +61,7 @@ export default function TopBar() {
           />
         }
       >
-        Connect Wallet
+        Connect
       </Button>
     </div>
   );

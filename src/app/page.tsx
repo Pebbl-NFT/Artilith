@@ -21,7 +21,8 @@ export default function Home() {
                 target="_blank" // Цей атрибут відкриває посилання в новій вкладці
                 style={{
                   width: '45%',
-                  margin: '0 auto',
+                  margin: 'scrin auto',
+                  height: 'auto',
                   display: 'block',
                   textAlign: 'center',
                   marginTop: '20px',
@@ -45,8 +46,8 @@ export default function Home() {
               className="blt0jZBzpxuR4oDhJc8s"
               src="https://xelene.me/telegram.gif"
               style={{  
-                marginBlockStart: '60px',
-                width: '40%', 
+                flex: '1',
+                width: '30%', 
                 height: 'auto', 
                 margin: '0 auto',
                 display: 'block'

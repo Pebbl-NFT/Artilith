@@ -8,46 +8,19 @@ export default function BottomBar() {
     <div className='bottom-bar' style={{ display: 'flex', justifyContent: 'space-between', width: '100%', position: 'fixed', bottom: 0, background: 'var(--tgui--secondary_bg_color)', padding: 10 }}>
       <Button
         Component="a"
-        href=" "
         mode="filled"
-        size="s"
+        size="l"
         target="_blank"
         style={{
           background: 'var(--tgui--secondary_bg_color)',
-          padding: 10,
-          width: '30%',
-          margin: 20,
-          borderRadius: 50,
-          border: '1px solid rgb(0, 123, 255)',
+          borderTop: '1px solid rgb(0, 123, 255)',
+          width: '25%',
+          borderRadius: 10,
+          display: 'flex',
+
         }}
       >
-        Hi user
-      </Button>
-      <Button
-        href="/ton-connect"
-        Component="b"
-        mode="filled"
-        size="s"
-        target="_blank"
-        style={{
-          background: 'var(--tgui--secondary_bg_color)',
-          padding: 10,
-          width: '30%',
-          margin: 20,
-          borderRadius: 50,
-          border: '1px solid rgb(0, 123, 255)',
-        }}
-        before={
-          <Image
-            src={tonSvg.src}
-            style={{ 
-              backgroundColor: '#007AFF',
-            }}
-            size={20}
-          />
-        }
-      >
-        Connect wallet
+        1
       </Button>
     </div>
   );
