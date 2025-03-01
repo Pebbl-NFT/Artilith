@@ -4,8 +4,6 @@ import { Button, Image } from '@telegram-apps/telegram-ui';
 import tonSvg from '../app/_assets/ton.svg';
 import { useMemo } from 'react';
 import { useSignal, initData } from '@telegram-apps/sdk-react';
-import Link from 'next/link';
-import { RGB } from './RGB/RGB';
 
 export default function TopBar() {
   const initDataState = useSignal(initData.state);
@@ -33,7 +31,6 @@ export default function TopBar() {
         style={{
           background: 'var(--tgui--secondary_bg_color)',
           padding: 10,
-          width: '30%',
           margin: 20,
           borderRadius: 50,
         }}
