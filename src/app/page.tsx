@@ -1,11 +1,11 @@
-import React from 'react';
-import { List, Placeholder, Button } from '@telegram-apps/telegram-ui';
+"use client";
+import React, { useEffect } from 'react';
+import { List, Placeholder } from '@telegram-apps/telegram-ui';
 import { useTranslations } from 'next-intl';
-import { Link } from '@/components/Link/Link';
-import { LocaleSwitcher } from '@/components/LocaleSwitcher/LocaleSwitcher';
 import { Page } from '@/components/Page';
 import TopBar from '@/components/TopBar';
 import BottomBar from '@/components/BottomBar';
+import Artilith_logo from '../app/_assets/Artilith_logo-no-bg.png';
 
 export default function Home() {
   const t = useTranslations('i18n');
@@ -14,49 +14,36 @@ export default function Home() {
       <List>
         <TopBar />
         <div className="HIJtihMA8FHczS02iWF5">
-          <Placeholder
-            action={
-              <a
-                href='https://t.me/artilith_official'
-                target="_blank" // Цей атрибут відкриває посилання в новій вкладці
-                style={{
-                  width: '45%',
-                  margin: 'scrin auto',
-                  height: 'auto',
-                  display: 'block',
-                  textAlign: 'center',
-                  marginTop: '20px',
-                  backgroundColor: '#007AFF',
-                  color: '#fff',
-                  borderRadius: '50px',
-                  padding: '10px',
-                  border: '1px solid #007AFF',
-                  textDecoration: 'none',
-                  cursor: 'pointer'
-                }}
-              >
-                Join group
-              </a>
-            }
-            description="We are sorry, but the page building is in progress. Please come back later."
-            header="Hmmm, something went wrong"
-          >
-            <img
-              alt="Telegram sticker"
-              className="blt0jZBzpxuR4oDhJc8s"
-              src="https://xelene.me/telegram.gif"
-              style={{  
-                flex: '1',
-                width: '30%', 
-                height: 'auto', 
-                margin: '0 auto',
-                display: 'block'
-              }}
-            />
+          <Placeholder 
+            >
+            <svg className="filter">
+              <filter id="alphaRed">
+                <feColorMatrix mode="matrix" values="1 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 1 0" result="joint" />
+              </filter>
+              <filter id="alphaGreen">
+                <feColorMatrix mode="matrix" values="0 0 0 0 0  0 1 0 0 0  0 0 0 0 0  0 0 0 1 0" result="joint" />
+              </filter>
+              <filter id="alphaBlue">
+                <feColorMatrix mode="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 1 0 0  0 0 0 1 0" result="joint" />
+              </filter>
+              <filter id="alpha">
+                <feColorMatrix type="saturate" values="0"/>
+              </filter>
+            </svg>
+            <div className="page">
+              <h1>HOLD to decrypt !</h1>
+              <h2>If you keep it you reap the rewards</h2>
+              <div className="imgWrap">
+                <img className="red" src={Artilith_logo.src} alt="Artilith Logo Red"/>
+                <img className="green" src={Artilith_logo.src} alt="Artilith Logo Green"/>
+                <img className="blue" src={Artilith_logo.src} alt="Artilith Logo Blue"/>
+                <p className="text"><span>Decode . . .</span></p>
+              </div>
+            </div>
           </Placeholder>
         </div>
+        <BottomBar />
       </List>
-      <BottomBar />
     </Page>
   );
 }
