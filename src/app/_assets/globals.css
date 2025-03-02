@@ -4,13 +4,13 @@ body {
 body{
   margin: 0;
   width: 100%;
-  height: 40%;
+  height: 100%;
 }
 .page{
-  width: 100vw;
-  height: 60vh;
-  min-width: 200px;
-  min-height: 200px;
+  width: 100%;
+  height: 50vh;
+  min-width: 30px;
+  min-height: 30px;
   display: flex;
   flex-flow: column;
   justify-content: center;
@@ -24,23 +24,24 @@ body{
 
 h1{
   font-size: 25px;
-  margin-bottom: 0px;
+  margin-bottom: 10px;
 }
 h2{
   font-size: 15px;
-  margin-bottom: 50px;
+  margin-bottom: 20px;
 }
 .imgWrap{
   width: 100%;
-  height: 120%;
+  height: 100%;
   max-width: 400px;
   max-height: 400px;
   position: relative;
   overflow: hidden;
+  object-fit: contain;
   img{
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
+    width: 60%;
+    height: 50%;
+    object-fit: contain;
     position: absolute;
     top: 50%;
     left: 50%;
@@ -61,10 +62,10 @@ h2{
   .text{
     display: block;
     color: #fff;
-    font-size: 25px;
-    padding: 2px 10;
+    font-size: 30px;
+    padding: 5 5;
     position: absolute;
-    top: 50%;
+    top: 45%;
     left: 50%;
     transform: translate(-50%,-50%);
     opacity: 0;
@@ -76,8 +77,8 @@ h2{
     &::before{
       content: "";
       display: block;
-      width: 110%;
-      height: 110%;
+      width: 90%;
+      height: 90%;
       background-color: #000000;
       position: absolute;
       top: 50%;
@@ -113,9 +114,9 @@ h2{
       animation-iteration-count: infinite;
     }
     .text{
-      opacity: 1;
+      opacity: 2;
       &::before{
-        transform: scale(2,2) translate(-50%,-60%);
+        transform: scale(2,2) translate(-50%,-30%);
       }
     }
   }

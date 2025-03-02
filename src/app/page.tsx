@@ -8,7 +8,33 @@ import BottomBar from '@/components/BottomBar';
 import Artilith_logo from '../app/_assets/Artilith_logo-no-bg.png';
 
 export default function Home() {
-  const t = useTranslations('i18n');
+  useEffect(() => {
+    const imgWrap = document.querySelector(".imgWrap");
+    if (!imgWrap) return;
+  
+    const handlePointerDown = () => {
+      imgWrap.classList.add("fast-glitch");
+      setTimeout(() => {
+        imgWrap.classList.remove("fast-glitch");
+      }, 300);
+    };
+  
+    const applyRandomEffect = () => {
+      const randEffect = Math.random() > 0.5 ? "glitch" : "fast-glitch";
+      imgWrap.classList.add(randEffect);
+      setTimeout(() => {
+        imgWrap.classList.remove(randEffect);
+      }, 200);
+    };
+  
+    imgWrap.addEventListener("pointerdown", handlePointerDown);
+    const interval = setInterval(applyRandomEffect, 500);
+  
+    return () => {
+      imgWrap.removeEventListener("pointerdown", handlePointerDown);
+      clearInterval(interval);
+    };
+  }, []);
   return (
     <Page back={false}>
       <List>
