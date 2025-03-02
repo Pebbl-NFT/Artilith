@@ -22,7 +22,7 @@ export default function TopBar() {
           fontSize: 8,
           color: 'var(--tgui--secondary_text_color)',
           width: '52%',
-        }}> 0.12.0 </p>
+        }}> 0.12.3 </p>
       <Button
         href=" "
         mode="filled"
@@ -33,7 +33,6 @@ export default function TopBar() {
           padding: 10,
           margin: 20,
           borderRadius: 50,
-          textOverflow: 'ellipsis',
         }}
       >
         👋 {username}

@@ -48,7 +48,7 @@ export default function BottomBar() {
           fontSize: '14px',
           fontWeight: 'lighter',
         }}>
-          Soon
+          EARN
         </Placeholder>
       </Button>
       <Button
@@ -92,7 +92,7 @@ export default function BottomBar() {
           fontSize: '14px',
           fontWeight: 'lighter',
         }}>
-      Home
+      HOLD
         </Placeholder>
       </Button>
       <Button
@@ -137,7 +137,7 @@ export default function BottomBar() {
           fontSize: '14px',
           fontWeight: 'lighter',
         }}>
-          Soon
+          SOON
         </Placeholder>
       </Button>
     </div>

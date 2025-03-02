@@ -16,7 +16,7 @@ export default function Home() {
 
         setTimeout(() => {
           imgWrap.classList.remove("active");
-        }, 500); // Час відповідно до анімації
+        }, 1000); // Час відповідно до анімації
       };
 
       imgWrap.addEventListener("click", handleClick);
@@ -60,7 +60,7 @@ export default function Home() {
               </filter>
             </svg>
             <div className="page">
-              <h1>HOLD to decrypt !</h1>
+              <h1>HOLD</h1>
               <h2>If you keep it you reap the rewards</h2>
               <div className="imgWrap">
                 <img
@@ -79,7 +79,7 @@ export default function Home() {
                   alt="Artilith Logo Blue"
                 />
                 <p className="text">
-                  <span>Decode . . .</span>
+                  <span>Decrypt . . .</span>
                 </p>
               </div>
             </div>
