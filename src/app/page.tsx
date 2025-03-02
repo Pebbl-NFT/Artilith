@@ -1,40 +1,12 @@
 "use client";
 import React, { useEffect } from 'react';
 import { List, Placeholder } from '@telegram-apps/telegram-ui';
-import { useTranslations } from 'next-intl';
 import { Page } from '@/components/Page';
 import TopBar from '@/components/TopBar';
 import BottomBar from '@/components/BottomBar';
 import Artilith_logo from '../app/_assets/Artilith_logo-no-bg.png';
 
 export default function Home() {
-  useEffect(() => {
-    const imgWrap = document.querySelector(".imgWrap");
-    if (!imgWrap) return;
-  
-    const handlePointerDown = () => {
-      imgWrap.classList.add("fast-glitch");
-      setTimeout(() => {
-        imgWrap.classList.remove("fast-glitch");
-      }, 300);
-    };
-  
-    const applyRandomEffect = () => {
-      const randEffect = Math.random() > 0.5 ? "glitch" : "fast-glitch";
-      imgWrap.classList.add(randEffect);
-      setTimeout(() => {
-        imgWrap.classList.remove(randEffect);
-      }, 200);
-    };
-  
-    imgWrap.addEventListener("pointerdown", handlePointerDown);
-    const interval = setInterval(applyRandomEffect, 500);
-  
-    return () => {
-      imgWrap.removeEventListener("pointerdown", handlePointerDown);
-      clearInterval(interval);
-    };
-  }, []);
   return (
     <Page back={false}>
       <List>
