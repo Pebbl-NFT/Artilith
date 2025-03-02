@@ -16,7 +16,7 @@ export default function Home() {
 
         setTimeout(() => {
           imgWrap.classList.remove("active");
-        }, 1000); // Час відповідно до анімації
+        }, 16000); // Час відповідно до анімації 
       };
 
       imgWrap.addEventListener("click", handleClick);
