@@ -90,36 +90,6 @@ h2{
       z-index: 0;
     }
   }
-  &:hover{
-    --time: 0.2s;
-    .red{
-      transform: translate(-48.5%,-49.8%);
-      animation-name: imgGlitch;
-      animation-duration: var(--time);
-      animation-timing-function: linear;
-      animation-iteration-count: infinite;
-    }
-    .green{
-      transform: translate(-50.5%,-48.8%);
-      animation-name: imgGlitch;
-      animation-duration: var(--time);
-      animation-timing-function: linear;
-      animation-iteration-count: infinite;
-    }
-    .blue{
-      transform: translate(-50.5%,-50.8%);
-      animation-name: imgGlitch;
-      animation-duration: var(--time);
-      animation-timing-function: linear;
-      animation-iteration-count: infinite;
-    }
-    .text{
-      opacity: 2;
-      &::before{
-        transform: scale(2,2) translate(-50%,-30%);
-      }
-    }
-  }
 }
 
 @keyframes imgGlitch {
@@ -205,4 +175,35 @@ h2{
 
 .imgWrap.fast-glitch .glitch-layer {
   animation: glitchEffect 0.3s infinite;
+}
+
+.imgWrap.active {
+  --time: 0.2s;
+}
+.imgWrap.active .red {
+  transform: translate(-48.5%, -49.8%);
+  animation-name: imgGlitch;
+  animation-duration: var(--time);
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+}
+.imgWrap.active .green {
+  transform: translate(-50.5%, -48.8%);
+  animation-name: imgGlitch;
+  animation-duration: var(--time);
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+}
+.imgWrap.active .blue {
+  transform: translate(-50.5%, -50.8%);
+  animation-name: imgGlitch;
+  animation-duration: var(--time);
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+}
+.imgWrap.active .text {
+  opacity: 2;
+}
+.imgWrap.active .text::before {
+  transform: scale(2, 2) translate(-50%, -30%);
 }

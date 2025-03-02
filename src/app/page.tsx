@@ -12,11 +12,11 @@ export default function Home() {
 
     if (imgWrap) {
       const handleClick = () => {
-        imgWrap.classList.add("fast-glitch");
+        imgWrap.classList.toggle("active");
 
         setTimeout(() => {
-          imgWrap.classList.remove("fast-glitch");
-        }, 300);
+          imgWrap.classList.remove("active");
+        }, 500); // Час відповідно до анімації
       };
 
       imgWrap.addEventListener("click", handleClick);
