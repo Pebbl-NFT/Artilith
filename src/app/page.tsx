@@ -31,28 +31,22 @@ export default function Home() {
 
   useEffect(() => {
     const imgWrap = document.querySelector(".imgWrap");
-
     if (imgWrap) {
       const handleClick = () => {
         if (!isClickable) return;
-
         setIsClickable(false);
         setPoints((prev) => prev + 1);
         imgWrap.classList.add("active");
-
         setTimeout(() => {
           imgWrap.classList.remove("active");
         }, animationTime); // Динамічний час анімації
-
         setTimeout(() => {
           setClickDelay((prev) => prev + 1000); // Збільшення інтервалу
           setAnimationTime((prev) => prev + 1000); // Збільшення часу анімації
           setIsClickable(true);
         }, clickDelay); // Затримка перед наступним кліком
       };
-
       imgWrap.addEventListener("click", handleClick);
-
       return () => {
         imgWrap.removeEventListener("click", handleClick);
       };
@@ -63,9 +57,9 @@ export default function Home() {
     <Page back={false}>
       <List>
         <TopBar />
-        <div className="HIJtihMA8FHczS02iWF5">
+        <div className="HIJtihMA8FHczS02iWF5" style={{ overflow: 'visible' }}>
           <Placeholder>
-          <svg className="filter">
+            <svg className="filter">
               <filter id="alphaRed">
                 <feColorMatrix
                   mode="matrix"
@@ -96,7 +90,7 @@ export default function Home() {
               <h2>If you keep it you reap the rewards</h2>
               <p>Points: {points}</p>
               <p>Animation time: {animationTime} ms</p>
-              <div className="imgWrap">
+              <div className="imgWrap" style={{ overflow: 'visible' }}>
                 <img className="red" src={Artilith_logo.src} alt="Artilith Logo Red" />
                 <img className="green" src={Artilith_logo.src} alt="Artilith Logo Green" />
                 <img className="blue" src={Artilith_logo.src} alt="Artilith Logo Blue" />
