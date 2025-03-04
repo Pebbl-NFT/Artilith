@@ -95,7 +95,7 @@ export default function Home() {
                 <img className="green" src={Artilith_logo.src} alt="Artilith Logo Green" />
                 <img className="blue" src={Artilith_logo.src} alt="Artilith Logo Blue" />
                 <p className="text">
-                  <span>Decrypt . . . {countdown}</span>
+                  <span >Decrypt . . . {countdown}</span>
                 </p>
               </div>
             </div>
