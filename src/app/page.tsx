@@ -5,14 +5,27 @@ import { Page } from "@/components/Page";
 import TopBar from "@/components/TopBar";
 import BottomBar from "@/components/BottomBar";
 import Artilith_logo from "../app/_assets/Artilith_logo-no-bg.png";
+import { useSignal, initData } from "@telegram-apps/sdk-react";
+import { saveUserToDB } from "../../lib/supabaseUser";
 
-export default function Home() {
+export default function HomePage() {
   const [points, setPoints] = useState(0);
   const [clickDelay, setClickDelay] = useState(1000); // Початковий інтервал 1 секунда
   const [isClickable, setIsClickable] = useState(true);
   const [animationTime, setAnimationTime] = useState(1100); // Початковий час анімації
   const [countdown, setCountdown] = useState(0);
   const [timer, setTimer] = useState<NodeJS.Timeout | null>(null);
+
+  // Ініціалізація даних користувача
+  const initDataState = useSignal(initData.state);
+  const username = initDataState?.user?.firstName || "User";
+
+  useEffect(() => {
+    if (initDataState?.user) {
+      const user = initDataState.user;
+      saveUserToDB(user); // Збереження користувача в Supabase
+    }
+  }, [initDataState?.user]);
 
   useEffect(() => {
     if (!isClickable) {
@@ -57,7 +70,7 @@ export default function Home() {
     <Page back={false}>
       <List>
         <TopBar />
-        <div className="HIJtihMA8FHczS02iWF5" style={{ overflow: 'visible' }}>
+        <div className="HIJtihMA8FHczS02iWF5" style={{ overflow: "visible" }}>
           <Placeholder>
             <svg className="filter">
               <filter id="alphaRed">
@@ -90,12 +103,24 @@ export default function Home() {
               <h2>If you keep it you reap the rewards</h2>
               <p>Points: {points}</p>
               <p>Animation time: {animationTime} ms</p>
-              <div className="imgWrap" style={{ overflow: 'visible' }}>
-                <img className="red" src={Artilith_logo.src} alt="Artilith Logo Red" />
-                <img className="green" src={Artilith_logo.src} alt="Artilith Logo Green" />
-                <img className="blue" src={Artilith_logo.src} alt="Artilith Logo Blue" />
+              <div className="imgWrap" style={{ overflow: "visible" }}>
+                <img
+                  className="red"
+                  src={Artilith_logo.src}
+                  alt="Artilith Logo Red"
+                />
+                <img
+                  className="green"
+                  src={Artilith_logo.src}
+                  alt="Artilith Logo Green"
+                />
+                <img
+                  className="blue"
+                  src={Artilith_logo.src}
+                  alt="Artilith Logo Blue"
+                />
                 <p className="text">
-                  <span >Decrypt . . . {countdown}</span>
+                  <span>Decrypt . . . {countdown}</span>
                 </p>
               </div>
             </div>

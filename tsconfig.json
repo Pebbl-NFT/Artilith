@@ -5,6 +5,11 @@
       "dom.iterable",
       "esnext"
     ],
+    "baseUrl": "src", 
+    "paths": {
+      "@/*": ["*"], // Папка src
+      "@/lib/*": ["../lib/*"] // Папка lib
+    },
     "allowJs": true,
     "skipLibCheck": true,
     "strict": true,
@@ -21,14 +26,6 @@
         "name": "next"
       }
     ],
-    "paths": {
-      "@/*": [
-        "./src/*"
-      ],
-      "@public/*": [
-        "./public/*"
-      ]
-    },
     "target": "ES2017"
   },
   "include": [
