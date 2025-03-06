@@ -7,6 +7,7 @@ const supabase = createClient(supabaseUrl, supabaseKey);
 
 export const saveUserToDB = async (user: any) => {
   try {
+    console.log('User data to be saved:', user); // Додано логування
     const { data, error } = await supabase
       .from('users')
       .upsert([
