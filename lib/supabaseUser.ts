@@ -26,5 +26,5 @@ export const saveUserToDB = async (user: any) => {
     }
   } catch (error) {
     console.error('Error in saveUserToDB:', error);
-  }
+  } 
 };
