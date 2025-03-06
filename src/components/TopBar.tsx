@@ -19,6 +19,9 @@ export default function TopBar() {
       saveUserToDB(user); // Зберення в базу даних
     }
   }, [initDataState?.user]);
+  console.log("Supabase URL:", process.env.NEXT_PUBLIC_SUPABASE_URL);
+  console.log("Supabase Key:", process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ? "Loaded" : "Missing");
+  
 
   return (
     <div className='top-bar' style={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}>
