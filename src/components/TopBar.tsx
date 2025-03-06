@@ -1,5 +1,4 @@
 // components/TopBar.tsx
-
 import { Button, Image } from '@telegram-apps/telegram-ui';
 import tonSvg from '../app/_assets/ton.svg';
 import { useMemo, useEffect } from 'react';
@@ -8,23 +7,23 @@ import { saveUserToDB } from "@/lib/supabaseUser"; // Імпортуємо фу�
 
 export default function TopBar() {
   const initDataState = useSignal(initData.state);
-
   const username = useMemo(() => {
     return initDataState?.user?.firstName || 'User';
   }, [initDataState]);
 
-  // Збереження користувача в Supabase
+  // Зберення користувача в Supabase
   useEffect(() => {
     if (initDataState?.user) {
       const user = initDataState.user;
       console.log('User data before saving:', user); // Перевірте дані користувача
-      saveUserToDB(user); // Збереження в базу даних
+      saveUserToDB(user); // Зберення в базу даних
     }
   }, [initDataState?.user]);
 
   return (
     <div className='top-bar' style={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}>
       <p
+        id="version-info" // Додано id
         style={{
           position: 'absolute',
           top: 0,
@@ -32,7 +31,10 @@ export default function TopBar() {
           fontSize: 8,
           color: 'var(--tgui--secondary_text_color)',
           width: '51%',
-        }}> 0.13 </p>
+        }}
+      >
+        0.13
+      </p>
       <Button
         href="-"
         mode="filled"
@@ -44,6 +46,7 @@ export default function TopBar() {
           margin: 20,
           borderRadius: 50,
         }}
+        name="greeting" // Додано name
       >
         👋 {username}
       </Button>
@@ -67,6 +70,7 @@ export default function TopBar() {
             size={20}
           />
         }
+        name="connect-button" // Додано name
       >
         Connect
       </Button>

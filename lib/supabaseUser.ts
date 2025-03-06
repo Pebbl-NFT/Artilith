@@ -3,7 +3,6 @@ import { createClient } from '@supabase/supabase-js';
 // Ініціалізація клієнта Supabase за допомогою змінних середовища
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
-
 const supabase = createClient(supabaseUrl, supabaseKey);
 
 export const saveUserToDB = async (user: any) => {
@@ -19,7 +18,6 @@ export const saveUserToDB = async (user: any) => {
           photo_url: user.photo_url, // Використовуємо photo_url замість email
         }
       ]);
-
     if (error) {
       console.error('Error saving user to DB:', error.message);
     } else {
@@ -29,5 +27,3 @@ export const saveUserToDB = async (user: any) => {
     console.error('Error in saveUserToDB:', error);
   }
 };
-
-
