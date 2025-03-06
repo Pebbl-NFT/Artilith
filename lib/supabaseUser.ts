@@ -1,30 +1,50 @@
-import { createClient } from '@supabase/supabase-js';
+import { supabase } from './supabaseClient'; // Імпортуємо supabase як іменований експорт
 
-// Ініціалізація клієнта Supabase за допомогою змінних середовища
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
-const supabase = createClient(supabaseUrl, supabaseKey);
+// Типізація об'єкта користувача
+interface User {
+  id: string;
+  username: string;
+  photoUrl: string | null;
+  firstName: string | null;
+  lastName: string | null;
+  isBot: boolean;
+  isPremium: boolean;
+  languageCode: string;
+  allowsWriteToPm: boolean;
+}
 
-export const saveUserToDB = async (user: any) => {
+const saveUserToDB = async (user: User) => { // Задаємо тип для параметра user
   try {
-    console.log('User data to be saved:', user); // Додано логування
     const { data, error } = await supabase
       .from('users')
       .upsert([
         {
           id: user.id,
+          username: user.username,
+          photo_url: user.photoUrl,
           first_name: user.firstName,
           last_name: user.lastName,
-          username: user.username, // Використовуємо username
-          photo_url: user.photo_url, // Використовуємо photo_url замість email
-        }
+          is_bot: user.isBot,
+          is_premium: user.isPremium,
+          language_code: user.languageCode,
+          allows_to_write_to_pm: user.allowsWriteToPm,
+          created_at: new Date(),
+        },
       ]);
+
     if (error) {
-      console.error('Error saving user to DB:', error.message);
+      console.log('Error saving user to DB:', error.message);
     } else {
-      console.log('User data saved to DB:', data); // Перевірте, чи повертаються правильні дані
+      console.log('User saved to DB:', data);
     }
-  } catch (error) {
-    console.error('Error in saveUserToDB:', error);
-  } 
+  } catch (error: unknown) { // Вказуємо тип error як unknown
+    // Перевірка типу error
+    if (error instanceof Error) {
+      console.log('Error during user data save:', error.message);
+    } else {
+      console.log('An unknown error occurred during user data save.');
+    }
+  }
 };
+
+export default saveUserToDB;
