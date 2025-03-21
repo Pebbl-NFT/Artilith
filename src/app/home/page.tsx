@@ -5,6 +5,8 @@ import { Page } from "@/components/Page";
 import TopBar from "@/components/TopBar";
 import BottomBar from "@/components/BottomBar";
 import { useSignal, initData } from "@telegram-apps/sdk-react";
+import artilithLogo from '../_assets/Artilith_logo-no-bg.png';
+import Image from 'next/image'; 
 
 export default function HomePage() {
   const [points, setPoints] = useState(0);
@@ -98,17 +100,26 @@ export default function HomePage() {
               <p>Points: {points}</p>
               <p>Animation time: {animationTime} ms</p>
               <div className="imgWrap" style={{ overflow: "visible" }}>
-                <img
+                <Image
                   className="red"
                   alt="Artilith Logo Red"
+                  src={artilithLogo}
+                  width={500}
+                  height={500}
                 />
-                <img
+                <Image
                   className="green"
                   alt="Artilith Logo Green"
+                  src={artilithLogo}
+                  width={500}
+                  height={500}
                 />
-                <img
+                <Image
                   className="blue"
                   alt="Artilith Logo Blue"
+                  src={artilithLogo}
+                  width={500}
+                  height={500}
                 />
                 <p className="text">
                   <span>Decrypt . . . {countdown}</span>
