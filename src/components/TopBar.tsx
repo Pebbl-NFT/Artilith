@@ -34,7 +34,7 @@ export default function TopBar() {
           width: '51%',
         }}
       >
-        0.13
+        0.14.0
       </p>
       <Button
         href="-"
