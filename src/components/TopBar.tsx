@@ -3,7 +3,6 @@ import { Button, Image } from '@telegram-apps/telegram-ui';
 import tonSvg from '../app/_assets/ton.svg';
 import { useMemo, useEffect } from 'react';
 import { useSignal, initData } from '@telegram-apps/sdk-react';
-import { saveUserToDB } from "@/lib/supabaseUser"; // Імпортуємо функцію
 
 export default function TopBar() {
   const initDataState = useSignal(initData.state);
@@ -16,7 +15,6 @@ export default function TopBar() {
     if (initDataState?.user) {
       const user = initDataState.user;
       console.log('User data before saving:', user); // Перевірте дані користувача
-      saveUserToDB(user); // Зберення в базу даних
     }
   }, [initDataState?.user]);
   console.log("Supabase URL:", process.env.NEXT_PUBLIC_SUPABASE_URL);

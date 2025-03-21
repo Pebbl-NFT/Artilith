@@ -1,5 +1,4 @@
 'use client';
-
 import { type PropsWithChildren, useEffect } from 'react';
 import {
   initData,
@@ -9,7 +8,6 @@ import {
 } from '@telegram-apps/sdk-react';
 import { TonConnectUIProvider } from '@tonconnect/ui-react';
 import { AppRoot } from '@telegram-apps/telegram-ui';
-
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { ErrorPage } from '@/components/ErrorPage';
 import { useTelegramMock } from '@/hooks/useTelegramMock';
@@ -17,11 +15,11 @@ import { useDidMount } from '@/hooks/useDidMount';
 import { useClientOnce } from '@/hooks/useClientOnce';
 import { setLocale } from '@/core/i18n/locale';
 import { init } from '@/core/init';
-
 import './styles.css';
 
 function RootInner({ children }: PropsWithChildren) {
   const isDev = process.env.NODE_ENV === 'development';
+  console.log('isDev:', isDev);
 
   // Mock Telegram environment in development mode if needed.
   if (isDev) {
@@ -30,7 +28,10 @@ function RootInner({ children }: PropsWithChildren) {
   }
 
   const lp = useLaunchParams();
+  console.log('lp:', lp);
+
   const debug = isDev || lp.startParam === 'debug';
+  console.log('debug:', debug);
 
   // Initialize the library.
   useClientOnce(() => {
@@ -38,11 +39,16 @@ function RootInner({ children }: PropsWithChildren) {
   });
 
   const isDark = useSignal(miniApp.isDark);
+  console.log('isDark:', isDark);
+
   const initDataUser = useSignal(initData.user);
+  console.log('initDataUser:', initDataUser);
 
   // Set the user locale.
   useEffect(() => {
-    initDataUser && setLocale(initDataUser.languageCode);
+    if (initDataUser) {
+      setLocale(initDataUser.languageCode);
+    }
   }, [initDataUser]);
 
   return (
@@ -62,10 +68,13 @@ export function Root(props: PropsWithChildren) {
   // the Server Side Rendering. That's why we are showing loader on the server
   // side.
   const didMount = useDidMount();
+  console.log('didMount:', didMount);
 
   return didMount ? (
     <ErrorBoundary fallback={ErrorPage}>
-      <RootInner {...props}/>
+      <RootInner {...props} />
     </ErrorBoundary>
-  ) : <div className="root__loading">Loading</div>;
+  ) : (
+    <div className="root__loading">Loading</div>
+  );
 }
