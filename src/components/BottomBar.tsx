@@ -1,8 +1,9 @@
 'use client';
 
 import { Button,  Placeholder } from '@telegram-apps/telegram-ui';
-import cube from '../app/_assets/cube.svg';
-import banknotes from '../app/_assets/banknotes.svg';
+import home from '../app/_assets/home.svg';
+import Auction from '../app/_assets/ticket.svg';
+import lockclosed from '../app/_assets/lock-closed.svg';
 
 export default function BottomBar() {
   return (
@@ -26,7 +27,7 @@ export default function BottomBar() {
         >
         <img
           alt="icon"
-          src={banknotes.src}
+          src={Auction.src}
           style={{
             flex: '1',
             width: '20%',  
@@ -45,10 +46,10 @@ export default function BottomBar() {
         <Placeholder
         style={{
           textAnchor: 'middle',
-          fontSize: '14px',
+          fontSize: '11px',
           fontWeight: 'lighter',
         }}>
-          EARN
+          AUCTION
         </Placeholder>
       </Button>
       <Button
@@ -70,7 +71,7 @@ export default function BottomBar() {
         >
         <img
           alt="icon"
-          src={cube.src}
+          src={home.src}
           style={{
             flex: '1',
             width: '20%',  
@@ -89,7 +90,7 @@ export default function BottomBar() {
         <Placeholder
         style={{
           textAnchor: 'middle',
-          fontSize: '14px',
+          fontSize: '11px',
           fontWeight: 'lighter',
         }}>
       HOLD
@@ -115,7 +116,7 @@ export default function BottomBar() {
         >
         <img
           alt="icon"
-          src={banknotes.src}
+          src={lockclosed.src}
           style={{
             flex: '1',
             width: '20%',  
@@ -127,15 +128,15 @@ export default function BottomBar() {
             border: '1px solid #007AFF',
             blockSize: 'fit-content',
             padding: '5px', 
-            cursor: 'pointer',
-            backgroundColor: '#007AFF',
+            backgroundColor: ' #007AFF',
           }}
         />
         <Placeholder
         style={{
           textAnchor: 'middle',
-          fontSize: '14px',
-          fontWeight: 'lighter',
+          fontSize: '11px',
+          fontWeight: 'bold',
+          color: 'rgb(143, 143, 143)',
         }}>
           SOON
         </Placeholder>
