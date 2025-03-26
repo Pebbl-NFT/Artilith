@@ -1,126 +1,105 @@
 "use client";
+
 import React, { useEffect, useState } from "react";
 import { List, Placeholder } from "@telegram-apps/telegram-ui";
 import { Page } from "@/components/Page";
 import TopBar from "@/components/TopBar";
 import BottomBar from "@/components/BottomBar";
 import { useSignal, initData } from "@telegram-apps/sdk-react";
-import artilithLogo from '../_assets/Artilith_logo-no-bg.png';
-import Image from 'next/image'; 
+import { supabase } from "@/lib/supabaseClient";
+import artilithLogo from "../_assets/Artilith_logo-no-bg.png";
+import Image from "next/image";
 
 export default function HomePage() {
   const [points, setPoints] = useState(0);
-  const [clickDelay, setClickDelay] = useState(1000); // Початковий інтервал 1 секунда
+  const [clickDelay, setClickDelay] = useState(1000);
   const [isClickable, setIsClickable] = useState(true);
-  const [animationTime, setAnimationTime] = useState(1100); // Початковий час анімації
   const [countdown, setCountdown] = useState(0);
-  const [timer, setTimer] = useState<NodeJS.Timeout | null>(null);
+  const [animationTime, setAnimationTime] = useState(1100);
 
-  // Ініціалізація даних користувача
   const initDataState = useSignal(initData.state);
-  const username = initDataState?.user?.firstName || "User";
+  const userId = initDataState?.user?.id;
 
   useEffect(() => {
-  }, [initDataState?.user]);
+    const fetchUserData = async () => {
+      if (!userId) return;
+      const { data, error } = await supabase
+        .from("users")
+        .select("points, click_delay")
+        .eq("id", userId)
+        .single();
 
-  useEffect(() => {
-    if (!isClickable) {
-      setCountdown(clickDelay / 1000);
-      const newTimer = setInterval(() => {
-        setCountdown((prev) => (prev > 0 ? prev - 1 : 0));
-      }, 1000);
-      setTimer(newTimer);
-    } else {
-      if (timer) clearInterval(timer);
-    }
-    return () => {
-      if (timer) clearInterval(timer);
+      if (error) {
+        console.error("Помилка завантаження даних:", error);
+      } else if (data) {
+        setPoints(data.points);
+        setClickDelay(data.click_delay);
+        setAnimationTime(data.click_delay + 100); // Анімація трохи довша за затримку
+      }
     };
-  }, [isClickable, clickDelay]);
+    fetchUserData();
+  }, [userId]);
 
-  useEffect(() => {
+  const saveUserData = async (newPoints: number, newClickDelay: number) => {
+    if (!userId) return;
+
+    const { error } = await supabase
+      .from("users")
+      .upsert([{ id: userId, points: newPoints, click_delay: newClickDelay }], {
+        onConflict: "id",
+      });
+
+    if (error) console.error("Помилка збереження:", error);
+  };
+
+  const handleClick = async () => {
+    if (!isClickable) return;
+
+    setIsClickable(false);
+    setCountdown(Math.ceil(clickDelay / 1000));
+
+    let remainingTime = Math.ceil(clickDelay / 1000);
+    const timer = setInterval(() => {
+      remainingTime -= 1;
+      setCountdown(remainingTime);
+      if (remainingTime <= 0) {
+        clearInterval(timer);
+
+        const newPoints = points + 1;
+        const newClickDelay = clickDelay + 1000;
+
+        setPoints(newPoints);
+        setClickDelay(newClickDelay);
+        setAnimationTime(newClickDelay + 100);
+        saveUserData(newPoints, newClickDelay);
+
+        setIsClickable(true);
+      }
+    }, 1000);
+
     const imgWrap = document.querySelector(".imgWrap");
     if (imgWrap) {
-      const handleClick = () => {
-        if (!isClickable) return;
-        setIsClickable(false);
-        setPoints((prev) => prev + 1);
-        imgWrap.classList.add("active");
-        setTimeout(() => {
-          imgWrap.classList.remove("active");
-        }, animationTime); // Динамічний час анімації
-        setTimeout(() => {
-          setClickDelay((prev) => prev + 1000); // Збільшення інтервалу
-          setAnimationTime((prev) => prev + 1000); // Збільшення часу анімації
-          setIsClickable(true);
-        }, clickDelay); // Затримка перед наступним кліком
-      };
-      imgWrap.addEventListener("click", handleClick);
-      return () => {
-        imgWrap.removeEventListener("click", handleClick);
-      };
+      imgWrap.classList.add("active");
+      setTimeout(() => {
+        imgWrap.classList.remove("active");
+      }, animationTime);
     }
-  }, [isClickable, clickDelay, animationTime]);
+  };
 
   return (
     <Page back={false}>
       <List>
         <TopBar />
-        <div className="HIJtihMA8FHczS02iWF5" style={{ overflow: "visible" }}>
+        <div className="HIJtihMA8FHczS02iWF5" style={{ overflow: "visible" }} onClick={handleClick}>
           <Placeholder>
-            <svg className="filter">
-              <filter id="alphaRed">
-                <feColorMatrix
-                  mode="matrix"
-                  values="1 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 1 0"
-                  result="joint"
-                />
-              </filter>
-              <filter id="alphaGreen">
-                <feColorMatrix
-                  mode="matrix"
-                  values="0 0 0 0 0  0 1 0 0 0  0 0 0 0 0  0 0 0 1 0"
-                  result="joint"
-                />
-              </filter>
-              <filter id="alphaBlue">
-                <feColorMatrix
-                  mode="matrix"
-                  values="0 0 0 0 0  0 0 0 0 0  0 0 1 0 0  0 0 0 1 0"
-                  result="joint"
-                />
-              </filter>
-              <filter id="alpha">
-                <feColorMatrix type="saturate" values="0" />
-              </filter>
-            </svg>
             <div className="page">
               <h1>HOLD</h1>
               <h2>If you keep it you reap the rewards</h2>
               <p>Points: {points}</p>
-              <p>Animation time: {animationTime} ms</p>
               <div className="imgWrap" style={{ overflow: "visible" }}>
-                <Image
-                  className="red"
-                  alt="Artilith Logo Red"
-                  src={artilithLogo}
-                  width={500}
-                  height={500}
-                />
-                <Image
-                  className="green"
-                  alt="Artilith Logo Green"
-                  src={artilithLogo}
-                  width={500}
-                  height={500}
-                />
-                <Image
-                  className="blue"
-                  alt="Artilith Logo Blue"
-                  src={artilithLogo}
-                  width={500}
-                  height={500}
-                />
+                <Image className="red" alt="Artilith Logo Red" src={artilithLogo} width={500} height={500} />
+                <Image className="green" alt="Artilith Logo Green" src={artilithLogo} width={500} height={500} />
+                <Image className="blue" alt="Artilith Logo Blue" src={artilithLogo} width={500} height={500} />
                 <p className="text">
                   <span>Decrypt . . . {countdown}</span>
                 </p>

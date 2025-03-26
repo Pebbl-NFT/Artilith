@@ -34,7 +34,7 @@ export default function TopBar() {
           width: '51%',
         }}
       >
-        0.14.0
+       alpha v0.15
       </p>
       <Button
         href="-"
@@ -49,7 +49,7 @@ export default function TopBar() {
         }}
         name="greeting" // Додано name
       >
-        👋 {username}
+        👋  {username}  ⛓
       </Button>
       <Button
         mode="filled"
