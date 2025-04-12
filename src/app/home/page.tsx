@@ -145,6 +145,18 @@ export default function HomePage() {
                 </p>
               </div>
             </div>
+            <h2 style={{
+            fontSize: '1.1rem',
+            fontWeight: 'lighter',
+            color: '#ccc',
+            textAlign: 'center',
+            marginBottom: '20px',
+            marginTop: '50px',
+            lineHeight: '1.4',
+            fontFamily: 'Arial, sans-serif',
+            }}>
+              Collect shards to unlock new possibilities and progress faster.
+            </h2>
           </Placeholder>
         </div>
         <BottomBar />
