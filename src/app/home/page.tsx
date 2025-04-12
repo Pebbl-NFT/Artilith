@@ -104,7 +104,7 @@ export default function HomePage() {
               HOLD
             </h1>
 
-              <div className="imgWrap" style={{ position: 'relative', display: 'flex', justifyContent: 'center', alignItems: 'center', overflow: 'visible', marginTop: '10px', width: '110%', height: '100%' }}>
+              <div className="imgWrap" style={{ position: 'relative', display: 'flex', justifyContent: 'center', alignItems: 'center', overflow: 'visible', marginTop: '30px', width: '110%', height: '100%' }}>
                 <Image
                   className="red"
                   alt="Artilith Logo Red"
@@ -138,8 +138,16 @@ export default function HomePage() {
                   }}
                 />
                 <p className="text" style={{
-                  fontSize: '1.2rem', fontWeight: 'bold', color: '#fff', position: 'absolute', bottom: '20px',
-                  margin: '10px', textAlign: 'center'
+                  fontSize: '1.2rem', 
+                  fontWeight: 'bold', 
+                  color: '#fff', 
+                  position: 'absolute', 
+                  bottom: '50%',
+                  left: '52%',
+                  top: '190px',
+                  margin: '-10px',
+                  marginTop: '-10px',
+                  textAlign: 'center'
                 }}>
                   <span>Decrypt . . . {countdown}</span>
                 </p>
@@ -151,7 +159,7 @@ export default function HomePage() {
             color: '#ccc',
             textAlign: 'center',
             marginBottom: '20px',
-            marginTop: '50px',
+            marginTop: '30px',
             lineHeight: '1.4',
             fontFamily: 'Arial, sans-serif',
             }}>
