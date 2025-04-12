@@ -163,7 +163,7 @@ export default function HomePage() {
             lineHeight: '1.4',
             fontFamily: 'Arial, sans-serif',
             }}>
-              Collect shards to unlock new possibilities and progress faster.
+              Collect shards to unlock new possibilities and progress faster
             </h2>
           </Placeholder>
         </div>
