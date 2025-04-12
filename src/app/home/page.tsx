@@ -89,18 +89,58 @@ export default function HomePage() {
   return (
     <Page back={false}>
       <List>
-        <TopBar />
+        <TopBar points={points} />
         <div className="HIJtihMA8FHczS02iWF5" style={{ overflow: "visible" }} onClick={handleClick}>
           <Placeholder>
-            <div className="page">
-              <h1>HOLD</h1>
-              <h2>If you keep it you reap the rewards</h2>
-              <p>Points: {points}</p>
-              <div className="imgWrap" style={{ overflow: "visible" }}>
-                <Image className="red" alt="Artilith Logo Red" src={artilithLogo} width={500} height={500} />
-                <Image className="green" alt="Artilith Logo Green" src={artilithLogo} width={500} height={500} />
-                <Image className="blue" alt="Artilith Logo Blue" src={artilithLogo} width={500} height={500} />
-                <p className="text">
+            <div className="page" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+            <h1 style={{
+                fontSize: '3rem',
+                fontWeight: 'bold',
+                marginBottom: '10px',
+                textAlign: 'center',
+                lineHeight: '1.2',
+                color: '#fff'
+              }}>
+              HOLD
+            </h1>
+
+              <div className="imgWrap" style={{ position: 'relative', display: 'flex', justifyContent: 'center', alignItems: 'center', overflow: 'visible', marginTop: '10px', width: '110%', height: '100%' }}>
+                <Image
+                  className="red"
+                  alt="Artilith Logo Red"
+                  src={artilithLogo}
+                  width={500}
+                  height={500}
+                  style={{
+                    position: 'absolute',
+                    opacity: 0.6,
+                  }}
+                />
+                <Image
+                  className="green"
+                  alt="Artilith Logo Green"
+                  src={artilithLogo}
+                  width={500}
+                  height={500}
+                  style={{
+                    position: 'absolute',
+                    opacity: 0.8,
+                  }}
+                />
+                <Image
+                  className="blue"
+                  alt="Artilith Logo Blue"
+                  src={artilithLogo}
+                  width={500}
+                  height={500}
+                  style={{
+                    position: 'absolute',
+                  }}
+                />
+                <p className="text" style={{
+                  fontSize: '1.2rem', fontWeight: 'bold', color: '#fff', position: 'absolute', bottom: '20px',
+                  margin: '10px', textAlign: 'center'
+                }}>
                   <span>Decrypt . . . {countdown}</span>
                 </p>
               </div>

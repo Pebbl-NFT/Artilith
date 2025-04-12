@@ -7,140 +7,78 @@ import lockclosed from '../app/_assets/lock-closed.svg';
 
 export default function BottomBar() {
   return (
-    <div className='bottom-bar' style={{ display: 'flex', justifyContent: 'space-between', width: '100%', position: 'fixed', bottom: 0, padding: 10 }}>
+    <div
+      className="bottom-bar"
+      style={{
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        width: '100%',
+        position: 'fixed',
+        bottom: 0,
+        background: 'var(--tgui--secondary_bg_color)',
+        borderTop: '1px solid rgb(0, 123, 255)',
+        zIndex: 50,
+      }}
+    >
+    {[ 
+      { icon: Auction.src, label: 'AUCTION', bold: false },
+      { icon: home.src, label: 'HOLD', bold: false },
+      { icon: lockclosed.src, label: 'SOON', bold: true }
+    ].map((item, index) => (
       <Button
+        key={index}
         Component="a"
         mode="filled"
         size="l"
         target="_blank"
         style={{
-          background: 'var(--tgui--secondary_bg_color)',
-          borderTop: '1px solid rgb(0, 123, 255)',
-          width: '90%',
-          height: '50%',
-          borderRadius: 10,
-          display: 'flex',
-          margin: 5,
-          marginTop : 20,
-          marginBottom  : -30,
+          flex: 1,
+          height: 90,
+          background: 'transparent',
+          border: 'none',
+          cursor: 'pointer',
+          padding: 0,
         }}
-        >
-        <img
-          alt="icon"
-          src={Auction.src}
+      >
+        <div
           style={{
-            flex: '1',
-            width: '20%',  
-            margin: '0 auto',
-            display: 'block',
-            marginBlockStart: '10px',
-            marginBlockEnd: '-20px',
-            borderRadius: '100%',
-            border: '1px solid #007AFF',
-            blockSize: 'fit-content',
-            padding: '5px', 
-            cursor: 'pointer',
-            backgroundColor: '#007AFF'
+            height: '100%',
+            width: '100%',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
           }}
-        />
-        <Placeholder
-        style={{
-          textAnchor: 'middle',
-          fontSize: '11px',
-          fontWeight: 'lighter',
-        }}>
-          AUCTION
-        </Placeholder>
-      </Button>
-      <Button
-        Component="a"
-        mode="filled"
-        size="l"
-        target="_blank"
-        style={{
-          background: 'var(--tgui--secondary_bg_color)',
-          borderTop: '1px solid rgb(0, 123, 255)',
-          width: '90%',
-          height: '50%',
-          borderRadius: 10,
-          display: 'flex',
-          margin: 5,
-          marginTop : 20,
-          marginBottom  : -30,
-        }}
         >
-        <img
-          alt="icon"
-          src={home.src}
-          style={{
-            flex: '1',
-            width: '20%',  
-            margin: '0 auto',
-            display: 'block',
-            marginBlockStart: '10px',
-            marginBlockEnd: '-20px',
-            borderRadius: '100%',
-            border: '1px solid #007AFF',
-            blockSize: 'fit-content',
-            padding: '5px', 
-            cursor: 'pointer',
-            backgroundColor: '#007AFF'
-          }}
-        />
-        <Placeholder
-        style={{
-          textAnchor: 'middle',
-          fontSize: '11px',
-          fontWeight: 'lighter',
-        }}>
-      HOLD
-        </Placeholder>
+          <img
+            alt="icon"
+            src={item.icon}
+            style={{
+              width: 36,
+              height: 36,
+              objectFit: 'contain',
+              borderRadius: '100%',
+              border: '1px solid #007AFF',
+              backgroundColor: '#007AFF',
+              padding: 6,
+              boxSizing: 'border-box',
+            }}
+          />
+          <Placeholder
+            style={{
+              fontSize: 14,
+              fontWeight: item.bold ? 'bold' : 'lighter',
+              color: item.bold ? 'rgb(143, 143, 143)' : undefined,
+              marginTop: 0,
+              textAlign: 'center',
+            }}
+          >
+            {item.label}
+          </Placeholder>
+        </div>
       </Button>
-      <Button
-        Component="a"
-        mode="filled"
-        size="l"
-        target="_blank"
-        style={{
-          background: 'var(--tgui--secondary_bg_color)',
-          borderTop: '1px solid rgb(0, 123, 255)',
-          width: '90%',
-          height: '50%',
-          borderRadius: 10,
-          display: 'flex',
-          margin: 5,
-          marginRight: 25,
-          marginTop : 20,
-          marginBottom  : -30,
-        }}
-        >
-        <img
-          alt="icon"
-          src={lockclosed.src}
-          style={{
-            flex: '1',
-            width: '20%',  
-            margin: '0 auto',
-            display: 'block',
-            marginBlockStart: '10px',
-            marginBlockEnd: '-20px',
-            borderRadius: '100%',
-            border: '1px solid #007AFF',
-            blockSize: 'fit-content',
-            padding: '5px', 
-            backgroundColor: ' #007AFF',
-          }}
-        />
-        <Placeholder
-        style={{
-          textAnchor: 'middle',
-          fontSize: '11px',
-          fontWeight: 'bold',
-          color: 'rgb(143, 143, 143)',
-        }}>
-          SOON
-        </Placeholder>
-      </Button>
+      ))}
     </div>
   );
 }
