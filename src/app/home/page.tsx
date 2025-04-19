@@ -164,36 +164,17 @@ export default function HomePage() {
                 }}
               >
                 <Image
-                  className="red"
-                  alt="Artilith Logo Red"
-                  src={artilithLogo}
-                  width={500}
-                  height={500}
-                  style={{
-                    position: "absolute",
-                    opacity: 0.6,
-                  }}
-                />
-                <Image
-                  className="green"
-                  alt="Artilith Logo Green"
-                  src={artilithLogo}
-                  width={500}
-                  height={500}
-                  style={{
-                    position: "absolute",
-                    opacity: 0.8,
-                  }}
-                />
-                <Image
-                  className="blue"
-                  alt="Artilith Logo Blue"
-                  src={artilithLogo}
-                  width={500}
-                  height={500}
-                  style={{
-                    position: "absolute",
-                  }}
+                className="blue"
+                alt="Artilith Logo Blue"
+                src={artilithLogo}
+                width={500}
+                height={500}
+                style={{
+                  position: "absolute",
+                  width: "100%",
+                  height: "auto",
+                  maxWidth: "300px", // для мобілки
+                }}
                 />
                 <p
                   className="text"
