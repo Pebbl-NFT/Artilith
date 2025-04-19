@@ -109,12 +109,13 @@ export default function HomePage() {
     setAnimationTime(newClickDelay + 100);
     saveUserData(newPoints, newClickDelay);
 
+    // Додаємо клас для пульсації
     const imgWrap = document.querySelector(".imgWrap");
     if (imgWrap) {
       imgWrap.classList.add("active");
       setTimeout(() => {
         imgWrap.classList.remove("active");
-      }, 600); // 🔥 Match the CSS animation time
+      }, 1000); // Відповідно до часу анімації
     }
   };
 
@@ -143,7 +144,7 @@ export default function HomePage() {
                   fontWeight: "bold",
                   marginBottom: "10px",
                   textAlign: "center",
-                  lineHeight: "1.2",
+                  lineHeight: "1",
                   color: "#fff",
                 }}
               >
@@ -158,8 +159,8 @@ export default function HomePage() {
                   justifyContent: "center",
                   alignItems: "center",
                   overflow: "visible",
-                  marginTop: "30px",
-                  width: "110%",
+                  marginTop: "-40px",
+                  width: "100%",
                   height: "100%",
                 }}
               >

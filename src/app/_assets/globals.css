@@ -71,6 +71,18 @@ h2 {
   transition: transform 0.3s ease;
 }
 
+/* Анімація пульсації */
+@keyframes pulse {
+  0% { transform: translate(-50%, -50%) scale(1); }
+  50% { transform: translate(-50%, -50%) scale(1.03); }
+  100% { transform: translate(-50%, -50%) scale(1); }
+}
+
+/* Клас для активного таймера */
+.imgWrap.timer-active img {
+  animation: pulse 1.5s infinite ease-in-out;
+}
+
 /* Без SVG фільтрів для кращої сумісності */
 .imgWrap .red,
 .imgWrap .green,
