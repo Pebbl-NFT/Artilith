@@ -31,21 +31,37 @@ export default function TopBar({ points }: { points: number }) {
       >
         alpha v0.16
       </p>
-      <Button
-        href="-"
-        mode="filled"
-        size="s"
-        target="_blank"
-        style={{
-          background: 'var(--tgui--secondary_bg_color)',
-          padding: 10,
-          margin: 20,
-          borderRadius: 50,
-        }}
-        name="greeting"
-      >
-        👋 {username} ⛓
-      </Button>
+      <div style={{ position: 'relative', margin: 20 }}>
+  <Button
+    href="-"
+    mode="filled"
+    size="s"
+    target="_blank"
+    style={{
+      background: 'var(--tgui--secondary_bg_color)',
+      padding: 10,
+      borderRadius: 50,
+    }}
+    name="greeting"
+  >
+    👋 {username}
+  </Button>
+
+  {/* Notification indicator */}
+  <span
+    style={{
+      position: 'absolute',
+      top: 2,
+      right: -4,
+      width: 6,
+      height: 6,
+      backgroundColor: '#ff3b30',
+      borderRadius: '50%',
+      border: '1px solid white',
+    }}
+  />
+</div>
+
       <Button
   mode="filled"
   size="s"
