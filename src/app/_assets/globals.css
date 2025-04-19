@@ -54,11 +54,10 @@ h2 {
 
 .imgWrap {
   width: 100%;
-  height: 100%;
   max-width: 500px;
-  max-height: 500px;
+  aspect-ratio: 1 / 1;
   position: relative;
-  overflow: visible;
+  overflow: hidden;
 }
 
 .imgWrap img {
@@ -72,21 +71,16 @@ h2 {
   transition: transform 0.3s ease;
 }
 
-.imgWrap:hover img {
-  transform: translate(-50%, -50%) scale(1.02);
+/* Без SVG фільтрів для кращої сумісності */
+.imgWrap .red,
+.imgWrap .green,
+.imgWrap .blue {
+  filter: none;
+  mix-blend-mode: normal;
 }
 
-.imgWrap .red {
-  filter: url(#alphaRed);
-  mix-blend-mode: lighten;
-}
-.imgWrap .green {
-  filter: url(#alphaGreen);
-  mix-blend-mode: lighten;
-}
-.imgWrap .blue {
-  filter: url(#alphaBlue);
-  mix-blend-mode: lighten;
+.imgWrap:hover img {
+  transform: translate(-50%, -50%) scale(1.02);
 }
 
 .imgWrap .text {
@@ -94,7 +88,7 @@ h2 {
   overflow: visible;
   color: var(--text-color);
   font-size: 30px;
-  padding: 30px 30px;
+  padding: 30px;
   position: absolute;
   top: 50%;
   left: 50%;
@@ -131,7 +125,7 @@ h2 {
   border-radius: 8px;
 }
 
-/* Glitch Animation */
+/* Glitch Animation (залишено, але необов'язково) */
 @keyframes imgGlitch {
   0% {
     clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
