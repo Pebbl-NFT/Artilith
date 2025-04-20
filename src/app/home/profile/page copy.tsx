@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { Button, Link, Placeholder } from '@telegram-apps/telegram-ui';
+import { Button } from '@telegram-apps/telegram-ui';
 import { Page } from "@/components/Page";
 import { Progress, Card } from "@telegram-apps/telegram-ui";
 import { useSignal, initData } from "@telegram-apps/sdk-react";
@@ -42,32 +42,50 @@ export default function ProfilePage() {
   return (
     <Page back>
       <div style={styles.container}>
-        <Placeholder>
         <h1
             style={{
                 fontSize: "3rem",
                 fontWeight: "bold",
-                marginTop: "20px",
+                marginBottom: "16px",
+                marginTop: "-4px",
                 textAlign: "center",
                 lineHeight: "1",
                 color: "#fff",
             }}
             >
-            {userName}
+            Profile
         </h1>
         <div style={styles.profileHeader}>
           {userAvatar && (
             <img src={userAvatar} alt="avatar" style={styles.avatar} />
           )}
           <div>
+            <h2 style={styles.userName}>{userName}</h2>
             <p style={styles.levelText}>Level {level}</p>
           </div>
         </div>
 
-        <div style={{ marginTop: "12px", width: "100%" }}>
+        <div style={{ marginTop: "12px" }}>
           <Progress value={(nextLevelProgress / 1000) * 100} />
           <p style={styles.xpText}>{1000 - nextLevelProgress} XP to next level</p>
         </div>
+
+        <Card style={styles.card}>
+          <h3 style={styles.cardTitle}>Achievements</h3>
+          <div style={styles.achievements}>
+            <Achievement value="96" label="By track" color="#ffd700" />
+            <Achievement value="45" label="Total wins" color="#00ffcc" />
+            <Achievement value="Diamond" label="Current Tier" color="#00cc99" />
+          </div>
+        </Card>
+
+        <Card style={styles.card}>
+          <h3 style={styles.cardTitle}>Games</h3>
+          <div style={styles.gameBadges}>
+            <span style={styles.gameBadge}>🪨 Artilith</span>
+            <span style={styles.gameBadge}>🧱 Blocks</span>
+          </div>
+        </Card>
 
         <Card style={styles.card}>
           <h3 style={styles.cardTitle}>Statistics</h3>
@@ -83,25 +101,6 @@ export default function ProfilePage() {
             </p>
           )}
         </Card>
-
-        <Card style={styles.card}>
-          <h3 style={styles.cardTitle}>Achievements</h3>
-          <div style={styles.achievements}>
-            <Achievement value="0" label="By track" color="#ffd700" />
-            <Achievement value="0" label="Total wins" color="#00ffcc" />
-            <Achievement value="Mud" label="Current Tier" color="#00cc99" />
-          </div>
-        </Card>
-
-        <Card style={styles.card}>
-        <Link href="/home">
-          <h3 style={styles.cardTitle}>Games</h3>
-          <div style={styles.gameBadges}>
-            <span style={styles.gameBadge}>🪨 HOLD</span>
-          </div>
-        </Link>
-        </Card>
-        </Placeholder>
       </div>
     </Page>
   );
@@ -129,10 +128,9 @@ import { CSSProperties } from "react";
 const styles: { [key: string]: CSSProperties } = {
   container: {
     padding: "20px",
+    backgroundColor: "#1a1a1a",
     minHeight: "100vh",
     color: "#fff",
-    display: "flex",
-    flexDirection: "column",
   },
   profileHeader: {
     display: "flex",
@@ -140,7 +138,7 @@ const styles: { [key: string]: CSSProperties } = {
     gap: "16px",
   },
   avatar: {
-    borderRadius: "100%",
+    borderRadius: "50%",
     width: 60,
     height: 60,
     border: "2px solid #888",
@@ -154,30 +152,22 @@ const styles: { [key: string]: CSSProperties } = {
   levelText: {
     color: "#bbb",
     fontSize: "14px",
-    display: "flex",
   },
   xpText: {
     fontSize: "12px",
     color: "#888",
-    marginTop: "10px",
-    display: "flex",
-    gap: "24px",
-    flexWrap: "wrap",
-    justifyContent: "space-around",
+    marginTop: "4px",
   },
   card: {
     marginTop: "20px",
-    width: "100%",
     backgroundColor: "#2b2b2b",
     borderRadius: "16px",
     padding: "16px",
-    boxShadow: "0 4px 12px rgba(61, 106, 148, 0.3)",
+    boxShadow: "0 4px 12px rgba(0,0,0,0.3)",
   },
   cardTitle: {
-    marginBottom: "20px",
-    width: "100%",
-    textAlign: "center",
-    fontSize: "18px",
+    marginBottom: "12px",
+    fontSize: "16px",
     color: "#fff",
   },
   achievements: {
@@ -188,9 +178,8 @@ const styles: { [key: string]: CSSProperties } = {
   },
   gameBadges: {
     display: "flex",
-    gap: "24px",
+    gap: "10px",
     flexWrap: "wrap",
-    justifyContent: "space-around",
   },
   gameBadge: {
     backgroundColor: "#444",
@@ -198,14 +187,12 @@ const styles: { [key: string]: CSSProperties } = {
     padding: "6px 14px",
     borderRadius: "14px",
     fontSize: "14px",
-    boxShadow: "inset 0 0 6px rgba(49, 127, 199, 0.1)",
+    boxShadow: "inset 0 0 6px rgba(255,255,255,0.1)",
     fontFamily: "monospace",
   },
   statText: {
-    padding: "6px 20px",
-    borderRadius: "14px",
+    margin: "6px 0",
     color: "#ccc",
     fontSize: "14px",
-    fontFamily: "monospace",
   },
 };

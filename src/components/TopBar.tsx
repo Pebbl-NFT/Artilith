@@ -30,7 +30,7 @@ export default function TopBar({ points }: { points: number }) {
           width: '53%',
         }}
       >
-        alpha v0.16
+        alpha v0.17
       </p>
 
       <div style={{ position: 'relative', margin: 20 }}>
