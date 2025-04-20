@@ -119,6 +119,17 @@ export default function HomePage() {
     }
   };
 
+  const formatTime = (totalSeconds: number) => {
+    const hours = Math.floor(totalSeconds / 3600);
+    const minutes = Math.floor((totalSeconds % 3600) / 60);
+    const seconds = totalSeconds % 60;
+  
+    const pad = (num: number) => num.toString().padStart(2, "0");
+  
+    return `${pad(hours)}:${pad(minutes)}:${pad(seconds)}`;
+  };
+  
+
   return (
     <Page back={false}>
       <List>
@@ -179,28 +190,24 @@ export default function HomePage() {
                   maxWidth: "300px", // для мобілки
                 }}
                 />
-                <p
-                  className="text"
-                  style={{
-                    fontSize: "1.2rem",
-                    fontWeight: "bold",
-                    color: "#fff",
-                    position: "absolute",
-                    bottom: "50%",
-                    left: "50%",
-                    top: "200px",
-                    margin: "-10px",
-                    marginTop: "-10px",
-                    textAlign: "center",
-                    background: "rgba(0, 0, 0, 0.5)",
-                  }}
-                >
-                  <span>
-                    {countdown > 0 ? `Decrypt . . . ${countdown}` : "Tap to decrypt"}
-                  </span>
-                </p>
               </div>
             </div>
+            <p
+              className="page"
+              style={{
+                fontSize: "1.1rem",
+                fontWeight: "lighter",
+                color: "#ccc",
+                textAlign: "center",
+                lineHeight: "1",
+                fontFamily: "Arial, sans-serif",
+                marginTop: "-140px",
+              }}
+            >
+              <span>
+                {countdown > 0 ? `Decrypt . . . ${formatTime(countdown)}` : "Tap to сollect"}
+              </span>
+            </p>
             <h2
               style={{
                 fontSize: "1.1rem",
