@@ -1,11 +1,12 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { Button, Link, Placeholder } from '@telegram-apps/telegram-ui';
+import { Button, Link, Placeholder, Image  } from '@telegram-apps/telegram-ui';
 import { Page } from "@/components/Page";
 import { Progress, Card } from "@telegram-apps/telegram-ui";
 import { useSignal, initData } from "@telegram-apps/sdk-react";
 import { supabase } from "@/lib/supabaseClient";
+import artilithLogo from "../_assets/Artilith_logo-no-bg.png";
 
 export default function ProfilePage() {
   const initDataState = useSignal(initData.state);
