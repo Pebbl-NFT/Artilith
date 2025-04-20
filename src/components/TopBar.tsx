@@ -41,20 +41,22 @@ export default function TopBar({ points }: { points: number }) {
       background: 'var(--tgui--secondary_bg_color)',
       padding: 10,
       borderRadius: 50,
+      width: '110px',
+      border: '1px solid rgb(255, 255, 255)',
     }}
     name="greeting"
   >
-    👋 {username}
+    👋 {username} 
   </Button>
 
-  {/* Notification indicator */}
+  {/* індикатор */}
   <span
     style={{
       position: 'absolute',
-      top: 2,
-      right: -4,
-      width: 6,
-      height: 6,
+      top: -1,
+      right: 2,
+      width: 8,
+      height: 8,
       backgroundColor: '#ff3b30',
       borderRadius: '50%',
       border: '1px solid white',
@@ -71,11 +73,11 @@ export default function TopBar({ points }: { points: number }) {
     padding: 10,
     margin: 20,
     borderRadius: 50,
-    border: '0px solid rgb(0, 123, 255)',
+    border: '0px solid rgb(255, 255, 255)',
   }}
   name="score-button"
 >
-Shards 🪨  {points}
+{points} 🪨
 </Button>
 
     </div>

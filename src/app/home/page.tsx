@@ -142,7 +142,7 @@ export default function HomePage() {
                 style={{
                   fontSize: "3rem",
                   fontWeight: "bold",
-                  marginBottom: "10px",
+                  marginBottom: "16px",
                   textAlign: "center",
                   lineHeight: "1",
                   color: "#fff",
@@ -159,20 +159,20 @@ export default function HomePage() {
                   justifyContent: "center",
                   alignItems: "center",
                   overflow: "visible",
-                  marginTop: "-40px",
-                  width: "100%",
-                  height: "100%",
+                  marginTop: "-30px",
+                  width: "90%",
+                  height: "90%",
                 }}
               >
                 <Image
                 className="blue"
                 alt="Artilith Logo Blue"
                 src={artilithLogo}
-                width={500}
-                height={500}
+                width={400}
+                height={400}
                 style={{
                   position: "absolute",
-                  width: "100%",
+                  width: "90%",
                   height: "auto",
                   maxWidth: "300px", // для мобілки
                 }}
@@ -187,7 +187,7 @@ export default function HomePage() {
                     bottom: "50%",
                     left: "52%",
                     top: "190px",
-                    margin: "-10px",
+                    margin: "-5px",
                     marginTop: "-10px",
                     textAlign: "center",
                   }}
@@ -197,6 +197,7 @@ export default function HomePage() {
                   </span>
                 </p>
               </div>
+              {countdown > 0 ? `Decrypt . . . ${countdown}` : "Tap to decrypt"}
             </div>
             <h2
               style={{
