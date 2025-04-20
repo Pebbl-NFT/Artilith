@@ -101,8 +101,42 @@ export default function ProfilePage() {
           </div>
         </Link>
         </Card>
+        <Card style={styles.card}>
+          <h3 style={styles.cardTitle}>Feedback</h3>
+          <div style={styles.gameBadges}>
+            <span style={styles.gameBadge}>Telegram</span>
+            <span style={styles.gameBadge}>Discord</span>
+            <span style={styles.gameBadge}>Twitter</span>
+            <span style={styles.gameBadge}>alpha v.0.17</span>
+          </div>
+        </Card>
         </Placeholder>
       </div>
+      <Link href="/home">
+          <Button
+            mode="filled"
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              width: "100%",
+              height: 100,
+              background: 'var(--tgui--secondary_bg_color)',
+              padding: 10,
+              borderRadius: 50,
+              marginBottom: '20px',
+              border: '0px solid rgb(255, 255, 255)',
+            }}
+            name="back"
+          >
+            <p style={{ 
+              fontSize: "20px", 
+              color: "#fff", 
+              fontWeight: "bold" 
+            }}>
+              👈 back</p>
+          </Button>
+        </Link>
     </Page>
   );
 }
@@ -170,11 +204,11 @@ const styles: { [key: string]: CSSProperties } = {
     width: "100%",
     backgroundColor: "#2b2b2b",
     borderRadius: "16px",
-    padding: "16px",
+    padding: "30px",
     boxShadow: "0 4px 12px rgba(61, 106, 148, 0.3)",
   },
   cardTitle: {
-    marginBottom: "20px",
+    marginBottom: "50px",
     width: "100%",
     textAlign: "center",
     fontSize: "18px",
