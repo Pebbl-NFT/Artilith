@@ -143,6 +143,7 @@ export default function HomePage() {
                   fontSize: "3rem",
                   fontWeight: "bold",
                   marginBottom: "16px",
+                  marginTop: "-4px",
                   textAlign: "center",
                   lineHeight: "1",
                   color: "#fff",

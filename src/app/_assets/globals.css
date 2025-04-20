@@ -189,3 +189,67 @@ h2 {
     font-size: 12px;
   }
 }
+
+/* Профільний контейнер */
+.profile-container {
+  max-width: 500px;
+  width: 100%;
+  margin: 2rem auto;
+  background: var(--card-bg);
+  border-radius: var(--border-radius);
+  padding: 1.5rem;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+  text-align: left;
+  position: relative;
+  animation: fadeIn 0.4s ease;
+}
+
+/* Заголовок профілю */
+.profile-title {
+  font-size: 22px;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  color: var(--accent-color);
+}
+
+/* Інформаційні рядки */
+.profile-info {
+  margin-bottom: 0.75rem;
+  color: var(--muted-color);
+  font-size: 15px;
+  line-height: 1.4;
+}
+
+.profile-info strong {
+  color: var(--text-color);
+  font-weight: 600;
+}
+
+/* Кнопка повернення/закриття */
+.close-profile-btn {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: transparent;
+  border: none;
+  color: var(--muted-color);
+  font-size: 1.5rem;
+  cursor: pointer;
+  transition: color var(--transition-fast);
+}
+
+.close-profile-btn:hover {
+  color: var(--accent-color);
+}
+
+/* Fade-in анімація */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
