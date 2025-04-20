@@ -172,7 +172,8 @@ export default function HomePage() {
                   justifyContent: "center",
                   alignItems: "center",
                   overflow: "visible",
-                  marginTop: "-30px",
+                  marginTop: "-20px",
+                  marginBottom: "10px",
                   width: "90%",
                   height: "90%",
                 }}
@@ -203,7 +204,7 @@ export default function HomePage() {
               }}
             >
               <span>
-                {countdown > 0 ? `Decrypt . . . ${formatTime(countdown)}` : "Tap to сollect"}
+                {countdown > 0 ? `${formatTime(countdown)}` : "Tap to сollect"}
               </span>
             </p>
             </div>
