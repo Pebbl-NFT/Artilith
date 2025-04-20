@@ -23,7 +23,7 @@ export default function BottomBar() {
     >
     {[ 
       { icon: Auction.src, label: 'AUCTION', bold: false },
-      { icon: home.src, label: 'HOLD', bold: false },
+      { icon: home.src, label: 'HOLD', bold: false, Link: "/home" },
       { icon: lockclosed.src, label: 'SOON', bold: true }
     ].map((item, index) => (
       <Button
