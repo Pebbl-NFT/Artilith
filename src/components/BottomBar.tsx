@@ -27,7 +27,7 @@ export default function BottomBar() {
       { icon: lockclosed.src, label: 'SOON', bold: true }
     ].map((item, index) => (
       <Button
-        key={index}
+        key={Auction.src}
         Component="a"
         mode="filled"
         size="l"
@@ -59,8 +59,7 @@ export default function BottomBar() {
               height: 36,
               objectFit: 'contain',
               borderRadius: '100%',
-              border: '1px solid #007AFF',
-              backgroundColor: '#007AFF',
+              backgroundColor: 'rgb(0, 123, 255)',
               padding: 6,
               boxSizing: 'border-box',
             }}
