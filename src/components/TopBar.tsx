@@ -19,20 +19,6 @@ export default function TopBar({ points }: { points: number }) {
 
   return (
     <div className='top-bar' style={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}>
-      <p
-        id="version-info"
-        style={{
-          position: 'absolute',
-          top: 0,
-          right: 0,
-          fontSize: 8,
-          color: 'var(--tgui--secondary_text_color)',
-          width: '53%',
-        }}
-      >
-        alpha v0.17
-      </p>
-
       <div style={{ position: 'relative', margin: 20 }}>
         <Link href="/home/profile">
           <Button
