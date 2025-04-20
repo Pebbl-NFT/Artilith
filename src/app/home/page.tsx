@@ -191,9 +191,7 @@ export default function HomePage() {
                 }}
                 />
               </div>
-            </div>
-            <p
-              className="page"
+              <p
               style={{
                 fontSize: "1.1rem",
                 fontWeight: "lighter",
@@ -201,21 +199,21 @@ export default function HomePage() {
                 textAlign: "center",
                 lineHeight: "1",
                 fontFamily: "Arial, sans-serif",
-                marginTop: "-140px",
+                marginTop: "0px",
               }}
             >
               <span>
                 {countdown > 0 ? `Decrypt . . . ${formatTime(countdown)}` : "Tap to сollect"}
               </span>
             </p>
+            </div>
             <h2
               style={{
                 fontSize: "1.1rem",
                 fontWeight: "lighter",
                 color: "#ccc",
                 textAlign: "center",
-                marginBottom: "20px",
-                marginTop: "30px",
+                marginTop: "10px",
                 lineHeight: "1.4",
                 fontFamily: "Arial, sans-serif",
               }}
