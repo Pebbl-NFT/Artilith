@@ -173,7 +173,7 @@ export default function HomePage() {
                   alignItems: "center",
                   overflow: "visible",
                   marginTop: "-20px",
-                  marginBottom: "10px",
+                  marginBottom: "20px",
                   width: "90%",
                   height: "90%",
                 }}

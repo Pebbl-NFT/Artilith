@@ -75,6 +75,12 @@ export default function ProfilePage() {
           🪨 <strong>{userData.points}</strong> Shards
           </p>
           <p style={styles.statText}>
+          🪙 <strong>0</strong> $ATL
+          </p>
+          <p style={styles.statText}>
+          💎 <strong>0</strong> TON
+          </p>
+          <p style={styles.statText}>
             ⏱️ <strong>{userData.click_delay}</strong> ms delay
           </p>
           {userData.created_at && (
