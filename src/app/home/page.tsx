@@ -188,8 +188,8 @@ export default function HomePage() {
                     position: "absolute",
                     bottom: "50%",
                     left: "52%",
-                    top: "190px",
-                    margin: "-5px",
+                    top: "200px",
+                    margin: "-10px",
                     marginTop: "-10px",
                     textAlign: "center",
                   }}
@@ -199,7 +199,6 @@ export default function HomePage() {
                   </span>
                 </p>
               </div>
-              {countdown > 0 ? `Decrypt . . . ${countdown}` : "Tap to decrypt"}
             </div>
             <h2
               style={{

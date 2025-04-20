@@ -69,7 +69,7 @@ export default function ProfilePage() {
           <p style={styles.xpText}>{1000 - nextLevelProgress} XP to next level</p>
         </div>
 
-        <Card style={styles.card}>
+        <Card className="page">
           <h3 style={styles.cardTitle}>Statistics</h3>
           <p style={styles.statText}>
           🪨 <strong>{userData.points}</strong> Shards
@@ -84,7 +84,7 @@ export default function ProfilePage() {
           )}
         </Card>
 
-        <Card style={styles.card}>
+        <Card className="page">
           <h3 style={styles.cardTitle}>Achievements</h3>
           <div style={styles.achievements}>
             <Achievement value="0" label="By track" color="#ffd700" />
@@ -93,7 +93,7 @@ export default function ProfilePage() {
           </div>
         </Card>
 
-        <Card style={styles.card}>
+        <Card className="page">
         <Link href="/home">
           <h3 style={styles.cardTitle}>Games</h3>
           <div style={styles.gameBadges}>
@@ -101,7 +101,7 @@ export default function ProfilePage() {
           </div>
         </Link>
         </Card>
-        <Card style={styles.card}>
+        <Card className="page">
           <h3 style={styles.cardTitle}>Feedback</h3>
           <div style={styles.gameBadges}>
             <span style={styles.gameBadge}>Telegram</span>
@@ -199,14 +199,6 @@ const styles: { [key: string]: CSSProperties } = {
     flexWrap: "wrap",
     justifyContent: "space-around",
   },
-  card: {
-    marginTop: "20px",
-    width: "100%",
-    backgroundColor: "#2b2b2b",
-    borderRadius: "16px",
-    padding: "30px",
-    boxShadow: "0 4px 12px rgba(61, 106, 148, 0.3)",
-  },
   cardTitle: {
     marginBottom: "50px",
     width: "100%",
@@ -227,10 +219,11 @@ const styles: { [key: string]: CSSProperties } = {
     justifyContent: "space-around",
   },
   gameBadge: {
-    backgroundColor: "#444",
+    background: 'var(--tgui--secondary_bg_color)',
     color: "#fff",
     padding: "6px 14px",
     borderRadius: "14px",
+    border: '1px solid rgb(255, 255, 255)',
     fontSize: "14px",
     boxShadow: "inset 0 0 6px rgba(49, 127, 199, 0.1)",
     fontFamily: "monospace",
