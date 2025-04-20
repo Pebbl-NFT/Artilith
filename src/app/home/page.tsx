@@ -172,7 +172,7 @@ export default function HomePage() {
                   justifyContent: "center",
                   alignItems: "center",
                   overflow: "visible",
-                  marginTop: "-20px",
+                  marginTop: "0px",
                   marginBottom: "20px",
                   width: "90%",
                   height: "90%",
