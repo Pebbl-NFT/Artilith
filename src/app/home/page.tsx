@@ -143,8 +143,8 @@ export default function HomePage() {
                 style={{
                   fontSize: "3rem",
                   fontWeight: "bold",
-                  marginBottom: "16px",
-                  marginTop: "-4px",
+                  marginBottom: "20px",
+                  marginTop: "5px",
                   textAlign: "center",
                   lineHeight: "1",
                   color: "#fff",
@@ -174,7 +174,7 @@ export default function HomePage() {
                 height={400}
                 style={{
                   position: "absolute",
-                  width: "90%",
+                  width: "100%",
                   height: "auto",
                   maxWidth: "300px", // для мобілки
                 }}
@@ -187,11 +187,12 @@ export default function HomePage() {
                     color: "#fff",
                     position: "absolute",
                     bottom: "50%",
-                    left: "52%",
+                    left: "50%",
                     top: "200px",
                     margin: "-10px",
                     marginTop: "-10px",
                     textAlign: "center",
+                    background: "rgba(0, 0, 0, 0.5)",
                   }}
                 >
                   <span>
