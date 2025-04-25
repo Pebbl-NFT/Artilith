@@ -142,7 +142,7 @@ export default function HomePage() {
       <h3 style={{ color: "#00ffcc", marginBottom: "10px" }}>{name}</h3>
       <p style={{ color: "#ddd", marginBottom: "15px" }}>{description}</p>
       <p style={{ color: "#fff", fontSize: "1.2rem", fontWeight: "bold" }}>
-        Ціна: {price} ARTL
+        Ціна: {price} 🪨
       </p>
       <button
         style={{
