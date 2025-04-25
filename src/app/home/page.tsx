@@ -259,7 +259,7 @@ export default function HomePage() {
         >
           
           <h3 style={{ color: "#00ffcc", marginBottom: "10px" }}>Зілля відновлення</h3>
-          <p style={{ color: "#ddd", marginBottom: "15px" }}>Відновлює частину здоров'я. Може врятувати в критичній ситуації.</p>
+          <p style={{ color: "#ddd", marginBottom: "15px" }}>Відновлює частину здоровя. Може врятувати в критичній ситуації.</p>
           <p style={{ color: "#fff", fontSize: "1.2rem", fontWeight: "bold" }}>Стартова ціна: 20 ARTL</p>
           <button
             style={{
