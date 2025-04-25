@@ -225,15 +225,7 @@ export default function HomePage() {
             boxShadow: "0 5px 15px rgba(0, 0, 0, 0.3)",
           }}
         >
-          <img
-            alt="Щит"
-            style={{
-              width: "100%",
-              height: "auto",
-              borderRadius: "10px",
-              marginBottom: "15px",
-            }}
-          />
+          
           <h3 style={{ color: "#00ffcc", marginBottom: "10px" }}>Щит захисний</h3>
           <p style={{ color: "#ddd", marginBottom: "15px" }}>Дозволяє зменшувати шкоду від атак. Потрібен кожному воїну.</p>
           <p style={{ color: "#fff", fontSize: "1.2rem", fontWeight: "bold" }}>Стартова ціна: 50 ARTL</p>
@@ -265,16 +257,7 @@ export default function HomePage() {
             boxShadow: "0 5px 15px rgba(0, 0, 0, 0.3)",
           }}
         >
-          <img
-            
-            alt="Зілля"
-            style={{
-              width: "100%",
-              height: "auto",
-              borderRadius: "10px",
-              marginBottom: "15px",
-            }}
-          />
+          
           <h3 style={{ color: "#00ffcc", marginBottom: "10px" }}>Зілля відновлення</h3>
           <p style={{ color: "#ddd", marginBottom: "15px" }}>Відновлює частину здоров'я. Може врятувати в критичній ситуації.</p>
           <p style={{ color: "#fff", fontSize: "1.2rem", fontWeight: "bold" }}>Стартова ціна: 20 ARTL</p>
