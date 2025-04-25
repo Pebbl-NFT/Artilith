@@ -7,7 +7,7 @@ import Auction from '../app/_assets/ticket.svg';
 import lockclosed from '../app/_assets/lock-closed.svg';
 
 const tabItems = [
-  { icon: Auction.src, label: 'AUCTION', bold: false, value: 'auction' },
+  { icon: Auction.src, label: 'SHOP', bold: false, value: 'shop' },
   { icon: home.src, label: 'HOLD', bold: false, value: 'home' },
   { icon: lockclosed.src, label: 'ITEM', bold: true, value: 'soon' },
 ];

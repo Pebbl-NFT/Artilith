@@ -121,6 +121,49 @@ export default function HomePage() {
     }
   };
 
+  type ItemCardProps = {
+    name: string;
+    emoji: string;
+    description: string;
+    price: number;
+  };
+  
+  const ItemCard: React.FC<ItemCardProps> = ({ name, emoji, description, price }) => (
+    <div
+      style={{
+        backgroundColor: "#222",
+        borderRadius: "10px",
+        padding: "20px",
+        textAlign: "center",
+        boxShadow: "0 5px 15px rgba(0, 0, 0, 0.3)",
+      }}
+    >
+      <h2 style={{ fontSize: "2rem", marginBottom: "10px" }}>{emoji}</h2>
+      <h3 style={{ color: "#00ffcc", marginBottom: "10px" }}>{name}</h3>
+      <p style={{ color: "#ddd", marginBottom: "15px" }}>{description}</p>
+      <p style={{ color: "#fff", fontSize: "1.2rem", fontWeight: "bold" }}>
+        Ціна: {price} ARTL
+      </p>
+      <button
+        style={{
+          backgroundColor: "#00bcd4",
+          border: "none",
+          padding: "12px 24px",
+          fontSize: "1rem",
+          color: "#fff",
+          borderRadius: "6px",
+          cursor: "pointer",
+          transition: "all 0.3s ease",
+          marginTop: "10px",
+        }}
+        onClick={() => alert(`Ви придбали ${name}!`)}
+      >
+        Купити
+      </button>
+    </div>
+  );
+  
+  
   const formatTime = (totalSeconds: number) => {
     const hours = Math.floor(totalSeconds / 3600);
     const minutes = Math.floor((totalSeconds % 3600) / 60);
@@ -132,175 +175,124 @@ export default function HomePage() {
   };
   const renderContent = () => {
     switch (activeTab) {
-      case 'auction':
+      case 'shop':
         return (
-<div>
-  <Placeholder>
-    <div
-      className="page"
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        justifyContent: "center",
-        marginTop: "-20px",
-      }}
-    >
-      <h1
-        style={{
-          fontSize: "3rem",
-          fontWeight: "bold",
-          marginBottom: "20px",
-          marginTop: "5px",
-          textAlign: "center",
-          lineHeight: "1",
-          color: "#fff",
-        }}
-      >
-        AUCTION
-      </h1>
-
-      {/* Опис аукціону */}
-      <p
-        style={{
-          fontSize: "1.2rem",
-          color: "#ddd",
-          textAlign: "center",
-          marginBottom: "30px",
-          maxWidth: "600px",
-        }}
-      >
-        Ласкаво просимо на аукціон Artilith! Тут ви знайдете різноманітні предмети, які стануть у пригоді на вашому шляху. Ставте ставки і отримуйте вигоду!
-      </p>
-
-      {/* Список предметів на аукціоні */}
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(3, 1fr)",
-          gap: "20px",
-          width: "100%",
-          maxWidth: "1200px",
-        }}
-      >
-        {/* Предмет 1: Меч */}
-        <div
-          style={{
-            backgroundColor: "#222",
-            borderRadius: "10px",
-            padding: "20px",
-            textAlign: "center",
-            boxShadow: "0 5px 15px rgba(0, 0, 0, 0.3)",
-          }}
-        >
-          <h2 style={{ color: "#00ffcc", marginBottom: "10px" }}>🗡️</h2>
-          <h3 style={{ color: "#00ffcc", marginBottom: "10px" }}>Меч сталевий</h3>
-          <p style={{ color: "#ddd", marginBottom: "15px" }}>Ідеальний для боротьби з монстрами. Підвищує атакувальні здібності.</p>
-          <p style={{ color: "#fff", fontSize: "1.2rem", fontWeight: "bold" }}>Стартова ціна: 30 ARTL</p>
-          <button
+        <Placeholder>
+          <div
+            className="page"
             style={{
-              backgroundColor: "#00bcd4",
-              border: "none",
-              padding: "12px 24px",
-              fontSize: "1rem",
-              color: "#fff",
-              borderRadius: "6px",
-              cursor: "pointer",
-              transition: "all 0.3s ease",
-              marginTop: "10px",
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              justifyContent: "center",
+              marginTop: "-20px",
             }}
-            onClick={() => alert("Ваша ставка на Меч сталевий!")}
           >
-            Зробити ставку
-          </button>
-        </div>
+            <h1
+              style={{
+                fontSize: "3rem",
+                fontWeight: "bold",
+                marginBottom: "20px",
+                marginTop: "5px",
+                textAlign: "center",
+                lineHeight: "1",
+                color: "#fff",
+              }}
+            >
+              МАГАЗИН ПРЕДМЕТІВ
+            </h1>
 
-        {/* Предмет 2: Щит */}
-        <div
-          style={{
-            backgroundColor: "#222",
-            borderRadius: "10px",
-            padding: "20px",
-            textAlign: "center",
-            boxShadow: "0 5px 15px rgba(0, 0, 0, 0.3)",
-          }}
-        >
-          <img
-            src="https://via.placeholder.com/250?text=Shield"
-            alt="Щит"
-            style={{
-              width: "100%",
-              height: "auto",
-              borderRadius: "10px",
-              marginBottom: "15px",
-            }}
-          />
-          <h3 style={{ color: "#00ffcc", marginBottom: "10px" }}>Щит захисний</h3>
-          <p style={{ color: "#ddd", marginBottom: "15px" }}>Дозволяє зменшувати шкоду від атак. Потрібен кожному воїну.</p>
-          <p style={{ color: "#fff", fontSize: "1.2rem", fontWeight: "bold" }}>Стартова ціна: 50 ARTL</p>
-          <button
-            style={{
-              backgroundColor: "#00bcd4",
-              border: "none",
-              padding: "12px 24px",
-              fontSize: "1rem",
-              color: "#fff",
-              borderRadius: "6px",
-              cursor: "pointer",
-              transition: "all 0.3s ease",
-              marginTop: "10px",
-            }}
-            onClick={() => alert("Ваша ставка на Щит захисний!")}
-          >
-            Зробити ставку
-          </button>
-        </div>
+            <p
+              style={{
+                fontSize: "1.2rem",
+                color: "#ddd",
+                textAlign: "center",
+                marginBottom: "30px",
+                maxWidth: "600px",
+              }}
+            >
+              Тут ви можете придбати початкове спорядження для пригод: зброю, броню та зілля.
+            </p>
 
-        {/* Предмет 3: Зілля */}
-        <div
-          style={{
-            backgroundColor: "#222",
-            borderRadius: "10px",
-            padding: "20px",
-            textAlign: "center",
-            boxShadow: "0 5px 15px rgba(0, 0, 0, 0.3)",
-          }}
-        >
-          <img
-            src="https://via.placeholder.com/250?text=Potion"
-            alt="Зілля"
-            style={{
-              width: "100%",
-              height: "auto",
-              borderRadius: "10px",
-              marginBottom: "15px",
-            }}
-          />
-          <h3 style={{ color: "#00ffcc", marginBottom: "10px" }}>Зілля відновлення</h3>
-          <p style={{ color: "#ddd", marginBottom: "15px" }}>Відновлює частину здоров'я. Може врятувати в критичній ситуації.</p>
-          <p style={{ color: "#fff", fontSize: "1.2rem", fontWeight: "bold" }}>Стартова ціна: 20 ARTL</p>
-          <button
-            style={{
-              backgroundColor: "#00bcd4",
-              border: "none",
-              padding: "12px 24px",
-              fontSize: "1rem",
-              color: "#fff",
-              borderRadius: "6px",
-              cursor: "pointer",
-              transition: "all 0.3s ease",
-              marginTop: "10px",
-            }}
-            onClick={() => alert("Ваша ставка на Зілля відновлення!")}
-          >
-            Зробити ставку
-          </button>
-        </div>
-      </div>
-    </div>
-  </Placeholder>
-</div>
+            {/* Сортування */}
+            <div style={{ marginBottom: "30px", color: "#fff" }}>
+              <label htmlFor="sort" style={{ marginRight: "10px" }}>Сортувати за:</label>
+              <select
+                id="sort"
+                style={{
+                  padding: "10px",
+                  borderRadius: "6px",
+                  border: "1px solid #444",
+                  backgroundColor: "#333",
+                  color: "#fff",
+                }}
+              >
+                <option value="price">Ціною</option>
+                <option value="type">Типом</option>
+                <option value="quality">Якістю</option>
+              </select>
+            </div>
 
+            {/* Список предметів */}
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(1, 1fr)",
+                gap: "20px",
+                width: "100%",
+                maxWidth: "1200px",
+              }}
+            >
+              {/* Меч дерев'яний */}
+              <ItemCard
+                name="Дерев'яний меч"
+                emoji="🗡️"
+                description="Простий меч для новачків. Легкий та зручний."
+                price={10}
+              />
+
+              {/* Щит із кори */}
+              <ItemCard
+                name="Щит з кори"
+                emoji="🛡️🌲"
+                description="Легкий захист для перших боїв. Зменшує шкоду на 5%."
+                price={12}
+              />
+
+              {/* Маленьке зілля */}
+              <ItemCard
+                name="Маленьке зілля"
+                emoji="🧪"
+                description="Відновлює 20% здоров’я. Один ковток — і ви знову в строю."
+                price={8}
+              />
+
+              {/* Шкіряна броня */}
+              <ItemCard
+                name="Шкіряна броня"
+                emoji="🥋"
+                description="Базовий захист від ушкоджень. Підвищує витривалість."
+                price={15}
+              />
+
+              {/* Палиця мага */}
+              <ItemCard
+                name="Палиця мага"
+                emoji="🪄"
+                description="Початковий артефакт для магів. Посилює магічну атаку."
+                price={18}
+              />
+
+              {/* Маленьке зілля мани */}
+              <ItemCard
+                name="Зілля мани"
+                emoji="🔮"
+                description="Відновлює 25 мани. Ідеальне для перших заклять."
+                price={9}
+              />
+            </div>
+          </div>
+        </Placeholder>
         );
       case 'home':
         return (
