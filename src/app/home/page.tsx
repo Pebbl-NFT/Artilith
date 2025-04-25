@@ -125,10 +125,12 @@ export default function HomePage() {
     name: string;
     emoji: string;
     description: string;
+    damage?: string;
+    strength?: string;
     price: number;
   };
   
-  const ItemCard: React.FC<ItemCardProps> = ({ name, emoji, description, price }) => (
+  const ItemCard: React.FC<ItemCardProps> = ({ name, emoji, description, damage, price, strength }) => (
     <div
       style={{
         backgroundColor: "#222",
@@ -141,9 +143,8 @@ export default function HomePage() {
       <h2 style={{ fontSize: "2rem", marginBottom: "10px" }}>{emoji}</h2>
       <h3 style={{ color: "#00ffcc", marginBottom: "10px" }}>{name}</h3>
       <p style={{ color: "#ddd", marginBottom: "15px" }}>{description}</p>
-      <p style={{ color: "#fff", fontSize: "1.2rem", fontWeight: "bold" }}>
-        Ціна: {price} 🪨
-      </p>
+      <p style={{ color: "#ddd", marginBottom: "15px" }}>{damage}</p>
+      <p style={{ color: "#ddd", marginBottom: "15px" }}>{strength}</p>
       <button
         style={{
           backgroundColor: "#00bcd4",
@@ -158,7 +159,7 @@ export default function HomePage() {
         }}
         onClick={() => alert(`Ви придбали ${name}!`)}
       >
-        Купити
+        Купити за : {price} 🪨
       </button>
     </div>
   );
@@ -229,6 +230,8 @@ export default function HomePage() {
                 name="Дерев'яний меч"
                 emoji="🗡️"
                 description="Простий меч для новачків. Легкий та зручний."
+                damage="Шкода: 1"
+                strength="Міцність: 25"
                 price={10}
               />
 
