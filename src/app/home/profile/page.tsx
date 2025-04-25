@@ -99,15 +99,6 @@ export default function ProfilePage() {
             <Achievement value="Mud" label="Current Tier" color="#00cc99" />
           </div>
         </Card>
-
-        <Card className="page">
-        <Link href="/home">
-          <h3 style={styles.cardTitle}>Games</h3>
-          <div style={styles.gameBadges}>
-            <span style={styles.gameBadge}>🪨 HOLD</span>
-          </div>
-        </Link>
-        </Card>
         <Card className="page">
           <h3 style={styles.cardTitle}>Feedback</h3>
           <div style={styles.gameBadges}>

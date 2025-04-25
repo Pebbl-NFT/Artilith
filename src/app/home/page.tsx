@@ -190,7 +190,7 @@ export default function HomePage() {
           >
             <h1
               style={{
-                fontSize: "3rem",
+                fontSize: "2rem",
                 fontWeight: "bold",
                 marginBottom: "20px",
                 marginTop: "5px",
@@ -204,7 +204,7 @@ export default function HomePage() {
 
             <p
               style={{
-                fontSize: "1.2rem",
+                fontSize: "1rem",
                 color: "#ddd",
                 textAlign: "center",
                 marginBottom: "30px",
@@ -213,25 +213,6 @@ export default function HomePage() {
             >
               Тут ви можете придбати початкове спорядження для пригод: зброю, броню та зілля.
             </p>
-
-            {/* Сортування */}
-            <div style={{ marginBottom: "30px", color: "#fff" }}>
-              <label htmlFor="sort" style={{ marginRight: "10px" }}>Сортувати за:</label>
-              <select
-                id="sort"
-                style={{
-                  padding: "10px",
-                  borderRadius: "6px",
-                  border: "1px solid #444",
-                  backgroundColor: "#333",
-                  color: "#fff",
-                }}
-              >
-                <option value="price">Ціною</option>
-                <option value="type">Типом</option>
-                <option value="quality">Якістю</option>
-              </select>
-            </div>
 
             {/* Список предметів */}
             <div
@@ -297,7 +278,7 @@ export default function HomePage() {
             >
               <h1
                 style={{
-                  fontSize: "3rem",
+                  fontSize: "2rem",
                   fontWeight: "bold",
                   marginBottom: "20px",
                   marginTop: "5px",
@@ -347,29 +328,29 @@ export default function HomePage() {
                 fontFamily: "Arial, sans-serif",
                 marginTop: "0px",
               }}
-            >
-              <span>
-                {countdown > 0 ? `${formatTime(countdown)}` : "Tap to сollect"}
-              </span>
-            </p>
+              >
+                <span>
+                  {countdown > 0 ? `${formatTime(countdown)}` : "Tap to сollect"}
+                </span>
+              </p>
+              <h2
+                style={{
+                  fontSize: "1.1rem",
+                  fontWeight: "lighter",
+                  color: "#ccc",
+                  textAlign: "center",
+                  marginTop: "10px",
+                  lineHeight: "1.4",
+                  fontFamily: "Arial, sans-serif",
+                }}
+              >
+                Collect shards to unlock new possibilities and progress faster
+              </h2>
             </div>
-            <h2
-              style={{
-                fontSize: "1.1rem",
-                fontWeight: "lighter",
-                color: "#ccc",
-                textAlign: "center",
-                marginTop: "10px",
-                lineHeight: "1.4",
-                fontFamily: "Arial, sans-serif",
-              }}
-            >
-              Collect shards to unlock new possibilities and progress faster
-            </h2>
           </Placeholder>
           </div>
         );
-      case 'soon':
+      case 'item':
         return (
           <div>
             <Placeholder>
@@ -385,7 +366,7 @@ export default function HomePage() {
             >
               <h1
                 style={{
-                  fontSize: "3rem",
+                  fontSize: "2rem",
                   fontWeight: "bold",
                   marginBottom: "20px",
                   marginTop: "5px",
