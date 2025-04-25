@@ -16,6 +16,8 @@ export default function HomePage() {
   const [isClickable, setIsClickable] = useState(true);
   const [countdown, setCountdown] = useState(0);
   const [animationTime, setAnimationTime] = useState(1100);
+  const [activeTab, setActiveTab] = useState("home");
+
 
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const initDataState = useSignal(initData.state);
@@ -128,18 +130,186 @@ export default function HomePage() {
   
     return `${pad(hours)}:${pad(minutes)}:${pad(seconds)}`;
   };
-  
+  const renderContent = () => {
+    switch (activeTab) {
+      case 'auction':
+        return (
+<div>
+  <Placeholder>
+    <div
+      className="page"
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        marginTop: "-20px",
+      }}
+    >
+      <h1
+        style={{
+          fontSize: "3rem",
+          fontWeight: "bold",
+          marginBottom: "20px",
+          marginTop: "5px",
+          textAlign: "center",
+          lineHeight: "1",
+          color: "#fff",
+        }}
+      >
+        AUCTION
+      </h1>
 
-  return (
-    <Page back={false}>
-      <List>
-        <TopBar points={points} />
+      {/* Опис аукціону */}
+      <p
+        style={{
+          fontSize: "1.2rem",
+          color: "#ddd",
+          textAlign: "center",
+          marginBottom: "30px",
+          maxWidth: "600px",
+        }}
+      >
+        Ласкаво просимо на аукціон Artilith! Тут ви знайдете різноманітні предмети, які стануть у пригоді на вашому шляху. Ставте ставки і отримуйте вигоду!
+      </p>
+
+      {/* Список предметів на аукціоні */}
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(3, 1fr)",
+          gap: "20px",
+          width: "100%",
+          maxWidth: "1200px",
+        }}
+      >
+        {/* Предмет 1: Меч */}
         <div
-          className="HIJtihMA8FHczS02iWF5"
-          style={{ overflow: "visible" }}
-          onClick={handleClick}
+          style={{
+            backgroundColor: "#222",
+            borderRadius: "10px",
+            padding: "20px",
+            textAlign: "center",
+            boxShadow: "0 5px 15px rgba(0, 0, 0, 0.3)",
+          }}
         >
-          <Placeholder>
+          <h2 style={{ color: "#00ffcc", marginBottom: "10px" }}>🗡️</h2>
+          <h3 style={{ color: "#00ffcc", marginBottom: "10px" }}>Меч сталевий</h3>
+          <p style={{ color: "#ddd", marginBottom: "15px" }}>Ідеальний для боротьби з монстрами. Підвищує атакувальні здібності.</p>
+          <p style={{ color: "#fff", fontSize: "1.2rem", fontWeight: "bold" }}>Стартова ціна: 30 ARTL</p>
+          <button
+            style={{
+              backgroundColor: "#00bcd4",
+              border: "none",
+              padding: "12px 24px",
+              fontSize: "1rem",
+              color: "#fff",
+              borderRadius: "6px",
+              cursor: "pointer",
+              transition: "all 0.3s ease",
+              marginTop: "10px",
+            }}
+            onClick={() => alert("Ваша ставка на Меч сталевий!")}
+          >
+            Зробити ставку
+          </button>
+        </div>
+
+        {/* Предмет 2: Щит */}
+        <div
+          style={{
+            backgroundColor: "#222",
+            borderRadius: "10px",
+            padding: "20px",
+            textAlign: "center",
+            boxShadow: "0 5px 15px rgba(0, 0, 0, 0.3)",
+          }}
+        >
+          <img
+            src="https://via.placeholder.com/250?text=Shield"
+            alt="Щит"
+            style={{
+              width: "100%",
+              height: "auto",
+              borderRadius: "10px",
+              marginBottom: "15px",
+            }}
+          />
+          <h3 style={{ color: "#00ffcc", marginBottom: "10px" }}>Щит захисний</h3>
+          <p style={{ color: "#ddd", marginBottom: "15px" }}>Дозволяє зменшувати шкоду від атак. Потрібен кожному воїну.</p>
+          <p style={{ color: "#fff", fontSize: "1.2rem", fontWeight: "bold" }}>Стартова ціна: 50 ARTL</p>
+          <button
+            style={{
+              backgroundColor: "#00bcd4",
+              border: "none",
+              padding: "12px 24px",
+              fontSize: "1rem",
+              color: "#fff",
+              borderRadius: "6px",
+              cursor: "pointer",
+              transition: "all 0.3s ease",
+              marginTop: "10px",
+            }}
+            onClick={() => alert("Ваша ставка на Щит захисний!")}
+          >
+            Зробити ставку
+          </button>
+        </div>
+
+        {/* Предмет 3: Зілля */}
+        <div
+          style={{
+            backgroundColor: "#222",
+            borderRadius: "10px",
+            padding: "20px",
+            textAlign: "center",
+            boxShadow: "0 5px 15px rgba(0, 0, 0, 0.3)",
+          }}
+        >
+          <img
+            src="https://via.placeholder.com/250?text=Potion"
+            alt="Зілля"
+            style={{
+              width: "100%",
+              height: "auto",
+              borderRadius: "10px",
+              marginBottom: "15px",
+            }}
+          />
+          <h3 style={{ color: "#00ffcc", marginBottom: "10px" }}>Зілля відновлення</h3>
+          <p style={{ color: "#ddd", marginBottom: "15px" }}>Відновлює частину здоров'я. Може врятувати в критичній ситуації.</p>
+          <p style={{ color: "#fff", fontSize: "1.2rem", fontWeight: "bold" }}>Стартова ціна: 20 ARTL</p>
+          <button
+            style={{
+              backgroundColor: "#00bcd4",
+              border: "none",
+              padding: "12px 24px",
+              fontSize: "1rem",
+              color: "#fff",
+              borderRadius: "6px",
+              cursor: "pointer",
+              transition: "all 0.3s ease",
+              marginTop: "10px",
+            }}
+            onClick={() => alert("Ваша ставка на Зілля відновлення!")}
+          >
+            Зробити ставку
+          </button>
+        </div>
+      </div>
+    </div>
+  </Placeholder>
+</div>
+
+        );
+      case 'home':
+        return (
+          <div
+            className="HIJtihMA8FHczS02iWF5"
+            style={{ overflow: "visible" }}
+            onClick={handleClick}
+          >
+            <Placeholder>
             <div
               className="page"
               style={{
@@ -173,7 +343,7 @@ export default function HomePage() {
                   alignItems: "center",
                   overflow: "visible",
                   marginTop: "0px",
-                  marginBottom: "20px",
+                  marginBottom: "0px",
                   width: "90%",
                   height: "90%",
                 }}
@@ -222,8 +392,65 @@ export default function HomePage() {
               Collect shards to unlock new possibilities and progress faster
             </h2>
           </Placeholder>
-        </div>
-        <BottomBar />
+          </div>
+        );
+      case 'soon':
+        return (
+          <div>
+            <Placeholder>
+            <div
+              className="page"
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                justifyContent: "center",
+                marginTop: "-20px",
+              }}
+            >
+              <h1
+                style={{
+                  fontSize: "3rem",
+                  fontWeight: "bold",
+                  marginBottom: "20px",
+                  marginTop: "5px",
+                  textAlign: "center",
+                  lineHeight: "1",
+                  color: "#fff",
+                }}
+              >
+                ITEM
+              </h1>
+
+              <h2
+              style={{
+                fontSize: "1.1rem",
+                fontWeight: "lighter",
+                color: "#ccc",
+                textAlign: "center",
+                marginTop: "10px",
+                lineHeight: "1.4",
+                fontFamily: "Arial, sans-serif",
+              }}
+            >
+              Comming Soon ...
+            </h2>
+            </div>
+          </Placeholder>
+          </div>
+        );
+      default:
+        return null;
+    }
+  };
+  
+
+  return (
+    <Page back={false}>
+      <List>
+        <TopBar points={points} />
+        <div style={{ paddingBottom: 100 }}>{renderContent()}</div>
+        <BottomBar activeTab={activeTab} setActiveTab={setActiveTab} />
       </List>
     </Page>
   );
