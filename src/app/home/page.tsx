@@ -226,7 +226,6 @@ export default function HomePage() {
           }}
         >
           <img
-            src="https://via.placeholder.com/250?text=Shield"
             alt="Щит"
             style={{
               width: "100%",
@@ -267,7 +266,7 @@ export default function HomePage() {
           }}
         >
           <img
-            src="https://via.placeholder.com/250?text=Potion"
+            
             alt="Зілля"
             style={{
               width: "100%",
