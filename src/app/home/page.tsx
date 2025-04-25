@@ -246,40 +246,6 @@ export default function HomePage() {
             Зробити ставку
           </button>
         </div>
-
-        {/* Предмет 3: Зілля */}
-        <div
-          style={{
-            backgroundColor: "#222",
-            borderRadius: "10px",
-            padding: "20px",
-            textAlign: "center",
-            boxShadow: "0 5px 15px rgba(0, 0, 0, 0.3)",
-          }}
-        >
-          
-          <h3 style={{ color: "#00ffcc", marginBottom: "10px" }}>Зілля відновлення</h3>
-          <p style={{ color: "#ddd", marginBottom: "15px" }}>
-  Відновлює частину здоров’я. Може врятувати в критичній ситуації.
-</p>
-          <p style={{ color: "#fff", fontSize: "1.2rem", fontWeight: "bold" }}>Стартова ціна: 20 ARTL</p>
-          <button
-            style={{
-              backgroundColor: "#00bcd4",
-              border: "none",
-              padding: "12px 24px",
-              fontSize: "1rem",
-              color: "#fff",
-              borderRadius: "6px",
-              cursor: "pointer",
-              transition: "all 0.3s ease",
-              marginTop: "10px",
-            }}
-            onClick={() => alert("Ваша ставка на Зілля відновлення!")}
-          >
-            Зробити ставку
-          </button>
-        </div>
       </div>
     </div>
   </Placeholder>
