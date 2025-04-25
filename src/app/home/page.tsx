@@ -202,6 +202,7 @@ export default function HomePage() {
               МАГАЗИН ПРЕДМЕТІВ
             </h1>
 
+<<<<<<< HEAD
             <p
               style={{
                 fontSize: "1.2rem",
@@ -232,6 +233,43 @@ export default function HomePage() {
                 <option value="quality">Якістю</option>
               </select>
             </div>
+=======
+        {/* Предмет 2: Щит */}
+        <div
+          style={{
+            backgroundColor: "#222",
+            borderRadius: "10px",
+            padding: "20px",
+            textAlign: "center",
+            boxShadow: "0 5px 15px rgba(0, 0, 0, 0.3)",
+          }}
+        >
+          
+          <h3 style={{ color: "#00ffcc", marginBottom: "10px" }}>Щит захисний</h3>
+          <p style={{ color: "#ddd", marginBottom: "15px" }}>Дозволяє зменшувати шкоду від атак. Потрібен кожному воїну.</p>
+          <p style={{ color: "#fff", fontSize: "1.2rem", fontWeight: "bold" }}>Стартова ціна: 50 ARTL</p>
+          <button
+            style={{
+              backgroundColor: "#00bcd4",
+              border: "none",
+              padding: "12px 24px",
+              fontSize: "1rem",
+              color: "#fff",
+              borderRadius: "6px",
+              cursor: "pointer",
+              transition: "all 0.3s ease",
+              marginTop: "10px",
+            }}
+            onClick={() => alert("Ваша ставка на Щит захисний!")}
+          >
+            Зробити ставку
+          </button>
+        </div>
+      </div>
+    </div>
+  </Placeholder>
+</div>
+>>>>>>> d1b3e0a5dce43093b4aaef34f3e84853e1f5a6c7
 
             {/* Список предметів */}
             <div
