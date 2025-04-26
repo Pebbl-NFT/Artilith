@@ -61,7 +61,7 @@ export default function InitDataPage() {
 
   return (
     <Placeholder> 
-      <div className="fixed top-0 left-0 z-50 w-screen h-screen flex items-center justify-center bg-black bg-opacity-50">
+      <div className="fixed top-50% left-0 z-50 w-screen h-screen flex items-center justify-center bg-black bg-opacity-50">
         <div className="bg-white border border-gray-300 py-4 px-6 rounded-lg flex flex-col items-center">
           <div className="flex space-x-2">
             <span className="w-3 h-3 bg-green-500 rounded-full animate-bounce [animation-delay:-0.3s]"></span>

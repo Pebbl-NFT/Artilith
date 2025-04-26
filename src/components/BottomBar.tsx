@@ -9,7 +9,7 @@ import lockclosed from '../app/_assets/lock-closed.svg';
 const tabItems = [
   { icon: Auction.src, label: 'SHOP', bold: false, value: 'shop' },
   { icon: home.src, label: 'HOLD', bold: false, value: 'home' },
-  { icon: lockclosed.src, label: 'ITEM', bold: true, value: 'item' },
+  { icon: lockclosed.src, label: 'HIRO', bold: false, value: 'hiro' },
 ];
 
 export default function BottomBar({ activeTab, setActiveTab }: { activeTab: string, setActiveTab: (value: string) => void }) {

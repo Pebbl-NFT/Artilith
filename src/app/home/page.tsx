@@ -231,7 +231,7 @@ export default function HomePage() {
                 emoji="🗡️"
                 description="Простий меч для новачків. Легкий та зручний."
                 damage="Шкода: 1"
-                strength="Міцність: 25"
+                strength="Міцність: 5"
                 price={10}
               />
 
@@ -239,8 +239,9 @@ export default function HomePage() {
               <ItemCard
                 name="Щит з кори"
                 emoji="🛡️"
-                description="Легкий захист для перших боїв. Зменшує шкоду на 5%."
-                price={12}
+                description="Легкий захист для перших боїв. Захищає від легких атак."
+                strength="Міцність: 15"
+                price={30}
               />
 
               {/* Маленьке зілля */}
@@ -248,14 +249,16 @@ export default function HomePage() {
                 name="Маленьке зілля"
                 emoji="🧪"
                 description="Відновлює 20% здоров’я. Один ковток — і ви знову в строю."
-                price={8}
+                price={10}
               /> 
               {/* Палиця мага */}
               <ItemCard
                 name="Палиця мага"
                 emoji="🪄"
-                description="Початковий артефакт для магів. Посилює магічну атаку."
-                price={18}
+                description="Початковий артефакт для магів."
+                damage="Шкода: 1-3"
+                strength="Міцність: 4"
+                price={15}
               />
             </div>
           </div>
@@ -317,7 +320,7 @@ export default function HomePage() {
                   position: "absolute",
                   width: "100%",
                   height: "auto",
-                  maxWidth: "300px", // для мобілки
+                  maxWidth: "250px", // для мобілки
                 }}
                 />
               </div>
@@ -338,7 +341,7 @@ export default function HomePage() {
               </p>
               <h2
                 style={{
-                  fontSize: "1.1rem",
+                  fontSize: "1rem",
                   fontWeight: "lighter",
                   color: "#ccc",
                   textAlign: "center",
@@ -347,13 +350,13 @@ export default function HomePage() {
                   fontFamily: "Arial, sans-serif",
                 }}
               >
-                Collect shards to unlock new possibilities and progress faster
+                Збирайте уламки, щоб прокачати свого героя та підготувати його до пригод.
               </h2>
             </div>
           </Placeholder>
           </div>
         );
-      case 'item':
+      case 'hiro':
         return (
           <div>
             <Placeholder>
@@ -378,7 +381,7 @@ export default function HomePage() {
                   color: "#fff",
                 }}
               >
-                ITEM
+                ГЕРОЙ
               </h1>
 
               <h2
@@ -392,7 +395,7 @@ export default function HomePage() {
                 fontFamily: "Arial, sans-serif",
               }}
             >
-              Comming Soon ...
+              Тут ви можете налаштувати свого героя, прокачати його та підготувати до пригод.
             </h2>
             </div>
           </Placeholder>
