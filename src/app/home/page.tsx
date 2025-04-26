@@ -309,67 +309,37 @@ export default function HomePage() {
                 Ви ще не досить сильні, щоб отримати доступ до цього рівня. Продовжуйте грати, щоб розблокувати нові предмети!
               </p>
 
-      {/* Окремий контейнер тільки для контенту */}
-      <div style={{ position: "relative", marginTop: "20px" }}>
-        {/* Контент */}
-        <div
-          className="blur-target"
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(1, 1fr)",
-            gap: "20px",
-            width: "100%",
-            maxWidth: "1200px",
-            margin: "0 auto",
-            filter: locked ? "blur(15px)" : "none",
-            transition: "filter 0.3s ease",
-          }}
-        >
-          {/* Твої ItemCard-и */}
-          <ItemCard
-            name="Деревяна палиця"
-            image={swordr1m3.src}
-            description="Початковий артефакт для воїнів."
-            damage="Шкода: 1"
-            strength="Міцність: 5"
-            price={30}
-          />
-          <ItemCard
-            name="Маленьке зілля"
-            image={potionmp.src}
-            description="Відновлює енергію. Один ковток — і ви знову в строю."
-            price={50}
-          />
-          <ItemCard
-            name="Палиця мага"
-            image={staffr1m3.src}
-            description="Початковий артефакт для магів."
-            damage="Шкода: 1-3"
-            strength="Міцність: 4"
-            price={65}
-          />
-        </div>
-
-        {/* Замок зверху */}
-        {locked && (
-          <div
-            style={{
-              position: "absolute",
-              top: "50%",
-              left: "50%",
-              transform: "translate(-50%, -50%)",
-              backgroundColor: "rgba(255, 255, 255, 0.8)",
-              borderRadius: "50%",
-              padding: "15px",
-              boxShadow: "0 0 15px rgba(0,0,0,0.3)",
-              zIndex: 5,
-            }}
-          >
-            <span style={{ fontSize: "36px" }}>🔒</span>
-          </div>
-        )}
-      </div>
-    </div>
+              {/* Окремий контейнер тільки для контенту */}
+              <div style={{ position: "relative", marginTop: "20px" }}>
+                {/* Контент */}
+                <div
+                  className="blur-target"
+                  style={{
+                    display: "grid",
+                    gridTemplateColumns: "repeat(1, 1fr)",
+                    gap: "20px",
+                    width: "100%",
+                    maxWidth: "1200px",
+                    margin: "0 auto",
+                    filter: locked ? "blur(15px)" : "none",
+                    transition: "filter 0.3s ease",
+                    pointerEvents: locked ?   "none" : "auto",
+                    opacity: locked ? 0.5 : 1,
+                    cursor: locked ? "block" : "auto",
+                  }}
+                >
+                  {/* Твої ItemCard-и */}
+                  <ItemCard
+                    name="Хитрун"
+                    image={swordr1m3.src}
+                    description="Хитрун"
+                    damage="Шкода: Хитрун"
+                    strength="Міцність: Хитрун"
+                    price={999999}
+                  />
+                </div>
+              </div>
+            </div>
           </Placeholder>
       </Page>
 
