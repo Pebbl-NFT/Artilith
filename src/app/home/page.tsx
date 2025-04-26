@@ -52,36 +52,34 @@ export default function HomePage() {
       fetchUserData();
     }, [userId]);
 
-     // Оновлюємо дані користувача в базі (зменшуємо уламки)
-  const updateUserPoints = async (newPoints: number) => {
-    if (!userId) return;
-    const { error } = await supabase
-      .from("users")
-      .update({ points: newPoints })
-      .eq("id", userId);
-    if (error) console.error("Помилка оновлення points:", error);
-  };
+  // Оновити кількість балів
+async function updateUserPoints(userId: string, newPoints: number): Promise<void> {
+  const { data, error } = await supabase
+    .from('users') // заміни на реальну назву таблиці, якщо потрібно
+    .update({ points: newPoints })
+    .eq('id', userId);
 
-  // Функція для додавання предмету до інвентарю користувача
-  const addInventoryItem = async (item: {
-    name: string;
-    image: string;
-    description: string;
-    damage?: string;
-    strength?: string;
-    price: number;
-  }) => {
-    if (!userId) return;
-    // Припустимо, у тебе є таблиця "inventory" з колонками user_id та item (JSON)
-    const { error } = await supabase
-      .from("inventory")
-      .insert([{ user_id: userId, item }]);
+  if (error) {
+    console.error('Помилка оновлення балів:', error);
+  } else {
+    console.log('Оновлено користувача:', data);
+  }
+}
+
+// Додати предмет у інвентар
+async function addInventoryItem(userId: string, item: string): Promise<boolean> { 
+  const { data, error } = await supabase
+    .from('inventory')
+    .insert([{ user_id: userId, item: item }]);
+
     if (error) {
-      console.error("Помилка додавання до інвентарю:", error);
+      console.error('Помилка додавання предмета:', error);
       return false;
-    }
-    return true;
-  };
+    } else {
+      console.log('Додано предмет в інвентар:', data);
+      return true;
+    }    
+}
 
   // Функція обробки покупки
   const handleBuyItem = async (
@@ -91,19 +89,20 @@ export default function HomePage() {
       alert("Недостатньо уламків для покупки!");
       return;
     }
-    // Віднімаємо уламки
+  
     const newPoints = points - item.price;
-    await updateUserPoints(newPoints);
+    await updateUserPoints(userId, newPoints); // <-- userId додаємо
     setPoints(newPoints);
-    // Додаємо предмет до інвентарю
-    const added = await addInventoryItem(item);
+  
+    const added = await addInventoryItem(userId, item.name); // <-- userId і item.name
     if (added) {
       alert(`Ви придбали ${item.name}!`);
-      // Оновлення локального стану інвентарю можна реалізувати тут (якщо він ведеться локально)
+      // Можна оновити локальний інвентар тут
     } else {
       alert("Помилка покупки!");
     }
   };
+  
   const saveUserData = async (newPoints: number, newClickDelay: number) => {
     if (!userId) return;
 
