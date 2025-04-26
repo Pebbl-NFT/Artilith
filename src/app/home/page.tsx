@@ -12,44 +12,98 @@ import swordr1m3 from "../_assets/sword-r1-m3.png";
 import staffr1m3 from "../_assets/staff-r1-m3.png";
 import potionmp from "../_assets/potion-mp.png";
 import Image from "next/image";
-import PageLoader from "next/dist/client/page-loader";
 
 
 export default function HomePage() {
+  // Кількість уламків (points)
   const [points, setPoints] = useState(0);
   const [clickDelay, setClickDelay] = useState(1000);
   const [isClickable, setIsClickable] = useState(true);
   const [countdown, setCountdown] = useState(0);
   const [animationTime, setAnimationTime] = useState(1100);
   const [activeTab, setActiveTab] = useState("home");
+  // Для магазину використовується сортування (вже інтегровано)
+  const [sortOption, setSortOption] = useState("price");
+  // Перемикач, який показує заблокований контент (наприклад, рівень 2)
   const [locked, setLocked] = useState(true);
-
 
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const initDataState = useSignal(initData.state);
   const userId = initDataState?.user?.id;
 
-  useEffect(() => {
-    const fetchUserData = async () => {
-      if (!userId) return;
-      const { data, error } = await supabase
-        .from("users")
-        .select("points, click_delay")
-        .eq("id", userId)
-        .single();
+    // Завантажуємо дані користувача із Supabase
+    useEffect(() => {
+      const fetchUserData = async () => {
+        if (!userId) return;
+        const { data, error } = await supabase
+          .from("users")
+          .select("points, click_delay")
+          .eq("id", userId)
+          .single();
+  
+        if (error) {
+          console.error("Помилка завантаження даних:", error);
+        } else if (data) {
+          setPoints(data.points);
+          setClickDelay(data.click_delay);
+          setAnimationTime(data.click_delay + 100);
+        }
+      };
+      fetchUserData();
+    }, [userId]);
 
-      if (error) {
-        console.error("Помилка завантаження даних:", error);
-      } else if (data) {
-        setPoints(data.points);
-        setClickDelay(data.click_delay);
-        setAnimationTime(data.click_delay + 100);
-      }
-    };
+     // Оновлюємо дані користувача в базі (зменшуємо уламки)
+  const updateUserPoints = async (newPoints: number) => {
+    if (!userId) return;
+    const { error } = await supabase
+      .from("users")
+      .update({ points: newPoints })
+      .eq("id", userId);
+    if (error) console.error("Помилка оновлення points:", error);
+  };
 
-    fetchUserData();
-  }, [userId]);
+  // Функція для додавання предмету до інвентарю користувача
+  const addInventoryItem = async (item: {
+    name: string;
+    image: string;
+    description: string;
+    damage?: string;
+    strength?: string;
+    price: number;
+  }) => {
+    if (!userId) return;
+    // Припустимо, у тебе є таблиця "inventory" з колонками user_id та item (JSON)
+    const { error } = await supabase
+      .from("inventory")
+      .insert([{ user_id: userId, item }]);
+    if (error) {
+      console.error("Помилка додавання до інвентарю:", error);
+      return false;
+    }
+    return true;
+  };
 
+  // Функція обробки покупки
+  const handleBuyItem = async (
+    item: { name: string; image: string; description: string; damage?: string; strength?: string; price: number }
+  ) => {
+    if (points < item.price) {
+      alert("Недостатньо уламків для покупки!");
+      return;
+    }
+    // Віднімаємо уламки
+    const newPoints = points - item.price;
+    await updateUserPoints(newPoints);
+    setPoints(newPoints);
+    // Додаємо предмет до інвентарю
+    const added = await addInventoryItem(item);
+    if (added) {
+      alert(`Ви придбали ${item.name}!`);
+      // Оновлення локального стану інвентарю можна реалізувати тут (якщо він ведеться локально)
+    } else {
+      alert("Помилка покупки!");
+    }
+  };
   const saveUserData = async (newPoints: number, newClickDelay: number) => {
     if (!userId) return;
 
@@ -62,22 +116,19 @@ export default function HomePage() {
     if (error) console.error("Помилка збереження:", error);
   };
 
+  // Функція оновлення таймера для кліку (залишається незмінною)
   const updateCountdown = (endTime: number) => {
     if (timerRef.current) clearInterval(timerRef.current);
-
     const now = Date.now();
     const remaining = Math.ceil((endTime - now) / 1000);
-
     if (remaining <= 0) {
       setCountdown(0);
       setIsClickable(true);
       localStorage.removeItem("nextClickTime");
       return;
     }
-
     setCountdown(remaining);
     setIsClickable(false);
-
     timerRef.current = setInterval(() => {
       const now = Date.now();
       const remaining = Math.ceil((endTime - now) / 1000);
@@ -100,44 +151,46 @@ export default function HomePage() {
     }
   }, []);
 
+  // При кліку на "HOLD" (збирати уламки)
   const handleClick = async () => {
     if (!isClickable) return;
-
     const nextAvailableClick = Date.now() + clickDelay;
     localStorage.setItem("nextClickTime", nextAvailableClick.toString());
-
     setIsClickable(false);
     updateCountdown(nextAvailableClick);
-
     const newPoints = points + 1;
     const newClickDelay = clickDelay + 1000;
-
     setPoints(newPoints);
     setClickDelay(newClickDelay);
     setAnimationTime(newClickDelay + 100);
-    saveUserData(newPoints, newClickDelay);
-
-    // Додаємо клас для пульсації
+    // Оновлюємо базу із новими даними
+    const { error } = await supabase
+      .from("users")
+      .upsert([{ id: userId, points: newPoints, click_delay: newClickDelay }], {
+        onConflict: "id",
+      });
+    if (error) console.error("Помилка збереження:", error);
+    // Клас для пульсації
     const imgWrap = document.querySelector(".imgWrap");
     if (imgWrap) {
       imgWrap.classList.add("active");
       setTimeout(() => {
         imgWrap.classList.remove("active");
-      }, 1000); // Відповідно до часу анімації
+      }, 1000);
     }
   };
 
+  // Компонент ItemCard: оновлено для роботи з зображенням (image)
   type ItemCardProps = {
     name: string;
-    image?: string;
+    image: string;
     description: string;
     damage?: string;
     strength?: string;
     price: number;
   };
-  
-  const ItemCard: React.FC<ItemCardProps> = ({ name, image, description, damage, price, strength }) => (
-    <div
+  const ItemCard: React.FC<ItemCardProps> = ({ name, image, description, damage, strength, price }) => (
+      <div
       style={{
         borderRadius: "10px",
         padding: "20px",
@@ -146,7 +199,7 @@ export default function HomePage() {
         border: "1px solid rgba(255, 255, 255, 0.1)",
       }}
     >
-    <img 
+      <img 
       src={image} 
       alt={name} 
       width={150} 
@@ -157,43 +210,44 @@ export default function HomePage() {
         boxShadow: "0 5px 15px rgba(255, 255, 255, 0.3)",
       }}
     />
-    <h3 style={{ color: "#00ffcc", marginBottom: "10px" }}>{name}</h3>
-    <p style={{ color: "#ddd", marginBottom: "15px" }}>{description}</p>
-    {damage && <p style={{ color: "#ddd", marginBottom: "15px" }}>{damage}</p>}
-    {strength && <p style={{ color: "#ddd", marginBottom: "15px" }}>{strength}</p>}
-    <button
-      style={{
-        backgroundColor: "#00bcd4",
-        border: "none",
-        padding: "12px 24px",
-        fontSize: "1rem",
-        color: "#fff",
-        borderRadius: "6px",
-        cursor: "pointer",
-        transition: "all 0.3s ease",
-        marginTop: "10px",
-      }}
-      onClick={() => alert(`Ви придбали ${name}!`)}
-    >
-      Купити за : {price} 🪨
-    </button>
-  </div>
-);
+      <h3 style={{ color: "#00ffcc", marginBottom: "10px" }}>{name}</h3>
+      <p style={{ color: "#ddd", marginBottom: "15px" }}>{description}</p>
+      {damage && <p style={{ color: "#ddd", marginBottom: "5px" }}>{damage}</p>}
+      {strength && <p style={{ color: "#ddd", marginBottom: "15px" }}>{strength}</p>}
+      <button
+        style={{
+          backgroundColor: "#00bcd4",
+          border: "none",
+          padding: "12px 24px",
+          fontSize: "1rem",
+          color: "#fff",
+          borderRadius: "6px",
+          cursor: "pointer",
+          transition: "all 0.3s ease",
+          marginTop: "10px",
+        }}
+        onClick={() => handleBuyItem({ name, image, description, damage, strength, price })}
+      >
+        Купити за {price} 🪨
+      </button>
+    </div>
+  );
   
   
-  const formatTime = (totalSeconds: number) => {
-    const hours = Math.floor(totalSeconds / 3600);
-    const minutes = Math.floor((totalSeconds % 3600) / 60);
-    const seconds = totalSeconds % 60;
-  
-    const pad = (num: number) => num.toString().padStart(2, "0");
-  
-    return `${pad(hours)}:${pad(minutes)}:${pad(seconds)}`;
-  };
-  const renderContent = () => {
-    switch (activeTab) {
-      case 'shop':
-        return (
+ // Функція форматування таймера
+ const formatTime = (totalSeconds: number) => {
+  const hours = Math.floor(totalSeconds / 3600);
+  const minutes = Math.floor((totalSeconds % 3600) / 60);
+  const seconds = totalSeconds % 60;
+  const pad = (num: number) => num.toString().padStart(2, "0");
+  return `${pad(hours)}:${pad(minutes)}:${pad(seconds)}`;
+};
+
+ // Функція рендеринга контенту для різних вкладок
+ const renderContent = () => {
+  switch (activeTab) {
+    case "shop":
+      return (
         <Page back>
           <Placeholder>
             <div
@@ -219,7 +273,6 @@ export default function HomePage() {
               >
                 МАГАЗИН ПРЕДМЕТІВ
               </h1>
-
               <p
                 style={{
                   fontSize: "1rem",
@@ -231,8 +284,6 @@ export default function HomePage() {
               >
                 Тут ви можете придбати початкове спорядження для пригод: зброю, броню та зілля.
               </p>
-
-              {/* Список предметів */}
               <div
                 style={{
                   display: "grid",
@@ -242,7 +293,6 @@ export default function HomePage() {
                   maxWidth: "1200px",
                 }}
               >
-                {/* Меч дерев'яний */}
                 <ItemCard
                   name="Деревяна палиця"
                   image={swordr1m3.src}
@@ -251,16 +301,12 @@ export default function HomePage() {
                   strength="Міцність: 5"
                   price={30}
                 />
-
-                {/* Маленьке зілля */}
                 <ItemCard
                   name="Маленьке зілля"
                   image={potionmp.src}
                   description="Відновлює енергію. Один ковток — і ви знову в строю."
                   price={50}
-                /> 
-                
-                {/* Палиця мага */}
+                />
                 <ItemCard
                   name="Магічна палиця"
                   image={staffr1m3.src}
@@ -273,7 +319,7 @@ export default function HomePage() {
             </div>
           </Placeholder>
           <Placeholder>
-          <div
+            <div
               className="page"
               style={{
                 display: "flex",
@@ -296,7 +342,6 @@ export default function HomePage() {
               >
                 Рівень 2
               </h1>
-
               <p
                 style={{
                   fontSize: "1rem",
@@ -308,10 +353,7 @@ export default function HomePage() {
               >
                 Ви ще не досить сильні, щоб отримати доступ до цього рівня. Продовжуйте грати, щоб розблокувати нові предмети!
               </p>
-
-              {/* Окремий контейнер тільки для контенту */}
               <div style={{ position: "relative", marginTop: "20px" }}>
-                {/* Контент */}
                 <div
                   className="blur-target"
                   style={{
@@ -323,12 +365,11 @@ export default function HomePage() {
                     margin: "0 auto",
                     filter: locked ? "blur(15px)" : "none",
                     transition: "filter 0.3s ease",
-                    pointerEvents: locked ?   "none" : "auto",
+                    pointerEvents: locked ? "none" : "auto",
                     opacity: locked ? 0.5 : 1,
                     cursor: locked ? "block" : "auto",
                   }}
                 >
-                  {/* Твої ItemCard-и */}
                   <ItemCard
                     name="Хитрун"
                     image={swordr1m3.src}
@@ -342,15 +383,15 @@ export default function HomePage() {
             </div>
           </Placeholder>
         </Page>
-        );
-      case 'home':
-        return (
-          <div
-            className="HIJtihMA8FHczS02iWF5"
-            style={{ overflow: "visible" }}
-            onClick={handleClick}
-          >
-            <Placeholder>
+      );
+    case "home":
+      return (
+        <div
+          className="HIJtihMA8FHczS02iWF5"
+          style={{ overflow: "visible" }}
+          onClick={handleClick}
+        >
+          <Placeholder>
             <div
               className="page"
               style={{
@@ -374,7 +415,6 @@ export default function HomePage() {
               >
                 HOLD
               </h1>
-
               <div
                 className="imgWrap"
                 style={{
@@ -390,29 +430,29 @@ export default function HomePage() {
                 }}
               >
                 <Image
-                className="blue"
-                alt="Artilith Logo Blue"
-                src={artilithLogo}
-                width={400}
-                height={400}
-                style={{
-                  position: "absolute",
-                  width: "100%",
-                  height: "auto",
-                  maxWidth: "250px", // для мобілки
-                }}
+                  className="blue"
+                  alt="Artilith Logo Blue"
+                  src={artilithLogo}
+                  width={400}
+                  height={400}
+                  style={{
+                    position: "absolute",
+                    width: "100%",
+                    height: "auto",
+                    maxWidth: "250px",
+                  }}
                 />
               </div>
               <p
-              style={{
-                fontSize: "0.9rem",
-                fontWeight: "lighter",
-                color: "#ccc",
-                textAlign: "center",
-                lineHeight: "1",
-                fontFamily: "Arial, sans-serif",
-                marginTop: "0px",
-              }}
+                style={{
+                  fontSize: "0.9rem",
+                  fontWeight: "lighter",
+                  color: "#ccc",
+                  textAlign: "center",
+                  lineHeight: "1",
+                  fontFamily: "Arial, sans-serif",
+                  marginTop: "0px",
+                }}
               >
                 <span>
                   {countdown > 0 ? `${formatTime(countdown)}` : "Тисни, щоб отримати уламок!"}
@@ -433,165 +473,243 @@ export default function HomePage() {
               </h2>
             </div>
           </Placeholder>
-          </div>
-        );
-        case 'hiro':
-          return (
-            <Page back>
-              <Placeholder>
+        </div>
+      );
+    case "hiro":
+      // Уявний інвентар гравця
+      const inventory = [
+        { id: 1, name: "Дерев'яний меч", equipped: false },
+        { id: 2, name: "Маленький щит", equipped: true },
+        null,
+        null,
+      ];
+      return (
+        <Page back>
+          <Placeholder>
+            <div
+              className="page"
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                marginTop: "-20px",
+              }}
+            >
+              <h1
+                style={{
+                  fontSize: "2rem",
+                  fontWeight: "bold",
+                  marginBottom: "10px",
+                  textAlign: "center",
+                  color: "#fff",
+                  lineHeight: "1",
+                }}
+              >
+                ГЕРОЙ
+              </h1>
+              <h2
+                style={{
+                  fontSize: "1.1rem",
+                  fontWeight: "lighter",
+                  color: "#ccc",
+                  textAlign: "center",
+                  marginBottom: "20px",
+                  lineHeight: "1.4",
+                  fontFamily: "Arial, sans-serif",
+                  maxWidth: "90%",
+                }}
+              >
+                Тут ви можете налаштувати свого героя, прокачати його та підготувати до пригод.
+              </h2>
+              {/* Блок героя */}
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  backgroundColor: "rgba(255, 255, 255, 0.05)",
+                  borderRadius: "15px",
+                  padding: "20px",
+                  width: "100%",
+                  maxWidth: "400px",
+                  boxShadow: "0 0 10px rgba(0,0,0,0.3)",
+                  position: "relative",
+                  overflow: "hidden",
+                  marginBottom: "40px",
+                }}
+              >
+                {/* Зображення героя */}
                 <div
-                  className="page"
                   style={{
+                    width: "120px",
+                    height: "120px",
+                    borderRadius: "50%",
+                    overflow: "hidden",
+                    background: "linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)",
+                    marginBottom: "15px",
                     display: "flex",
-                    flexDirection: "column",
                     alignItems: "center",
-                    marginTop: "-20px",
+                    justifyContent: "center",
                   }}
                 >
-                  <h1
-                    style={{
-                      fontSize: "2rem",
-                      fontWeight: "bold",
-                      marginBottom: "10px",
-                      textAlign: "center",
-                      color: "#fff",
-                      lineHeight: "1",
-                    }}
-                  >
-                    ГЕРОЙ
-                  </h1>
-        
-                  <h2
-                    style={{
-                      fontSize: "1.1rem",
-                      fontWeight: "lighter",
-                      color: "#ccc",
-                      textAlign: "center",
-                      marginBottom: "20px",
-                      lineHeight: "1.4",
-                      fontFamily: "Arial, sans-serif",
-                      maxWidth: "90%",
-                    }}
-                  >
-                    Тут ви можете налаштувати свого героя, прокачати його та підготувати до пригод.
-                  </h2>
-        
-                  {/* Блок героя */}
+                  <span style={{ fontSize: "60px", color: "#fff" }}>🛡️</span>
+                </div>
+                {/* Статистика героя */}
+                <div
+                  style={{
+                    width: "100%",
+                    color: "#fff",
+                    fontSize: "1rem",
+                    textAlign: "left",
+                  }}
+                >
+                  <div style={{ marginBottom: "10px" }}>
+                    <strong>Рівень:</strong> 0
+                  </div>
+                  {/* Індикатор здоров'я */}
+                  <div style={{ marginBottom: "10px" }}>
+                    <strong>Здоров'я:</strong>
+                    <div
+                      style={{
+                        width: "100%",
+                        height: "12px",
+                        backgroundColor: "#444",
+                        borderRadius: "6px",
+                        overflow: "hidden",
+                        marginTop: "5px",
+                      }}
+                    >
+                      <div
+                        style={{
+                          width: "100%",
+                          height: "100%",
+                          background: "linear-gradient(to right, #4caf50, #8bc34a)",
+                          transition: "width 0.5s ease",
+                        }}
+                      />
+                    </div>
+                  </div>
+                  <div style={{ marginBottom: "10px" }}>
+                    <strong>Захист:</strong> 0
+                  </div>
+                  <div style={{ marginBottom: "10px" }}>
+                    <strong>Шкода:</strong> 0
+                  </div>
+                </div>
+              </div>
+              {/* Інвентар */}
+              <h2
+                style={{
+                  fontSize: "1.4rem",
+                  fontWeight: "bold",
+                  marginTop: "30px",
+                  marginBottom: "10px",
+                  textAlign: "center",
+                  color: "#fff",
+                }}
+              >
+                Інвентар
+              </h2>
+              <div
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "repeat(2, 1fr)",
+                  gap: "15px",
+                  width: "100%",
+                  maxWidth: "400px",
+                }}
+              >
+                {inventory.map((item, index) => (
                   <div
+                    key={index}
                     style={{
                       display: "flex",
                       flexDirection: "column",
                       alignItems: "center",
                       backgroundColor: "rgba(255, 255, 255, 0.05)",
-                      borderRadius: "15px",
-                      padding: "20px",
-                      width: "100%",
-                      maxWidth: "400px",
-                      boxShadow: "0 0 10px rgba(0,0,0,0.3)",
+                      borderRadius: "10px",
+                      padding: "10px",
+                      position: "relative",
+                      animation: "fadeIn 0.5s ease forwards",
+                      animationDelay: `${index * 0.1}s`,
+                      opacity: 0,
                     }}
                   >
-                    {/* Зображення героя */}
-                    <div
-                      style={{
-                        width: "120px",
-                        height: "120px",
-                        borderRadius: "50%",
-                        overflow: "hidden",
-                        backgroundColor: "#555",
-                        marginBottom: "15px",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                      }}
-                    >
-                      {/* Тут вставити героя */}
-                      <span style={{ fontSize: "50px", color: "#fff" }}>🧙‍♂️</span>
-                    </div>
-        
-                    {/* Статистика героя */}
                     <div
                       style={{
                         width: "100%",
-                        color: "#fff",
-                        fontSize: "1rem",
+                        aspectRatio: "1 / 1",
+                        backgroundColor: item
+                          ? "rgba(255, 255, 255, 0.08)"
+                          : "rgba(255, 255, 255, 0.02)",
+                        border: item
+                          ? "2px solid rgba(255, 255, 255, 0.3)"
+                          : "2px dashed rgba(255, 255, 255, 0.1)",
+                        borderRadius: "8px",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        fontSize: "2rem",
+                        color: item ? "#fff" : "#777",
+                        marginBottom: "10px",
                       }}
                     >
-                      <div style={{ marginBottom: "8px" }}>
-                        <strong>Рівень:</strong> 1
-                      </div>
-                      <div style={{ marginBottom: "8px" }}>
-                        <strong>Здоров'я:</strong> 100/100
-                      </div>
-                      <div style={{ marginBottom: "8px" }}>
-                        <strong>Захист:</strong> 5
-                      </div>
-                      <div style={{ marginBottom: "8px" }}>
-                        <strong>Шкода:</strong> 3-5
-                      </div>
+                      {item ? item.name : "Порожньо"}
                     </div>
-                  </div>
-        
-                  {/* Блок інвентаря */}
-                  <h2
-                    style={{
-                      fontSize: "1.4rem",
-                      fontWeight: "bold",
-                      marginTop: "30px",
-                      marginBottom: "10px",
-                      textAlign: "center",
-                      color: "#fff",
-                    }}
-                  >
-                    Інвентар
-                  </h2>
-        
-                  <div
-                    style={{
-                      display: "grid",
-                      gridTemplateColumns: "repeat(3, 1fr)",
-                      gap: "15px",
-                      width: "100%",
-                      maxWidth: "400px",
-                    }}
-                  >
-                    {/* Слоти для предметів */}
-                    {[...Array(9)].map((_, index) => (
-                      <div
-                        key={index}
+                    {item && (
+                      <button
                         style={{
+                          backgroundColor: item.equipped ? "#f44336" : "#4caf50",
+                          color: "#fff",
+                          border: "none",
+                          borderRadius: "5px",
+                          padding: "5px 10px",
+                          fontSize: "0.9rem",
+                          cursor: "pointer",
+                          transition: "background-color 0.3s",
                           width: "100%",
-                          aspectRatio: "1 / 1",
-                          backgroundColor: "rgba(255, 255, 255, 0.05)",
-                          border: "2px dashed rgba(255, 255, 255, 0.2)",
-                          borderRadius: "10px",
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          color: "#777",
-                          fontSize: "1.5rem",
                         }}
+                        onClick={() =>
+                          alert(
+                            item.equipped ? `Скинути ${item.name}` : `Екіпірувати ${item.name}`
+                          )
+                        }
                       >
-                        📦
-                      </div>
-                    ))}
+                        {item.equipped ? "Скинути" : "Екіпірувати"}
+                      </button>
+                    )}
                   </div>
-                </div>
-              </Placeholder>
-            </Page>
-          );
-      default:
-        return null;
-    }
-  };
-  
+                ))}
+              </div>
+            </div>
+          </Placeholder>
 
-  return (
-    <Page back={false}>
-      <List>
-        <TopBar points={points} />
-        <div style={{ paddingBottom: 100 }}>{renderContent()}</div>
-        <BottomBar activeTab={activeTab} setActiveTab={setActiveTab} />
-      </List>
-    </Page>
-  );
+          <style jsx>{`
+            @keyframes fadeIn {
+              from {
+                opacity: 0;
+                transform: scale(0.8);
+              }
+              to {
+                opacity: 1;
+                transform: scale(1);
+              }
+            }
+          `}</style>
+        </Page>
+      );
+    default:
+      return null;
+  }
+};
+
+return (
+  <Page back={false}>
+    <List>
+      <TopBar points={points} />
+      <div style={{ paddingBottom: 100 }}>{renderContent()}</div>
+      <BottomBar activeTab={activeTab} setActiveTab={setActiveTab} />
+    </List>
+  </Page>
+);
 }
