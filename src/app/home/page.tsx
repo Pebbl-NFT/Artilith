@@ -326,7 +326,7 @@ export default function HomePage() {
               </div>
               <p
               style={{
-                fontSize: "1.1rem",
+                fontSize: "0.9rem",
                 fontWeight: "lighter",
                 color: "#ccc",
                 textAlign: "center",
