@@ -478,7 +478,7 @@ export default function HomePage() {
     case "hiro":
       // Уявний інвентар гравця
       const inventory = [
-        { id: 1, name: "Дерев'яний меч", equipped: false },
+        { id: 1, name: "Деревяна палиця", equipped: false },
         { id: 2, name: "Маленький щит", equipped: true },
         null,
         null,
@@ -566,9 +566,9 @@ export default function HomePage() {
                   <div style={{ marginBottom: "10px" }}>
                     <strong>Рівень:</strong> 0
                   </div>
-                  {/* Індикатор здоров'я */}
+                  {/* Індикатор Здоровя */}
                   <div style={{ marginBottom: "10px" }}>
-                    <strong>Здоров'я:</strong>
+                    <strong>Здоров&apos;я:</strong>
                     <div
                       style={{
                         width: "100%",
