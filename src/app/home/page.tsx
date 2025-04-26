@@ -336,7 +336,7 @@ export default function HomePage() {
               }}
               >
                 <span>
-                  {countdown > 0 ? `${formatTime(countdown)}` : "Tap to сollect"}
+                  {countdown > 0 ? `${formatTime(countdown)}` : "Тисни, щоб отримати уламок!"}
                 </span>
               </p>
               <h2
