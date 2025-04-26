@@ -61,19 +61,19 @@ export default function ProfilePage() {
             <img src={userAvatar} alt="avatar" style={styles.avatar} />
           )}
           <div>
-            <p style={styles.levelText}>Level {level}</p>
+            <p style={styles.levelText}>Рівень {level}</p>
           </div>
         </div>
 
         <div style={{ marginTop: "12px", width: "100%" }}>
           <Progress value={(nextLevelProgress / 1000) * 100} />
-          <p style={styles.xpText}>{1000 - nextLevelProgress} XP to next level</p>
+          <p style={styles.xpText}>{1000 - nextLevelProgress} Очок досвіду до наступного рівня</p>
         </div>
 
         <Card className="page">
-          <h3 style={styles.cardTitle}>Statistics</h3>
+          <h3 style={styles.cardTitle}>Статистика</h3>
           <p style={styles.statText}>
-          🪨 <strong>{userData.points}</strong> Shards
+          🪨 <strong>{userData.points}</strong> Уламки
           </p>
           <p style={styles.statText}>
           🪙 <strong>0</strong> $ATL
@@ -82,7 +82,7 @@ export default function ProfilePage() {
           💎 <strong>0</strong> TON
           </p>
           <p style={styles.statText}>
-            ⏱️ <strong>{userData.click_delay}</strong> ms delay
+            ⏱️ <strong>{userData.click_delay}</strong> с. на клік
           </p>
           {userData.created_at && (
             <p style={styles.statText}>
@@ -92,7 +92,7 @@ export default function ProfilePage() {
         </Card>
 
         <Card className="page">
-          <h3 style={styles.cardTitle}>Achievements</h3>
+          <h3 style={styles.cardTitle}>Досягнення</h3>
           <div style={styles.achievements}>
             <Achievement value="0" label="By track" color="#ffd700" />
             <Achievement value="0" label="Total wins" color="#00ffcc" />
@@ -100,12 +100,12 @@ export default function ProfilePage() {
           </div>
         </Card>
         <Card className="page">
-          <h3 style={styles.cardTitle}>Feedback</h3>
+          <h3 style={styles.cardTitle}>Оновлення</h3>
           <div style={styles.gameBadges}>
             <span style={styles.gameBadge}>Telegram</span>
             <span style={styles.gameBadge}>Discord</span>
             <span style={styles.gameBadge}>Twitter</span>
-            <span style={styles.gameBadge}>alpha 0.18</span>
+            <span style={styles.gameBadge}>v. alpha 0.18.5</span>
           </div>
         </Card>
         </Placeholder>

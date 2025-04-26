@@ -12,6 +12,7 @@ import swordr1m3 from "../_assets/sword-r1-m3.png";
 import staffr1m3 from "../_assets/staff-r1-m3.png";
 import potionmp from "../_assets/potion-mp.png";
 import Image from "next/image";
+import PageLoader from "next/dist/client/page-loader";
 
 
 export default function HomePage() {
@@ -21,6 +22,7 @@ export default function HomePage() {
   const [countdown, setCountdown] = useState(0);
   const [animationTime, setAnimationTime] = useState(1100);
   const [activeTab, setActiveTab] = useState("home");
+  const [locked, setLocked] = useState(true);
 
 
   const timerRef = useRef<NodeJS.Timeout | null>(null);
@@ -192,82 +194,186 @@ export default function HomePage() {
     switch (activeTab) {
       case 'shop':
         return (
-        <Placeholder>
+        <Page back>
+          <Placeholder>
+            <div
+              className="page"
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                justifyContent: "center",
+                marginTop: "-20px",
+              }}
+            >
+              <h1
+                style={{
+                  fontSize: "2rem",
+                  fontWeight: "bold",
+                  marginBottom: "20px",
+                  marginTop: "5px",
+                  textAlign: "center",
+                  lineHeight: "1",
+                  color: "#fff",
+                }}
+              >
+                МАГАЗИН ПРЕДМЕТІВ
+              </h1>
+
+              <p
+                style={{
+                  fontSize: "1rem",
+                  color: "#ddd",
+                  textAlign: "center",
+                  marginBottom: "30px",
+                  maxWidth: "600px",
+                }}
+              >
+                Тут ви можете придбати початкове спорядження для пригод: зброю, броню та зілля.
+              </p>
+
+              {/* Список предметів */}
+              <div
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "repeat(1, 1fr)",
+                  gap: "20px",
+                  width: "100%",
+                  maxWidth: "1200px",
+                }}
+              >
+                {/* Меч дерев'яний */}
+                <ItemCard
+                  name="Деревяна палиця"
+                  image={swordr1m3.src}
+                  description="Початковий артефакт для воїнів."
+                  damage="Шкода: 1"
+                  strength="Міцність: 5"
+                  price={30}
+                />
+
+                {/* Маленьке зілля */}
+                <ItemCard
+                  name="Маленьке зілля"
+                  image={potionmp.src}
+                  description="Відновлює енергію. Один ковток — і ви знову в строю."
+                  price={50}
+                /> 
+                
+                {/* Палиця мага */}
+                <ItemCard
+                  name="Магічна палиця"
+                  image={staffr1m3.src}
+                  description="Початковий артефакт для магів."
+                  damage="Шкода: 1-3"
+                  strength="Міцність: 4"
+                  price={65}
+                />
+              </div>
+            </div>
+          </Placeholder>
+          <Placeholder>
           <div
-            className="page"
+              className="page"
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                justifyContent: "center",
+                marginTop: "-20px",
+              }}
+            >
+              <h1
+                style={{
+                  fontSize: "2rem",
+                  fontWeight: "bold",
+                  marginBottom: "20px",
+                  marginTop: "5px",
+                  textAlign: "center",
+                  lineHeight: "1",
+                  color: "#fff",
+                }}
+              >
+                Рівень 2
+              </h1>
+
+              <p
+                style={{
+                  fontSize: "1rem",
+                  color: "#ddd",
+                  textAlign: "center",
+                  marginBottom: "30px",
+                  maxWidth: "600px",
+                }}
+              >
+                Ви ще не досить сильні, щоб отримати доступ до цього рівня. Продовжуйте грати, щоб розблокувати нові предмети!
+              </p>
+
+      {/* Окремий контейнер тільки для контенту */}
+      <div style={{ position: "relative", marginTop: "20px" }}>
+        {/* Контент */}
+        <div
+          className="blur-target"
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(1, 1fr)",
+            gap: "20px",
+            width: "100%",
+            maxWidth: "1200px",
+            margin: "0 auto",
+            filter: locked ? "blur(15px)" : "none",
+            transition: "filter 0.3s ease",
+          }}
+        >
+          {/* Твої ItemCard-и */}
+          <ItemCard
+            name="Деревяна палиця"
+            image={swordr1m3.src}
+            description="Початковий артефакт для воїнів."
+            damage="Шкода: 1"
+            strength="Міцність: 5"
+            price={30}
+          />
+          <ItemCard
+            name="Маленьке зілля"
+            image={potionmp.src}
+            description="Відновлює енергію. Один ковток — і ви знову в строю."
+            price={50}
+          />
+          <ItemCard
+            name="Палиця мага"
+            image={staffr1m3.src}
+            description="Початковий артефакт для магів."
+            damage="Шкода: 1-3"
+            strength="Міцність: 4"
+            price={65}
+          />
+        </div>
+
+        {/* Замок зверху */}
+        {locked && (
+          <div
             style={{
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              justifyContent: "center",
-              marginTop: "-20px",
+              position: "absolute",
+              top: "50%",
+              left: "50%",
+              transform: "translate(-50%, -50%)",
+              backgroundColor: "rgba(255, 255, 255, 0.8)",
+              borderRadius: "50%",
+              padding: "15px",
+              boxShadow: "0 0 15px rgba(0,0,0,0.3)",
+              zIndex: 5,
             }}
           >
-            <h1
-              style={{
-                fontSize: "2rem",
-                fontWeight: "bold",
-                marginBottom: "20px",
-                marginTop: "5px",
-                textAlign: "center",
-                lineHeight: "1",
-                color: "#fff",
-              }}
-            >
-              МАГАЗИН ПРЕДМЕТІВ
-            </h1>
-
-            <p
-              style={{
-                fontSize: "1rem",
-                color: "#ddd",
-                textAlign: "center",
-                marginBottom: "30px",
-                maxWidth: "600px",
-              }}
-            >
-              Тут ви можете придбати початкове спорядження для пригод: зброю, броню та зілля.
-            </p>
-
-            {/* Список предметів */}
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: "repeat(1, 1fr)",
-                gap: "20px",
-                width: "100%",
-                maxWidth: "1200px",
-              }}
-            >
-              {/* Меч дерев'яний */}
-              <ItemCard
-                name="Деревяна палиця"
-                image={swordr1m3.src}
-                description="Початковий артефакт для воїнів."
-                damage="Шкода: 1"
-                strength="Міцність: 5"
-                price={30}
-              />
-
-              {/* Маленьке зілля */}
-              <ItemCard
-                name="Маленьке зілля"
-                image={potionmp.src}
-                description="Відновлює енергію. Один ковток — і ви знову в строю."
-                price={50}
-              /> 
-              {/* Палиця мага */}
-              <ItemCard
-                name="Палиця мага"
-                image={staffr1m3.src}
-                description="Початковий артефакт для магів."
-                damage="Шкода: 1-3"
-                strength="Міцність: 4"
-                price={65}
-              />
-            </div>
+            <span style={{ fontSize: "36px" }}>🔒</span>
           </div>
-        </Placeholder>
+        )}
+      </div>
+    </div>
+          </Placeholder>
+      </Page>
+
+
         );
       case 'home':
         return (
