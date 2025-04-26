@@ -435,51 +435,150 @@ export default function HomePage() {
           </Placeholder>
           </div>
         );
-      case 'hiro':
-        return (
-          <div>
-            <Placeholder>
-            <div
-              className="page"
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                justifyContent: "center",
-                marginTop: "-20px",
-              }}
-            >
-              <h1
-                style={{
-                  fontSize: "2rem",
-                  fontWeight: "bold",
-                  marginBottom: "20px",
-                  marginTop: "5px",
-                  textAlign: "center",
-                  lineHeight: "1",
-                  color: "#fff",
-                }}
-              >
-                ГЕРОЙ
-              </h1>
-
-              <h2
-              style={{
-                fontSize: "1.1rem",
-                fontWeight: "lighter",
-                color: "#ccc",
-                textAlign: "center",
-                marginTop: "10px",
-                lineHeight: "1.4",
-                fontFamily: "Arial, sans-serif",
-              }}
-            >
-              Тут ви можете налаштувати свого героя, прокачати його та підготувати до пригод.
-            </h2>
-            </div>
-          </Placeholder>
-          </div>
-        );
+        case 'hiro':
+          return (
+            <Page back>
+              <Placeholder>
+                <div
+                  className="page"
+                  style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                    marginTop: "-20px",
+                  }}
+                >
+                  <h1
+                    style={{
+                      fontSize: "2rem",
+                      fontWeight: "bold",
+                      marginBottom: "10px",
+                      textAlign: "center",
+                      color: "#fff",
+                      lineHeight: "1",
+                    }}
+                  >
+                    ГЕРОЙ
+                  </h1>
+        
+                  <h2
+                    style={{
+                      fontSize: "1.1rem",
+                      fontWeight: "lighter",
+                      color: "#ccc",
+                      textAlign: "center",
+                      marginBottom: "20px",
+                      lineHeight: "1.4",
+                      fontFamily: "Arial, sans-serif",
+                      maxWidth: "90%",
+                    }}
+                  >
+                    Тут ви можете налаштувати свого героя, прокачати його та підготувати до пригод.
+                  </h2>
+        
+                  {/* Блок героя */}
+                  <div
+                    style={{
+                      display: "flex",
+                      flexDirection: "column",
+                      alignItems: "center",
+                      backgroundColor: "rgba(255, 255, 255, 0.05)",
+                      borderRadius: "15px",
+                      padding: "20px",
+                      width: "100%",
+                      maxWidth: "400px",
+                      boxShadow: "0 0 10px rgba(0,0,0,0.3)",
+                    }}
+                  >
+                    {/* Зображення героя */}
+                    <div
+                      style={{
+                        width: "120px",
+                        height: "120px",
+                        borderRadius: "50%",
+                        overflow: "hidden",
+                        backgroundColor: "#555",
+                        marginBottom: "15px",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                      }}
+                    >
+                      {/* Тут вставити героя */}
+                      <span style={{ fontSize: "50px", color: "#fff" }}>🧙‍♂️</span>
+                    </div>
+        
+                    {/* Статистика героя */}
+                    <div
+                      style={{
+                        width: "100%",
+                        color: "#fff",
+                        fontSize: "1rem",
+                      }}
+                    >
+                      <div style={{ marginBottom: "8px" }}>
+                        <strong>Рівень:</strong> 1
+                      </div>
+                      <div style={{ marginBottom: "8px" }}>
+                        <strong>Здоров'я:</strong> 100/100
+                      </div>
+                      <div style={{ marginBottom: "8px" }}>
+                        <strong>Захист:</strong> 5
+                      </div>
+                      <div style={{ marginBottom: "8px" }}>
+                        <strong>Шкода:</strong> 3-5
+                      </div>
+                    </div>
+                  </div>
+        
+                  {/* Блок інвентаря */}
+                  <h2
+                    style={{
+                      fontSize: "1.4rem",
+                      fontWeight: "bold",
+                      marginTop: "30px",
+                      marginBottom: "10px",
+                      textAlign: "center",
+                      color: "#fff",
+                    }}
+                  >
+                    Інвентар
+                  </h2>
+        
+                  <div
+                    style={{
+                      display: "grid",
+                      gridTemplateColumns: "repeat(3, 1fr)",
+                      gap: "15px",
+                      width: "100%",
+                      maxWidth: "400px",
+                    }}
+                  >
+                    {/* Слоти для предметів */}
+                    {[...Array(9)].map((_, index) => (
+                      <div
+                        key={index}
+                        style={{
+                          width: "100%",
+                          aspectRatio: "1 / 1",
+                          backgroundColor: "rgba(255, 255, 255, 0.05)",
+                          border: "2px dashed rgba(255, 255, 255, 0.2)",
+                          borderRadius: "10px",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          color: "#777",
+                          fontSize: "1.5rem",
+                        }}
+                      >
+                        📦
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </Placeholder>
+            </Page>
+          );
       default:
         return null;
     }
