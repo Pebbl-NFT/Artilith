@@ -316,16 +316,12 @@ export default function HomePage() {
                   className="blur-target"
                   style={{
                     display: "grid",
-                    gridTemplateColumns: "repeat(1, 1fr)",
                     gap: "20px",
                     width: "100%",
                     maxWidth: "1200px",
                     margin: "0 auto",
                     filter: locked ? "blur(15px)" : "none",
                     transition: "filter 0.3s ease",
-                    pointerEvents: locked ?   "none" : "auto",
-                    opacity: locked ? 0.5 : 1,
-                    cursor: locked ? "block" : "auto",
                   }}
                 >
                   {/* Твої ItemCard-и */}
@@ -341,9 +337,7 @@ export default function HomePage() {
               </div>
             </div>
           </Placeholder>
-      </Page>
-
-
+        </Page>
         );
       case 'home':
         return (
