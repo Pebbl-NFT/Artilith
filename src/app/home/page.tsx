@@ -8,7 +8,11 @@ import BottomBar from "@/components/BottomBar";
 import { useSignal, initData } from "@telegram-apps/sdk-react";
 import { supabase } from "@/lib/supabaseClient";
 import artilithLogo from "../_assets/Artilith_logo-no-bg.png";
+import swordr1m3 from "../_assets/sword-r1-m3.png";
+import staffr1m3 from "../_assets/staff-r1-m3.png";
+import potionmp from "../_assets/potion-mp.png";
 import Image from "next/image";
+
 
 export default function HomePage() {
   const [points, setPoints] = useState(0);
@@ -123,46 +127,56 @@ export default function HomePage() {
 
   type ItemCardProps = {
     name: string;
-    emoji: string;
+    image?: string;
     description: string;
     damage?: string;
     strength?: string;
     price: number;
   };
   
-  const ItemCard: React.FC<ItemCardProps> = ({ name, emoji, description, damage, price, strength }) => (
+  const ItemCard: React.FC<ItemCardProps> = ({ name, image, description, damage, price, strength }) => (
     <div
       style={{
-        backgroundColor: "#222",
         borderRadius: "10px",
         padding: "20px",
         textAlign: "center",
-        boxShadow: "0 5px 15px rgba(0, 0, 0, 0.3)",
+        boxShadow: "0 2px 9px rgba(0, 0, 0, 0.3)",
+        border: "1px solid rgba(255, 255, 255, 0.1)",
       }}
     >
-      <h2 style={{ fontSize: "2rem", marginBottom: "10px" }}>{emoji}</h2>
-      <h3 style={{ color: "#00ffcc", marginBottom: "10px" }}>{name}</h3>
-      <p style={{ color: "#ddd", marginBottom: "15px" }}>{description}</p>
-      <p style={{ color: "#ddd", marginBottom: "15px" }}>{damage}</p>
-      <p style={{ color: "#ddd", marginBottom: "15px" }}>{strength}</p>
-      <button
-        style={{
-          backgroundColor: "#00bcd4",
-          border: "none",
-          padding: "12px 24px",
-          fontSize: "1rem",
-          color: "#fff",
-          borderRadius: "6px",
-          cursor: "pointer",
-          transition: "all 0.3s ease",
-          marginTop: "10px",
-        }}
-        onClick={() => alert(`Ви придбали ${name}!`)}
-      >
-        Купити за : {price} 🪨
-      </button>
-    </div>
-  );
+    <img 
+      src={image} 
+      alt={name} 
+      width={150} 
+      height={150}
+      style={{
+        borderRadius: "10px",
+        marginBottom: "15px",
+        boxShadow: "0 5px 15px rgba(255, 255, 255, 0.3)",
+      }}
+    />
+    <h3 style={{ color: "#00ffcc", marginBottom: "10px" }}>{name}</h3>
+    <p style={{ color: "#ddd", marginBottom: "15px" }}>{description}</p>
+    {damage && <p style={{ color: "#ddd", marginBottom: "15px" }}>{damage}</p>}
+    {strength && <p style={{ color: "#ddd", marginBottom: "15px" }}>{strength}</p>}
+    <button
+      style={{
+        backgroundColor: "#00bcd4",
+        border: "none",
+        padding: "12px 24px",
+        fontSize: "1rem",
+        color: "#fff",
+        borderRadius: "6px",
+        cursor: "pointer",
+        transition: "all 0.3s ease",
+        marginTop: "10px",
+      }}
+      onClick={() => alert(`Ви придбали ${name}!`)}
+    >
+      Купити за : {price} 🪨
+    </button>
+  </div>
+);
   
   
   const formatTime = (totalSeconds: number) => {
@@ -227,38 +241,29 @@ export default function HomePage() {
             >
               {/* Меч дерев'яний */}
               <ItemCard
-                name="Дерев'яний меч"
-                emoji="🗡️"
-                description="Простий меч для новачків. Легкий та зручний."
+                name="Деревяна палиця"
+                image={swordr1m3.src}
+                description="Початковий артефакт для воїнів."
                 damage="Шкода: 1"
                 strength="Міцність: 5"
-                price={10}
-              />
-
-              {/* Щит із кори */}
-              <ItemCard
-                name="Щит з кори"
-                emoji="🛡️"
-                description="Легкий захист для перших боїв. Захищає від легких атак."
-                strength="Міцність: 15"
                 price={30}
               />
 
               {/* Маленьке зілля */}
               <ItemCard
                 name="Маленьке зілля"
-                emoji="🧪"
-                description="Відновлює 20% здоров’я. Один ковток — і ви знову в строю."
-                price={10}
+                image={potionmp.src}
+                description="Відновлює енергію. Один ковток — і ви знову в строю."
+                price={50}
               /> 
               {/* Палиця мага */}
               <ItemCard
                 name="Палиця мага"
-                emoji="🪄"
+                image={staffr1m3.src}
                 description="Початковий артефакт для магів."
                 damage="Шкода: 1-3"
                 strength="Міцність: 4"
-                price={15}
+                price={65}
               />
             </div>
           </div>
