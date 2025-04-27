@@ -348,7 +348,7 @@ const handleClick = async () => {
 
                 <ItemCard
                   item_id={2}
-                  name="Маленьке зілля"
+                  name="Маленьке зілля енергії"
                   image={potion01f.src}
                   description="Відновлює енергію. Один ковток — і ви знову в строю."
                   price={50}
