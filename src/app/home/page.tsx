@@ -245,10 +245,12 @@ const handleClick = async () => {
       width={50} 
       height={50}
       style={{
+        backgroundColor: "rgba(255, 255, 255, 0.05)",
+        border: "1px solid rgba(253, 253, 253, 0.37)",
         padding: "20px",
         borderRadius: "10px",
         marginBottom: "15px",
-        boxShadow: "0 5px 15px rgba(255, 255, 255, 0.3)",
+        boxShadow: " rgba(0, 0, 0, 0.3) 0px 19px 38px, rgba(0, 0, 0, 0.22) 0px 15px 12px",
       }}
     />
       <h3 style={{ color: "#00ffcc", marginBottom: "10px" }}>{name}</h3>
