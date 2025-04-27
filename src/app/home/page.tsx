@@ -71,55 +71,63 @@ async function updateUserPoints(userId: string | undefined, newPoints: number) {
   return true;
 }
 
-// Додати предмет у інвентар
-async function addInventoryItem(userId: string | undefined, item: string) {
-  if (!userId) {
-    console.error('userId не вказаний при додаванні предмета');
-    return false;
-  }
-
-  const { error } = await supabase
+// Додаємо предмет у інвентар користувача
+async function addInventoryItem(userId: string, itemId: number) {
+  const { data, error } = await supabase
     .from('inventory')
-    .insert([{ user_id: userId, item: item }]);
-
+    .insert([{ user_id: userId, item_id: itemId }]);
+  
   if (error) {
-    console.error('Помилка додавання предмета:', error);
+    console.error('Помилка додавання предмета:', error.message, error.details);
     return false;
+  } else {
+    console.log('Предмет додано в інвентар:', data);
+    return true;
   }
-  return true;
 }
+
 
 // Функція обробки покупки
 const handleBuyItem = async (
-  item: { name: string; image: string; description: string; damage?: string; strength?: string; price: number }
+  item: { item_id: number; name: string; image: string; description: string; damage?: string; strength?: string; price: number }
 ) => {
-  if (!userId) {
-    alert('Користувач не знайдений!');
-    return;
-  }
-
   if (points < item.price) {
     alert("Недостатньо уламків для покупки!");
     return;
   }
 
-  const newPoints = points - item.price;
-  const updated = userId ? await updateUserPoints(userId.toString(), newPoints) : false;
-  
-  if (!updated) {
-    alert("Помилка оновлення балів!");
+  if (!userId) {
+    alert('Користувач не знайдений!');
     return;
   }
 
+  const newPoints = points - item.price;
+  await updateUserPoints(String(userId), newPoints); // привели до string
   setPoints(newPoints);
 
-  const added = userId ? await addInventoryItem(userId.toString(), item.name.toString()) : false;
+  const added = await addInventoryItem(String(userId), item.item_id); // привели до string
   if (added) {
     alert(`Ви придбали ${item.name}!`);
   } else {
     alert("Помилка покупки предмета!");
   }
 };
+
+
+async function getUserInventory(userId: string) {
+  const { data, error } = await supabase
+    .from('inventory')
+    .select('id, item_id, items ( name, image, description, damage, defense, price )')
+    .eq('user_id', userId);
+
+  if (error) {
+    console.error('Помилка завантаження інвентаря:', error);
+    return [];
+  }
+
+  return data;
+}
+
 
 // Збереження даних користувача
 const saveUserData = async (newPoints: number, newClickDelay: number) => {
@@ -213,6 +221,7 @@ const handleClick = async () => {
 
   // Компонент ItemCard: оновлено для роботи з зображенням (image)
   type ItemCardProps = {
+    item_id: number;
     name: string;
     image: string;
     description: string;
@@ -220,7 +229,7 @@ const handleClick = async () => {
     strength?: string;
     price: number;
   };
-  const ItemCard: React.FC<ItemCardProps> = ({ name, image, description, damage, strength, price }) => (
+  const ItemCard: React.FC<ItemCardProps> = ({ item_id, name, image, description, damage, strength, price }) => (
       <div
       style={{
         borderRadius: "10px",
@@ -257,7 +266,7 @@ const handleClick = async () => {
           transition: "all 0.3s ease",
           marginTop: "10px",
         }}
-        onClick={() => handleBuyItem({ name, image, description, damage, strength, price })}
+        onClick={() => handleBuyItem({ item_id, name, image, description, damage, strength, price })}
       >
         Купити за {price} 🪨
       </button>
@@ -325,6 +334,7 @@ const handleClick = async () => {
                 }}
               >
                 <ItemCard
+                  item_id={1}
                   name="Деревяна палиця"
                   image={swordr1m3.src}
                   description="Початковий артефакт для воїнів."
@@ -332,13 +342,17 @@ const handleClick = async () => {
                   strength="Міцність: 5"
                   price={30}
                 />
+
                 <ItemCard
+                  item_id={2}
                   name="Маленьке зілля"
                   image={potionmp.src}
                   description="Відновлює енергію. Один ковток — і ви знову в строю."
                   price={50}
                 />
+
                 <ItemCard
+                  item_id={3}
                   name="Магічна палиця"
                   image={staffr1m3.src}
                   description="Початковий артефакт для магів."
@@ -402,6 +416,7 @@ const handleClick = async () => {
                   }}
                 >
                   <ItemCard
+                    item_id={0}
                     name="Хитрун"
                     image={swordr1m3.src}
                     description="Хитрун"
