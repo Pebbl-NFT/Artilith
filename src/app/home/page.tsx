@@ -336,7 +336,7 @@ const handleClick = async () => {
               >
                 <ItemCard
                   item_id={1}
-                  name="Деревяна палиця"
+                  name="Деревяний меч"
                   image={sword01a.src}
                   description="Початковий артефакт для воїнів."
                   damage="Шкода: 1"
