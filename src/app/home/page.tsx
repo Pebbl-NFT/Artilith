@@ -8,9 +8,9 @@ import BottomBar from "@/components/BottomBar";
 import { useSignal, initData } from "@telegram-apps/sdk-react";
 import { supabase } from "@/lib/supabaseClient";
 import artilithLogo from "../_assets/Artilith_logo-no-bg.png";
-import swordr1m3 from "../_assets/sword-r1-m3.png";
-import staffr1m3 from "../_assets/staff-r1-m3.png";
-import potionmp from "../_assets/potion-mp.png";
+import sword01a from "../_assets/item/sword01a.png";
+import shield01a from "../_assets/item/shield01a.png";
+import potion01f from "../_assets/item/potion01f.png";
 import Image from "next/image";
 
 
@@ -242,9 +242,10 @@ const handleClick = async () => {
       <img 
       src={image} 
       alt={name} 
-      width={150} 
-      height={150}
+      width={50} 
+      height={50}
       style={{
+        padding: "20px",
         borderRadius: "10px",
         marginBottom: "15px",
         boxShadow: "0 5px 15px rgba(255, 255, 255, 0.3)",
@@ -336,7 +337,7 @@ const handleClick = async () => {
                 <ItemCard
                   item_id={1}
                   name="Деревяна палиця"
-                  image={swordr1m3.src}
+                  image={sword01a.src}
                   description="Початковий артефакт для воїнів."
                   damage="Шкода: 1"
                   strength="Міцність: 5"
@@ -346,18 +347,18 @@ const handleClick = async () => {
                 <ItemCard
                   item_id={2}
                   name="Маленьке зілля"
-                  image={potionmp.src}
+                  image={potion01f.src}
                   description="Відновлює енергію. Один ковток — і ви знову в строю."
                   price={50}
                 />
 
                 <ItemCard
                   item_id={3}
-                  name="Магічна палиця"
-                  image={staffr1m3.src}
-                  description="Початковий артефакт для магів."
-                  damage="Шкода: 1-3"
-                  strength="Міцність: 4"
+                  name="Малий щит"
+                  image={shield01a.src}
+                  description="Простий щит для початківців."
+                  damage=""
+                  strength="Міцність: 15"
                   price={65}
                 />
               </div>
@@ -418,7 +419,7 @@ const handleClick = async () => {
                   <ItemCard
                     item_id={0}
                     name="Хитрун"
-                    image={swordr1m3.src}
+                    image={sword01a.src}
                     description="Хитрун"
                     damage="Шкода: Хитрун"
                     strength="Міцність: Хитрун"
