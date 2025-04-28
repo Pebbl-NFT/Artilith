@@ -12,6 +12,8 @@ import sword01a from "../_assets/item/sword01a.png";
 import shield01a from "../_assets/item/shield01a.png";
 import potion01f from "../_assets/item/potion01f.png";
 import Image from "next/image";
+import { Toaster } from 'react-hot-toast';
+import toast from 'react-hot-toast';
 
 
 export default function HomePage() {
@@ -72,46 +74,93 @@ async function updateUserPoints(userId: string | undefined, newPoints: number) {
 }
 
 // Додаємо предмет у інвентар користувача
-async function addInventoryItem(userId: string, itemId: number) {
-  const { data, error } = await supabase
-    .from('inventory')
-    .insert([{ user_id: userId, item_id: itemId }]);
-  
-  if (error) {
-    console.error('Помилка додавання предмета:', error.message, error.details);
-    return false;
-  } else {
-    console.log('Предмет додано в інвентар:', data);
+const addInventoryItem = async (userId: string, itemId: number, itemName: string) => {
+  try {
+    const { data: existingItem, error: fetchError } = await supabase
+      .from('inventory')
+      .select('item_id')
+      .eq('user_id', userId)
+      .eq('item_id', itemId)
+      .maybeSingle();
+
+    if (fetchError) {
+      console.error('Помилка перевірки інвентаря:', fetchError.message);
+      return false;
+    }
+
+    if (existingItem) {
+      console.log('Предмет вже є в інвентарі.');
+      return false;
+    }
+
+    const { error: insertError } = await supabase
+      .from('inventory')
+      .insert([
+        {
+          user_id: userId,
+          item_id: itemId,
+          item: itemName, // <-- сюди передаємо назву предмета!
+        },
+      ]);
+
+    if (insertError) {
+      console.error('Помилка вставки в інвентар:', insertError.message);
+      return false;
+    }
+
     return true;
+  } catch (error) {
+    console.error('Невідома помилка:', error);
+    return false;
   }
-}
+};
+
+
 
 
 // Функція обробки покупки
-const handleBuyItem = async (
-  item: { item_id: number; name: string; image: string; description: string; damage?: string; strength?: string; price: number }
-) => {
+const handleBuyItem = async (item: { item_id: number; name: string; image: string; description: string; damage?: string; strength?: string; price: number }) => {
   if (points < item.price) {
-    alert("Недостатньо уламків для покупки!");
+    toast.error("Недостатньо уламків для покупки!");
     return;
   }
 
   if (!userId) {
-    alert('Користувач не знайдений!');
+    toast.error('Користувач не знайдений!');
     return;
   }
 
-  const newPoints = points - item.price;
-  await updateUserPoints(String(userId), newPoints); // привели до string
-  setPoints(newPoints);
+  // Перевірити чи предмет вже є
+  const exists = await checkInventoryItem(String(userId), item.item_id);
+  if (exists) {
+    toast.error(`Ви вже маєте ${item.name}!`);
+    return;
+  }
 
-  const added = await addInventoryItem(String(userId), item.item_id); // привели до string
+  // Додаємо предмет
+  const added = await addInventoryItem(String(userId), item.item_id, item.name);
   if (added) {
-    alert(`Ви придбали ${item.name}!`);
+    const newPoints = points - item.price;
+    await updateUserPoints(String(userId), newPoints);
+    setPoints(newPoints);
+
+    toast.success(`Ви придбали ${item.name}!`);
   } else {
-    alert("Помилка покупки предмета!");
+    toast.error(`Ви вже маєте ${item.name} або сталася помилка!`);
   }
 };
+
+// Перевірка наявності предмета в інвентарі
+const checkInventoryItem = async (userId: string, itemId: number) => {
+  const { data, error } = await supabase
+    .from('inventory')
+    .select('item_id')
+    .eq('user_id', userId)
+    .eq('item_id', itemId)
+    .single(); // або .maybeSingle()
+
+  return !!data; // якщо знайдено — true
+}
 
 
 async function getUserInventory(userId: string) {
@@ -219,7 +268,7 @@ const handleClick = async () => {
 };
 
 
-  // Компонент ItemCard: оновлено для роботи з зображенням (image)
+  // Компонент ItemCard
   type ItemCardProps = {
     item_id: number;
     name: string;
@@ -759,6 +808,8 @@ return (
       <div style={{ paddingBottom: 100 }}>{renderContent()}</div>
       <BottomBar activeTab={activeTab} setActiveTab={setActiveTab} />
     </List>
+    <Toaster position="top-center" reverseOrder={false} />
   </Page>
 );
+
 }
