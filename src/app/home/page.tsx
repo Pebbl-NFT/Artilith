@@ -28,6 +28,18 @@ export default function HomePage() {
   const [sortOption, setSortOption] = useState("price");
   // Перемикач, який показує заблокований контент (наприклад, рівень 2)
   const [locked, setLocked] = useState(true);
+  // state для модалки
+  type SelectedItemType = {
+    item_id: number;
+    name: string;
+    image: string;
+    description: string;
+    damage?: string;
+    strength?: string;
+    price: number;
+  } | null;
+
+  const [selectedItem, setSelectedItem] = useState<SelectedItemType>(null);
 
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const initDataState = useSignal(initData.state);
@@ -54,8 +66,8 @@ export default function HomePage() {
       fetchUserData();
     }, [userId]);
 
-// Оновити кількість балів
-async function updateUserPoints(userId: string | undefined, newPoints: number) {
+  // Оновити кількість балів
+  async function updateUserPoints(userId: string | undefined, newPoints: number) {
   if (!userId) {
     console.error('userId не вказаний при оновленні балів');
     return false;
@@ -76,30 +88,13 @@ async function updateUserPoints(userId: string | undefined, newPoints: number) {
 // Додаємо предмет у інвентар користувача
 const addInventoryItem = async (userId: string, itemId: number, itemName: string) => {
   try {
-    const { data: existingItem, error: fetchError } = await supabase
-      .from('inventory')
-      .select('item_id')
-      .eq('user_id', userId)
-      .eq('item_id', itemId)
-      .maybeSingle();
-
-    if (fetchError) {
-      console.error('Помилка перевірки інвентаря:', fetchError.message);
-      return false;
-    }
-
-    if (existingItem) {
-      console.log('Предмет вже є в інвентарі.');
-      return false;
-    }
-
     const { error: insertError } = await supabase
       .from('inventory')
       .insert([
         {
           user_id: userId,
           item_id: itemId,
-          item: itemName, // <-- сюди передаємо назву предмета!
+          item: itemName,
         },
       ]);
 
@@ -115,7 +110,24 @@ const addInventoryItem = async (userId: string, itemId: number, itemName: string
   }
 };
 
+// натискаємо "купити"
+interface ItemType {
+  item_id: number;
+  name: string;
+  image: string;
+  description: string;
+  damage?: string;
+  strength?: string;
+  price: number;
+}
 
+// підтвердження покупки
+const confirmBuy = async () => {
+  if (selectedItem) {
+    await handleBuyItem(selectedItem);
+    setSelectedItem(null);
+  }
+};
 
 
 // Функція обробки покупки
@@ -130,12 +142,12 @@ const handleBuyItem = async (item: { item_id: number; name: string; image: strin
     return;
   }
 
-  // Перевірити чи предмет вже є
-  const exists = await checkInventoryItem(String(userId), item.item_id);
-  if (exists) {
-    toast.error(`Ви вже маєте ${item.name}!`);
-    return;
-  }
+ // Перевірити чи предмет вже є
+// const exists = await checkInventoryItem(String(userId), item.item_id);
+// if (exists) {
+//   toast.error(`Ви вже маєте ${item.name}!`);
+//   return;
+// }
 
   // Додаємо предмет
   const added = await addInventoryItem(String(userId), item.item_id, item.name);
@@ -277,8 +289,17 @@ const handleClick = async () => {
     damage?: string;
     strength?: string;
     price: number;
+    onBuyRequest: (item: {
+      item_id: number;
+      name: string;
+      image: string;
+      description: string;
+      damage?: string;
+      strength?: string;
+      price: number;
+    }) => void;
   };
-  const ItemCard: React.FC<ItemCardProps> = ({ item_id, name, image, description, damage, strength, price }) => (
+  const ItemCard: React.FC<ItemCardProps> = ({ item_id, name, image, description, damage, strength, price,onBuyRequest }) => (
       <div
       style={{
         borderRadius: "10px",
@@ -318,8 +339,8 @@ const handleClick = async () => {
           transition: "all 0.3s ease",
           marginTop: "10px",
         }}
-        onClick={() => handleBuyItem({ item_id, name, image, description, damage, strength, price })}
-      >
+        onClick={() => onBuyRequest({ item_id, name, image, description, damage, strength, price })}
+        >
         Купити за {price} 🪨
       </button>
     </div>
@@ -387,12 +408,13 @@ const handleClick = async () => {
               >
                 <ItemCard
                   item_id={1}
-                  name="Деревяний меч"
+                  name="Дерев’яний меч"
                   image={sword01a.src}
                   description="Початковий артефакт для воїнів."
                   damage="Шкода: 1"
                   strength="Міцність: 5"
                   price={30}
+                  onBuyRequest={(item) => setSelectedItem(item)}
                 />
 
                 <ItemCard
@@ -401,6 +423,7 @@ const handleClick = async () => {
                   image={potion01f.src}
                   description="Відновлює енергію. Один ковток — і ви знову в строю."
                   price={50}
+                  onBuyRequest={(item) => setSelectedItem(item)}
                 />
 
                 <ItemCard
@@ -411,6 +434,7 @@ const handleClick = async () => {
                   damage=""
                   strength="Міцність: 15"
                   price={65}
+                  onBuyRequest={(item) => setSelectedItem(item)}
                 />
               </div>
             </div>
@@ -475,6 +499,7 @@ const handleClick = async () => {
                     damage="Шкода: Хитрун"
                     strength="Міцність: Хитрун"
                     price={999999}
+                    onBuyRequest={(item) => setSelectedItem(item)}
                   />
                 </div>
               </div>
@@ -806,6 +831,18 @@ return (
     <List>
       <TopBar points={points} />
       <div style={{ paddingBottom: 100 }}>{renderContent()}</div>
+      {selectedItem && (
+          <div className="modal-overlay" onClick={() => setSelectedItem(null)}>
+            <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+              <h3>Підтвердження покупки</h3>
+              <p>Придбати <strong>{selectedItem.name}</strong> за <strong>{selectedItem.price}</strong> уламків?</p>
+              <div style={{ display: "flex", justifyContent: "center", gap: "10px" }}>
+                <button onClick={confirmBuy}>Так</button>
+                <button onClick={() => setSelectedItem(null)}>Ні</button>
+              </div>
+            </div>
+          </div>
+        )}
       <BottomBar activeTab={activeTab} setActiveTab={setActiveTab} />
     </List>
     <Toaster position="top-center" reverseOrder={false} />
