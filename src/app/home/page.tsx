@@ -24,11 +24,13 @@ export default function HomePage() {
   const [countdown, setCountdown] = useState(0);
   const [animationTime, setAnimationTime] = useState(1100);
   const [activeTab, setActiveTab] = useState("home");
-  // Для магазину використовується сортування (вже інтегровано)
-  const [sortOption, setSortOption] = useState("price");
+
+
   // Перемикач, який показує заблокований контент (наприклад, рівень 2)
   const [locked, setLocked] = useState(true);
-  // state для модалки
+
+  // Модальне вікно для підтвердження покупки
+  const [selectedItem, setSelectedItem] = useState<SelectedItemType>(null);
   type SelectedItemType = {
     item_id: number;
     name: string;
@@ -39,32 +41,45 @@ export default function HomePage() {
     price: number;
   } | null;
 
-  const [selectedItem, setSelectedItem] = useState<SelectedItemType>(null);
+  type Item = {
+    name: string;
+    equipped: boolean;
+    image?: string;
+  };
 
+  // Початковий інвентар
+  const initialInventory: (Item | null)[] = [
+    { name: "Дерев'яний меч", equipped: false, image: "/sword.png" },
+    null,
+    { name: "Кам'яна броня", equipped: true, image: "/armor.png" },
+    null,
+  ];
+
+  const [inventory, setInventory] = useState<(Item | null)[]>(initialInventory);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const initDataState = useSignal(initData.state);
   const userId = initDataState?.user?.id;
 
-    // Завантажуємо дані користувача із Supabase
-    useEffect(() => {
-      const fetchUserData = async () => {
-        if (!userId) return;
-        const { data, error } = await supabase
-          .from("users")
-          .select("points, click_delay")
-          .eq("id", userId)
-          .single();
-  
-        if (error) {
-          console.error("Помилка завантаження даних:", error);
-        } else if (data) {
-          setPoints(data.points);
-          setClickDelay(data.click_delay);
-          setAnimationTime(data.click_delay + 100);
-        }
-      };
-      fetchUserData();
-    }, [userId]);
+  // Завантажуємо дані користувача із Supabase
+  useEffect(() => {
+    const fetchUserData = async () => {
+      if (!userId) return;
+      const { data, error } = await supabase
+        .from("users")
+        .select("points, click_delay")
+        .eq("id", userId)
+        .single();
+
+      if (error) {
+        console.error("Помилка завантаження даних:", error);
+      } else if (data) {
+        setPoints(data.points);
+        setClickDelay(data.click_delay);
+        setAnimationTime(data.click_delay + 100);
+      }
+    };
+    fetchUserData();
+  }, [userId]);
 
   // Оновити кількість балів
   async function updateUserPoints(userId: string | undefined, newPoints: number) {
@@ -83,205 +98,35 @@ export default function HomePage() {
     return false;
   }
   return true;
-}
+  }
 
-// Додаємо предмет у інвентар користувача
-const addInventoryItem = async (userId: string, itemId: number, itemName: string) => {
+  // Додаємо предмет у інвентар користувача
+  const addInventoryItem = async (userId: string, itemId: number, itemName: string) => {
   try {
-    const { error: insertError } = await supabase
-      .from('inventory')
-      .insert([
-        {
-          user_id: userId,
-          item_id: itemId,
-          item: itemName,
-        },
-      ]);
+  const { error: insertError } = await supabase
+  .from('inventory')
+  .insert([
+    {
+      user_id: userId,
+      item_id: itemId,
+      item: itemName,
+    },
+  ]);
 
-    if (insertError) {
-      console.error('Помилка вставки в інвентар:', insertError.message);
-      return false;
-    }
+  if (insertError) {
+  console.error('Помилка вставки в інвентар:', insertError.message);
+  return false;
+  }
 
-    return true;
+  return true;
   } catch (error) {
-    console.error('Невідома помилка:', error);
-    return false;
+  console.error('Невідома помилка:', error);
+  return false;
   }
-};
+  };
 
-// натискаємо "купити"
-interface ItemType {
-  item_id: number;
-  name: string;
-  image: string;
-  description: string;
-  damage?: string;
-  strength?: string;
-  price: number;
-}
-
-// підтвердження покупки
-const confirmBuy = async () => {
-  if (selectedItem) {
-    await handleBuyItem(selectedItem);
-    setSelectedItem(null);
-  }
-};
-
-
-// Функція обробки покупки
-const handleBuyItem = async (item: { item_id: number; name: string; image: string; description: string; damage?: string; strength?: string; price: number }) => {
-  if (points < item.price) {
-    toast.error("Недостатньо уламків для покупки!");
-    return;
-  }
-
-  if (!userId) {
-    toast.error('Користувач не знайдений!');
-    return;
-  }
-
- // Перевірити чи предмет вже є
-// const exists = await checkInventoryItem(String(userId), item.item_id);
-// if (exists) {
-//   toast.error(`Ви вже маєте ${item.name}!`);
-//   return;
-// }
-
-  // Додаємо предмет
-  const added = await addInventoryItem(String(userId), item.item_id, item.name);
-  if (added) {
-    const newPoints = points - item.price;
-    await updateUserPoints(String(userId), newPoints);
-    setPoints(newPoints);
-
-    toast.success(`Ви придбали ${item.name}!`);
-  } else {
-    toast.error(`Ви вже маєте ${item.name} або сталася помилка!`);
-  }
-};
-
-// Перевірка наявності предмета в інвентарі
-const checkInventoryItem = async (userId: string, itemId: number) => {
-  const { data, error } = await supabase
-    .from('inventory')
-    .select('item_id')
-    .eq('user_id', userId)
-    .eq('item_id', itemId)
-    .single(); // або .maybeSingle()
-
-  return !!data; // якщо знайдено — true
-}
-
-
-async function getUserInventory(userId: string) {
-  const { data, error } = await supabase
-    .from('inventory')
-    .select('id, item_id, items ( name, image, description, damage, defense, price )')
-    .eq('user_id', userId);
-
-  if (error) {
-    console.error('Помилка завантаження інвентаря:', error);
-    return [];
-  }
-
-  return data;
-}
-
-
-// Збереження даних користувача
-const saveUserData = async (newPoints: number, newClickDelay: number) => {
-  if (!userId) return;
-
-  const { error } = await supabase
-    .from("users")
-    .upsert([{ id: userId, points: newPoints, click_delay: newClickDelay }], {
-      onConflict: "id",
-    });
-
-  if (error) console.error("Помилка збереження:", error);
-};
-
-// Оновлення таймера для кліку
-const updateCountdown = (endTime: number) => {
-  if (timerRef.current) clearInterval(timerRef.current);
-
-  const now = Date.now();
-  let remaining = Math.ceil((endTime - now) / 1000);
-
-  if (remaining <= 0) {
-    setCountdown(0);
-    setIsClickable(true);
-    localStorage.removeItem("nextClickTime");
-    return;
-  }
-
-  setCountdown(remaining);
-  setIsClickable(false);
-
-  timerRef.current = setInterval(() => {
-    const now = Date.now();
-    remaining = Math.ceil((endTime - now) / 1000);
-
-    if (remaining <= 0) {
-      clearInterval(timerRef.current!);
-      setCountdown(0);
-      setIsClickable(true);
-      localStorage.removeItem("nextClickTime");
-    } else {
-      setCountdown(remaining);
-    }
-  }, 1000);
-};
-
-useEffect(() => {
-  const savedNextClick = localStorage.getItem("nextClickTime");
-  if (savedNextClick) {
-    const endTime = parseInt(savedNextClick, 10);
-    updateCountdown(endTime);
-  }
-}, []);
-
-// Клік на "HOLD"
-const handleClick = async () => {
-  if (!isClickable) return;
-
-  const nextAvailableClick = Date.now() + clickDelay;
-  localStorage.setItem("nextClickTime", nextAvailableClick.toString());
-
-  setIsClickable(false);
-  updateCountdown(nextAvailableClick);
-
-  const newPoints = points + 1;
-  const newClickDelay = clickDelay + 1000;
-
-  setPoints(newPoints);
-  setClickDelay(newClickDelay);
-  setAnimationTime(newClickDelay + 100);
-
-  if (!userId) return;
-
-  const { error } = await supabase
-    .from("users")
-    .upsert([{ id: userId, points: newPoints, click_delay: newClickDelay }], {
-      onConflict: "id",
-    });
-
-  if (error) console.error("Помилка збереження:", error);
-
-  const imgWrap = document.querySelector(".imgWrap");
-  if (imgWrap) {
-    imgWrap.classList.add("active");
-    setTimeout(() => {
-      imgWrap.classList.remove("active");
-    }, 1000);
-  }
-};
-
-
-  // Компонент ItemCard
-  type ItemCardProps = {
+  // натискаємо "купити"
+  interface ItemType {
     item_id: number;
     name: string;
     image: string;
@@ -289,15 +134,175 @@ const handleClick = async () => {
     damage?: string;
     strength?: string;
     price: number;
-    onBuyRequest: (item: {
-      item_id: number;
-      name: string;
-      image: string;
-      description: string;
-      damage?: string;
-      strength?: string;
-      price: number;
-    }) => void;
+  }
+
+  // підтвердження покупки
+  const confirmBuy = async () => {
+    if (selectedItem) {
+      await handleBuyItem(selectedItem);
+      setSelectedItem(null);
+    }
+  };
+
+
+  // Функція обробки покупки
+  const handleBuyItem = async (item: { item_id: number; name: string; image: string; description: string; damage?: string; strength?: string; price: number }) => {
+    if (points < item.price) {
+      toast.error("Недостатньо уламків для покупки!");
+      return;
+    }
+
+    if (!userId) {
+      toast.error('Користувач не знайдений!');
+      return;
+    }
+
+  // Перевірити чи предмет вже є
+  // const exists = await checkInventoryItem(String(userId), item.item_id);
+  // if (exists) {
+  //   toast.error(`Ви вже маєте ${item.name}!`);
+  //   return;
+  // }
+
+    // Додаємо предмет
+    const added = await addInventoryItem(String(userId), item.item_id, item.name);
+    if (added) {
+      const newPoints = points - item.price;
+      await updateUserPoints(String(userId), newPoints);
+      setPoints(newPoints);
+
+      toast.success(`Ви придбали ${item.name}!`);
+    } else {
+      toast.error(`Ви вже маєте ${item.name} або сталася помилка!`);
+    }
+  };
+
+  // Перевірка наявності предмета в інвентарі
+  const checkInventoryItem = async (userId: string, itemId: number) => {
+    const { data, error } = await supabase
+      .from('inventory')
+      .select('item_id')
+      .eq('user_id', userId)
+      .eq('item_id', itemId)
+      .single(); // або .maybeSingle()
+
+    return !!data; // якщо знайдено — true
+  }
+
+  async function getUserInventory(userId: string) {
+    const { data, error } = await supabase
+      .from('inventory')
+      .select('id, item_id, items ( name, image, description, damage, defense, price )')
+      .eq('user_id', userId);
+
+    if (error) {
+      console.error('Помилка завантаження інвентаря:', error);
+      return [];
+    }
+
+    return data;
+  }
+  
+  // Збереження даних користувача
+  const saveUserData = async (newPoints: number, newClickDelay: number) => {
+    if (!userId) return;
+
+    const { error } = await supabase
+      .from("users")
+      .upsert([{ id: userId, points: newPoints, click_delay: newClickDelay }], {
+        onConflict: "id",
+      });
+
+    if (error) console.error("Помилка збереження:", error);
+  };
+
+  // Оновлення таймера для кліку
+  const updateCountdown = (endTime: number) => {
+    if (timerRef.current) clearInterval(timerRef.current);
+
+    const now = Date.now();
+    let remaining = Math.ceil((endTime - now) / 1000);
+
+    if (remaining <= 0) {
+      setCountdown(0);
+      setIsClickable(true);
+      localStorage.removeItem("nextClickTime");
+      return;
+    }
+
+    setCountdown(remaining);
+    setIsClickable(false);
+
+    timerRef.current = setInterval(() => {
+      const now = Date.now();
+      remaining = Math.ceil((endTime - now) / 1000);
+
+      if (remaining <= 0) {
+        clearInterval(timerRef.current!);
+        setCountdown(0);
+        setIsClickable(true);
+        localStorage.removeItem("nextClickTime");
+      } else {
+        setCountdown(remaining);
+      }
+    }, 1000);
+  };
+  useEffect(() => {
+    const savedNextClick = localStorage.getItem("nextClickTime");
+    if (savedNextClick) {
+      const endTime = parseInt(savedNextClick, 10);
+      updateCountdown(endTime);
+    }
+  }, []);
+
+  // Клік на "HOLD"
+  const handleClick = async () => {
+    if (!isClickable) return;
+
+    const nextAvailableClick = Date.now() + clickDelay;
+    localStorage.setItem("nextClickTime", nextAvailableClick.toString());
+
+    setIsClickable(false);
+    updateCountdown(nextAvailableClick);
+
+    const newPoints = points + 1;
+    const newClickDelay = clickDelay + 1000;
+
+    setPoints(newPoints);
+    setClickDelay(newClickDelay);
+    setAnimationTime(newClickDelay + 100);
+
+    if (!userId) return;
+
+    const { error } = await supabase
+      .from("users")
+      .upsert([{ id: userId, points: newPoints, click_delay: newClickDelay }], {
+        onConflict: "id",
+      });
+
+    if (error) console.error("Помилка збереження:", error);
+
+    const imgWrap = document.querySelector(".imgWrap");
+    if (imgWrap) {
+      imgWrap.classList.add("active");
+      setTimeout(() => {
+        imgWrap.classList.remove("active");
+      }, 1000);
+    }
+  };
+
+  const toggleEquip = (index: number) => {
+    setInventory((prev) =>
+      prev.map((item, i) =>
+        i === index && item ? { ...item, equipped: !item.equipped } : item
+      )
+    );
+  };
+
+
+  // Компонент ItemCard
+  type ItemCardProps = ItemType & {
+  onBuyRequest: (item: ItemType) => void;
   };
   const ItemCard: React.FC<ItemCardProps> = ({ item_id, name, image, description, damage, strength, price,onBuyRequest }) => (
       <div
@@ -348,13 +353,42 @@ const handleClick = async () => {
   
   
  // Функція форматування таймера
- const formatTime = (totalSeconds: number) => {
+  const formatTime = (totalSeconds: number) => {
   const hours = Math.floor(totalSeconds / 3600);
   const minutes = Math.floor((totalSeconds % 3600) / 60);
   const seconds = totalSeconds % 60;
   const pad = (num: number) => num.toString().padStart(2, "0");
   return `${pad(hours)}:${pad(minutes)}:${pad(seconds)}`;
-};
+  };
+
+  useEffect(() => {
+    const fetchInventory = async () => {
+      if (!userId) return;
+  
+      const { data, error } = await supabase
+        .from('inventory')
+        .select('id, item_id, items ( name, image, description, damage, defense, price )')
+        .eq('user_id', userId);
+  
+      if (error) {
+        console.error('Помилка при завантаженні інвентаря:', error.message);
+      } else if (data) {
+        const formatted = data.map((entry) => ({
+          name: entry.items[0]?.name,
+          image: entry.items[0]?.image,
+          description: entry.items[0]?.description,
+          damage: entry.items[0]?.damage,
+          strength: entry.items[0]?.defense,
+          price: entry.items[0]?.price,
+          equipped: false,
+        }));
+        setInventory(formatted);
+      }
+    };
+  
+    fetchInventory();
+  }, [userId]);
+  
 
  // Функція рендеринга контенту для різних вкладок
  const renderContent = () => {
@@ -599,13 +633,6 @@ const handleClick = async () => {
         </div>
       );
     case "hiro":
-      // Уявний інвентар гравця
-      const inventory = [
-        { id: 1, name: "Деревяна палиця", equipped: false },
-        { id: 2, name: "Маленький щит", equipped: true },
-        null,
-        null,
-      ];
       return (
         <Page back>
           <Placeholder>
@@ -792,11 +819,7 @@ const handleClick = async () => {
                           transition: "background-color 0.3s",
                           width: "100%",
                         }}
-                        onClick={() =>
-                          alert(
-                            item.equipped ? `Скинути ${item.name}` : `Екіпірувати ${item.name}`
-                          )
-                        }
+                        onClick={() => toggleEquip(index)}
                       >
                         {item.equipped ? "Скинути" : "Екіпірувати"}
                       </button>
