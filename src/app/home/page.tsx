@@ -7,13 +7,14 @@ import TopBar from "@/components/TopBar";
 import BottomBar from "@/components/BottomBar";
 import { useSignal, initData } from "@telegram-apps/sdk-react";
 import { supabase } from "@/lib/supabaseClient";
+import Image from "next/image";
 import artilithLogo from "../_assets/Artilith_logo-no-bg.png";
 import sword01a from "../_assets/item/sword01a.png";
 import shield01a from "../_assets/item/shield01a.png";
 import potion01f from "../_assets/item/potion01f.png";
-import Image from "next/image";
 import { Toaster } from 'react-hot-toast';
 import toast from 'react-hot-toast';
+import type { StaticImageData } from "next/image";
 
 
 export default function HomePage() {
@@ -44,14 +45,13 @@ export default function HomePage() {
   type Item = {
     name: string;
     equipped: boolean;
-    image?: string;
+    image: string | StaticImageData;
   };
 
   // Початковий інвентар
   const initialInventory: (Item | null)[] = [
-    { name: "Дерев'яний меч", equipped: false, image: "/sword.png" },
-    null,
-    { name: "Кам'яна броня", equipped: true, image: "/armor.png" },
+    { name: "Дерев'яний меч", equipped: false, image: sword01a },
+    { name: "Щит", equipped: false, image: shield01a },
     null,
   ];
 
@@ -361,34 +361,40 @@ export default function HomePage() {
   return `${pad(hours)}:${pad(minutes)}:${pad(seconds)}`;
   };
 
+  // Функція додавання предмета в інвентар
   useEffect(() => {
     const fetchInventory = async () => {
       if (!userId) return;
   
       const { data, error } = await supabase
-        .from('inventory')
-        .select('id, item_id, items ( name, image, description, damage, defense, price )')
-        .eq('user_id', userId);
+      .from('inventory')
+      .select('id, item_id, item ( name, image, description, damage, defense, price )')
+      .eq('user_id', userId);
+      
+
   
       if (error) {
         console.error('Помилка при завантаженні інвентаря:', error.message);
       } else if (data) {
-        const formatted = data.map((entry) => ({
-          name: entry.items[0]?.name,
-          image: entry.items[0]?.image,
-          description: entry.items[0]?.description,
-          damage: entry.items[0]?.damage,
-          strength: entry.items[0]?.defense,
-          price: entry.items[0]?.price,
-          equipped: false,
-        }));
+        const formatted = data.map((entry) => {
+          const item = Array.isArray(entry.item) ? entry.item[0] : entry.item;
+          return {
+            name: item?.name,
+            image: item?.image,
+            description: item?.description,
+            damage: item?.damage,
+            strength: item?.defense,
+            price: item?.price,
+            equipped: false,
+          };
+        });
         setInventory(formatted);
+        
       }
     };
-  
     fetchInventory();
   }, [userId]);
-  
+
 
  // Функція рендеринга контенту для різних вкладок
  const renderContent = () => {
@@ -442,9 +448,9 @@ export default function HomePage() {
               >
                 <ItemCard
                   item_id={1}
-                  name="Дерев’яний меч"
+                  name="Навчальний меч"
                   image={sword01a.src}
-                  description="Початковий артефакт для воїнів."
+                  description="Простий меч для початківців."
                   damage="Шкода: 1"
                   strength="Міцність: 5"
                   price={30}
@@ -453,21 +459,21 @@ export default function HomePage() {
 
                 <ItemCard
                   item_id={2}
-                  name="Маленьке зілля енергії"
-                  image={potion01f.src}
-                  description="Відновлює енергію. Один ковток — і ви знову в строю."
-                  price={50}
-                  onBuyRequest={(item) => setSelectedItem(item)}
-                />
-
-                <ItemCard
-                  item_id={3}
-                  name="Малий щит"
+                  name="Навчальний щит"
                   image={shield01a.src}
                   description="Простий щит для початківців."
                   damage=""
                   strength="Міцність: 15"
                   price={65}
+                  onBuyRequest={(item) => setSelectedItem(item)}
+                />
+
+                <ItemCard
+                  item_id={3}
+                  name="Маленьке зілля енергії"
+                  image={potion01f.src}
+                  description="Відновлює енергію. Один ковток — і ви знову в строю."
+                  price={50}
                   onBuyRequest={(item) => setSelectedItem(item)}
                 />
               </div>
@@ -753,20 +759,20 @@ export default function HomePage() {
                   fontSize: "1.4rem",
                   fontWeight: "bold",
                   marginTop: "30px",
-                  marginBottom: "10px",
+                  marginBottom: "30px",
                   textAlign: "center",
                   color: "#fff",
                 }}
               >
-                Інвентар
+                ІНВЕНТАР
               </h2>
               <div
                 style={{
                   display: "grid",
-                  gridTemplateColumns: "repeat(2, 1fr)",
-                  gap: "15px",
+                  gridTemplateColumns: "repeat(5, 1fr)",
+                  gap: "20px",
                   width: "100%",
-                  maxWidth: "400px",
+                  maxWidth: "1200px",
                 }}
               >
                 {inventory.map((item, index) => (
@@ -802,10 +808,26 @@ export default function HomePage() {
                         fontSize: "2rem",
                         color: item ? "#fff" : "#777",
                         marginBottom: "10px",
+                        overflow: "hidden",
                       }}
-                    >
-                      {item ? item.name : "Порожньо"}
+                      >
+                      {item?.image ? (
+                      <img
+                      src={typeof item.image === "string" ? item.image : item.image.src}
+                      alt={item.name}
+                      style={{
+                        width: "100%",
+                        height: "100%",
+                        objectFit: "contain",
+                      }}
+                    /> 
+                    ) : item?.name ? (
+                      item.name
+                    ) : (
+                      "+"
+                    )}
                     </div>
+
                     {item && (
                       <button
                         style={{
@@ -831,17 +853,18 @@ export default function HomePage() {
           </Placeholder>
 
           <style jsx>{`
-            @keyframes fadeIn {
-              from {
-                opacity: 0;
-                transform: scale(0.8);
+              @keyframes fadeIn {
+                from {
+                  opacity: 0;
+                  transform: scale(1);
+                }
+                to {
+                  opacity: 1;
+                  transform: scale(1);
+                }
               }
-              to {
-                opacity: 1;
-                transform: scale(1);
-              }
-            }
-          `}</style>
+            `}
+          </style>
         </Page>
       );
     default:
