@@ -687,7 +687,7 @@ export default function HomePage() {
                   <strong>Рівень:</strong> 0
                 </div>
                 <div style={{ marginBottom: "10px" }}>
-                  <strong>Здоров'я:</strong>
+                  <strong>Здоровя:</strong>
                   <div style={{ width: "100%", height: "12px", backgroundColor: "#444", borderRadius: "6px", overflow: "hidden", marginTop: "5px" }}>
                     <div style={{ width: "100%", height: "100%", background: "linear-gradient(to right, #4caf50, #8bc34a)", transition: "width 0.5s ease" }} />
                   </div>
@@ -711,34 +711,46 @@ export default function HomePage() {
               </p>
             )}
       
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "20px", width: "100%", maxWidth: "100%", margin: "0 auto" }}>
-              <style>{`
-                @media (max-width: 768px) {
-                  div[style*="gridTemplateColumns"] {
-                    grid-template-columns: repeat(2, 1fr);
+              <div
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "repeat(3, 1fr)", // 3 колонки за замовчуванням
+                  gap: "20px",
+                  width: "100%",
+                  maxWidth: "100%",
+                  margin: "0 auto",
+                }}
+              >
+                {/* Медіа-запити для адаптації на мобільних пристроях */}
+                <style>{`
+                  @media (max-width: 1024px) {
+                    div[style*="gridTemplateColumns"] {
+                      grid-template-columns: repeat(2, 1fr); /* 2 колонки на екранах шириною до 1024px */
+                    }
                   }
-                }
-                @media (max-width: 480px) {
-                  div[style*="gridTemplateColumns"] {
-                    grid-template-columns: 1fr;
+                  @media (max-width: 480px) {
+                    div[style*="gridTemplateColumns"] {
+                      grid-template-columns: 1fr; /* 1 колонка на екранах шириною до 480px */
+                    }
                   }
-                }
-              `}</style>
-      
-              {inventory.length > 0 && inventory.map((item, index) => (
-                <div key={index} style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "center",
-                  backgroundColor: "rgba(255, 255, 255, 0.05)",
-                  borderRadius: "10px",
-                  padding: "10px",
-                  position: "relative",
-                  animation: "fadeIn 0.5s ease forwards",
-                  animationDelay: `${index * 0.1}s`,
-                  opacity: 0,
-                  maxWidth: "100%", // додаємо для кожного елемента
-                }}>
+                `}</style>
+                {inventory.length > 0 &&
+                  inventory.map((item, index) => (
+                    <div
+                      key={index}
+                      style={{
+                        display: "flex",
+                        flexDirection: "column",
+                        alignItems: "center",
+                        backgroundColor: "rgba(255, 255, 255, 0.05)",
+                        borderRadius: "10px",
+                        padding: "10px",
+                        position: "relative",
+                        animation: "fadeIn 0.5s ease forwards",
+                        animationDelay: `${index * 0.1}s`,
+                        opacity: 0,
+                      }}
+                    >
                   <div style={{
                     width: "100%",
                     aspectRatio: "1 / 1",
