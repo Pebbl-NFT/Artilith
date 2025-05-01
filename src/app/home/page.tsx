@@ -666,6 +666,7 @@ export default function HomePage() {
                 display: "flex",
                 flexDirection: "column",
                 alignItems: "center",
+                justifyContent: "center",
                 marginTop: "-20px",
               }}
             >
@@ -787,10 +788,10 @@ export default function HomePage() {
               <div
               style={{
                 display: "grid",
-                gridTemplateColumns: "repeat(5, 1fr)",
+                gridTemplateColumns: "repeat(3, 1fr)",
                 gap: "20px",
                 width: "100%",
-                maxWidth: "1200px",
+                maxWidth: "100%",
               }}
               > 
               {(() => {
@@ -828,9 +829,6 @@ export default function HomePage() {
                           backgroundColor: item
                             ? "rgba(255, 255, 255, 0.08)"
                             : "rgba(255, 255, 255, 0.02)",
-                          border: item
-                            ? "2px solid rgba(255, 255, 255, 0.3)"
-                            : "2px dashed rgba(255, 255, 255, 0.1)",
                           borderRadius: "8px",
                           display: "flex",
                           alignItems: "center",
@@ -887,7 +885,7 @@ export default function HomePage() {
           <style jsx>{`
               @keyframes fadeIn {
                 from {
-                  opacity: 0;
+                  opacity: 1;
                   transform: scale(1);
                 }
                 to {
