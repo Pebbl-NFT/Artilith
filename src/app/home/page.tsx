@@ -659,252 +659,146 @@ export default function HomePage() {
     case "hiro":
       return (
         <Page back>
-          <Placeholder>
-            <div
-              className="page"
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                justifyContent: "center",
-                marginTop: "-20px",
-              }}
-            >
-              <h1
-                style={{
-                  fontSize: "2rem",
-                  fontWeight: "bold",
-                  marginBottom: "10px",
-                  textAlign: "center",
-                  color: "#fff",
-                  lineHeight: "1",
-                }}
-              >
-                ГЕРОЙ
-              </h1>
-              <h2
-                style={{
-                  fontSize: "1.1rem",
-                  fontWeight: "lighter",
-                  color: "#ccc",
-                  textAlign: "center",
-                  marginBottom: "20px",
-                  lineHeight: "1.4",
-                  fontFamily: "Arial, sans-serif",
-                  maxWidth: "90%",
-                }}
-              >
-                Тут ви можете налаштувати свого героя, прокачати його та підготувати до пригод.
-              </h2>
-              {/* Блок героя */}
-              <div
-                style={{
+        <Placeholder>
+          <div
+            className="page"
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              justifyContent: "center",
+              marginTop: "-20px",
+              width: "100%", // Повна ширина для контейнера
+              boxSizing: "border-box", // Коригує обчислення ширини елементів
+            }}
+          >
+            <h1 style={{ fontSize: "2rem", fontWeight: "bold", marginBottom: "10px", textAlign: "center", color: "#fff", lineHeight: "1" }}>ГЕРОЙ</h1>
+            <h2 style={{ fontSize: "1.1rem", fontWeight: "lighter", color: "#ccc", textAlign: "center", marginBottom: "20px", lineHeight: "1.4", fontFamily: "Arial, sans-serif", maxWidth: "90%" }}>
+              Тут ви можете налаштувати свого героя, прокачати його та підготувати до пригод.
+            </h2>
+      
+            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", backgroundColor: "rgba(255, 255, 255, 0.05)", borderRadius: "15px", padding: "20px", width: "100%", maxWidth: "400px", boxShadow: "0 0 10px rgba(0,0,0,0.3)", position: "relative", overflow: "hidden", marginBottom: "40px" }}>
+              <div style={{ width: "120px", height: "120px", borderRadius: "50%", overflow: "hidden", background: "linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)", marginBottom: "15px", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                <span style={{ fontSize: "60px", color: "#fff" }}>🛡️</span>
+              </div>
+      
+              <div style={{ width: "100%", color: "#fff", fontSize: "1rem", textAlign: "left" }}>
+                <div style={{ marginBottom: "10px" }}>
+                  <strong>Рівень:</strong> 0
+                </div>
+                <div style={{ marginBottom: "10px" }}>
+                  <strong>Здоров'я:</strong>
+                  <div style={{ width: "100%", height: "12px", backgroundColor: "#444", borderRadius: "6px", overflow: "hidden", marginTop: "5px" }}>
+                    <div style={{ width: "100%", height: "100%", background: "linear-gradient(to right, #4caf50, #8bc34a)", transition: "width 0.5s ease" }} />
+                  </div>
+                </div>
+                <div style={{ marginBottom: "10px" }}>
+                  <strong>Захист:</strong> 0
+                </div>
+                <div style={{ marginBottom: "10px" }}>
+                  <strong>Шкода:</strong> 0
+                </div>
+              </div>
+            </div>
+      
+            <h2 style={{ fontSize: "1.4rem", fontWeight: "bold", marginTop: "30px", marginBottom: "30px", textAlign: "center", color: "#fff" }}>
+              ІНВЕНТАР
+            </h2>
+      
+            {inventory.length === 0 && (
+              <p style={{ fontSize: "1.1rem", fontWeight: "lighter", color: "#ccc", textAlign: "center", marginBottom: "20px", lineHeight: "1.4", fontFamily: "Arial, sans-serif", maxWidth: "90%" }}>
+                Інвентар порожній — купіть предмети в магазині!
+              </p>
+            )}
+      
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "20px", width: "100%", maxWidth: "100%", margin: "0 auto" }}>
+              <style>{`
+                @media (max-width: 768px) {
+                  div[style*="gridTemplateColumns"] {
+                    grid-template-columns: repeat(2, 1fr);
+                  }
+                }
+                @media (max-width: 480px) {
+                  div[style*="gridTemplateColumns"] {
+                    grid-template-columns: 1fr;
+                  }
+                }
+              `}</style>
+      
+              {inventory.length > 0 && inventory.map((item, index) => (
+                <div key={index} style={{
                   display: "flex",
                   flexDirection: "column",
                   alignItems: "center",
                   backgroundColor: "rgba(255, 255, 255, 0.05)",
-                  borderRadius: "15px",
-                  padding: "20px",
-                  width: "100%",
-                  maxWidth: "400px",
-                  boxShadow: "0 0 10px rgba(0,0,0,0.3)",
+                  borderRadius: "10px",
+                  padding: "10px",
                   position: "relative",
-                  overflow: "hidden",
-                  marginBottom: "40px",
-                }}
-              >
-                {/* Зображення героя */}
-                <div
-                  style={{
-                    width: "120px",
-                    height: "120px",
-                    borderRadius: "50%",
-                    overflow: "hidden",
-                    background: "linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)",
-                    marginBottom: "15px",
+                  animation: "fadeIn 0.5s ease forwards",
+                  animationDelay: `${index * 0.1}s`,
+                  opacity: 0,
+                  maxWidth: "100%", // додаємо для кожного елемента
+                }}>
+                  <div style={{
+                    width: "100%",
+                    aspectRatio: "1 / 1",
+                    backgroundColor: item ? "rgba(255, 255, 255, 0.08)" : "rgba(255, 255, 255, 0.02)",
+                    borderRadius: "8px",
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
-                  }}
-                >
-                  <span style={{ fontSize: "60px", color: "#fff" }}>🛡️</span>
-                </div>
-                {/* Статистика героя */}
-                <div
-                  style={{
-                    width: "100%",
-                    color: "#fff",
-                    fontSize: "1rem",
-                    textAlign: "left",
-                  }}
-                >
-                  <div style={{ marginBottom: "10px" }}>
-                    <strong>Рівень:</strong> 0
-                  </div>
-                  {/* Індикатор Здоровя */}
-                  <div style={{ marginBottom: "10px" }}>
-                    <strong>Здоров&apos;я:</strong>
-                    <div
-                      style={{
-                        width: "100%",
-                        height: "12px",
-                        backgroundColor: "#444",
-                        borderRadius: "6px",
-                        overflow: "hidden",
-                        marginTop: "5px",
-                      }}
-                    >
-                      <div
+                    fontSize: "2rem",
+                    color: item ? "#fff" : "#777",
+                    marginBottom: "10px",
+                    overflow: "hidden",
+                  }}>
+                    {item?.image ? (
+                      <img
+                        src={typeof item.image === "string" ? item.image : item.image.src}
+                        alt={item.name}
                         style={{
-                          width: "100%",
-                          height: "100%",
-                          background: "linear-gradient(to right, #4caf50, #8bc34a)",
-                          transition: "width 0.5s ease",
+                          backgroundColor: "rgba(255, 255, 255, 0.05)",
+                          border: "1px solid rgba(253, 253, 253, 0.37)",
+                          padding: "20px",
+                          borderRadius: "10px",
+                          boxShadow: " rgba(0, 0, 0, 0.3) 0px 19px 38px, rgba(0, 0, 0, 0.22) 0px 15px 12px",
+                          maxWidth: "100%",
+                          height: "auto", // Забезпечуємо адаптацію зображень
                         }}
                       />
-                    </div>
+                    ) : item?.name ? (
+                      item.name
+                    ) : (
+                      "+"
+                    )}
                   </div>
-                  <div style={{ marginBottom: "10px" }}>
-                    <strong>Захист:</strong> 0
-                  </div>
-                  <div style={{ marginBottom: "10px" }}>
-                    <strong>Шкода:</strong> 0
-                  </div>
-                </div>
-              </div>
-              {/* Інвентар */}
-              <h2
-                style={{
-                  fontSize: "1.4rem",
-                  fontWeight: "bold",
-                  marginTop: "30px",
-                  marginBottom: "30px",
-                  textAlign: "center",
-                  color: "#fff",
-                }}
-              >
-                ІНВЕНТАР
-              </h2>
-              {inventory.length === 0 && (
-                  <p style={{
-                    fontSize: "1.1rem",
-                    fontWeight: "lighter",
-                    color: "#ccc",
-                    textAlign: "center",
-                    marginBottom: "20px",
-                    lineHeight: "1.4",
-                    fontFamily: "Arial, sans-serif",
-                    maxWidth: "90%",
-                  }}>
-                    Інвентар порожній — купіть предмети в магазині!
-                  </p>
-                )}
-              <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: "repeat(3, 1fr)",
-                gap: "20px",
-                width: "100%",
-                maxWidth: "100%",
-                margin: "0 auto",
-              }}
-              > 
-              {(() => {
-                console.log('Інвентар на рендері:', inventory);
-                return null;
-              })()}
-
-                {inventory.length > 0 &&
-                  inventory.map((item, index) => (
-                    <div
-                      key={index}
+      
+                  {item && (
+                    <button
                       style={{
-                        display: "flex",
-                        flexDirection: "column",
-                        alignItems: "center",
-                        backgroundColor: "rgba(255, 255, 255, 0.05)",
-                        borderRadius: "10px",
-                        padding: "10px",
-                        position: "relative",
-                        animation: "fadeIn 0.5s ease forwards",
-                        animationDelay: `${index * 0.1}s`,
-                        opacity: 0,
+                        backgroundColor: item.equipped ? "#f44336" : "#4caf50",
+                        color: "#fff",
+                        border: "none",
+                        borderRadius: "5px",
+                        padding: "5px 10px",
+                        fontSize: "0.9rem",
+                        cursor: "pointer",
+                        transition: "background-color 0.3s",
+                        width: "100%",
+                        maxWidth: "150px", // Обмежуємо максимальну ширину кнопок
                       }}
+                      onClick={() => toggleEquip(index)}
                     >
-                      <div
-                        style={{
-                          width: "100%",
-                          aspectRatio: "1 / 1",
-                          backgroundColor: item
-                            ? "rgba(255, 255, 255, 0.08)"
-                            : "rgba(255, 255, 255, 0.02)",
-                          borderRadius: "8px",
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          fontSize: "2rem",
-                          color: item ? "#fff" : "#777",
-                          marginBottom: "10px",
-                          overflow: "hidden",
-                        }}
-                      >
-                        {item?.image ? (
-                          <img
-                            src={typeof item.image === "string" ? item.image : item.image.src}
-                            alt={item.name}
-                            style={{
-                              backgroundColor: "rgba(255, 255, 255, 0.05)",
-                              border: "1px solid rgba(253, 253, 253, 0.37)",
-                              padding: "20px",
-                              borderRadius: "10px",
-                              boxShadow: " rgba(0, 0, 0, 0.3) 0px 19px 38px, rgba(0, 0, 0, 0.22) 0px 15px 12px",
-                            }}
-                          />
-                        ) : item?.name ? (
-                          item.name
-                        ) : (
-                          "+"
-                        )}
-                      </div>
-
-                      {item && (
-                        <button
-                          style={{
-                            backgroundColor: item.equipped ? "#f44336" : "#4caf50",
-                            color: "#fff",
-                            border: "none",
-                            borderRadius: "5px",
-                            padding: "5px 10px",
-                            fontSize: "0.9rem",
-                            cursor: "pointer",
-                            transition: "background-color 0.3s",
-                            width: "100%",
-                          }}
-                          onClick={() => toggleEquip(index)}
-                        >
-                          {item.equipped ? "Скинути" : "Екіпірувати"}
-                        </button>
-                      )}
-                    </div>
-                  ))}
-              </div>
+                      {item.equipped ? "Скинути" : "Екіпірувати"}
+                    </button>
+                  )}
+                </div>
+              ))}
             </div>
-          </Placeholder>
-
-          <style jsx>{`
-              @keyframes fadeIn {
-                from {
-                  opacity: 1;
-                  transform: scale(1);
-                }
-                to {
-                  opacity: 1;
-                  transform: scale(1);
-                }
-              }
-            `}
-          </style>
-        </Page>
+          </div>
+        </Placeholder>
+      </Page>
+      
       );
     default:
       return null;
