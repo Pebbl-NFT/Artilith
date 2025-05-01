@@ -754,15 +754,12 @@ export default function HomePage() {
                   <div style={{
                     width: "100%",
                     aspectRatio: "1 / 1",
-                    backgroundColor: item ? "rgba(255, 255, 255, 0.08)" : "rgba(255, 255, 255, 0.02)",
-                    borderRadius: "8px",
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
                     fontSize: "2rem",
                     color: item ? "#fff" : "#777",
                     marginBottom: "10px",
-                    overflow: "hidden",
                   }}>
                     {item?.image ? (
                       <img
