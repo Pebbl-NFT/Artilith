@@ -806,6 +806,7 @@ export default function HomePage() {
                 gap: "20px",
                 width: "100%",
                 maxWidth: "100%",
+                margin: "0 auto",
               }}
               > 
               {(() => {
