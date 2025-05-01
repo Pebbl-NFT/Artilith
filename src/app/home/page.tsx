@@ -714,7 +714,7 @@ export default function HomePage() {
               <div
                 style={{
                   display: "grid",
-                  gridTemplateColumns: "repeat(3, 1fr)", // 3 колонки за замовчуванням
+                  gridTemplateColumns: "repeat(2, 1fr)", // 3 колонки за замовчуванням
                   gap: "20px",
                   width: "100%",
                   maxWidth: "100%",
