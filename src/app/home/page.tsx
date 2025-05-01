@@ -785,6 +785,20 @@ export default function HomePage() {
               >
                 ІНВЕНТАР
               </h2>
+              {inventory.length === 0 && (
+                  <p style={{
+                    fontSize: "1.1rem",
+                    fontWeight: "lighter",
+                    color: "#ccc",
+                    textAlign: "center",
+                    marginBottom: "20px",
+                    lineHeight: "1.4",
+                    fontFamily: "Arial, sans-serif",
+                    maxWidth: "90%",
+                  }}>
+                    Інвентар порожній — купіть предмети в магазині!
+                  </p>
+                )}
               <div
               style={{
                 display: "grid",
@@ -798,12 +812,6 @@ export default function HomePage() {
                 console.log('Інвентар на рендері:', inventory);
                 return null;
               })()}
-
-                {inventory.length === 0 && (
-                  <p style={{ color: 'white', textAlign: 'center' }}>
-                    Інвентар порожній або не завантажено
-                  </p>
-                )}
 
                 {inventory.length > 0 &&
                   inventory.map((item, index) => (
