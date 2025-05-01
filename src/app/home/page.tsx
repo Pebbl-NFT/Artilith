@@ -361,39 +361,57 @@ export default function HomePage() {
   return `${pad(hours)}:${pad(minutes)}:${pad(seconds)}`;
   };
 
+  const imageMap: Record<number, string> = {
+    1: sword01a.src,
+    2: shield01a.src,
+    3: potion01f.src,
+  };
+  
+  
+
   // Функція додавання предмета в інвентар
   useEffect(() => {
     const fetchInventory = async () => {
       if (!userId) return;
   
       const { data, error } = await supabase
-      .from('inventory')
-      .select('id, item_id, item ( name, image, description, damage, defense, price )')
-      .eq('user_id', userId);
-      
-
+        .from('inventory')
+        .select('id, item_id, item ( name, description, damage, defense, price )')
+        .eq('user_id', userId);
   
       if (error) {
         console.error('Помилка при завантаженні інвентаря:', error.message);
-      } else if (data) {
+        return;
+      }
+      
+      if (data) {
         const formatted = data.map((entry) => {
           const item = Array.isArray(entry.item) ? entry.item[0] : entry.item;
+          const itemId = Number(entry.item_id);
+          const image = imageMap[itemId];
+  
+          if (!image) {
+            console.warn(`Зображення не знайдено для item_id: ${itemId}`);
+          }
+  
           return {
             name: item?.name,
-            image: item?.image,
             description: item?.description,
             damage: item?.damage,
             strength: item?.defense,
             price: item?.price,
+            image,
             equipped: false,
           };
-        });
+        });        
+  
         setInventory(formatted);
-        
       }
     };
+  
     fetchInventory();
   }, [userId]);
+  
 
 
  // Функція рендеринга контенту для різних вкладок
@@ -767,87 +785,101 @@ export default function HomePage() {
                 ІНВЕНТАР
               </h2>
               <div
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: "repeat(5, 1fr)",
-                  gap: "20px",
-                  width: "100%",
-                  maxWidth: "1200px",
-                }}
-              >
-                {inventory.map((item, index) => (
-                  <div
-                    key={index}
-                    style={{
-                      display: "flex",
-                      flexDirection: "column",
-                      alignItems: "center",
-                      backgroundColor: "rgba(255, 255, 255, 0.05)",
-                      borderRadius: "10px",
-                      padding: "10px",
-                      position: "relative",
-                      animation: "fadeIn 0.5s ease forwards",
-                      animationDelay: `${index * 0.1}s`,
-                      opacity: 0,
-                    }}
-                  >
-                    <div
-                      style={{
-                        width: "100%",
-                        aspectRatio: "1 / 1",
-                        backgroundColor: item
-                          ? "rgba(255, 255, 255, 0.08)"
-                          : "rgba(255, 255, 255, 0.02)",
-                        border: item
-                          ? "2px solid rgba(255, 255, 255, 0.3)"
-                          : "2px dashed rgba(255, 255, 255, 0.1)",
-                        borderRadius: "8px",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        fontSize: "2rem",
-                        color: item ? "#fff" : "#777",
-                        marginBottom: "10px",
-                        overflow: "hidden",
-                      }}
-                      >
-                      {item?.image ? (
-                      <img
-                      src={typeof item.image === "string" ? item.image : item.image.src}
-                      alt={item.name}
-                      style={{
-                        width: "100%",
-                        height: "100%",
-                        objectFit: "contain",
-                      }}
-                    /> 
-                    ) : item?.name ? (
-                      item.name
-                    ) : (
-                      "+"
-                    )}
-                    </div>
+              style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(5, 1fr)",
+                gap: "20px",
+                width: "100%",
+                maxWidth: "1200px",
+              }}
+              > 
+              {(() => {
+                console.log('Інвентар на рендері:', inventory);
+                return null;
+              })()}
 
-                    {item && (
-                      <button
+                {inventory.length === 0 && (
+                  <p style={{ color: 'white', textAlign: 'center' }}>
+                    Інвентар порожній або не завантажено
+                  </p>
+                )}
+
+                {inventory.length > 0 &&
+                  inventory.map((item, index) => (
+                    <div
+                      key={index}
+                      style={{
+                        display: "flex",
+                        flexDirection: "column",
+                        alignItems: "center",
+                        backgroundColor: "rgba(255, 255, 255, 0.05)",
+                        borderRadius: "10px",
+                        padding: "10px",
+                        position: "relative",
+                        animation: "fadeIn 0.5s ease forwards",
+                        animationDelay: `${index * 0.1}s`,
+                        opacity: 0,
+                      }}
+                    >
+                      <div
                         style={{
-                          backgroundColor: item.equipped ? "#f44336" : "#4caf50",
-                          color: "#fff",
-                          border: "none",
-                          borderRadius: "5px",
-                          padding: "5px 10px",
-                          fontSize: "0.9rem",
-                          cursor: "pointer",
-                          transition: "background-color 0.3s",
                           width: "100%",
+                          aspectRatio: "1 / 1",
+                          backgroundColor: item
+                            ? "rgba(255, 255, 255, 0.08)"
+                            : "rgba(255, 255, 255, 0.02)",
+                          border: item
+                            ? "2px solid rgba(255, 255, 255, 0.3)"
+                            : "2px dashed rgba(255, 255, 255, 0.1)",
+                          borderRadius: "8px",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          fontSize: "2rem",
+                          color: item ? "#fff" : "#777",
+                          marginBottom: "10px",
+                          overflow: "hidden",
                         }}
-                        onClick={() => toggleEquip(index)}
                       >
-                        {item.equipped ? "Скинути" : "Екіпірувати"}
-                      </button>
-                    )}
-                  </div>
-                ))}
+                        {item?.image ? (
+                          <img
+                            src={typeof item.image === "string" ? item.image : item.image.src}
+                            alt={item.name}
+                            style={{
+                              backgroundColor: "rgba(255, 255, 255, 0.05)",
+                              border: "1px solid rgba(253, 253, 253, 0.37)",
+                              padding: "20px",
+                              borderRadius: "10px",
+                              boxShadow: " rgba(0, 0, 0, 0.3) 0px 19px 38px, rgba(0, 0, 0, 0.22) 0px 15px 12px",
+                            }}
+                          />
+                        ) : item?.name ? (
+                          item.name
+                        ) : (
+                          "+"
+                        )}
+                      </div>
+
+                      {item && (
+                        <button
+                          style={{
+                            backgroundColor: item.equipped ? "#f44336" : "#4caf50",
+                            color: "#fff",
+                            border: "none",
+                            borderRadius: "5px",
+                            padding: "5px 10px",
+                            fontSize: "0.9rem",
+                            cursor: "pointer",
+                            transition: "background-color 0.3s",
+                            width: "100%",
+                          }}
+                          onClick={() => toggleEquip(index)}
+                        >
+                          {item.equipped ? "Скинути" : "Екіпірувати"}
+                        </button>
+                      )}
+                    </div>
+                  ))}
               </div>
             </div>
           </Placeholder>
