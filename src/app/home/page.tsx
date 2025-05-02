@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState, useRef } from "react";
-import { List, Placeholder } from "@telegram-apps/telegram-ui";
+import { List, Placeholder, Button } from "@telegram-apps/telegram-ui";
 import { Page } from "@/components/Page";
 import TopBar from "@/components/TopBar";
 import BottomBar from "@/components/BottomBar";
@@ -25,6 +25,7 @@ export default function HomePage() {
   const [countdown, setCountdown] = useState(0);
   const [animationTime, setAnimationTime] = useState(1100);
   const [activeTab, setActiveTab] = useState("home");
+  const [loading, setLoading] = useState(false);
 
 
   // Перемикач, який показує заблокований контент (наприклад, рівень 2)
@@ -370,47 +371,54 @@ export default function HomePage() {
   
 
   // Функція додавання предмета в інвентар
+  const fetchInventory = async () => {
+    if (!userId) return;
+
+    setLoading(true); // Показуємо індикатор завантаження
+
+    const { data, error } = await supabase
+      .from('inventory')
+      .select('id, item_id, item (name, description, damage, defense, price)')
+      .eq('user_id', userId);
+
+    if (error) {
+      console.error('Помилка при завантаженні інвентаря:', error.message);
+      setLoading(false);
+      return;
+    }
+
+    if (data) {
+      const formatted = data.map((entry) => {
+        const item = Array.isArray(entry.item) ? entry.item[0] : entry.item;
+        const itemId = Number(entry.item_id);
+        const image = imageMap[itemId]; // ваша картка зображень
+
+        if (!image) {
+          console.warn(`Зображення не знайдено для item_id: ${itemId}`);
+        }
+
+        return {
+          name: item?.name,
+          description: item?.description,
+          damage: item?.damage,
+          strength: item?.defense,
+          price: item?.price,
+          image,
+          equipped: false,
+        };
+      });
+
+      setInventory(formatted);
+    }
+
+    setLoading(false); // Скидаємо індикатор завантаження
+  };
+
+  // Завантажуємо інвентар при зміні userId
   useEffect(() => {
-    const fetchInventory = async () => {
-      if (!userId) return;
-  
-      const { data, error } = await supabase
-        .from('inventory')
-        .select('id, item_id, item ( name, description, damage, defense, price )')
-        .eq('user_id', userId);
-  
-      if (error) {
-        console.error('Помилка при завантаженні інвентаря:', error.message);
-        return;
-      }
-      
-      if (data) {
-        const formatted = data.map((entry) => {
-          const item = Array.isArray(entry.item) ? entry.item[0] : entry.item;
-          const itemId = Number(entry.item_id);
-          const image = imageMap[itemId];
-  
-          if (!image) {
-            console.warn(`Зображення не знайдено для item_id: ${itemId}`);
-          }
-  
-          return {
-            name: item?.name,
-            description: item?.description,
-            damage: item?.damage,
-            strength: item?.defense,
-            price: item?.price,
-            image,
-            equipped: false,
-          };
-        });        
-  
-        setInventory(formatted);
-      }
-    };
-  
     fetchInventory();
   }, [userId]);
+
   
 
 
@@ -701,9 +709,29 @@ export default function HomePage() {
               </div>
             </div>
       
-            <h2 style={{ fontSize: "1.4rem", fontWeight: "bold", marginTop: "30px", marginBottom: "30px", textAlign: "center", color: "#fff" }}>
+            <h2 style={{ fontSize: "1.4rem", fontWeight: "bold", marginTop: "15px", marginBottom: "40px", textAlign: "center", color: "#fff" }}>
               ІНВЕНТАР
             </h2>
+
+            <Button
+          mode="filled"
+          onClick={fetchInventory}
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            width: "100%",
+            height: 50,
+            background: 'var(--tgui--secondary_bg_color)',
+            padding: 10,
+            borderRadius: 50,
+            marginBottom: '20px',
+            border: '0px solid rgb(255, 255, 255)',
+          }}
+          name="back"
+        >
+          {loading ? "✨✨✨🪄✨✨✨" : "Оновити 🧚🏻‍♀️ інвентар "}
+        </Button>
       
             {inventory.length === 0 && (
               <p style={{ fontSize: "1.1rem", fontWeight: "lighter", color: "#ccc", textAlign: "center", marginBottom: "20px", lineHeight: "1.4", fontFamily: "Arial, sans-serif", maxWidth: "90%" }}>
@@ -806,8 +834,27 @@ export default function HomePage() {
             </div>
           </div>
         </Placeholder>
+        <Button
+          mode="filled"
+          onClick={fetchInventory}
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            width: "100%",
+            height: 100,
+            background: 'var(--tgui--secondary_bg_color)',
+            padding: 10,
+            borderRadius: 50,
+            marginBottom: '20px',
+            border: '0px solid rgb(255, 255, 255)',
+          }}
+          name="back"
+        >
+          {loading ? "✨🪄✨" : "Оновити 🧚🏻‍♀️ інвентар "}
+        </Button>
       </Page>
-      
+
       );
     default:
       return null;
