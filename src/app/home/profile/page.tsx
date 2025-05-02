@@ -6,7 +6,6 @@ import { Page } from "@/components/Page";
 import { Progress, Card } from "@telegram-apps/telegram-ui";
 import { useSignal, initData } from "@telegram-apps/sdk-react";
 import { supabase } from "@/lib/supabaseClient";
-import artilithLogo from "../_assets/Artilith_logo-no-bg.png";
 
 export default function ProfilePage() {
   const initDataState = useSignal(initData.state);
@@ -37,14 +36,16 @@ export default function ProfilePage() {
     fetchData();
   }, [userId]);
 
-  const level = Math.floor(userData.points / 1000);
-  const nextLevelProgress = userData.points % 1000;
+  const level = Math.floor(100 / 100);
+  const nextLevelProgress = 0  % 100;
 
   return (
     <Page back>
       <div style={styles.container}>
-        <Placeholder>
-        <h1
+      {userAvatar && (
+            <img src={userAvatar} alt="avatar" style={styles.avatar} />
+          )}
+      <h1
             style={{
                 fontSize: "3rem",
                 fontWeight: "bold",
@@ -56,85 +57,88 @@ export default function ProfilePage() {
             >
             {userName}
         </h1>
-        <div style={styles.profileHeader}>
-          {userAvatar && (
-            <img src={userAvatar} alt="avatar" style={styles.avatar} />
-          )}
-          <div>
-            <p style={styles.levelText}>Рівень {level}</p>
-          </div>
-        </div>
+        <Placeholder>
+          <Card className="page" 
+            style={{ 
+              padding: "20px",
+              border: '1px solid rgba(255, 208, 0, 0.81)',
+            }}>
+            <div>
+              <p style={styles.levelText}>VIP {level}</p>
+            </div>
+            <div style={{ marginTop: "12px", width: "90%" }}>
+              <Progress style={{ 
+              color: 'rgba(255, 208, 0, 0.81)',
+            }} value={(nextLevelProgress / 100) * 100} />
+              <p style={styles.xpText}>{100 - nextLevelProgress} Очок досвіду до наступного рівня VIP</p>
+            </div>
+          </Card>
 
-        <div style={{ marginTop: "12px", width: "100%" }}>
-          <Progress value={(nextLevelProgress / 1000) * 100} />
-          <p style={styles.xpText}>{1000 - nextLevelProgress} Очок досвіду до наступного рівня</p>
-        </div>
-
-        <Card className="page">
-          <h3 style={styles.cardTitle}>Статистика</h3>
-          <p style={styles.statText}>
-          🪨 <strong>{userData.points}</strong> Уламки
-          </p>
-          <p style={styles.statText}>
-          🪙 <strong>0</strong> $ATL
-          </p>
-          <p style={styles.statText}>
-          💎 <strong>0</strong> TON
-          </p>
-          <p style={styles.statText}>
-            ⏱️ <strong>{userData.click_delay}</strong> с. на клік
-          </p>
-          {userData.created_at && (
+          <Card className="page">
+            <h3 style={styles.cardTitle}>Статистика</h3>
             <p style={styles.statText}>
-              📅 Joined {new Date(userData.created_at).toLocaleDateString()}
+            🪨 <strong>{userData.points}</strong> Уламки
             </p>
-          )}
-        </Card>
+            <p style={styles.statText}>
+            🪙 <strong>0</strong> $ATL
+            </p>
+            <p style={styles.statText}>
+            💎 <strong>0</strong> TON
+            </p>
+            <p style={styles.statText}>
+              ⏱️ <strong>{userData.click_delay}</strong> с. на клік
+            </p>
+            {userData.created_at && (
+              <p style={styles.statText}>
+                📅 Joined {new Date(userData.created_at).toLocaleDateString()}
+              </p>
+            )}
+          </Card>
 
-        <Card className="page">
-          <h3 style={styles.cardTitle}>Досягнення</h3>
-          <div style={styles.achievements}>
-            <Achievement value="0" label="By track" color="#ffd700" />
-            <Achievement value="0" label="Total wins" color="#00ffcc" />
-            <Achievement value="Mud" label="Current Tier" color="#00cc99" />
-          </div>
-        </Card>
-        <Card className="page">
-          <h3 style={styles.cardTitle}>Оновлення</h3>
-          <div style={styles.gameBadges}>
-            <span style={styles.gameBadge}>Telegram</span>
-            <span style={styles.gameBadge}>Discord</span>
-            <span style={styles.gameBadge}>Twitter</span>
-            <span style={styles.gameBadge}>v. alpha 0.19</span>
-          </div>
-        </Card>
+          <Card className="page">
+            <h3 style={styles.cardTitle}>Досягнення</h3>
+            <div style={styles.achievements}>
+              <Achievement value="0" label="By track" color="#ffd700" />
+              <Achievement value="0" label="Total wins" color="#00ffcc" />
+              <Achievement value="Mud" label="Current Tier" color="#00cc99" />
+            </div>
+          </Card>
+          <Card className="page">
+            <h3 style={styles.cardTitle}>Оновлення</h3>
+            <div style={styles.gameBadges}>
+              <span style={styles.gameBadge}>Telegram</span>
+              <span style={styles.gameBadge}>Discord</span>
+              <span style={styles.gameBadge}>Twitter</span>
+              <span style={styles.gameBadge}>v. alpha 0.19</span>
+            </div>
+          </Card>
         </Placeholder>
       </div>
       <Link href="/home">
-          <Button
-            mode="filled"
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              width: "100%",
-              height: 100,
-              background: 'var(--tgui--secondary_bg_color)',
-              padding: 10,
-              borderRadius: 50,
-              marginBottom: '20px',
-              border: '0px solid rgb(255, 255, 255)',
-            }}
-            name="back"
-          >
-            <p style={{ 
-              fontSize: "20px", 
-              color: "#fff", 
-              fontWeight: "bold" 
-            }}>
-              👈 back</p>
-          </Button>
-        </Link>
+        <Button
+          mode="filled"
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            width: "100%",
+            height: 100,
+            background: 'var(--tgui--secondary_bg_color)',
+            padding: 10,
+            borderRadius: 50,
+            marginBottom: '20px',
+            border: '0px solid rgb(255, 255, 255)',
+          }}
+          name="back"
+        >
+          <p style={{ 
+            fontSize: "20px", 
+            color: "#fff", 
+            fontWeight: "bold" 
+          }}>
+            👈 back</p>
+        </Button>
+      </Link>
     </Page>
   );
 }
@@ -184,13 +188,13 @@ const styles: { [key: string]: CSSProperties } = {
     fontSize: "20px",
   },
   levelText: {
-    color: "#bbb",
+    color: "rgba(255, 208, 0, 0.81)",
     fontSize: "14px",
     display: "flex",
   },
   xpText: {
     fontSize: "12px",
-    color: "#888",
+    color: "rgba(167, 167, 167, 0.81)",
     marginTop: "10px",
     display: "flex",
     gap: "24px",

@@ -44,19 +44,17 @@ export default function HomePage() {
   } | null;
 
   type Item = {
+    item_id: number; // додати для оновлення в Supabase
     name: string;
-    equipped: boolean;
+    description: string;
+    damage: number;
+    strength: number; // якщо в тебе це defense — перейменуй або враховуй
+    price: number;
     image: string | StaticImageData;
+    equipped: boolean;
   };
-
-  // Початковий інвентар
-  const initialInventory: (Item | null)[] = [
-    { name: "Дерев'яний меч", equipped: false, image: sword01a },
-    { name: "Щит", equipped: false, image: shield01a },
-    null,
-  ];
-
-  const [inventory, setInventory] = useState<(Item | null)[]>(initialInventory);
+  
+  const [inventory, setInventory] = useState<(Item | null)[]>([]);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const initDataState = useSignal(initData.state);
   const userId = initDataState?.user?.id;
@@ -292,13 +290,35 @@ export default function HomePage() {
     }
   };
 
-  const toggleEquip = (index: number) => {
+  const toggleEquip = async (index: number) => {
+    const item = inventory[index];
+    if (!item) return; // захист від null
+  
+    const newStatus = !item.equipped;
+  
+    // Оновлюємо локальний стан
     setInventory((prev) =>
-      prev.map((item, i) =>
-        i === index && item ? { ...item, equipped: !item.equipped } : item
+      prev.map((i, idx) =>
+        idx === index && i !== null
+          ? {
+              ...i,
+              equipped: newStatus,
+            }
+          : i
       )
     );
-  };
+  
+    const { error } = await supabase
+      .from('inventory')
+      .update({ equipped: newStatus })
+      .eq('user_id', userId)
+      .eq('item_id', item.item_id); // або item.itemId, якщо так у тебе в типах
+  
+    if (error) {
+      console.error("Не вдалося оновити стан предмета:", error.message);
+    }
+  };  
+  
 
 
   // Компонент ItemCard
@@ -378,7 +398,7 @@ export default function HomePage() {
 
     const { data, error } = await supabase
       .from('inventory')
-      .select('id, item_id, item (name, description, damage, defense, price)')
+      .select('id, item_id, equipped, item (name, description, damage, defense, price)')
       .eq('user_id', userId);
 
     if (error) {
@@ -398,14 +418,15 @@ export default function HomePage() {
         }
 
         return {
+          item_id: itemId,
           name: item?.name,
           description: item?.description,
           damage: item?.damage,
           strength: item?.defense,
           price: item?.price,
           image,
-          equipped: false,
-        };
+          equipped: entry.equipped ?? false,
+        };        
       });
 
       setInventory(formatted);
@@ -667,85 +688,122 @@ export default function HomePage() {
     case "hiro":
       return (
         <Page back>
-        <Placeholder>
-          <div
-            className="page"
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              justifyContent: "center",
-              marginTop: "-20px",
-              width: "100%", // Повна ширина для контейнера
-              boxSizing: "border-box", // Коригує обчислення ширини елементів
-            }}
-          >
-            <h1 style={{ fontSize: "2rem", fontWeight: "bold", marginBottom: "10px", textAlign: "center", color: "#fff", lineHeight: "1" }}>ГЕРОЙ</h1>
-            <h2 style={{ fontSize: "1.1rem", fontWeight: "lighter", color: "#ccc", textAlign: "center", marginBottom: "20px", lineHeight: "1.4", fontFamily: "Arial, sans-serif", maxWidth: "90%" }}>
-              Тут ви можете налаштувати свого героя, прокачати його та підготувати до пригод.
-            </h2>
-      
-            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", backgroundColor: "rgba(255, 255, 255, 0.05)", borderRadius: "15px", padding: "20px", width: "100%", maxWidth: "400px", boxShadow: "0 0 10px rgba(0,0,0,0.3)", position: "relative", overflow: "hidden", marginBottom: "40px" }}>
-              <div style={{ width: "120px", height: "120px", borderRadius: "50%", overflow: "hidden", background: "linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)", marginBottom: "15px", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                <span style={{ fontSize: "60px", color: "#fff" }}>🛡️</span>
-              </div>
-      
-              <div style={{ width: "100%", color: "#fff", fontSize: "1rem", textAlign: "left" }}>
-                <div style={{ marginBottom: "10px" }}>
-                  <strong>Рівень:</strong> 0
-                </div>
-                <div style={{ marginBottom: "10px" }}>
-                  <strong>Здоровя:</strong>
-                  <div style={{ width: "100%", height: "12px", backgroundColor: "#444", borderRadius: "6px", overflow: "hidden", marginTop: "5px" }}>
-                    <div style={{ width: "100%", height: "100%", background: "linear-gradient(to right, #4caf50, #8bc34a)", transition: "width 0.5s ease" }} />
-                  </div>
-                </div>
-                <div style={{ marginBottom: "10px" }}>
-                  <strong>Захист:</strong> 0
-                </div>
-                <div style={{ marginBottom: "10px" }}>
-                  <strong>Шкода:</strong> 0
-                </div>
-              </div>
-            </div>
-      
-            <h2 style={{ fontSize: "1.4rem", fontWeight: "bold", marginTop: "15px", marginBottom: "40px", textAlign: "center", color: "#fff" }}>
-              ІНВЕНТАР
-            </h2>
-
-            <Button
-          mode="filled"
-          onClick={fetchInventory}
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            width: "100%",
-            height: 50,
-            background: 'var(--tgui--secondary_bg_color)',
-            padding: 10,
-            borderRadius: 50,
-            marginBottom: '20px',
-            border: '0px solid rgb(255, 255, 255)',
-          }}
-          name="back"
-        >
-          {loading ? "✨✨✨🪄✨✨✨" : "Оновити 🧚🏻‍♀️ інвентар "}
-        </Button>
-      
-            {inventory.length === 0 && (
-              <p style={{ fontSize: "1.1rem", fontWeight: "lighter", color: "#ccc", textAlign: "center", marginBottom: "20px", lineHeight: "1.4", fontFamily: "Arial, sans-serif", maxWidth: "90%" }}>
-                Інвентар порожній — купіть предмети в магазині!
+          <Placeholder>
+            <div
+              className="page"
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                justifyContent: "center",
+                marginTop: "-20px",
+                width: "100%",
+                boxSizing: "border-box",
+              }}
+            >
+              <h1 style={{ fontSize: "2rem", fontWeight: "bold", marginBottom: "10px", textAlign: "center", color: "#fff", lineHeight: "1" }}>ГЕРОЙ</h1>
+              <p
+                style={{
+                  fontSize: "1rem",
+                  color: "#ddd",
+                  textAlign: "center",
+                  marginBottom: "30px",
+                }}
+              >
+                Тут ви можете налаштувати свого героя, прокачати його та підготувати до пригод.
               </p>
-            )}
-      
+
+              {/*
+                Визначаємо об'єкт equipped, який розподіляє екіпіровані предмети по слотах.
+                Для прикладу, тут простий розподіл за item_id (реалізуйте за своїми правилами).
+              */}
+              {(() => {
+                // Мапа слотів: item_id -> slot (змініть згідно вашої логіки)
+                const slotMap: Record<number, keyof typeof equipped> = {
+                  1: "weapon",
+                  2: "shield",
+                  3: "potion",
+                  // додайте інші item_id та їхні слоти
+                };
+
+                // Початковий об'єкт equipped
+                const equipped: {
+                  helmet?: Item | null;
+                  weapon?: Item | null;
+                  shield?: Item | null;
+                  armor?: Item | null;
+                  pants?: Item | null;
+                  boots?: Item | null;
+                  potion?: Item | null;
+                  ring?: Item | null;
+                } = {};
+
+                inventory.forEach((item) => {
+                  if (item && item.equipped) {
+                    const slot = slotMap[item.item_id];
+                    if (slot) {
+                      equipped[slot] = item;
+                    }
+                  }
+                });
+
+                return (
+                  <div style={{
+                    display: "grid",
+                    gridTemplateColumns: "repeat(auto-fill, minmax(130px, 1fr))", // адаптуємо колонки
+                    gap: "20px",
+                    width: "100%",
+                    margin: "10px auto",
+                    maxWidth: "1200px",
+                  }}>
+                    <div className="slot helmet">🪖 {equipped.helmet?.name || "+"}</div>
+                    <div className="slot weapon">🗡️ {equipped.weapon?.name || "+"}</div>
+                    <div className="slot ring">💍 {equipped.ring?.name || "+"}</div>
+                    <div className="slot shield">🛡️ {equipped.shield?.name || "+"}</div>
+                    <div className="slot armor">🧥 {equipped.armor?.name || "+"}</div>
+                    <div className="slot pants">👖 {equipped.pants?.name || "+"}</div>
+                    <div className="slot boots">👞 {equipped.boots?.name || "+"}</div>
+                    <div className="slot potion">🧪 {equipped.potion?.name || "+"}</div>
+                  </div>
+                );
+              })()}
+
+              <h2 style={{ fontSize: "1.4rem", fontWeight: "bold", marginTop: "15px", marginBottom: "40px", textAlign: "center", color: "#fff" }}>
+                ІНВЕНТАР
+              </h2>
+
+              <Button
+                mode="filled"
+                onClick={fetchInventory}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  width: "100%",
+                  height: 50,
+                  background: 'var(--tgui--secondary_bg_color)',
+                  padding: 10,
+                  borderRadius: 50,
+                  marginBottom: '20px',
+                  border: '0px solid rgb(255, 255, 255)',
+                }}
+                name="back"
+              >
+                {loading ? "✨✨✨🪄✨✨✨" : "Оновити інвентар "}
+              </Button>
+
+              {inventory.length === 0 && (
+                <p style={{ fontSize: "1.1rem", fontWeight: "lighter", color: "#ccc", textAlign: "center", marginBottom: "20px", lineHeight: "1.4", fontFamily: "Arial, sans-serif", maxWidth: "90%" }}>
+                  Інвентар порожній — купіть предмети в магазині!
+                </p>
+              )}
+
               <div
                 style={{
                   display: "grid",
-                  gridTemplateColumns: "repeat(2, 1fr)", // 3 колонки за замовчуванням
+                  gridTemplateColumns: "repeat(auto-fill, minmax(130px, 1fr))", // адаптуємо колонки
                   gap: "20px",
                   width: "100%",
-                  maxWidth: "100%",
                   margin: "0 auto",
                 }}
               >
@@ -767,82 +825,62 @@ export default function HomePage() {
                         opacity: 0,
                       }}
                     >
-                  <div style={{
-                    width: "100%",
-                    aspectRatio: "1 / 1",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    fontSize: "2rem",
-                    color: item ? "#fff" : "#777",
-                    marginBottom: "10px",
-                  }}>
-                    {item?.image ? (
-                      <img
-                        src={typeof item.image === "string" ? item.image : item.image.src}
-                        alt={item.name}
-                        style={{
-                          backgroundColor: "rgba(255, 255, 255, 0.05)",
-                          border: "1px solid rgba(253, 253, 253, 0.37)",
-                          padding: "20px",
-                          borderRadius: "10px",
-                          boxShadow: " rgba(0, 0, 0, 0.3) 0px 19px 38px, rgba(0, 0, 0, 0.22) 0px 15px 12px",
-                          maxWidth: "100%",
-                          height: "auto", // Забезпечуємо адаптацію зображень
-                        }}
-                      />
-                    ) : item?.name ? (
-                      item.name
-                    ) : (
-                      "+"
-                    )}
-                  </div>
-      
-                  {item && (
-                    <button
-                      style={{
-                        backgroundColor: item.equipped ? "#f44336" : "#4caf50",
-                        color: "#fff",
-                        border: "none",
-                        borderRadius: "5px",
-                        padding: "5px 10px",
-                        fontSize: "0.9rem",
-                        cursor: "pointer",
-                        transition: "background-color 0.3s",
+                      <div style={{
                         width: "100%",
-                        maxWidth: "150px", // Обмежуємо максимальну ширину кнопок
-                      }}
-                      onClick={() => toggleEquip(index)}
-                    >
-                      {item.equipped ? "Скинути" : "Екіпірувати"}
-                    </button>
-                  )}
-                </div>
-              ))}
-            </div>
-          </div>
-        </Placeholder>
-        <Button
-          mode="filled"
-          onClick={fetchInventory}
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            width: "100%",
-            height: 100,
-            background: 'var(--tgui--secondary_bg_color)',
-            padding: 10,
-            borderRadius: 50,
-            marginBottom: '20px',
-            border: '0px solid rgb(255, 255, 255)',
-          }}
-          name="back"
-        >
-          {loading ? "✨🪄✨" : "Оновити 🧚🏻‍♀️ інвентар "}
-        </Button>
-      </Page>
+                        aspectRatio: "1 / 1",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        fontSize: "2rem",
+                        color: item ? "#fff" : "#777",
+                        marginBottom: "10px",
+                      }}>
+                        {item?.image ? (
+                          <img
+                            src={typeof item.image === "string" ? item.image : item.image.src}
+                            alt={item.name}
+                            style={{
+                              backgroundColor: "rgba(255, 255, 255, 0.05)",
+                              border: "1px solid rgba(253, 253, 253, 0.37)",
+                              padding: "20px",
+                              borderRadius: "10px",
+                              boxShadow: " rgba(0, 0, 0, 0.3) 0px 19px 38px, rgba(0, 0, 0, 0.22) 0px 15px 12px",
+                              maxWidth: "100%",
+                              height: "auto", // Забезпечуємо адаптацію зображень
+                            }}
+                          />
+                        ) : item?.name ? (
+                          item.name
+                        ) : (
+                          "+"
+                        )}
+                      </div>
 
+                      {item && (
+                        <button
+                          style={{
+                            backgroundColor: item.equipped ? "#f44336" : "#4caf50",
+                            color: "#fff",
+                            border: "none",
+                            borderRadius: "5px",
+                            padding: "5px 10px",
+                            fontSize: "0.9rem",
+                            cursor: "pointer",
+                            transition: "background-color 0.3s",
+                            width: "100%",
+                            maxWidth: "150px", // Обмежуємо максимальну ширину кнопок
+                          }}
+                          onClick={() => toggleEquip(index)}
+                        >
+                          {item.equipped ? "Скинути" : "Екіпірувати"}
+                        </button>
+                      )}
+                    </div>
+                  ))}
+              </div>
+            </div>
+          </Placeholder>
+        </Page>
       );
     default:
       return null;

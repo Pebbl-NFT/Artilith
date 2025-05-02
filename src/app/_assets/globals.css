@@ -287,3 +287,28 @@ button {
 button:hover {
   background-color: #f0f0f0;
 }
+
+.hero-grid {
+  display: grid;
+  grid-template-areas:
+    "helmet helmet helmet"
+    "weapon avatar shield"
+    "armor armor armor"
+    "pants pants pants"
+    "boots potion boots";
+  gap: 10px;
+  justify-items: center;
+  align-items: center;
+}
+.slot {
+  background: rgba(255,255,255,0.1);
+  padding: 10px;
+  border-radius: 10px;
+  color: white;
+  min-width: 80px;
+  text-align: center;
+}
+.avatar {
+  grid-area: avatar;
+  font-size: 50px;
+}
