@@ -750,18 +750,6 @@ export default function HomePage() {
                 }}
               >
                 {/* Медіа-запити для адаптації на мобільних пристроях */}
-                <style>{`
-                  @media (max-width: 1024px) {
-                    div[style*="gridTemplateColumns"] {
-                      grid-template-columns: repeat(2, 1fr); /* 2 колонки на екранах шириною до 1024px */
-                    }
-                  }
-                  @media (max-width: 480px) {
-                    div[style*="gridTemplateColumns"] {
-                      grid-template-columns: 1fr; /* 1 колонка на екранах шириною до 480px */
-                    }
-                  }
-                `}</style>
                 {inventory.length > 0 &&
                   inventory.map((item, index) => (
                     <div
