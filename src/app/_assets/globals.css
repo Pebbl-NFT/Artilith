@@ -312,3 +312,10 @@ button:hover {
   grid-area: avatar;
   font-size: 50px;
 }
+
+.achievements {
+  display: flex;
+  gap: 24px;
+  flex-wrap: wrap;
+  justify-content: center;
+}

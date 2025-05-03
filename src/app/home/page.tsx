@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState, useRef } from "react";
-import { List, Placeholder, Button } from "@telegram-apps/telegram-ui";
+import { List, Placeholder, Button, Card } from "@telegram-apps/telegram-ui";
 import { Page } from "@/components/Page";
 import TopBar from "@/components/TopBar";
 import BottomBar from "@/components/BottomBar";
@@ -440,8 +440,37 @@ export default function HomePage() {
     fetchInventory();
   }, [userId]);
 
-  
+  const equipped = {
+    head: {
+      id: 'helmet-1',
+      name: 'Залізний шолом',
+      icon: '🪖',
+      defense: 5,
+    },
+    weapon: {
+      id: 'sword-1',
+      name: 'Меч воїна',
+      icon: '🗡️',
+      damage: 10,
+    },
+  };
 
+  function Achievement({
+    value,
+    label,
+    color,
+  }: {
+    value: string;
+    label: string;
+    color: string;
+  }) {
+    return (
+      <div style={{ textAlign: "center" }}>
+        <p style={{ fontSize: "16px", color }}>{value}</p>
+        <p style={{ fontSize: "12px", color: "#aaa" }}>{label}</p>
+      </div>
+    );
+  } 
 
  // Функція рендеринга контенту для різних вкладок
  const renderContent = () => {
@@ -713,65 +742,34 @@ export default function HomePage() {
                 Тут ви можете налаштувати свого героя, прокачати його та підготувати до пригод.
               </p>
 
-              {/*
-                Визначаємо об'єкт equipped, який розподіляє екіпіровані предмети по слотах.
-                Для прикладу, тут простий розподіл за item_id (реалізуйте за своїми правилами).
-              */}
-              {(() => {
-                // Мапа слотів: item_id -> slot (змініть згідно вашої логіки)
-                const slotMap: Record<number, keyof typeof equipped> = {
-                  1: "weapon",
-                  2: "shield",
-                  3: "potion",
-                  // додайте інші item_id та їхні слоти
-                };
-
-                // Початковий об'єкт equipped
-                const equipped: {
-                  helmet?: Item | null;
-                  weapon?: Item | null;
-                  shield?: Item | null;
-                  armor?: Item | null;
-                  pants?: Item | null;
-                  boots?: Item | null;
-                  potion?: Item | null;
-                  ring?: Item | null;
-                } = {};
-
-                inventory.forEach((item) => {
-                  if (item && item.equipped) {
-                    const slot = slotMap[item.item_id];
-                    if (slot) {
-                      equipped[slot] = item;
-                    }
-                  }
-                });
-
-                return (
-                  <div style={{
-                    display: "grid",
-                    gridTemplateColumns: "repeat(auto-fill, minmax(130px, 1fr))", // адаптуємо колонки
-                    gap: "20px",
-                    width: "100%",
-                    margin: "10px auto",
-                    maxWidth: "1200px",
-                  }}>
-                    <div className="slot helmet">🪖 {equipped.helmet?.name || "+"}</div>
-                    <div className="slot weapon">🗡️ {equipped.weapon?.name || "+"}</div>
-                    <div className="slot ring">💍 {equipped.ring?.name || "+"}</div>
-                    <div className="slot shield">🛡️ {equipped.shield?.name || "+"}</div>
-                    <div className="slot armor">🧥 {equipped.armor?.name || "+"}</div>
-                    <div className="slot pants">👖 {equipped.pants?.name || "+"}</div>
-                    <div className="slot boots">👞 {equipped.boots?.name || "+"}</div>
-                    <div className="slot potion">🧪 {equipped.potion?.name || "+"}</div>
-                  </div>
-                );
-              })()}
-
-              <h2 style={{ fontSize: "1.4rem", fontWeight: "bold", marginTop: "15px", marginBottom: "40px", textAlign: "center", color: "#fff" }}>
+              <Card className="page">
+                <h3 >Характеристики</h3>
+                <div className="achievements" 
+                  style={{ 
+                    display: "flex", 
+                    gap: "30px",
+                    width: "50%",
+                    justifyContent: "space-around", 
+                    marginTop: "30px",
+                  }}
+                >
+                  <Achievement value="10" label="💚" color="#00cc99" />
+                  <Achievement value="0" label="🗡️" color="#00ffcc" />
+                  <Achievement value="0" label="🛡️" color="#00cc99" />
+                  <Achievement value="10" label="⚡" color="#00cc99" />
+                </div>
+              </Card>
+              
+              <h2 style={{ 
+                fontSize: "1.4rem", 
+                fontWeight: "bold", 
+                marginTop: "50px", 
+                marginBottom: "50px", 
+                textAlign: "center", 
+                color: "#fff" }}
+              >
                 ІНВЕНТАР
               </h2>
-
               <Button
                 mode="filled"
                 onClick={fetchInventory}
@@ -789,7 +787,7 @@ export default function HomePage() {
                 }}
                 name="back"
               >
-                {loading ? "✨✨✨🪄✨✨✨" : "Оновити інвентар "}
+                {loading ? "✨✨✨✨✨✨✨" : "Оновити інвентар "}
               </Button>
 
               {inventory.length === 0 && (
