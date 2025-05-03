@@ -764,7 +764,7 @@ export default function HomePage() {
                 fontSize: "1.4rem", 
                 fontWeight: "bold", 
                 marginTop: "50px", 
-                marginBottom: "50px", 
+                marginBottom: "40px", 
                 textAlign: "center", 
                 color: "#fff" }}
               >
@@ -778,11 +778,11 @@ export default function HomePage() {
                   alignItems: "center",
                   justifyContent: "center",
                   width: "100%",
-                  height: 50,
+                  height: 40,
                   background: 'var(--tgui--secondary_bg_color)',
                   padding: 10,
                   borderRadius: 50,
-                  marginBottom: '20px',
+                  marginBottom: '40px',
                   border: '0px solid rgb(255, 255, 255)',
                 }}
                 name="back"
