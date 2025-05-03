@@ -10,10 +10,9 @@ import { supabase } from "@/lib/supabaseClient";
 import Image from "next/image";
 import artilithLogo from "../_assets/Artilith_logo-no-bg.png";
 import sword01a from "../_assets/item/sword01a.png";
-import shield01a from "../_assets/item/shield01a.png";
-import potion01f from "../_assets/item/potion01f.png";
 import { Toaster } from 'react-hot-toast';
 import toast from 'react-hot-toast';
+import { AllItems } from "@/components/Item/Items";
 
 
 export default function HomePage() {
@@ -52,17 +51,6 @@ export default function HomePage() {
     strength?: string;
     price: number;
   } | null;
-
-  type Item = {
-    item_id: number;
-    name: string;
-    description: string;
-    damage: number;
-    strength: number;
-    price: number;
-    image: string ;
-    equipped: boolean;
-  };  
 
   // Завантажуємо дані користувача із Supabase
   useEffect(() => {
@@ -269,27 +257,24 @@ export default function HomePage() {
   }, [inventory]);
 
   // Функція обрахунку характеристик героя
-  // Функція обрахунку характеристик героя
-const updateHeroStats = useCallback(() => {
-  const baseStats = {
-    health: 10,
-    attack: 0,
-    defense: 0,
-    energy: 10,
-  };
-
-  inventory.forEach((item) => {
-    if (item.equipped) {
-      const attack = typeof item.damage === "number" ? item.damage : parseInt(item.damage ?? "0", 10);
-      const defense = typeof item.defense === "number" ? item.defense : parseInt(item.defense ?? "0", 10);
-
-      baseStats.attack += isNaN(attack) ? 0 : attack;
-      baseStats.defense += isNaN(defense) ? 0 : defense;
-    }
-  });
-  console.log("Оновлено характеристики героя:", baseStats);
-  setHeroStats(baseStats);
-}, [inventory]);
+  const updateHeroStats = useCallback(() => {
+    const baseStats = {
+      health: 10,
+      attack: 0,
+      defense: 0,
+      energy: 10,
+    };
+  
+    inventory.forEach((item) => {
+      if (item.equipped) {
+        baseStats.attack += item.damage || 0;
+        baseStats.defense += item.defense || 0;
+      }
+    });
+  
+    console.log("Оновлені характеристики героя:", baseStats);
+    setHeroStats(baseStats);
+  }, [inventory]);
 
   
   useEffect(() => {
@@ -302,65 +287,42 @@ const updateHeroStats = useCallback(() => {
     setLoading(true);
   
     const { data, error } = await supabase
-    .from('inventory')
-    .select(`
-      id,
-      item_id,
-      equipped,
-      item: item_id (      
-        name,
-        description,
-        damage,
-        defense,
-        price,
-        type
-      )
-    `)
-    .eq('user_id', userId);
-
+      .from("inventory")
+      .select(`
+        id,
+        item_id,
+        equipped
+      `)
+      .eq("user_id", userId);
+  
     if (error) {
-      console.error('Помилка при завантаженні інвентаря:', error.message);
+      console.error("Помилка при завантаженні інвентаря:", error.message);
       setLoading(false);
       return;
     }
   
     if (data) {
       const formatted = data.map((entry) => {
-        const item = Array.isArray(entry.item) ? entry.item[0] : entry.item;
-        const itemId = Number(entry.item_id);
-        const image = imageMap[itemId];
-      
+        const item = AllItems.find((i) => i.item_id === entry.item_id); // Знаходимо предмет у локальному масиві
         return {
-          item_id: itemId,
-          name: item?.name,
-          description: item?.description,
-          damage: Number(item?.damage) || 0,
-          defense: Number(item?.defense) || 0,
-          price: item?.price,
-          type: item?.type,
-          image,
+          ...item,
           equipped: entry.equipped ?? false,
         };
-      });         
-
-      if (!userId) {
-        console.warn("UserID порожній");
-        return;
-      }
-  setInventory(formatted);
-}
-
+      });
+  
+      console.log("Форматований інвентар:", formatted);
+      setInventory(formatted);
+    }
   
     setLoading(false);
   };
 
-  const toggleEquip = async (index: number) => {
+    const toggleEquip = async (index: number) => {
     const selectedItem = inventory[index];
     if (!selectedItem) return;
   
     const itemType = selectedItem.type;
   
-    // Якщо вже екіпірований — просто зняти
     if (selectedItem.equipped) {
       await supabase
         .from('inventory')
@@ -368,7 +330,6 @@ const updateHeroStats = useCallback(() => {
         .eq('user_id', userId)
         .eq('item_id', selectedItem.item_id);
     } else {
-      // Зняти всі інші предмети цього типу
       await supabase
         .from('inventory')
         .update({ equipped: false })
@@ -377,7 +338,6 @@ const updateHeroStats = useCallback(() => {
           .filter(item => item.type === itemType)
           .map(item => item.item_id));
   
-      // Екіпірувати новий
       await supabase
         .from('inventory')
         .update({ equipped: true })
@@ -385,8 +345,8 @@ const updateHeroStats = useCallback(() => {
         .eq('item_id', selectedItem.item_id);
     }
   
-    // Оновити інвентар
-    await fetchInventory();
+    console.log("Екіпіруємо предмет:", selectedItem);
+    await fetchInventory(); // Оновлюємо інвентар
   };
   
 
@@ -451,9 +411,9 @@ const updateHeroStats = useCallback(() => {
   };
 
   const imageMap: Record<number, string> = {
-    1: sword01a.src,
-    2: shield01a.src,
-    3: potion01f.src,
+    1: "/_assets/item/sword01a.png",
+    2: "/_assets/item/shield01a.png",
+    3: "/_assets/item/potion01f.png",
   };
 
   // Завантажуємо інвентар при зміні userId
@@ -466,24 +426,8 @@ const updateHeroStats = useCallback(() => {
 
   useEffect(() => {
     updateHeroStats();
-  }, [inventory, updateHeroStats]);
+  }, [inventory, updateHeroStats]); 
 
-  function Achievement({
-    value,
-    label,
-    color,
-  }: {
-    value: string;
-    label: string;
-    color: string;
-  }) {
-    return (
-      <div style={{ textAlign: "center" }}>
-        <p style={{ fontSize: "16px", color }}>{value}</p>
-        <p style={{ fontSize: "12px", color: "#aaa" }}>{label}</p>
-      </div>
-    );
-  } 
 
   // Функція рендеринга контенту для різних вкладок
   const renderContent = () => {
@@ -536,39 +480,20 @@ const updateHeroStats = useCallback(() => {
                   animation: "fadeIn 1s ease forwards",
                 }}
               >
-                <ItemCard
-                  item_id={1}
-                  type="weapon"
-                  name="Навчальний меч"
-                  image={sword01a.src}
-                  description="Простий меч для початківців."
-                  damage="Шкода: 1"
-                  strength="Міцність: 5"
-                  price={30}
-                  onBuyRequest={(item) => setSelectedItem(item)}
-                />
-
-                <ItemCard
-                  item_id={2}
-                  type="shield"
-                  name="Навчальний щит"
-                  image={shield01a.src}
-                  description="Простий щит для початківців."
-                  damage=""
-                  strength="Міцність: 15"
-                  price={65}
-                  onBuyRequest={(item) => setSelectedItem(item)}
-                />
-
-                <ItemCard
-                  item_id={3}
-                  type="potion"
-                  name="Маленьке зілля енергії"
-                  image={potion01f.src}
-                  description="Відновлює енергію. Один ковток — і ви знову в строю."
-                  price={50}
-                  onBuyRequest={(item) => setSelectedItem(item)}
-                />
+                {AllItems.map((item) => (
+                  <ItemCard
+                    key={item.item_id}
+                    item_id={item.item_id}
+                    type={item.type}
+                    name={item.name}
+                    image={item.image}
+                    description={item.description}
+                    damage={item.damage ? `Шкода: ${item.damage}` : ""}
+                    strength={item.defense ? `Міцність: ${item.defense}` : ""}
+                    price={item.price}
+                    onBuyRequest={(item) => setSelectedItem(item)}
+                  />
+                ))}
               </div>
             </div>
           </Placeholder>
@@ -803,20 +728,33 @@ const updateHeroStats = useCallback(() => {
               </p>
 
               <Card className="page">
-                <h3 >Характеристики</h3>
-                <div className="achievements" 
-                  style={{ 
-                    display: "flex", 
-                    gap: "30px",
-                    width: "50%",
-                    justifyContent: "space-around", 
+                <h3>Характеристики</h3>
+                <div
+                  style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                    gap: "10px",
                     marginTop: "20px",
+                    color: "#fff",
                   }}
                 >
-                  <Achievement value={String(heroStats.health)} label="💚" color="#00cc99" />
-                  <Achievement value={String(heroStats.attack)} label="🗡️" color="#00ffcc" />
-                  <Achievement value={String(heroStats.defense)} label="🛡️" color="#00cc99" />
-                  <Achievement value={String(heroStats.energy)} label="⚡" color="#00cc99" />
+                  <div style={{ display: "flex", justifyContent: "space-between", width: "50%" }}>
+                    <span>💚 Здоров'я:</span>
+                    <span>{heroStats.health}</span>
+                  </div>
+                  <div style={{ display: "flex", justifyContent: "space-between", width: "50%" }}>
+                    <span>🗡️ Атака:</span>
+                    <span>{heroStats.attack}</span>
+                  </div>
+                  <div style={{ display: "flex", justifyContent: "space-between", width: "50%" }}>
+                    <span>🛡️ Захист:</span>
+                    <span>{heroStats.defense}</span>
+                  </div>
+                  <div style={{ display: "flex", justifyContent: "space-between", width: "50%" }}>
+                    <span>⚡ Енергія:</span>
+                    <span>{heroStats.energy}</span>
+                  </div>
                 </div>
               </Card>
               
