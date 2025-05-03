@@ -732,29 +732,30 @@ export default function HomePage() {
                 <div
                   style={{
                     display: "flex",
-                    flexDirection: "column",
+                    flexDirection: "row",
+                    justifyContent: "center",
                     alignItems: "center",
-                    gap: "10px",
+                    gap: "20px",
                     marginTop: "20px",
                     color: "#fff",
                   }}
-                >
-                  <div style={{ display: "flex", justifyContent: "space-between", width: "50%" }}>
-                    <span>💚 Здоров'я:</span>
-                    <span>{heroStats.health}</span>
-                  </div>
-                  <div style={{ display: "flex", justifyContent: "space-between", width: "50%" }}>
-                    <span>🗡️ Атака:</span>
-                    <span>{heroStats.attack}</span>
-                  </div>
-                  <div style={{ display: "flex", justifyContent: "space-between", width: "50%" }}>
-                    <span>🛡️ Захист:</span>
-                    <span>{heroStats.defense}</span>
-                  </div>
-                  <div style={{ display: "flex", justifyContent: "space-between", width: "50%" }}>
-                    <span>⚡ Енергія:</span>
-                    <span>{heroStats.energy}</span>
-                  </div>
+                  >
+                    <div style={{ display: "flex", justifyContent: "space-between", width: "50%" }}>
+                      <span>❤️ </span>
+                      <span> {heroStats.health}</span>
+                    </div>
+                    <div style={{ display: "flex", justifyContent: "space-between", width: "50%" }}>
+                      <span>🗡️ </span>
+                      <span>{heroStats.attack}</span>
+                    </div>
+                    <div style={{ display: "flex", justifyContent: "space-between", width: "50%" }}>
+                      <span>🛡️</span>
+                      <span>{heroStats.defense}</span>
+                    </div>
+                    <div style={{ display: "flex", justifyContent: "space-between", width: "50%" }}>
+                      <span>⚡</span>
+                      <span>{heroStats.energy}</span>
+                    </div>
                 </div>
               </Card>
               
