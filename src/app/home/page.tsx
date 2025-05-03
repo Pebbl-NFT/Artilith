@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef, useCallback } from "react";
 import { List, Placeholder, Button, Card } from "@telegram-apps/telegram-ui";
 import { Page } from "@/components/Page";
 import TopBar from "@/components/TopBar";
@@ -14,7 +14,6 @@ import shield01a from "../_assets/item/shield01a.png";
 import potion01f from "../_assets/item/potion01f.png";
 import { Toaster } from 'react-hot-toast';
 import toast from 'react-hot-toast';
-import type { StaticImageData } from "next/image";
 
 
 export default function HomePage() {
@@ -26,7 +25,17 @@ export default function HomePage() {
   const [animationTime, setAnimationTime] = useState(1100);
   const [activeTab, setActiveTab] = useState("home");
   const [loading, setLoading] = useState(false);
+  const [inventory, setInventory] = useState<any[]>([]);
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
+  const initDataState = useSignal(initData.state);
+  const userId = initDataState?.user?.id;
 
+  const [heroStats, setHeroStats] = useState({
+    health: 10,
+    attack: 0,
+    defense: 0,
+    energy: 10
+  });
 
   // Перемикач, який показує заблокований контент (наприклад, рівень 2)
   const [locked, setLocked] = useState(true);
@@ -35,6 +44,7 @@ export default function HomePage() {
   const [selectedItem, setSelectedItem] = useState<SelectedItemType>(null);
   type SelectedItemType = {
     item_id: number;
+    type: string;
     name: string;
     image: string;
     description: string;
@@ -44,20 +54,15 @@ export default function HomePage() {
   } | null;
 
   type Item = {
-    item_id: number; // додати для оновлення в Supabase
+    item_id: number;
     name: string;
     description: string;
     damage: number;
-    strength: number; // якщо в тебе це defense — перейменуй або враховуй
+    strength: number;
     price: number;
-    image: string | StaticImageData;
+    image: string ;
     equipped: boolean;
-  };
-  
-  const [inventory, setInventory] = useState<(Item | null)[]>([]);
-  const timerRef = useRef<NodeJS.Timeout | null>(null);
-  const initDataState = useSignal(initData.state);
-  const userId = initDataState?.user?.id;
+  };  
 
   // Завантажуємо дані користувача із Supabase
   useEffect(() => {
@@ -127,6 +132,7 @@ export default function HomePage() {
   // натискаємо "купити"
   interface ItemType {
     item_id: number;
+    type: string;
     name: string;
     image: string;
     description: string;
@@ -145,7 +151,7 @@ export default function HomePage() {
 
 
   // Функція обробки покупки
-  const handleBuyItem = async (item: { item_id: number; name: string; image: string; description: string; damage?: string; strength?: string; price: number }) => {
+  const handleBuyItem = async (item: { item_id: number; type:string; name: string; image: string; description: string; damage?: string; strength?: string; price: number }) => {
     if (points < item.price) {
       toast.error("Недостатньо уламків для покупки!");
       return;
@@ -174,45 +180,6 @@ export default function HomePage() {
     } else {
       toast.error(`Ви вже маєте ${item.name} або сталася помилка!`);
     }
-  };
-
-  // Перевірка наявності предмета в інвентарі
-  const checkInventoryItem = async (userId: string, itemId: number) => {
-    const { data, error } = await supabase
-      .from('inventory')
-      .select('item_id')
-      .eq('user_id', userId)
-      .eq('item_id', itemId)
-      .single(); // або .maybeSingle()
-
-    return !!data; // якщо знайдено — true
-  }
-
-  async function getUserInventory(userId: string) {
-    const { data, error } = await supabase
-      .from('inventory')
-      .select('id, item_id, items ( name, image, description, damage, defense, price )')
-      .eq('user_id', userId);
-
-    if (error) {
-      console.error('Помилка завантаження інвентаря:', error);
-      return [];
-    }
-
-    return data;
-  }
-  
-  // Збереження даних користувача
-  const saveUserData = async (newPoints: number, newClickDelay: number) => {
-    if (!userId) return;
-
-    const { error } = await supabase
-      .from("users")
-      .upsert([{ id: userId, points: newPoints, click_delay: newClickDelay }], {
-        onConflict: "id",
-      });
-
-    if (error) console.error("Помилка збереження:", error);
   };
 
   // Оновлення таймера для кліку
@@ -290,42 +257,144 @@ export default function HomePage() {
     }
   };
 
-  const toggleEquip = async (index: number) => {
-    const item = inventory[index];
-    if (!item) return; // захист від null
-  
-    const newStatus = !item.equipped;
-  
-    // Оновлюємо локальний стан
-    setInventory((prev) =>
-      prev.map((i, idx) =>
-        idx === index && i !== null
-          ? {
-              ...i,
-              equipped: newStatus,
-            }
-          : i
-      )
-    );
-  
-    const { error } = await supabase
-      .from('inventory')
-      .update({ equipped: newStatus })
-      .eq('user_id', userId)
-      .eq('item_id', item.item_id); // або item.itemId, якщо так у тебе в типах
-  
-    if (error) {
-      console.error("Не вдалося оновити стан предмета:", error.message);
-    }
-  };  
-  
+  useEffect(() => {
+    let newStats = {
+      health: 10,
+      attack: 0,
+      defense: 0,
+      energy: 10
+    };
 
+    setHeroStats(newStats);
+  }, [inventory]);
+
+  // Функція обрахунку характеристик героя
+  // Функція обрахунку характеристик героя
+const updateHeroStats = useCallback(() => {
+  const baseStats = {
+    health: 10,
+    attack: 0,
+    defense: 0,
+    energy: 10,
+  };
+
+  inventory.forEach((item) => {
+    if (item.equipped) {
+      const attack = typeof item.damage === "number" ? item.damage : parseInt(item.damage ?? "0", 10);
+      const defense = typeof item.defense === "number" ? item.defense : parseInt(item.defense ?? "0", 10);
+
+      baseStats.attack += isNaN(attack) ? 0 : attack;
+      baseStats.defense += isNaN(defense) ? 0 : defense;
+    }
+  });
+  console.log("Оновлено характеристики героя:", baseStats);
+  setHeroStats(baseStats);
+}, [inventory]);
+
+  
+  useEffect(() => {
+    updateHeroStats();
+  }, [inventory]);
+  
+  // Функція додавання предмета в інвентар
+  const fetchInventory = async () => {
+    if (!userId) return;
+    setLoading(true);
+  
+    const { data, error } = await supabase
+    .from('inventory')
+    .select(`
+      id,
+      item_id,
+      equipped,
+      item: item_id (      
+        name,
+        description,
+        damage,
+        defense,
+        price,
+        type
+      )
+    `)
+    .eq('user_id', userId);
+
+    if (error) {
+      console.error('Помилка при завантаженні інвентаря:', error.message);
+      setLoading(false);
+      return;
+    }
+  
+    if (data) {
+      const formatted = data.map((entry) => {
+        const item = Array.isArray(entry.item) ? entry.item[0] : entry.item;
+        const itemId = Number(entry.item_id);
+        const image = imageMap[itemId];
+      
+        return {
+          item_id: itemId,
+          name: item?.name,
+          description: item?.description,
+          damage: Number(item?.damage) || 0,
+          defense: Number(item?.defense) || 0,
+          price: item?.price,
+          type: item?.type,
+          image,
+          equipped: entry.equipped ?? false,
+        };
+      });         
+
+      if (!userId) {
+        console.warn("UserID порожній");
+        return;
+      }
+  setInventory(formatted);
+}
+
+  
+    setLoading(false);
+  };
+
+  const toggleEquip = async (index: number) => {
+    const selectedItem = inventory[index];
+    if (!selectedItem) return;
+  
+    const itemType = selectedItem.type;
+  
+    // Якщо вже екіпірований — просто зняти
+    if (selectedItem.equipped) {
+      await supabase
+        .from('inventory')
+        .update({ equipped: false })
+        .eq('user_id', userId)
+        .eq('item_id', selectedItem.item_id);
+    } else {
+      // Зняти всі інші предмети цього типу
+      await supabase
+        .from('inventory')
+        .update({ equipped: false })
+        .eq('user_id', userId)
+        .in('item_id', inventory
+          .filter(item => item.type === itemType)
+          .map(item => item.item_id));
+  
+      // Екіпірувати новий
+      await supabase
+        .from('inventory')
+        .update({ equipped: true })
+        .eq('user_id', userId)
+        .eq('item_id', selectedItem.item_id);
+    }
+  
+    // Оновити інвентар
+    await fetchInventory();
+  };
+  
 
   // Компонент ItemCard
   type ItemCardProps = ItemType & {
   onBuyRequest: (item: ItemType) => void;
   };
-  const ItemCard: React.FC<ItemCardProps> = ({ item_id, name, image, description, damage, strength, price,onBuyRequest }) => (
+  const ItemCard: React.FC<ItemCardProps> = ({ item_id, type, name, image, description, damage, strength, price,onBuyRequest }) => (
       <div
       style={{
         borderRadius: "10px",
@@ -349,7 +418,7 @@ export default function HomePage() {
         boxShadow: " rgba(0, 0, 0, 0.3) 0px 19px 38px, rgba(0, 0, 0, 0.22) 0px 15px 12px",
       }}
     />
-      <h3 style={{ color: "#00ffcc", marginBottom: "10px" }}>{name}</h3>
+      <h3 style={{ color: "rgba(253, 253, 253, 0.37)", marginBottom: "10px" }}>{name}</h3>
       <p style={{ color: "#ddd", marginBottom: "15px" }}>{description}</p>
       {damage && <p style={{ color: "#ddd", marginBottom: "5px" }}>{damage}</p>}
       {strength && <p style={{ color: "#ddd", marginBottom: "15px" }}>{strength}</p>}
@@ -365,15 +434,14 @@ export default function HomePage() {
           transition: "all 0.3s ease",
           marginTop: "10px",
         }}
-        onClick={() => onBuyRequest({ item_id, name, image, description, damage, strength, price })}
+        onClick={() => onBuyRequest({ item_id, type, name, image, description, damage, strength, price })}
         >
         Купити за {price} 🪨
       </button>
     </div>
   );
-  
-  
- // Функція форматування таймера
+   
+  // Функція форматування таймера
   const formatTime = (totalSeconds: number) => {
   const hours = Math.floor(totalSeconds / 3600);
   const minutes = Math.floor((totalSeconds % 3600) / 60);
@@ -387,73 +455,18 @@ export default function HomePage() {
     2: shield01a.src,
     3: potion01f.src,
   };
-  
-  
-
-  // Функція додавання предмета в інвентар
-  const fetchInventory = async () => {
-    if (!userId) return;
-
-    setLoading(true); // Показуємо індикатор завантаження
-
-    const { data, error } = await supabase
-      .from('inventory')
-      .select('id, item_id, equipped, item (name, description, damage, defense, price)')
-      .eq('user_id', userId);
-
-    if (error) {
-      console.error('Помилка при завантаженні інвентаря:', error.message);
-      setLoading(false);
-      return;
-    }
-
-    if (data) {
-      const formatted = data.map((entry) => {
-        const item = Array.isArray(entry.item) ? entry.item[0] : entry.item;
-        const itemId = Number(entry.item_id);
-        const image = imageMap[itemId]; // ваша картка зображень
-
-        if (!image) {
-          console.warn(`Зображення не знайдено для item_id: ${itemId}`);
-        }
-
-        return {
-          item_id: itemId,
-          name: item?.name,
-          description: item?.description,
-          damage: item?.damage,
-          strength: item?.defense,
-          price: item?.price,
-          image,
-          equipped: entry.equipped ?? false,
-        };        
-      });
-
-      setInventory(formatted);
-    }
-
-    setLoading(false); // Скидаємо індикатор завантаження
-  };
 
   // Завантажуємо інвентар при зміні userId
   useEffect(() => {
-    fetchInventory();
+    if (userId) {
+      fetchInventory();
+    }
   }, [userId]);
+  
 
-  const equipped = {
-    head: {
-      id: 'helmet-1',
-      name: 'Залізний шолом',
-      icon: '🪖',
-      defense: 5,
-    },
-    weapon: {
-      id: 'sword-1',
-      name: 'Меч воїна',
-      icon: '🗡️',
-      damage: 10,
-    },
-  };
+  useEffect(() => {
+    updateHeroStats();
+  }, [inventory, updateHeroStats]);
 
   function Achievement({
     value,
@@ -472,8 +485,8 @@ export default function HomePage() {
     );
   } 
 
- // Функція рендеринга контенту для різних вкладок
- const renderContent = () => {
+  // Функція рендеринга контенту для різних вкладок
+  const renderContent = () => {
   switch (activeTab) {
     case "shop":
       return (
@@ -520,10 +533,12 @@ export default function HomePage() {
                   gap: "20px",
                   width: "100%",
                   maxWidth: "1200px",
+                  animation: "fadeIn 1s ease forwards",
                 }}
               >
                 <ItemCard
                   item_id={1}
+                  type="weapon"
                   name="Навчальний меч"
                   image={sword01a.src}
                   description="Простий меч для початківців."
@@ -535,6 +550,7 @@ export default function HomePage() {
 
                 <ItemCard
                   item_id={2}
+                  type="shield"
                   name="Навчальний щит"
                   image={shield01a.src}
                   description="Простий щит для початківців."
@@ -546,6 +562,7 @@ export default function HomePage() {
 
                 <ItemCard
                   item_id={3}
+                  type="potion"
                   name="Маленьке зілля енергії"
                   image={potion01f.src}
                   description="Відновлює енергію. Один ковток — і ви знову в строю."
@@ -609,6 +626,7 @@ export default function HomePage() {
                 >
                   <ItemCard
                     item_id={0}
+                    type="weapon"
                     name="Хитрун"
                     image={sword01a.src}
                     description="Хитрун"
@@ -638,21 +656,23 @@ export default function HomePage() {
                 flexDirection: "column",
                 alignItems: "center",
                 justifyContent: "center",
-                marginTop: "-20px",
+                marginTop: "0px",
+                width: "100%",
+                height: "300px",
+                animation: "fadeIn 0.5s ease forwards",
               }}
             >
               <h1
                 style={{
-                  fontSize: "2rem",
+                  fontSize: "1.5rem",
                   fontWeight: "bold",
-                  marginBottom: "20px",
-                  marginTop: "5px",
+                  marginTop: "20px",
                   textAlign: "center",
                   lineHeight: "1",
                   color: "#fff",
                 }}
               >
-                HOLD
+              Експедиція
               </h1>
               <div
                 className="imgWrap"
@@ -662,7 +682,7 @@ export default function HomePage() {
                   justifyContent: "center",
                   alignItems: "center",
                   overflow: "visible",
-                  marginTop: "0px",
+                  marginTop: "-20px",
                   marginBottom: "0px",
                   width: "90%",
                   height: "90%",
@@ -672,13 +692,13 @@ export default function HomePage() {
                   className="blue"
                   alt="Artilith Logo Blue"
                   src={artilithLogo}
-                  width={400}
-                  height={400}
+                  width={100}
+                  height={100}
                   style={{
                     position: "absolute",
-                    width: "100%",
+                    width: "auto",
                     height: "auto",
-                    maxWidth: "250px",
+                    maxWidth: "200px",
                   }}
                 />
               </div>
@@ -690,31 +710,71 @@ export default function HomePage() {
                   textAlign: "center",
                   lineHeight: "1",
                   fontFamily: "Arial, sans-serif",
-                  marginTop: "0px",
+                  marginTop: "-20px",
                 }}
               >
                 <span>
-                  {countdown > 0 ? `${formatTime(countdown)}` : "Тисни, щоб отримати уламок!"}
+                  {countdown > 0 ? `${formatTime(countdown)}` : "Тисни щоб відправитись на пошуки!"}
                 </span>
               </p>
-              <h2
+            </div>
+          </Placeholder>
+          <Placeholder>
+            <div
+              className="page"
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                justifyContent: "center",
+                width: "100%",
+                height: "100px",
+                animation: "fadeIn 0.5s ease forwards",
+              }}
+            >
+              <h1
                 style={{
-                  fontSize: "1rem",
+                  fontSize: "1.5rem",
+                  fontWeight: "bold",
+                  marginTop: "20px",
+                  textAlign: "center",
+                  lineHeight: "1",
+                  color: "#fff",
+                }}
+              >
+              Рейд
+              </h1>
+              <div
+                className="imgWrap"
+                style={{
+                  position: "relative",
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  overflow: "visible",
+                  marginTop: "-20px",
+                  width: "90%",
+                  height: "90%",
+                }}
+              >
+                <p
+                style={{
+                  fontSize: "0.9rem",
                   fontWeight: "lighter",
                   color: "#ccc",
                   textAlign: "center",
-                  marginTop: "10px",
-                  lineHeight: "1.4",
+                  lineHeight: "1",
                   fontFamily: "Arial, sans-serif",
                 }}
               >
-                Збирайте уламки, щоб прокачати свого героя та підготувати його до пригод.
-              </h2>
+                В розробці
+              </p>
+              </div>
             </div>
           </Placeholder>
         </div>
       );
-    case "hiro":
+    case "hero":
       return (
         <Page back>
           <Placeholder>
@@ -753,10 +813,10 @@ export default function HomePage() {
                     marginTop: "20px",
                   }}
                 >
-                  <Achievement value="10" label="💚" color="#00cc99" />
-                  <Achievement value="0" label="🗡️" color="#00ffcc" />
-                  <Achievement value="0" label="🛡️" color="#00cc99" />
-                  <Achievement value="10" label="⚡" color="#00cc99" />
+                  <Achievement value={String(heroStats.health)} label="💚" color="#00cc99" />
+                  <Achievement value={String(heroStats.attack)} label="🗡️" color="#00ffcc" />
+                  <Achievement value={String(heroStats.defense)} label="🛡️" color="#00cc99" />
+                  <Achievement value={String(heroStats.energy)} label="⚡" color="#00cc99" />
                 </div>
               </Card>
               
@@ -884,29 +944,29 @@ export default function HomePage() {
     default:
       return null;
   }
-};
+  };
 
-return (
-  <Page back={false}>
-    <List>
-      <TopBar points={points} />
-      <div style={{ paddingBottom: 100 }}>{renderContent()}</div>
-      {selectedItem && (
-          <div className="modal-overlay" onClick={() => setSelectedItem(null)}>
-            <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-              <h3>Підтвердження покупки</h3>
-              <p>Придбати <strong>{selectedItem.name}</strong> за <strong>{selectedItem.price}</strong> уламків?</p>
-              <div style={{ display: "flex", justifyContent: "center", gap: "10px" }}>
-                <button onClick={confirmBuy}>Так</button>
-                <button onClick={() => setSelectedItem(null)}>Ні</button>
+  return (
+    <Page back={false}>
+      <List>
+        <TopBar points={points} />
+        <div style={{ paddingBottom: 100 }}>{renderContent()}</div>
+        {selectedItem && (
+            <div className="modal-overlay" onClick={() => setSelectedItem(null)}>
+              <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+                <h3>Підтвердження покупки</h3>
+                <p>Придбати <strong>{selectedItem.name}</strong> за <strong>{selectedItem.price}</strong> уламків?</p>
+                <div style={{ display: "flex", justifyContent: "center", gap: "10px" }}>
+                  <button onClick={confirmBuy}>Так</button>
+                  <button onClick={() => setSelectedItem(null)}>Ні</button>
+                </div>
               </div>
             </div>
-          </div>
-        )}
-      <BottomBar activeTab={activeTab} setActiveTab={setActiveTab} />
-    </List>
-    <Toaster position="top-center" reverseOrder={false} />
-  </Page>
-);
+          )}
+        <BottomBar activeTab={activeTab} setActiveTab={setActiveTab} />
+      </List>
+      <Toaster position="top-center" reverseOrder={false} />
+    </Page>
+  );
 
 }

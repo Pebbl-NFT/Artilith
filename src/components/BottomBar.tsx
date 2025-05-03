@@ -1,15 +1,14 @@
 'use client';
 
-import { useState } from 'react';
 import { Button, Placeholder } from '@telegram-apps/telegram-ui';
-import home from '../app/_assets/home.svg';
+import Hero from '../app/_assets/home.svg';
 import Auction from '../app/_assets/ticket.svg';
-import lockclosed from '../app/_assets/lock-closed.svg';
+import Artilith from '../app/_assets/Artilith_logo-no-bg.png';
 
 const tabItems = [
-  { icon: Auction.src, label: 'SHOP', bold: false, value: 'shop' },
-  { icon: home.src, label: 'HOLD', bold: false, value: 'home' },
-  { icon: lockclosed.src, label: 'HIRO', bold: false, value: 'hiro' },
+  { icon: Auction.src, label: 'МІСТО', bold: false, value: 'shop' },
+  { icon: Artilith.src, label: 'ПРИГОДИ', bold: false, value: 'home' },
+  { icon: Hero.src, label: 'ДІМ', bold: false, value: 'hero' },
 ];
 
 export default function BottomBar({ activeTab, setActiveTab }: { activeTab: string, setActiveTab: (value: string) => void }) {
@@ -22,9 +21,9 @@ export default function BottomBar({ activeTab, setActiveTab }: { activeTab: stri
         alignItems: 'center',
         width: '100%',
         position: 'fixed',
-        bottom: 0,
+        bottom: -10,
         background: 'var(--tgui--secondary_bg_color)',
-        borderTop: '1px solid rgb(0, 123, 255)',
+        borderTop: '1px solid rgb(255, 255, 255)',
         zIndex: 50,
       }}
     >
@@ -36,7 +35,7 @@ export default function BottomBar({ activeTab, setActiveTab }: { activeTab: stri
           onClick={() => setActiveTab(item.value)}
           style={{
             flex: 1,
-            height: 90,
+            height: 70,
             background: 'transparent',
             border: 'none',
             cursor: 'pointer',
@@ -71,7 +70,7 @@ export default function BottomBar({ activeTab, setActiveTab }: { activeTab: stri
                 fontSize: 14,
                 fontWeight: item.bold ? 'bold' : 'lighter',
                 color: item.bold ? 'rgb(143, 143, 143)' : undefined,
-                marginTop: 0,
+                marginTop: -20,
                 textAlign: 'center',
               }}
             >
