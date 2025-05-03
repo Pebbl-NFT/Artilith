@@ -750,7 +750,7 @@ export default function HomePage() {
                     gap: "30px",
                     width: "50%",
                     justifyContent: "space-around", 
-                    marginTop: "30px",
+                    marginTop: "20px",
                   }}
                 >
                   <Achievement value="10" label="💚" color="#00cc99" />
@@ -770,6 +770,7 @@ export default function HomePage() {
               >
                 ІНВЕНТАР
               </h2>
+
               <Button
                 mode="filled"
                 onClick={fetchInventory}
