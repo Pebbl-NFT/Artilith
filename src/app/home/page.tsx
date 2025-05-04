@@ -1,18 +1,36 @@
 "use client";
 
 import React, { useEffect, useState, useRef, useCallback } from "react";
-import { List, Placeholder, Button, Card } from "@telegram-apps/telegram-ui";
+import Image from "next/image";
+import {
+  List,
+  Placeholder,
+  Button,
+  Card,
+} from "@telegram-apps/telegram-ui";
+import { useSignal, initData } from "@telegram-apps/sdk-react";
+import { Toaster } from "react-hot-toast";
+import toast from "react-hot-toast";
+
+// Компоненти
 import { Page } from "@/components/Page";
 import TopBar from "@/components/TopBar";
 import BottomBar from "@/components/BottomBar";
-import { useSignal, initData } from "@telegram-apps/sdk-react";
+import { ItemCard } from "@/components/ItemCard";
+
+// Дані та логіка
 import { supabase } from "@/lib/supabaseClient";
-import Image from "next/image";
+import { AllItems } from "@/components/Item/Items";
+import { formatTime } from "@/utils/formatTime";
+import { updateUserPoints } from "@/hooks/useUserPoints";
+import {
+  addInventoryItem,
+  toggleEquipItem, // якщо не використовується – видали
+} from "@/hooks/useItemActions";
+
+// Зображення
 import artilithLogo from "../_assets/Artilith_logo-no-bg.png";
 import sword01a from "../_assets/item/sword01a.png";
-import { Toaster } from 'react-hot-toast';
-import toast from 'react-hot-toast';
-import { AllItems } from "@/components/Item/Items";
 
 
 export default function HomePage() {
@@ -73,62 +91,6 @@ export default function HomePage() {
     fetchUserData();
   }, [userId]);
 
-  // Оновити кількість балів
-  async function updateUserPoints(userId: string | undefined, newPoints: number) {
-  if (!userId) {
-    console.error('userId не вказаний при оновленні балів');
-    return false;
-  }
-
-  const { error } = await supabase
-    .from('users')
-    .update({ points: newPoints })
-    .eq('id', userId);
-
-  if (error) {
-    console.error('Помилка оновлення балів:', error);
-    return false;
-  }
-  return true;
-  }
-
-  // Додаємо предмет у інвентар користувача
-  const addInventoryItem = async (userId: string, itemId: number, itemName: string) => {
-  try {
-  const { error: insertError } = await supabase
-  .from('inventory')
-  .insert([
-    {
-      user_id: userId,
-      item_id: itemId,
-      item: itemName,
-    },
-  ]);
-
-  if (insertError) {
-  console.error('Помилка вставки в інвентар:', insertError.message);
-  return false;
-  }
-
-  return true;
-  } catch (error) {
-  console.error('Невідома помилка:', error);
-  return false;
-  }
-  };
-
-  // натискаємо "купити"
-  interface ItemType {
-    item_id: number;
-    type: string;
-    rarity: string;
-    name: string;
-    image: string;
-    description: string;
-    damage?: string;
-    strength?: string;
-    price: number;
-  }
 
   // підтвердження покупки
   const confirmBuy = async () => {
@@ -137,7 +99,6 @@ export default function HomePage() {
       setSelectedItem(null);
     }
   };
-
 
   // Функція обробки покупки
   const handleBuyItem = async (item: { item_id: number; type:string; name: string; image: string; description: string; damage?: string; strength?: string; price: number }) => {
@@ -150,13 +111,6 @@ export default function HomePage() {
       toast.error('Користувач не знайдений!');
       return;
     }
-
-  // Перевірити чи предмет вже є
-  // const exists = await checkInventoryItem(String(userId), item.item_id);
-  // if (exists) {
-  //   toast.error(`Ви вже маєте ${item.name}!`);
-  //   return;
-  // }
 
     // Додаємо предмет
     const added = await addInventoryItem(String(userId), item.item_id, item.name);
@@ -355,79 +309,13 @@ export default function HomePage() {
   
     await fetchInventory();
   };
-  
-  // Компонент ItemCard
-  type ItemCardProps = ItemType & {
-  onBuyRequest: (item: ItemType) => void;
-  };
-  const ItemCard: React.FC<ItemCardProps> = ({ item_id, type, rarity, name, image, description, damage, strength, price,onBuyRequest }) => (
-      <div
-      style={{
-        borderRadius: "10px",
-        padding: "20px",
-        textAlign: "center",
-        boxShadow: "0 2px 9px rgba(0, 0, 0, 0.3)",
-        border: "1px solid rgba(255, 255, 255, 0.1)",
-      }}
-    >
-      <img 
-        src={image}
-        alt={name}
-        width={50} 
-        height={50}
-        className={`item-image rarity-border-${rarity?.toLowerCase()}`}
-        style={{
-          backgroundColor: "rgba(255, 255, 255, 0.05)",
-          padding: "20px",
-          borderRadius: "10px",
-          marginBottom: "15px",
-          boxShadow: "rgba(0, 0, 0, 0.3) 0px 19px 38px, rgba(0, 0, 0, 0.22) 0px 15px 12px",
-        }}
-      />
-      <h3 style={{ color: "rgba(253, 253, 253, 0.37)", marginBottom: "10px" }}>{name}</h3>
-      <p style={{ color: "#ddd", marginBottom: "15px" }}>{description}</p>
-      {damage && <p style={{ color: "#ddd", marginBottom: "5px" }}>{damage}</p>}
-      {strength && <p style={{ color: "#ddd", marginBottom: "15px" }}>{strength}</p>}
-      <button
-        style={{
-          backgroundColor: "#00bcd4",
-          border: "none",
-          padding: "12px 24px",
-          fontSize: "1rem",
-          color: "#fff",
-          borderRadius: "6px",
-          cursor: "pointer",
-          transition: "all 0.3s ease",
-          marginTop: "10px",
-        }}
-        onClick={() => onBuyRequest({ item_id, type, rarity, name, image, description, damage, strength, price })}
-        >
-        Купити за {price} 🪨
-      </button>
-    </div>
-  );
-   
-  // Функція форматування таймера
-  const formatTime = (totalSeconds: number) => {
-  const hours = Math.floor(totalSeconds / 3600);
-  const minutes = Math.floor((totalSeconds % 3600) / 60);
-  const seconds = totalSeconds % 60;
-  const pad = (num: number) => num.toString().padStart(2, "0");
-  return `${pad(hours)}:${pad(minutes)}:${pad(seconds)}`;
-  };
-
-  const imageMap: Record<number, string> = {
-    1: "/_assets/item/sword01a.png",
-    2: "/_assets/item/shield01a.png",
-    3: "/_assets/item/potion01f.png",
-  };
 
   // Завантажуємо інвентар при зміні userId
   useEffect(() => {
-    if (userId) {
+    if (activeTab === "hero" && userId) {
       fetchInventory();
     }
-  }, [userId]);
+  }, [activeTab, userId]);
   useEffect(() => {
     updateHeroStats();
   }, [inventory, updateHeroStats]); 
@@ -448,6 +336,7 @@ export default function HomePage() {
                 alignItems: "center",
                 justifyContent: "center",
                 marginTop: "-20px",
+                animation: "fadeIn 1s ease forwards",
               }}
             >
               <h1
@@ -719,7 +608,7 @@ export default function HomePage() {
                 marginTop: "-20px",
                 width: "100%",
                 boxSizing: "border-box",
-                animation: "fadeIn 0.5s ease forwards",
+                animation: "fadeIn 1s ease forwards",
               }}
             >
               <h1 style={{ 
@@ -784,26 +673,6 @@ export default function HomePage() {
               >
                 ІНВЕНТАР
               </h2>
-
-              <Button
-                mode="filled"
-                onClick={fetchInventory}
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  width: "100%",
-                  height: 40,
-                  background: 'var(--tgui--secondary_bg_color)',
-                  padding: 10,
-                  borderRadius: 50,
-                  marginBottom: '40px',
-                  border: '0px solid rgb(255, 255, 255)',
-                }}
-                name="back"
-              >
-                {loading ? "✨✨✨✨✨✨✨" : "Оновити інвентар "}
-              </Button>
 
               {inventory.length === 0 && (
                 <p style={{ fontSize: "1.1rem", fontWeight: "lighter", color: "#ccc", textAlign: "center", marginBottom: "20px", lineHeight: "1.4", fontFamily: "Arial, sans-serif", maxWidth: "90%" }}>
