@@ -719,6 +719,7 @@ export default function HomePage() {
                 marginTop: "-20px",
                 width: "100%",
                 boxSizing: "border-box",
+                animation: "fadeIn 0.5s ease forwards",
               }}
             >
               <h1 style={{ 
@@ -751,6 +752,7 @@ export default function HomePage() {
                     gap: "20px",
                     marginTop: "20px",
                     color: "#fff",
+                    animation: "fadeIn 0.6s ease forwards",
                   }}
                   >
                     <div style={{ display: "flex", justifyContent: "space-between", width: "50%" }}>
@@ -829,6 +831,7 @@ export default function HomePage() {
                         borderRadius: "10px",
                         padding: "20px",
                         animationDelay: `${index * 0.1}s`,
+                        animation: "fadeIn 0.7s ease forwards",
                       }}
                     >
                       <div style={{

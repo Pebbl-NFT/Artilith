@@ -57,11 +57,14 @@ export default function ProfilePage() {
             >
             {userName}
         </h1>
-        <Placeholder>
+        <Placeholder style={{ 
+              animation: "fadeIn 0.5s ease forwards",
+            }}>
           <Card className="page" 
             style={{ 
               padding: "20px",
               border: '1px solid rgba(255, 208, 0, 0.81)',
+              animation: "fadeIn 0.7s ease forwards",
             }}>
             <div>
               <p style={styles.levelText}>VIP {level}</p>
