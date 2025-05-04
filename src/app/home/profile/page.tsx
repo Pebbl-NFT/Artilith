@@ -112,7 +112,7 @@ export default function ProfilePage() {
               <span style={styles.gameBadge}>Telegram</span>
               <span style={styles.gameBadge}>Discord</span>
               <span style={styles.gameBadge}>Twitter</span>
-              <span style={styles.gameBadge}>v. alpha 0.19.5</span>
+              <span style={styles.gameBadge}>v. alpha 0.19.9</span>
             </div>
           </Card>
         </Placeholder>
