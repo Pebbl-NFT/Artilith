@@ -4,6 +4,7 @@ export const ShieldItems = [
     {
       item_id: 2,
       type: "shield",
+      rarity: 'common',
       name: "Навчальний щит",
       description: "Простий щит для початківців.",
       damage: 0,

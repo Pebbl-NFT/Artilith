@@ -319,3 +319,37 @@ button:hover {
   flex-wrap: wrap;
   justify-content: center;
 }
+
+.item-image {
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+/* Кольори за рідкістю */
+.rarity-border-common {
+  border-color: #b0b0b0;
+}
+
+.rarity-border-uncommon {
+  border-color: #4caf50;
+}
+
+.rarity-border-rare {
+  border-color: #2196f3;
+}
+
+.rarity-border-epic {
+  border-color: #9c27b0;
+}
+
+.rarity-border-legendary {
+  border-color: #ff9800;
+}
+
+.rarity-label {
+  position: absolute;
+  top: -10px;
+  font-size: 0.5rem;
+  font-weight: bold;
+  text-align: center;
+  width: 100%;
+}

@@ -121,6 +121,7 @@ export default function HomePage() {
   interface ItemType {
     item_id: number;
     type: string;
+    rarity: string;
     name: string;
     image: string;
     description: string;
@@ -303,12 +304,13 @@ export default function HomePage() {
   
     if (data) {
       const formatted = data.map((entry) => {
-        const item = AllItems.find((i) => i.item_id === entry.item_id); // Знаходимо предмет у локальному масиві
+        const item = AllItems.find((i) => i.item_id === entry.item_id);
         return {
           ...item,
+          id: entry.id, // унікальний id інстансу предмета
           equipped: entry.equipped ?? false,
         };
-      });
+      });      
   
       console.log("Форматований інвентар:", formatted);
       setInventory(formatted);
@@ -317,9 +319,9 @@ export default function HomePage() {
     setLoading(false);
   };
 
-    const toggleEquip = async (index: number) => {
+  const toggleEquip = async (index: number) => {
     const selectedItem = inventory[index];
-    if (!selectedItem) return;
+    if (!selectedItem || !userId) return;
   
     const itemType = selectedItem.type;
   
@@ -328,33 +330,37 @@ export default function HomePage() {
         .from('inventory')
         .update({ equipped: false })
         .eq('user_id', userId)
-        .eq('item_id', selectedItem.item_id);
+        .eq('id', selectedItem.id); // зміна тут
     } else {
-      await supabase
-        .from('inventory')
-        .update({ equipped: false })
-        .eq('user_id', userId)
-        .in('item_id', inventory
-          .filter(item => item.type === itemType)
-          .map(item => item.item_id));
+      // Зняти всі предмети такого типу
+      const idsToUnequip = inventory
+        .filter(item => item.type === itemType && item.equipped)
+        .map(item => item.id);
   
+      if (idsToUnequip.length > 0) {
+        await supabase
+          .from('inventory')
+          .update({ equipped: false })
+          .eq('user_id', userId)
+          .in('id', idsToUnequip);
+      }
+  
+      // Екіпірувати поточний
       await supabase
         .from('inventory')
         .update({ equipped: true })
         .eq('user_id', userId)
-        .eq('item_id', selectedItem.item_id);
+        .eq('id', selectedItem.id); // зміна тут
     }
   
-    console.log("Екіпіруємо предмет:", selectedItem);
-    await fetchInventory(); // Оновлюємо інвентар
+    await fetchInventory();
   };
   
-
   // Компонент ItemCard
   type ItemCardProps = ItemType & {
   onBuyRequest: (item: ItemType) => void;
   };
-  const ItemCard: React.FC<ItemCardProps> = ({ item_id, type, name, image, description, damage, strength, price,onBuyRequest }) => (
+  const ItemCard: React.FC<ItemCardProps> = ({ item_id, type, rarity, name, image, description, damage, strength, price,onBuyRequest }) => (
       <div
       style={{
         borderRadius: "10px",
@@ -365,19 +371,19 @@ export default function HomePage() {
       }}
     >
       <img 
-      src={image} 
-      alt={name} 
-      width={50} 
-      height={50}
-      style={{
-        backgroundColor: "rgba(255, 255, 255, 0.05)",
-        border: "1px solid rgba(253, 253, 253, 0.37)",
-        padding: "20px",
-        borderRadius: "10px",
-        marginBottom: "15px",
-        boxShadow: " rgba(0, 0, 0, 0.3) 0px 19px 38px, rgba(0, 0, 0, 0.22) 0px 15px 12px",
-      }}
-    />
+        src={image}
+        alt={name}
+        width={50} 
+        height={50}
+        className={`item-image rarity-border-${rarity?.toLowerCase()}`}
+        style={{
+          backgroundColor: "rgba(255, 255, 255, 0.05)",
+          padding: "20px",
+          borderRadius: "10px",
+          marginBottom: "15px",
+          boxShadow: "rgba(0, 0, 0, 0.3) 0px 19px 38px, rgba(0, 0, 0, 0.22) 0px 15px 12px",
+        }}
+      />
       <h3 style={{ color: "rgba(253, 253, 253, 0.37)", marginBottom: "10px" }}>{name}</h3>
       <p style={{ color: "#ddd", marginBottom: "15px" }}>{description}</p>
       {damage && <p style={{ color: "#ddd", marginBottom: "5px" }}>{damage}</p>}
@@ -394,7 +400,7 @@ export default function HomePage() {
           transition: "all 0.3s ease",
           marginTop: "10px",
         }}
-        onClick={() => onBuyRequest({ item_id, type, name, image, description, damage, strength, price })}
+        onClick={() => onBuyRequest({ item_id, type, rarity, name, image, description, damage, strength, price })}
         >
         Купити за {price} 🪨
       </button>
@@ -422,8 +428,6 @@ export default function HomePage() {
       fetchInventory();
     }
   }, [userId]);
-  
-
   useEffect(() => {
     updateHeroStats();
   }, [inventory, updateHeroStats]); 
@@ -485,6 +489,7 @@ export default function HomePage() {
                     key={item.item_id}
                     item_id={item.item_id}
                     type={item.type}
+                    rarity={item.rarity}
                     name={item.name}
                     image={item.image}
                     description={item.description}
@@ -553,10 +558,11 @@ export default function HomePage() {
                     item_id={0}
                     type="weapon"
                     name="Хитрун"
+                    rarity="legendary"
                     image={sword01a.src}
                     description="Хитрун"
-                    damage="Шкода: Хитрун"
-                    strength="Міцність: Хитрун"
+                    damage="Шкода: 999999"
+                    strength="Міцність: 999999"
                     price={999999}
                     onBuyRequest={(item) => setSelectedItem(item)}
                   />
@@ -715,7 +721,14 @@ export default function HomePage() {
                 boxSizing: "border-box",
               }}
             >
-              <h1 style={{ fontSize: "2rem", fontWeight: "bold", marginBottom: "10px", textAlign: "center", color: "#fff", lineHeight: "1" }}>ГЕРОЙ</h1>
+              <h1 style={{ 
+                fontSize: "2rem", 
+                fontWeight: "bold", 
+                marginBottom: "10px", 
+                textAlign: "center", 
+                color: "#fff", 
+                lineHeight: "1" }}>
+                ДІМ</h1>
               <p
                 style={{
                   fontSize: "1rem",
@@ -724,7 +737,7 @@ export default function HomePage() {
                   marginBottom: "30px",
                 }}
               >
-                Тут ви можете налаштувати свого героя, прокачати його та підготувати до пригод.
+                Тут ви можете налаштувати свого героя, та підготувати до пригод.
               </p>
 
               <Card className="page">
@@ -810,17 +823,12 @@ export default function HomePage() {
                   inventory.map((item, index) => (
                     <div
                       key={index}
+                      className={`relative flex flex-col items-center bg-white/[0.05] rounded-lg p-2 animate-fadeIn opacity-0 rarity-${item.rarity?.toLowerCase()}`}
                       style={{
-                        display: "flex",
-                        flexDirection: "column",
-                        alignItems: "center",
-                        backgroundColor: "rgba(255, 255, 255, 0.05)",
+                        border: "1px solid rgba(255, 255, 255, 0.1)",
                         borderRadius: "10px",
-                        padding: "10px",
-                        position: "relative",
-                        animation: "fadeIn 0.5s ease forwards",
+                        padding: "20px",
                         animationDelay: `${index * 0.1}s`,
-                        opacity: 0,
                       }}
                     >
                       <div style={{
@@ -832,28 +840,32 @@ export default function HomePage() {
                         fontSize: "2rem",
                         color: item ? "#fff" : "#777",
                         marginBottom: "10px",
+                        position: "relative", // важливо для абсолютного позиціонування rarity-label
                       }}>
+                        <div className="rarity-label">
+                          {item.rarity?.toUpperCase()}
+                        </div>
+
                         {item?.image ? (
                           <img
-                            src={typeof item.image === "string" ? item.image : item.image.src}
-                            alt={item.name}
-                            style={{
-                              backgroundColor: "rgba(255, 255, 255, 0.05)",
-                              border: "1px solid rgba(253, 253, 253, 0.37)",
-                              padding: "20px",
-                              borderRadius: "10px",
-                              boxShadow: " rgba(0, 0, 0, 0.3) 0px 19px 38px, rgba(0, 0, 0, 0.22) 0px 15px 12px",
-                              maxWidth: "100%",
-                              height: "auto", // Забезпечуємо адаптацію зображень
-                            }}
-                          />
+                          src={typeof item.image === "string" ? item.image : item.image.src}
+                          alt={item.name}
+                          className={`item-image rarity-border-${item.rarity?.toLowerCase()}`}
+                          style={{
+                            backgroundColor: "rgba(255, 255, 255, 0.05)",
+                            padding: "20px",
+                            borderRadius: "10px",
+                            boxShadow: "rgba(0, 0, 0, 0.3) 0px 19px 38px, rgba(0, 0, 0, 0.22) 0px 15px 12px",
+                            maxWidth: "100%",
+                            height: "auto",
+                          }}
+                        />
                         ) : item?.name ? (
                           item.name
                         ) : (
                           "+"
                         )}
                       </div>
-
                       {item && (
                         <button
                           style={{
@@ -866,7 +878,8 @@ export default function HomePage() {
                             cursor: "pointer",
                             transition: "background-color 0.3s",
                             width: "100%",
-                            maxWidth: "150px", // Обмежуємо максимальну ширину кнопок
+                            maxWidth: "150px",
+                            marginTop: "-10px",
                           }}
                           onClick={() => toggleEquip(index)}
                         >

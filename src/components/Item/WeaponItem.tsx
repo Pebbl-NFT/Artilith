@@ -4,6 +4,7 @@ export const WeaponItems = [
     {
       item_id: 1,
       type: "weapon",
+      rarity: 'common',
       name: "Навчальний меч",
       description: "Простий меч для початківців.",
       damage: 1,
