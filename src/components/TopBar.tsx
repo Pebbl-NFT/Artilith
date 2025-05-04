@@ -64,22 +64,6 @@ export default function TopBar({ points }: { points: number }) {
           }}
         />
       </div>
-
-      <Button
-        mode="filled"
-        size="s"
-        target="_blank"
-        style={{
-          background: 'var(--tgui--secondary_bg_color)',
-          padding: 10,
-          margin: 20,
-          borderRadius: 50,
-          border: '0px solid rgb(255, 255, 255)',
-        }}
-        name="score-button"
-      >
-        0 💎
-      </Button>
       <Button
         mode="filled"
         size="s"
