@@ -123,14 +123,14 @@ export default function BattlePage() {
 
         <div className="mb-4">
           <p>🧍‍♂️ <strong>Гравець</strong></p>
-          <p>Здоров'я: {playerStats.health}</p>
+          <p>HP: {playerStats.health}</p>
           <p>Атака: {playerStats.attack}</p>
           <p>Захист: {playerStats.defense}</p>
         </div>
 
         <div className="mb-4">
           <p>👾 <strong>{enemyStats.name}</strong></p>
-          <p>Здоров'я: {enemyStats.health}</p>
+          <p>HP: {enemyStats.health}</p>
           <p>Атака: {enemyStats.attack}</p>
           <p>Захист: {enemyStats.defense}</p>
         </div>
