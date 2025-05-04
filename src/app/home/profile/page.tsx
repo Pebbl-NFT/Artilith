@@ -42,24 +42,27 @@ export default function ProfilePage() {
   return (
     <Page back>
       <div style={styles.container}>
-      {userAvatar && (
-            <img src={userAvatar} alt="avatar" style={styles.avatar} />
-          )}
-      <h1
-            style={{
-                fontSize: "3rem",
-                fontWeight: "bold",
-                marginTop: "20px",
-                textAlign: "center",
-                lineHeight: "1",
-                color: "#fff",
-            }}
-            >
-            {userName}
-        </h1>
-        <Placeholder style={{ 
+        <Placeholder 
+            style={{ 
               animation: "fadeIn 0.5s ease forwards",
             }}>
+
+            {userAvatar && (
+              <img src={userAvatar} alt="avatar" style={styles.avatar} />
+            )}
+
+            <h1
+              style={{
+                  fontSize: "3rem",
+                  fontWeight: "bold",
+                  marginTop: "20px",
+                  textAlign: "center",
+                  lineHeight: "1",
+                  color: "#fff",
+              }}
+            >
+              {userName}
+            </h1>
           <Card className="page" 
             style={{ 
               padding: "20px",
