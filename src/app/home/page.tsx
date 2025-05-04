@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState, useRef, useCallback } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import {
   List,
   Placeholder,
@@ -22,6 +23,7 @@ import { ItemCard } from "@/components/ItemCard";
 import { supabase } from "@/lib/supabaseClient";
 import { AllItems } from "@/components/Item/Items";
 import { formatTime } from "@/utils/formatTime";
+import { getPlayerStats } from "@/utils/getPlayerStats";
 import { updateUserPoints } from "@/hooks/useUserPoints";
 import {
   addInventoryItem,
@@ -200,6 +202,7 @@ export default function HomePage() {
     }
   };
 
+  // 
   useEffect(() => {
     let newStats = {
       health: 10,
@@ -213,27 +216,8 @@ export default function HomePage() {
 
   // Функція обрахунку характеристик героя
   const updateHeroStats = useCallback(() => {
-    const baseStats = {
-      health: 10,
-      attack: 0,
-      defense: 0,
-      energy: 10,
-    };
-  
-    inventory.forEach((item) => {
-      if (item.equipped) {
-        baseStats.attack += item.damage || 0;
-        baseStats.defense += item.defense || 0;
-      }
-    });
-  
-    console.log("Оновлені характеристики героя:", baseStats);
-    setHeroStats(baseStats);
-  }, [inventory]);
-
-  
-  useEffect(() => {
-    updateHeroStats();
+    const stats = getPlayerStats(inventory);
+    setHeroStats(stats);
   }, [inventory]);
   
   // Функція додавання предмета в інвентар
@@ -316,6 +300,7 @@ export default function HomePage() {
       fetchInventory();
     }
   }, [activeTab, userId]);
+
   useEffect(() => {
     updateHeroStats();
   }, [inventory, updateHeroStats]); 
@@ -335,7 +320,7 @@ export default function HomePage() {
                 flexDirection: "column",
                 alignItems: "center",
                 justifyContent: "center",
-                marginTop: "-20px",
+                marginTop: "50px",
                 animation: "fadeIn 1s ease forwards",
               }}
             >
@@ -476,7 +461,7 @@ export default function HomePage() {
                 flexDirection: "column",
                 alignItems: "center",
                 justifyContent: "center",
-                marginTop: "0px",
+                marginTop: "50px",
                 width: "100%",
                 height: "300px",
                 animation: "fadeIn 0.5s ease forwards",
@@ -540,6 +525,7 @@ export default function HomePage() {
             </div>
           </Placeholder>
           <Placeholder>
+          <Link href="/battle" style={{ textDecoration: "none" }}>
             <div
               className="page"
               style={{
@@ -587,10 +573,11 @@ export default function HomePage() {
                   fontFamily: "Arial, sans-serif",
                 }}
               >
-                В розробці
+                Ранній доступ
               </p>
               </div>
             </div>
+            </Link>
           </Placeholder>
         </div>
       );
@@ -605,9 +592,7 @@ export default function HomePage() {
                 flexDirection: "column",
                 alignItems: "center",
                 justifyContent: "center",
-                marginTop: "-20px",
-                width: "100%",
-                boxSizing: "border-box",
+                marginTop: "50px",
                 animation: "fadeIn 1s ease forwards",
               }}
             >

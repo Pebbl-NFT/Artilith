@@ -18,7 +18,20 @@ export default function TopBar({ points }: { points: number }) {
   }, [initDataState?.user]);
 
   return (
-    <div className='top-bar' style={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}>
+    <div className='top-bar' 
+    style={{ 
+      display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        width: '100%',
+        background: 'var(--tgui--secondary_bg_color)',
+        backdropFilter: "blur(2px)",
+        transition: "filter 0.3s ease",
+        pointerEvents: "auto",
+        top: -5,
+        position: 'fixed',
+        zIndex: 10,
+    }}>
       <div style={{ position: 'relative', margin: 20 }}>
         <Link href="/home/profile">
           <Button
@@ -52,6 +65,36 @@ export default function TopBar({ points }: { points: number }) {
         />
       </div>
 
+      <Button
+        mode="filled"
+        size="s"
+        target="_blank"
+        style={{
+          background: 'var(--tgui--secondary_bg_color)',
+          padding: 10,
+          margin: 20,
+          borderRadius: 50,
+          border: '0px solid rgb(255, 255, 255)',
+        }}
+        name="score-button"
+      >
+        0 💎
+      </Button>
+      <Button
+        mode="filled"
+        size="s"
+        target="_blank"
+        style={{
+          background: 'var(--tgui--secondary_bg_color)',
+          padding: 10,
+          margin: 20,
+          borderRadius: 50,
+          border: '0px solid rgb(255, 255, 255)',
+        }}
+        name="score-button"
+      >
+        0 🪙
+      </Button>
       <Button
         mode="filled"
         size="s"
