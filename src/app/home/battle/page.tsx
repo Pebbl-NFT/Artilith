@@ -232,7 +232,7 @@ export default function BattlePage() {
 
   if (showPreBattle) {
     return (
-      <Page>
+      <Page >
         <Card className="page" style={{
               display: "flex",
               justifyContent: "center",
@@ -300,7 +300,7 @@ export default function BattlePage() {
           >
             ⚔️ Почати бій ⚔️ 
           </Button>
-          <p>- 1 ⚡</p>
+          <p style={{ marginTop: 12, animation: "fadeIn 0.6s ease forwards",}}> - 1 ⚡</p>
           <Link href="/home">
             <Button style={{ marginTop: 12, animation: "fadeIn 0.6s ease forwards", marginBottom: -20, backgroundColor:"#f44336" }}>
               Втекти
