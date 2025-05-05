@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
-import { Button, Link } from '@telegram-apps/telegram-ui';
+import { Button, Link, Card, Placeholder } from '@telegram-apps/telegram-ui';
 import { Page } from "@/components/Page";
 import { useSignal, initData } from "@telegram-apps/sdk-react";
 import { supabase } from "@/lib/supabaseClient";
@@ -204,43 +204,102 @@ export default function BattlePage() {
   if (isLoading) return <div>Завантаження бою...</div>;
 
   return (
-    <Page>
-      <div className="flex flex-col justify-between h-screen px-4 py-2 text-white">
-        <div className="text-center">
-          <h2 className="text-xl font-bold mb-2">👾 {enemyStats.name}</h2>
-          <ProgressBar value={enemyHP} max={enemyStats.health} color="#60a5fa" />
-          <p>Захист: {enemyDEF}</p>
-          <p>Атака: {enemyStats.attack}</p>
-        </div>
+    <Page back >
+      <Placeholder>
+      <div
+        className="page"
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+          marginTop: "0px",
+          animation: "fadeIn 1s ease forwards",
+        }}
+      >
+        <Card className="page">
+          <h3> {enemyStats.name}</h3>
+          <div style={{ display: "flex", justifyContent: "space-between", width: "100%" }}>
+                <span>{enemyHP} </span>
+                <span>❤️ </span>
+                <span>{enemyStats.health} </span>
+              </div>
+              <ProgressBar value={enemyHP} max={enemyStats.health} color="rgba(218, 48, 48, 0.73)" />
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "row",
+              justifyContent: "center",
+              alignItems: "center",
+              gap: "40px",
+              marginTop: "30px",
+              color: "#fff",
+              animation: "fadeIn 0.6s ease forwards",
+            }}
+            >
+              <div style={{ display: "flex", justifyContent: "space-between", width: "50%" }}>
+                <span>🗡️ </span>
+                <span>{enemyStats.attack} </span>
+              </div>
+              <div style={{ display: "flex", justifyContent: "space-between", width: "50%" }}>            
+                <span>🛡️</span>
+                <span>{enemyDEF} </span>
+              </div>
+          </div>
+        </Card>
 
-        <div className="flex flex-col items-center mt-4">
-          <button
-            disabled={!canAttack || playerHP <= 0 || enemyHP <= 0}
-            onClick={handleAttack}
-            className={`px-6 py-3 rounded-full text-lg font-semibold transition ${
-              canAttack ? "bg-red-600 text-white" : "bg-gray-500 text-gray-300"
-            }`}
-          >
-            🔥 Атакувати
-          </button>
-          <ProgressBar value={turnTimer} max={30} color="#fbbf24" />
-        </div>
-
-        <div className="text-center">
-          <h2 className="text-xl font-bold mb-2">🧍‍♂️ Гравець</h2>
-          <ProgressBar value={playerHP} max={playerStats.health} color="#ef4444" />
-          <p>Захист: {playerDEF}</p>
-          <p>Атака: {playerStats.attack}</p>
-        </div>
-
-        <Link href="/home">
+        <Placeholder className="w-full">
+          <div className="flex flex-col gap-3 items-center w-full">
+            <ProgressBar value={turnTimer} max={15} color="#fbbf24" />
+            <button
+              disabled={!canAttack || playerHP <= 0 || enemyHP <= 0}
+              onClick={handleAttack}
+              className={`w-full px-6 py-3 rounded-full text-lg font-semibold transition ${
+                canAttack ? "bg-red-600 text-white" : "bg-gray-500 text-gray-300"
+              }`}
+            >
+              🔥 Атакувати
+            </button>
+          </div>
+        </Placeholder>
+        
+        <Card className="page">
+          <h3> Ваші характеристики</h3>
+          <div style={{ display: "flex", justifyContent: "space-between", width: "100%" }}>
+                <span>{playerHP} </span>
+                <span>❤️ </span>
+                <span>{playerStats.health} </span>
+              </div>
+          <ProgressBar value={playerHP} max={playerStats.health} color="rgba(60, 255, 0, 0.73)" />
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "row",
+              justifyContent: "center",
+              alignItems: "center",
+              gap: "40px",
+              marginTop: "30px",
+              color: "#fff",
+              animation: "fadeIn 0.6s ease forwards",
+            }}
+            >
+              <div style={{ display: "flex", justifyContent: "space-between", width: "50%" }}>
+                <span>🗡️ </span>
+                <span>{playerStats.attack} </span>
+              </div>
+              <div style={{ display: "flex", justifyContent: "space-between", width: "50%" }}>            
+                <span>🛡️</span>
+                <span>{playerDEF} </span>
+              </div>
+          </div>
+          <Link href="/home">
           <Button
             mode="filled"
             style={{
-              marginTop: "1rem",
               width: "100%",
               borderRadius: 50,
               padding: "1rem",
+              marginTop: "2rem",
               fontSize: 18,
               fontWeight: "bold",
             }}
@@ -249,12 +308,16 @@ export default function BattlePage() {
             👈 Вийти з бою
           </Button>
         </Link>
-        <div className="mt-4 text-sm h-32 overflow-y-auto border-t border-white/20 pt-2">
+        </Card>
+
+        <div className="text-sm h-32 overflow-y-auto border-t border-white/20 pt-4">
           {log.map((entry, idx) => (
             <div key={idx}>{entry}</div>
           ))}
         </div>
       </div>
+      </Placeholder>
     </Page>
   );
+  
 }

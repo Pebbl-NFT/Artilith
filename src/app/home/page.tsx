@@ -563,19 +563,17 @@ export default function HomePage() {
                 }}
               >
               </div>
-              <Link href="/home/battle">
-                <p
-                  style={{
-                    fontSize: "0.9rem",
-                    fontWeight: "lighter",
-                    color: "#fff",
-                    textAlign: "center",
-                    lineHeight: "1",
-                    fontFamily: "Arial, sans-serif",
-                  }}
-                >
-                  Тисни щоб відкрити тестовий бій
-                </p>
+              <Link href="/home/battle" style={{
+                  fontSize: "0.9rem",
+                  fontWeight: "lighter",
+                  color: "#fff",
+                  textAlign: "center",
+                  lineHeight: "1",
+                  fontFamily: "Arial, sans-serif",
+                }}><p
+              >
+                Тисни щоб відкрити тестовий бій
+              </p>
               </Link>
             </div>
           </Placeholder>
