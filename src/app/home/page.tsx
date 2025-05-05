@@ -525,7 +525,6 @@ export default function HomePage() {
             </div>
           </Placeholder>
           <Placeholder>
-          <Link href="/home/battle" style={{ textDecoration: "none" }}>
             <div
               className="page"
               style={{
@@ -548,7 +547,7 @@ export default function HomePage() {
                   color: "#fff",
                 }}
               >
-              Рейд
+              Битва
               </h1>
               <div
                 className="imgWrap"
@@ -560,10 +559,11 @@ export default function HomePage() {
                   overflow: "visible",
                   marginTop: "-20px",
                   width: "90%",
-                  height: "90%",
+                  height: "30%",
                 }}
               >
-                <p
+              </div>
+              <Button href="/home/battle"><p
                 style={{
                   fontSize: "0.9rem",
                   fontWeight: "lighter",
@@ -573,11 +573,9 @@ export default function HomePage() {
                   fontFamily: "Arial, sans-serif",
                 }}
               >
-                Ранній доступ
-              </p>
-              </div>
+                Тисни щоб відкрити тестовий бій
+              </p></Button>
             </div>
-            </Link>
           </Placeholder>
         </div>
       );
