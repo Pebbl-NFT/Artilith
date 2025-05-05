@@ -34,7 +34,7 @@ export default function BattlePage() {
   const fetchInventory = async () => {
     if (!userId) return;
 
-    const { data, error } = await supabase
+    const { data, error } = await supabase 
       .from("inventory")
       .select("item_id, equipped, id")
       .eq("user_id", userId)
