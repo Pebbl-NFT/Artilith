@@ -567,7 +567,7 @@ export default function HomePage() {
                 style={{
                   fontSize: "0.9rem",
                   fontWeight: "lighter",
-                  color: "#ccc",
+                  color: "#fff",
                   textAlign: "center",
                   lineHeight: "1",
                   fontFamily: "Arial, sans-serif",
