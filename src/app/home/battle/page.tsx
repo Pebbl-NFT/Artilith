@@ -292,15 +292,15 @@ export default function BattlePage() {
 
           <Button
             mode="filled"
-            style={{ marginTop: -20, marginBottom: -80, animation: "fadeIn 0.6s ease forwards", backgroundColor:"#4caf50" }}
+            style={{ marginTop: -10, marginBottom: -70, animation: "fadeIn 0.6s ease forwards", backgroundColor:"#4caf50" }}
             onClick={() => {
               setShowPreBattle(false);
               startTurnTimer();
             }}
           >
-            ⚔️ Почати бій ⚔️
+            ⚔️ Почати бій ⚔️ 
           </Button>
-          <p>Ви витратите 1 ⚡</p>
+          <p>- 1 ⚡</p>
           <Link href="/home">
             <Button style={{ marginTop: 12, animation: "fadeIn 0.6s ease forwards", marginBottom: -20, backgroundColor:"#f44336" }}>
               Втекти
