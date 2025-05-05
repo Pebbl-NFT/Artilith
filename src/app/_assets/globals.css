@@ -334,3 +334,24 @@ button:hover {
   text-align: center;
   width: 100%;
 }
+
+.enemy-hit {
+  animation: shake 0.3s;
+}
+
+@keyframes shake {
+  0% { transform: translate(0); }
+  25% { transform: translate(-4px, 0); }
+  50% { transform: translate(4px, 0); }
+  75% { transform: translate(-4px, 0); }
+  100% { transform: translate(0); }
+}
+
+.enemy-damage {
+  animation: damage-flash 0.3s;
+}
+
+@keyframes damage-flash {
+  0%, 100% { filter: brightness(1); }
+  50% { filter: brightness(2) saturate(0.5); }
+}

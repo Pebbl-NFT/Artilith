@@ -23,18 +23,32 @@ export default function BattlePage() {
   const [enemyHP, setEnemyHP] = useState(8);
   const [enemyDEF, setEnemyDEF] = useState(0);
 
+  const [isHit, setIsHit] = useState(false);
   const [canAttack, setCanAttack] = useState(true);
   const [log, setLog] = useState<string[]>([]);
   const [turnTimer, setTurnTimer] = useState(30);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
 
+  const [battleResult, setBattleResult] = useState<"win" | "lose" | null>(null);
+  const [showLog, setShowLog] = useState(false);
+
   const hasMissedTurnRef = useRef(false);
 
+  const enemyImage = (() => {
+    switch (enemyStats.name) {
+      case "Слиз":
+        return "/enemies/slime.png";
+      case "Гоблін":
+        return "/images/enemies/goblin.png";
+      default:
+        return "/images/enemies/default.png";
+    }
+  })();
 
   const fetchInventory = async () => {
     if (!userId) return;
 
-    const { data, error } = await supabase 
+    const { data, error } = await supabase
       .from("inventory")
       .select("item_id, equipped, id")
       .eq("user_id", userId)
@@ -64,7 +78,7 @@ export default function BattlePage() {
 
   const ProgressBar = ({ value, max, color = "#4ade80" }: { value: number, max: number, color?: string }) => {
     const percent = Math.max(0, Math.min(100, (value / max) * 100));
-  
+
     return (
       <div style={{
         width: '100%',
@@ -83,31 +97,30 @@ export default function BattlePage() {
       </div>
     );
   };
-  
 
   const startTurnTimer = () => {
-  setTurnTimer(15);
-  hasMissedTurnRef.current = false; // Скидаємо прапорець
+    if (battleResult) return; // Не запускаємо таймер, якщо бій завершено
 
-  if (timerRef.current) clearInterval(timerRef.current);
+    setTurnTimer(5);
+    hasMissedTurnRef.current = false;
 
-  timerRef.current = setInterval(() => {
-    setTurnTimer(prev => {
-      if (prev <= 1) {
-        clearInterval(timerRef.current!);
-        if (!hasMissedTurnRef.current) {
-          hasMissedTurnRef.current = true;
-          handleMissedTurn();
+    if (timerRef.current) clearInterval(timerRef.current);
+
+    timerRef.current = setInterval(() => {
+      setTurnTimer(prev => {
+        if (prev <= 1) {
+          clearInterval(timerRef.current!);
+          if (!hasMissedTurnRef.current && !battleResult) {
+            hasMissedTurnRef.current = true;
+            handleMissedTurn();
+          }
+          return 0;
         }
-        return 0;
-      }
-      return prev - 1;
-    });
-  }, 1000);
-};
+        return prev - 1;
+      });
+    }, 1000);
+  };
 
-
-  //Пропуск ходу
   const handleMissedTurn = () => {
     if (!canAttack || playerHP <= 0 || enemyHP <= 0) return;
   
@@ -127,9 +140,11 @@ export default function BattlePage() {
           ...prev,
         ]);
   
-        if (newHP > 0) {
+        if (newHP <= 0) {
+          setBattleResult("lose");
+        } else {
           setCanAttack(true);
-          startTurnTimer(); // запустити новий хід
+          startTurnTimer(); // 👉 Додаємо початок нового ходу
         }
   
         return newHP;
@@ -137,12 +152,10 @@ export default function BattlePage() {
   
       return newDEF;
     });
-  };
-  
-
+  };  
 
   const handleAttack = () => {
-    if (!canAttack || playerHP <= 0 || enemyHP <= 0) return;
+    if (!canAttack || playerHP <= 0 || enemyHP <= 0 || battleResult) return;
 
     if (timerRef.current) clearInterval(timerRef.current);
 
@@ -155,7 +168,9 @@ export default function BattlePage() {
 
     if (newEnemyHP <= 0) {
       setLog((prev) => ["🎉 Перемога!", ...prev]);
+      setBattleResult("win");
       setCanAttack(false);
+      clearInterval(timerRef.current!);
       return;
     }
 
@@ -171,6 +186,8 @@ export default function BattlePage() {
 
       if (newPlayerHP <= 0) {
         setLog((prev) => ["💀 Поразка!", ...prev]);
+        setBattleResult("lose");
+        clearInterval(timerRef.current!);
         return;
       }
 
@@ -205,18 +222,35 @@ export default function BattlePage() {
 
   return (
     <Page back >
+      <Link href="/home">
+          <Button
+            mode="filled"
+            style={{
+              width: "15%",
+              borderRadius: 50,
+              padding: "1rem",
+              marginTop: "2rem",
+              marginLeft: "2rem",
+              fontSize: 18,
+              fontWeight: "bold",
+            }}
+            name="back"
+          >
+            🏃‍♂️
+          </Button>
+        </Link>
       <Placeholder>
       <div
-        className="page"
         style={{
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
           justifyContent: "center",
           marginTop: "0px",
+          width:"100%",
           animation: "fadeIn 1s ease forwards",
         }}
-      >
+      > 
         <Card className="page">
           <h3> {enemyStats.name}</h3>
           <div style={{ display: "flex", justifyContent: "space-between", width: "100%" }}>
@@ -249,21 +283,20 @@ export default function BattlePage() {
         </Card>
 
         <Placeholder className="w-full">
-          <div className="flex flex-col gap-3 items-center w-full">
-            <ProgressBar value={turnTimer} max={15} color="#fbbf24" />
-            <button
-              disabled={!canAttack || playerHP <= 0 || enemyHP <= 0}
-              onClick={handleAttack}
-              className={`w-full px-6 py-3 rounded-full text-lg font-semibold transition ${
-                canAttack ? "bg-red-600 text-white" : "bg-gray-500 text-gray-300"
-              }`}
-            >
-              🔥 Атакувати
-            </button>
-          </div>
+        <div className="flex justify-center items-center h-64">
+          <img
+            src={enemyImage}
+            alt={enemyStats.name}
+            onClick={handleAttack}
+            className={`h-30 w-30 object-contain cursor-pointer transition-transform duration-200 ${
+              isHit ? "scale-110" : ""
+            }`}
+          />
+        </div>
         </Placeholder>
         
         <Card className="page">
+        <ProgressBar value={turnTimer} max={5} color="#fbbf24" />
           <h3> Ваші характеристики</h3>
           <div style={{ display: "flex", justifyContent: "space-between", width: "100%" }}>
                 <span>{playerHP} </span>
@@ -292,32 +325,62 @@ export default function BattlePage() {
                 <span>{playerDEF} </span>
               </div>
           </div>
-          <Link href="/home">
-          <Button
-            mode="filled"
-            style={{
-              width: "100%",
-              borderRadius: 50,
-              padding: "1rem",
-              marginTop: "2rem",
-              fontSize: 18,
-              fontWeight: "bold",
-            }}
-            name="back"
-          >
-            👈 Вийти з бою
-          </Button>
-        </Link>
         </Card>
-
-        <div className="text-sm h-32 overflow-y-auto border-t border-white/20 pt-4">
+        <p>Лог бою</p>
+        <Card className="page" >
+        <div
+        style={{
+          position: "absolute",
+          borderRadius: 50,
+          padding: "2rem",
+          fontSize: 18,
+          fontWeight: "bold",
+        }}>
           {log.map((entry, idx) => (
             <div key={idx}>{entry}</div>
           ))}
         </div>
+        </Card>
       </div>
       </Placeholder>
+        {battleResult && (
+          <div style={{
+            position: "fixed", top: 0, left: 0, width: "100%", height: "100%",
+            backgroundColor: "rgba(0, 0, 0, 0.8)", display: "flex",
+            justifyContent: "center", alignItems: "center", zIndex: 1000,
+            flexDirection: "column", color: "#fff", padding: 20,
+          }}>
+            <h2>{battleResult === "win" ? "🎉 Перемога!" : "💀 Поразка!"}</h2>
+            <p>✨ Ваша нагорода ✨</p>
+            <p>🪨 ? / 💡 ? </p>
+
+            <Button onClick={() => setShowLog(prev => !prev)} style={{ marginTop: 12, backgroundColor:"rgb(92, 92, 92)", }}>
+              📜 {showLog ? "Сховати лог бою" : "Переглянути лог бою"}
+            </Button>
+
+            <Button onClick={() => location.reload()} style={{ marginTop: 12, backgroundColor:"rgb(92, 92, 92)",}}>
+              🔁 Спробувати ще
+            </Button>
+
+            <Link href="/home">
+              <Button style={{ marginTop: 12, backgroundColor:"rgb(92, 92, 92)", }}>
+                👈 Покинути бій
+              </Button>
+            </Link>
+
+            {showLog && (
+              <div style={{
+                marginTop: 16, maxHeight: 200, overflowY: "auto",
+                padding: 12, border: "1px solid #fff", borderRadius: 8,
+                backgroundColor: "#111", width: "90%",
+              }}>
+                {log.map((entry, idx) => (
+                  <div key={idx}>{entry}</div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
     </Page>
   );
-  
 }
