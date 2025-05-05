@@ -34,6 +34,9 @@ export default function BattlePage() {
 
   const [showPreBattle, setShowPreBattle] = useState(true);
 
+  const [hitText, setHitText] = useState<null | { value: number, id: number }>(null);
+  const hitIdRef = useRef(0);
+
   const hasMissedTurnRef = useRef(false);
 
   const enemyImage = (() => {
@@ -167,6 +170,9 @@ export default function BattlePage() {
     setEnemyDEF(newEnemyDEF);
     setEnemyHP(newEnemyHP);
     setLog((prev) => [`🧍 Гравець завдає ${playerHit.defenseLoss + playerHit.healthLoss} шкоди.`, ...prev]);
+    setHitText({ value: playerHit.defenseLoss + playerHit.healthLoss, id: hitIdRef.current++ });
+    setTimeout(() => setHitText(null), 800); // Прибрати через 800мс
+
 
     if (newEnemyHP <= 0) {
       setLog((prev) => ["🎉 Перемога!", ...prev]);
@@ -400,20 +406,35 @@ export default function BattlePage() {
         </Card>
 
         <div className="w-full" onClick={handleAttack}>
-          <div className="flex justify-center items-center" style={{ height: "600px" }}>
+        <div style={{ position: 'relative', display: 'inline-block' }}>
             <img
               src={enemyImage}
               alt={enemyStats.name}
+              onClick={handleAttack}
               style={{
-                padding:100,
-                width: "400px",
-                height: "400px",
-                objectFit: "contain",
-                cursor: "pointer",
-                transition: "transform 0.2s",
-                transform: isHit ? "scale(1.1)" : "scale(1)",
+                width: 450,
+                height: 450,
+                cursor: canAttack ? 'pointer' : 'default',
+                opacity: enemyHP <= 0 ? 0.3 : 1,
               }}
             />
+            {hitText && (
+              <div
+                key={hitText.id}
+                style={{
+                  position: 'absolute',
+                  top: 30,
+                  left: '50%',
+                  transform: 'translateX(-50%)',
+                  fontSize: '20px',
+                  color: '#ff4747',
+                  animation: 'hit-float 0.8s ease-out forwards',
+                  pointerEvents: 'none',
+                }}
+              >
+                -{hitText.value}
+              </div>
+            )}
           </div>
           <ProgressBar value={turnTimer} max={5} color="#fbbf24" />
         </div>
@@ -454,13 +475,13 @@ export default function BattlePage() {
       {battleResult && (
           <div style={{
             position: "fixed", top: 0, left: 0, width: "100%", height: "100%",
-            backgroundColor: "rgba(0, 0, 0, 0.8)", display: "flex",
+            backgroundColor: "rgb(0, 0, 0)", display: "flex",
             justifyContent: "center", alignItems: "center",
             flexDirection: "column", color: "#fff",
           }}>
-            <h2 style={{fontSize: 30, marginTop:-100,marginBottom:100}}>{battleResult === "win" ? "🎊 Перемога! 🎊" : "💀 Поразка!"}</h2>
-            <p>✨ Ваша нагорода ✨</p>
-            <p>🪨 ? / 💡 ? </p>
+            <h2 style={{fontSize: 40, marginTop:-100, marginBottom:100, color:"rgb(255, 255, 255)", }}>{battleResult === "win" ? "🎊 Перемога! 🎊" : "💀 Поразка!"}</h2>
+            <p style={{fontSize: 20, marginTop:-50, marginBottom:50, }}>✨ Ваша нагорода ✨</p>
+            <p style={{fontSize: 20, marginTop:-30, marginBottom:50, }}>🪨 ? / 💡 ? </p>
 
             <Button onClick={() => setShowLog(prev => !prev)} style={{ marginTop: 12, backgroundColor:"rgb(92, 92, 92)", }}>
               📜 {showLog ? "Сховати лог бою" : "Переглянути лог бою"}
