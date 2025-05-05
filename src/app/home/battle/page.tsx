@@ -106,7 +106,7 @@ export default function BattlePage() {
   const startTurnTimer = () => {
     if (battleResult) return; // Не запускаємо таймер, якщо бій завершено
 
-    setTurnTimer(5);
+    setTurnTimer(3);
     hasMissedTurnRef.current = false;
 
     if (timerRef.current) clearInterval(timerRef.current);
@@ -239,6 +239,7 @@ export default function BattlePage() {
               alignItems: "center",
               gap: 70,
               marginTop:30,
+              marginLeft: -20,
               color: "#fff",
               animation: "fadeIn 0.6s ease forwards",
             }}>
@@ -291,7 +292,7 @@ export default function BattlePage() {
 
           <Button
             mode="filled"
-            style={{ marginTop: 16, animation: "fadeIn 0.6s ease forwards", backgroundColor:"#4caf50" }}
+            style={{ marginTop: -20, marginBottom: -80, animation: "fadeIn 0.6s ease forwards", backgroundColor:"#4caf50" }}
             onClick={() => {
               setShowPreBattle(false);
               startTurnTimer();
@@ -299,6 +300,7 @@ export default function BattlePage() {
           >
             ⚔️ Почати бій ⚔️
           </Button>
+          <p>Ви витратите 1 ⚡</p>
           <Link href="/home">
             <Button style={{ marginTop: 12, animation: "fadeIn 0.6s ease forwards", marginBottom: -20, backgroundColor:"#f44336" }}>
               Втекти
@@ -436,7 +438,7 @@ export default function BattlePage() {
               </div>
             )}
           </div>
-          <ProgressBar value={turnTimer} max={5} color="#fbbf24" />
+          <ProgressBar value={turnTimer} max={3} color="#fbbf24" />
         </div>
         
         <Card className="page">
