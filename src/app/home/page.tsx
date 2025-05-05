@@ -368,7 +368,7 @@ export default function HomePage() {
                     image={item.image}
                     description={item.description}
                     damage={item.damage ? `Шкода: ${item.damage}` : ""}
-                    strength={item.defense ? `Міцність: ${item.defense}` : ""}
+                    strength={item.defense ? `Захист: ${item.defense}` : ""}
                     price={item.price}
                     onBuyRequest={(item) => setSelectedItem(item)}
                   />
@@ -525,7 +525,7 @@ export default function HomePage() {
             </div>
           </Placeholder>
           <Placeholder>
-          <Link href="/battle" style={{ textDecoration: "none" }}>
+          <Link href="/home/battle" style={{ textDecoration: "none" }}>
             <div
               className="page"
               style={{
