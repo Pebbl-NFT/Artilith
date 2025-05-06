@@ -513,15 +513,27 @@ export default function BattlePage() {
               📜 {showLog ? "Сховати лог бою" : "Переглянути лог бою"}
             </Button>
 
-            <Button onClick={() => location.reload()} style={{ marginTop: 12, backgroundColor:"rgb(92, 92, 92)",}}>
-              🔁 Спробувати ще
+            <div style={{
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              color: "#fff",
+              animation: "fadeIn 0.6s ease forwards",
+              marginTop: 30,
+            }}>
+            <Button
+              mode="filled"
+              style={{ animation: "fadeIn 0.6s ease forwards", backgroundColor:"#4caf50" }}
+              onClick={() => location.reload()}
+            >⚔️ Новий бій ⚔️ 
             </Button>
+          </div>
 
-            <Link href="/home">
-              <Button style={{ marginTop: 12, backgroundColor:"rgb(92, 92, 92)", }}>
-                👈 Покинути бій
-              </Button>
-            </Link>
+          <Link href="/home">
+            <Button style={{ marginTop: 30, animation: "fadeIn 0.6s ease forwards", marginBottom: -20, backgroundColor:"#f44336" }}>
+              Втекти
+            </Button>
+          </Link>
 
             {showLog && (
               <div style={{
