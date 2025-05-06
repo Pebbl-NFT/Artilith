@@ -233,14 +233,24 @@ export default function BattlePage() {
 
   if (showPreBattle) {
     return (
-      <Page back>
-        <Placeholder>
-        <Card className="page" style={{
-            position: "fixed", top: -40, left: 0, width: "100%", height: "100%",
+      <Page>
+        <Card
+          className="page"
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            width: "100vw",
+            height: "100vh",
             display: "flex",
-            justifyContent: "center", alignItems: "center",
-            flexDirection: "column", color: "#fff",
-          }}>
+            justifyContent: "center",
+            alignItems: "center",
+            flexDirection: "column",
+            color: "#fff",
+            padding: "16px", // трохи внутрішнього відступу
+            boxSizing: "border-box",
+          }}
+        >
           <h2 
             style={{
               display: "flex",
@@ -285,14 +295,10 @@ export default function BattlePage() {
           </div>
           <div style={{
               display: "flex",
-              flexDirection: "row",
               justifyContent: "center",
               alignItems: "center",
-              gap: "40px",
               color: "#fff",
               animation: "fadeIn 0.6s ease forwards",
-              marginLeft: "80px",
-              marginBottom: "0px"
             }}>
             <Button
               mode="filled"
@@ -301,11 +307,10 @@ export default function BattlePage() {
                 setShowPreBattle(false);
                 startTurnTimer();
               }}
-            >
-              ⚔️ Почати бій ⚔️ 
+            >⚔️ Почати бій ⚔️ 
             </Button>
-            <p style={{ marginTop: 12, animation: "fadeIn 0.6s ease forwards",}}> - 1 ⚡</p>  
           </div>
+          <p style={{ marginTop: 12, animation: "fadeIn 0.6s ease forwards",}}> - 1 ⚡</p>  
           
 
           <h2
@@ -354,7 +359,6 @@ export default function BattlePage() {
             </Button>
           </Link>
         </Card>
-        </Placeholder>
       </Page>
     );
   }
