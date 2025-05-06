@@ -236,32 +236,27 @@ export default function BattlePage() {
       <Page back>
         <Placeholder>
         <Card className="page" style={{
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-              gap: 60,
-              color: "#fff",
-              animation: "fadeIn 0.6s ease forwards",
-            }}>
+            position: "fixed", top: -40, left: 0, width: "100%", height: "100%",
+            display: "flex",
+            justifyContent: "center", alignItems: "center",
+            flexDirection: "column", color: "#fff",
+          }}>
           <h2 
             style={{
               display: "flex",
               flexDirection: "row",
               justifyContent: "center",
               alignItems: "center",
-              gap: "40px",
               color: "#fff",
               animation: "fadeIn 0.6s ease forwards",
-              marginBottom: "20px"
             }}
           >
-            ⚔️ Ви натрапили на ворога: {enemyStats.name}! ⚔️</h2>
+            ⚔️ Ви натрапили на ворога ! ⚔️</h2>
+
+          <h1>{enemyStats.name}</h1>
           <img
             src={enemyImage}
             alt={enemyStats.name} style={{ animation: "fadeIn 1s ease forwards", }}
-            className={`h-30 w-30 object-contain cursor-pointer transition-transform duration-200 ${
-              isHit ? "scale-110" : ""
-            }`}
           />
           <div
             style={{
@@ -270,7 +265,6 @@ export default function BattlePage() {
               justifyContent: "center",
               alignItems: "center",
               gap: "40px",
-              marginTop: "30px",
               color: "#fff",
               animation: "fadeIn 0.6s ease forwards",
               marginBottom: "60px"
@@ -289,23 +283,30 @@ export default function BattlePage() {
                 <span>{enemyDEF} </span>
               </div>
           </div>
-
-          <Button
-            mode="filled"
-            style={{ marginTop: -10, marginBottom: -70, animation: "fadeIn 0.6s ease forwards", backgroundColor:"#4caf50" }}
-            onClick={() => {
-              setShowPreBattle(false);
-              startTurnTimer();
-            }}
-          >
-            ⚔️ Почати бій ⚔️ 
-          </Button>
-          <p style={{ marginTop: 12, animation: "fadeIn 0.6s ease forwards",}}> - 1 ⚡</p>
-          <Link href="/home">
-            <Button style={{ marginTop: 12, animation: "fadeIn 0.6s ease forwards", marginBottom: -20, backgroundColor:"#f44336" }}>
-              Втекти
+          <div style={{
+              display: "flex",
+              flexDirection: "row",
+              justifyContent: "center",
+              alignItems: "center",
+              gap: "40px",
+              color: "#fff",
+              animation: "fadeIn 0.6s ease forwards",
+              marginLeft: "80px",
+              marginBottom: "0px"
+            }}>
+            <Button
+              mode="filled"
+              style={{ animation: "fadeIn 0.6s ease forwards", backgroundColor:"#4caf50" }}
+              onClick={() => {
+                setShowPreBattle(false);
+                startTurnTimer();
+              }}
+            >
+              ⚔️ Почати бій ⚔️ 
             </Button>
-          </Link>
+            <p style={{ marginTop: 12, animation: "fadeIn 0.6s ease forwards",}}> - 1 ⚡</p>  
+          </div>
+          
 
           <h2
             style={{
@@ -315,7 +316,6 @@ export default function BattlePage() {
               alignItems: "center",
               gap: "40px",
               marginTop: "60px",
-              marginBottom: "-25px",
               color: "#fff",
               animation: "fadeIn 0.6s ease forwards",
             }}
@@ -328,7 +328,7 @@ export default function BattlePage() {
               justifyContent: "center",
               alignItems: "center",
               gap: "40px",
-              marginTop: "30px",
+              marginBottom: "50px",
               color: "#fff",
               animation: "fadeIn 0.6s ease forwards",
             }}
@@ -346,6 +346,13 @@ export default function BattlePage() {
                 <span>{playerDEF} </span>
               </div>
           </div>
+
+
+          <Link href="/home">
+            <Button style={{ marginTop: 12, animation: "fadeIn 0.6s ease forwards", marginBottom: -20, backgroundColor:"#f44336" }}>
+              Втекти
+            </Button>
+          </Link>
         </Card>
         </Placeholder>
       </Page>
