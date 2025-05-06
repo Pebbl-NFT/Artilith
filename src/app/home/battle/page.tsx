@@ -263,11 +263,7 @@ export default function BattlePage() {
           >
             ⚔️ Ви натрапили на ворога ! ⚔️</h2>
 
-          <h1 style={{ animation: "fadeIn 3s ease forwards", }}>{enemyStats.name}</h1>
-          <img
-            src={enemyImage}
-            alt={enemyStats.name} style={{ animation: "fadeIn 3s ease forwards", }}
-          />
+          <h1 style={{ animation: "fadeIn 3s ease forwards",marginBottom:20, }}>{enemyStats.name}</h1>
           <div
             style={{
               display: "flex",
@@ -277,7 +273,7 @@ export default function BattlePage() {
               gap: "40px",
               color: "#fff",
               animation: "fadeIn 3s ease forwards",
-              marginBottom: "60px"
+              marginBottom: "0px"
             }}
             >
               <div style={{ display: "flex", justifyContent: "space-between", width: "50%" }}>
@@ -293,25 +289,11 @@ export default function BattlePage() {
                 <span>{enemyDEF} </span>
               </div>
           </div>
-          <div style={{
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-              color: "#fff",
-              animation: "fadeIn 0.6s ease forwards",
-            }}>
-            <Button
-              mode="filled"
-              style={{ animation: "fadeIn 0.6s ease forwards", backgroundColor:"#4caf50" }}
-              onClick={() => {
-                setShowPreBattle(false);
-                startTurnTimer();
-              }}
-            >⚔️ Почати бій ⚔️ 
-            </Button>
-          </div>
-          <p style={{ marginTop: 12, animation: "fadeIn 0.6s ease forwards",}}> - 1 ⚡</p>  
           
+          <img
+            src={enemyImage}
+            alt={enemyStats.name} style={{ animation: "fadeIn 3s ease forwards", }}
+          />
 
           <h2
             style={{
@@ -320,7 +302,6 @@ export default function BattlePage() {
               justifyContent: "center",
               alignItems: "center",
               gap: "40px",
-              marginTop: "60px",
               color: "#fff",
               animation: "fadeIn 0.6s ease forwards",
             }}
@@ -333,7 +314,7 @@ export default function BattlePage() {
               justifyContent: "center",
               alignItems: "center",
               gap: "40px",
-              marginBottom: "50px",
+              marginBottom: "30px",
               color: "#fff",
               animation: "fadeIn 0.6s ease forwards",
             }}
@@ -352,9 +333,27 @@ export default function BattlePage() {
               </div>
           </div>
 
+          <div style={{
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              color: "#fff",
+              animation: "fadeIn 0.6s ease forwards",
+            }}>
+            <Button
+              mode="filled"
+              style={{ animation: "fadeIn 0.6s ease forwards", backgroundColor:"#4caf50" }}
+              onClick={() => {
+                setShowPreBattle(false);
+                startTurnTimer();
+              }}
+            >⚔️ Почати бій ⚔️ 
+            </Button>
+          </div>
+          <p style={{ marginTop: 12, animation: "fadeIn 0.6s ease forwards",}}> - 1 ⚡</p>  
 
           <Link href="/home">
-            <Button style={{ marginTop: 12, animation: "fadeIn 0.6s ease forwards", marginBottom: -20, backgroundColor:"#f44336" }}>
+            <Button style={{ animation: "fadeIn 0.6s ease forwards", marginBottom: -20, backgroundColor:"#f44336" }}>
               Втекти
             </Button>
           </Link>
@@ -427,8 +426,8 @@ export default function BattlePage() {
                 width: "200px",
                 height: "200px",
                 objectFit: "contain",
-                marginTop: "80px",
-                marginBottom: "60px",
+                marginTop: "110px",
+                marginBottom: "100px",
                 animation: isHit ? "hitFlash 0.3s ease" : undefined,
                 cursor: canAttack && !battleResult ? "pointer" : "default",
                 transition: "transform 0.2s ease",
@@ -457,7 +456,7 @@ export default function BattlePage() {
                   pointerEvents: 'none',
                 }}
               >
-                -{hitText.value}
+                - {hitText.value}
               </div>
             )}
           </div>
@@ -469,7 +468,7 @@ export default function BattlePage() {
           display: "flex", 
           justifyContent: "space-between",
           marginTop:10,
-          marginBottom:-10,
+          marginBottom:-30,
           padding:30,
           width: "100%",
           }}>
