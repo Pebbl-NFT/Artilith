@@ -504,12 +504,12 @@ export default function BattlePage() {
             justifyContent: "center", alignItems: "center",
             flexDirection: "column", color: "#fff",
           }}>
-            <h2 style={{fontSize: 40, marginTop:0, marginBottom:100, color:"rgb(255, 255, 255)", }}>{battleResult === "win" ? "🎊" : "💀 "}</h2>
+            <h2 style={{fontSize: 40, marginTop:20, marginBottom:100, color:"rgb(255, 255, 255)", }}>{battleResult === "win" ? "🎊" : "💀 "}</h2>
             <h2 style={{fontSize: 40, marginTop:0, marginBottom:100, color:"rgb(255, 255, 255)", }}>{battleResult === "win" ? "Перемога!" : "Поразка!"}</h2>
             <p style={{fontSize: 20, marginTop:-50, marginBottom:50, }}>{battleResult === "win" ? "✨ Ваша нагорода ✨" : "Схоже не пощатисло"}</p>
             <p style={{fontSize: 20, marginTop:-30, marginBottom:50, }}>{battleResult === "win" ? "🪨 ? / 💡 ?" : ""}</p>
 
-            <Button onClick={() => setShowLog(prev => !prev)} style={{ marginTop: 12, backgroundColor:"rgb(92, 92, 92)", }}>
+            <Button onClick={() => setShowLog(prev => !prev)} style={{ marginTop: 30, backgroundColor:"rgb(92, 92, 92)", }}>
               📜 {showLog ? "Сховати лог бою" : "Переглянути лог бою"}
             </Button>
 
@@ -530,7 +530,7 @@ export default function BattlePage() {
           </div>
 
           <Link href="/home">
-            <Button style={{ marginTop: 30, animation: "fadeIn 0.6s ease forwards", marginBottom: -20, backgroundColor:"#f44336" }}>
+            <Button style={{ marginTop: 30, animation: "fadeIn 0.6s ease forwards", backgroundColor:"#f44336" }}>
               Втекти
             </Button>
           </Link>
