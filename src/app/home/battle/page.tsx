@@ -509,7 +509,7 @@ export default function BattlePage() {
             <p style={{fontSize: 20, marginTop:-50, marginBottom:50, }}>{battleResult === "win" ? "✨ Ваша нагорода ✨" : "Схоже не пощатисло"}</p>
             <p style={{fontSize: 20, marginTop:-30, marginBottom:50, }}>{battleResult === "win" ? "🪨 ? / 💡 ?" : ""}</p>
 
-            <Button onClick={() => setShowLog(prev => !prev)} style={{ marginTop: 30, backgroundColor:"rgb(92, 92, 92)", }}>
+            <Button onClick={() => setShowLog(prev => !prev)} style={{ marginTop: 30, backgroundColor:"rgb(0, 0, 0)",border:"1px solid #fff", borderRadius: 8, }}>
               📜 {showLog ? "Сховати лог бою" : "Переглянути лог бою"}
             </Button>
 
