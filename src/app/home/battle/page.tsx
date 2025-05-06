@@ -36,20 +36,19 @@ export default function BattlePage() {
 
   const [hitText, setHitText] = useState<null | { value: number, id: number }>(null);
   const hitIdRef = useRef(0);
+  const [isEnemyAttacking, setIsEnemyAttacking] = useState(false);
+  const [isEnemyHit, setIsEnemyHit] = useState(false);
+
 
   const hasMissedTurnRef = useRef(false);
 
   const enemyImage = (() => {
-    switch (enemyStats.name) {
-      case "Слиз":
-        return "/enemies/slimeidle.gif";
-      case "Гоблін":
-        return "/images/enemies/goblin.png";
-      default:
-        return "/images/enemies/default.png";
-    }
+    if (isEnemyAttacking) return "/enemies/slimeattack.gif";
+    if (isEnemyHit) return "/enemies/slimehit.gif";
+    return "/enemies/slimeidle.gif";
   })();
 
+  
   const fetchInventory = async () => {
     if (!userId) return;
 
@@ -191,6 +190,8 @@ export default function BattlePage() {
       setPlayerDEF(newPlayerDEF);
       setPlayerHP(newPlayerHP);
       setLog((prev) => [`👾 Ворог завдає ${enemyHit.defenseLoss + enemyHit.healthLoss} шкоди.`, ...prev]);
+      setIsEnemyAttacking(true);
+      setTimeout(() => setIsEnemyAttacking(false), 400); // довжина анімації атаки
 
       if (newPlayerHP <= 0) {
         setLog((prev) => ["💀 Поразка!", ...prev]);
@@ -232,14 +233,13 @@ export default function BattlePage() {
 
   if (showPreBattle) {
     return (
-      <Page >
+      <Page back>
+        <Placeholder>
         <Card className="page" style={{
               display: "flex",
               justifyContent: "center",
               alignItems: "center",
-              gap: 70,
-              marginTop:30,
-              marginLeft: -20,
+              gap: 60,
               color: "#fff",
               animation: "fadeIn 0.6s ease forwards",
             }}>
@@ -347,6 +347,7 @@ export default function BattlePage() {
               </div>
           </div>
         </Card>
+        </Placeholder>
       </Page>
     );
   }
@@ -408,16 +409,27 @@ export default function BattlePage() {
         </Card>
 
         <div className="w-full" onClick={handleAttack}>
-        <div style={{ position: 'relative', display: 'inline-block' }}>
+          <div style={{ position: 'relative', display: 'inline-block' }}>
             <img
               src={enemyImage}
               alt={enemyStats.name}
-              onClick={handleAttack}
               style={{
-                width: 450,
-                height: 450,
-                cursor: canAttack ? 'pointer' : 'default',
-                opacity: enemyHP <= 0 ? 0.3 : 1,
+                width: "420px",
+                height: "420px",
+                objectFit: "contain",
+                marginTop: "20px",
+                animation: isHit ? "hitFlash 0.3s ease" : undefined,
+                cursor: canAttack && !battleResult ? "pointer" : "default",
+                transition: "transform 0.2s ease",
+              }}
+              onClick={() => {
+                if (canAttack && !battleResult) {
+                  setIsHit(true);
+                  handleAttack();
+                  setIsEnemyHit(true);
+                  setTimeout(() => setIsEnemyHit(false), 300); // довжина анімації отримання шкоди
+                  setTimeout(() => setIsHit(false), 300);
+                }
               }}
             />
             {hitText && (
