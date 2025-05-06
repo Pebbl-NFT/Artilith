@@ -45,6 +45,7 @@ export default function HomePage() {
   const [activeTab, setActiveTab] = useState("home");
   const [loading, setLoading] = useState(false);
   const [inventory, setInventory] = useState<any[]>([]);
+  const [energy, setEnergy] = useState(null);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const initDataState = useSignal(initData.state);
   const userId = initDataState?.user?.id;
@@ -53,7 +54,6 @@ export default function HomePage() {
     health: 10,
     attack: 1,
     defense: 0,
-    energy: 10
   });
 
   // Перемикач, який показує заблокований контент (наприклад, рівень 2)
@@ -78,20 +78,21 @@ export default function HomePage() {
       if (!userId) return;
       const { data, error } = await supabase
         .from("users")
-        .select("points, click_delay")
+        .select("points, click_delay, energy")
         .eq("id", userId)
         .single();
-
+  
       if (error) {
         console.error("Помилка завантаження даних:", error);
       } else if (data) {
         setPoints(data.points);
         setClickDelay(data.click_delay);
+        setEnergy(data.energy);
         setAnimationTime(data.click_delay + 100);
       }
     };
     fetchUserData();
-  }, [userId]);
+  }, [userId]);  
 
 
   // підтвердження покупки
@@ -629,7 +630,7 @@ export default function HomePage() {
                     </div>
                     <div style={{ display: "flex", justifyContent: "space-between", width: "50%" }}>
                       <span>⚡</span>
-                      <span>{heroStats.energy}</span>
+                      <span>{energy}</span>
                     </div>
                 </div>
               </Card>

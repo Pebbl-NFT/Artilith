@@ -7,16 +7,18 @@ import { useSignal, initData } from "@telegram-apps/sdk-react";
 import { supabase } from "@/lib/supabaseClient";
 import { AllItems } from "@/components/Item/Items";
 import { getPlayerStats } from "@/utils/getPlayerStats";
+import { reduceEnergy } from "@/utils/reduceEnergy";
 
 export default function BattlePage() {
   const initDataState = useSignal(initData.state);
   const userId = initDataState?.user?.id;
 
-  const [playerStats, setPlayerStats] = useState({ health: 10, attack: 0, defense: 0, energy: 10 });
+  const [playerStats, setPlayerStats] = useState({ health: 10, attack: 0, defense: 0});
   const [enemyStats, setEnemyStats] = useState({ name: "Слиз", health: 8, attack: 2, defense: 0 });
 
   const [inventory, setInventory] = useState<any[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
+  const [energy, setEnergy] = useState(10);
 
   const [playerHP, setPlayerHP] = useState(10);
   const [playerDEF, setPlayerDEF] = useState(0);
@@ -48,7 +50,25 @@ export default function BattlePage() {
     return "/enemies/slimeidle.gif";
   })();
 
+    // Завантажуємо дані користувача із Supabase
+  useEffect(() => {
+    const fetchUserData = async () => {
+      if (!userId) return;
+      const { data, error } = await supabase
+        .from("users")
+        .select("points, click_delay, energy")
+        .eq("id", userId)
+        .single();
   
+      if (error) {
+        console.error("Помилка завантаження даних:", error);
+      } else if (data) {
+        setEnergy(data.energy);
+      }
+    };
+    fetchUserData();
+  }, [userId]);  
+
   const fetchInventory = async () => {
     if (!userId) return;
 
@@ -289,7 +309,7 @@ export default function BattlePage() {
                 <span>{enemyDEF} </span>
               </div>
           </div>
-          
+
           <img
             src={enemyImage}
             alt={enemyStats.name} style={{ animation: "fadeIn 3s ease forwards", }}
@@ -331,6 +351,10 @@ export default function BattlePage() {
                 <span>🛡️</span>
                 <span>{playerDEF} </span>
               </div>
+              <div style={{ display: "flex", justifyContent: "space-between", width: "50%" }}>
+              <span>⚡</span>
+              <span>{energy}</span>
+              </div>
           </div>
 
           <div style={{
@@ -340,20 +364,36 @@ export default function BattlePage() {
               color: "#fff",
               animation: "fadeIn 0.6s ease forwards",
             }}>
-            <Button
-              mode="filled"
-              style={{ animation: "fadeIn 0.6s ease forwards", backgroundColor:"#4caf50" }}
-              onClick={() => {
+            <Button  style={{ marginLeft:66, animation: "fadeIn 0.6s ease forwards", backgroundColor:"#4caf50" }}
+              disabled={isLoading}
+              onClick={async () => {
+                if (!userId || isLoading) return;
+                setIsLoading(true);
+
+                const success = await reduceEnergy(userId, 1);
+
+                if (!success) {
+                  alert("Недостатньо енергії для початку бою!");
+                  setIsLoading(false);
+                  return;
+                }
+
                 setShowPreBattle(false);
                 startTurnTimer();
+                setIsLoading(false);
               }}
-            >⚔️ Почати бій ⚔️ 
+            >
+              {isLoading ? "..." : "⚔️ Почати бій ⚔️"}
+            </Button>
+            <Button mode="filled"
+              style={{ paddingRight:10, marginLeft:5, animation: "fadeIn 0.6s ease forwards", border:"1px solid rgba(255, 251, 0, 0.73)",backgroundColor:"rgba(255, 255, 255, 0)" }}
+            >
+           - 1⚡
             </Button>
           </div>
-          <p style={{ marginTop: 12, animation: "fadeIn 0.6s ease forwards",}}> - 1 ⚡</p>  
 
           <Link href="/home">
-            <Button style={{ animation: "fadeIn 0.6s ease forwards", marginBottom: -20, backgroundColor:"#f44336" }}>
+            <Button style={{ animation: "fadeIn 0.6s ease forwards",marginTop: 12, marginBottom: -20, backgroundColor:"#f44336" }}>
               Втекти
             </Button>
           </Link>
@@ -417,8 +457,23 @@ export default function BattlePage() {
           </div>
         </Card>
         <ProgressBar value={enemyHP} max={enemyStats.health} color="#f44336" />
-        <div className="w-full" onClick={handleAttack}>
-          <div style={{ position: 'relative', display: 'inline-block' }}>
+        <div
+          style={{
+            position: "relative",
+            width: "100%",
+            height: "400px", // або більше/менше залежно від дизайну
+            backgroundImage: "url('/bg/bgforest.png')",
+            backgroundSize: "cover",
+            backgroundPosition: "center",
+            marginTop: "20px",
+            marginBottom: "20px",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+          onClick={handleAttack}
+        >
+          <div style={{ position: "relative", display: "inline-block", zIndex: 2 }}>
             <img
               src={enemyImage}
               alt={enemyStats.name}
@@ -426,8 +481,6 @@ export default function BattlePage() {
                 width: "200px",
                 height: "200px",
                 objectFit: "contain",
-                marginTop: "110px",
-                marginBottom: "100px",
                 animation: isHit ? "hitFlash 0.3s ease" : undefined,
                 cursor: canAttack && !battleResult ? "pointer" : "default",
                 transition: "transform 0.2s ease",
@@ -437,7 +490,7 @@ export default function BattlePage() {
                   setIsHit(true);
                   handleAttack();
                   setIsEnemyHit(true);
-                  setTimeout(() => setIsEnemyHit(false), 200); // довжина анімації отримання шкоди
+                  setTimeout(() => setIsEnemyHit(false), 200);
                   setTimeout(() => setIsHit(false), 200);
                 }
               }}
@@ -446,14 +499,14 @@ export default function BattlePage() {
               <div
                 key={hitText.id}
                 style={{
-                  position: 'absolute',
-                  top: 120,
-                  left: '55%',
-                  transform: 'translateX(-50%)',
-                  fontSize: '20px',
-                  color: '#ff4747',
-                  animation: 'hit-float 1s ease-out forwards',
-                  pointerEvents: 'none',
+                  position: "absolute",
+                  top: 20,
+                  left: "50%",
+                  transform: "translateX(-50%)",
+                  fontSize: "20px",
+                  color: "#ff4747",
+                  animation: "hit-float 1s ease-out forwards",
+                  pointerEvents: "none",
                 }}
               >
                 - {hitText.value}
