@@ -105,7 +105,7 @@ export default function BattlePage() {
   const startTurnTimer = () => {
     if (battleResult) return; // Не запускаємо таймер, якщо бій завершено
 
-    setTurnTimer(225);
+    setTurnTimer(5);
     hasMissedTurnRef.current = false;
 
     if (timerRef.current) clearInterval(timerRef.current);
@@ -424,11 +424,11 @@ export default function BattlePage() {
               src={enemyImage}
               alt={enemyStats.name}
               style={{
-                width: "320px",
-                height: "320px",
+                width: "200px",
+                height: "200px",
                 objectFit: "contain",
-                marginTop: "50px",
-                marginBottom: "40px",
+                marginTop: "80px",
+                marginBottom: "60px",
                 animation: isHit ? "hitFlash 0.3s ease" : undefined,
                 cursor: canAttack && !battleResult ? "pointer" : "default",
                 transition: "transform 0.2s ease",
@@ -453,7 +453,7 @@ export default function BattlePage() {
                   transform: 'translateX(-50%)',
                   fontSize: '20px',
                   color: '#ff4747',
-                  animation: 'hit-float 0.8s ease-out forwards',
+                  animation: 'hit-float 1s ease-out forwards',
                   pointerEvents: 'none',
                 }}
               >
