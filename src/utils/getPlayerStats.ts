@@ -3,7 +3,7 @@ import { AllItems } from "@/components/Item/Items";
 export function getPlayerStats(inventory: any[]) {
   const baseStats = {
     health: 10,
-    attack: 0,
+    attack: 1,
     defense: 0,
     energy: 10,
   };

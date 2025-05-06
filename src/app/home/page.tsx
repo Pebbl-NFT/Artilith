@@ -51,7 +51,7 @@ export default function HomePage() {
 
   const [heroStats, setHeroStats] = useState({
     health: 10,
-    attack: 0,
+    attack: 1,
     defense: 0,
     energy: 10
   });
@@ -201,18 +201,6 @@ export default function HomePage() {
       }, 1000);
     }
   };
-
-  // 
-  useEffect(() => {
-    let newStats = {
-      health: 10,
-      attack: 0,
-      defense: 0,
-      energy: 10
-    };
-
-    setHeroStats(newStats);
-  }, [inventory]);
 
   // Функція обрахунку характеристик героя
   const updateHeroStats = useCallback(() => {
