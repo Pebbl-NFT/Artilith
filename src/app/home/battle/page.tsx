@@ -239,7 +239,7 @@ export default function BattlePage() {
           style={{
             position: "fixed",
             top: 0,
-            left: 0,
+            left: 1,
             width: "100vw",
             height: "100vh",
             display: "flex",
