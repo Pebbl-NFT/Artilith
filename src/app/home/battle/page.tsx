@@ -424,8 +424,8 @@ export default function BattlePage() {
               src={enemyImage}
               alt={enemyStats.name}
               style={{
-                width: "420px",
-                height: "420px",
+                width: "320px",
+                height: "320px",
                 objectFit: "contain",
                 marginTop: "20px",
                 animation: isHit ? "hitFlash 0.3s ease" : undefined,
