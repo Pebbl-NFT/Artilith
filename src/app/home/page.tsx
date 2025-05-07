@@ -25,10 +25,7 @@ import { AllItems } from "@/components/Item/Items";
 import { formatTime } from "@/utils/formatTime";
 import { getPlayerStats } from "@/utils/getPlayerStats";
 import { updateUserPoints } from "@/hooks/useUserPoints";
-import {
-  addInventoryItem,
-  toggleEquipItem, // якщо не використовується – видали
-} from "@/hooks/useItemActions";
+import {addInventoryItem} from "@/hooks/useItemActions";
 
 // Зображення
 import artilithLogo from "../_assets/Artilith_logo-no-bg.png";

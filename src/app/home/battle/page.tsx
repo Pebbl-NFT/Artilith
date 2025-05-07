@@ -8,6 +8,7 @@ import { supabase } from "@/lib/supabaseClient";
 import { AllItems } from "@/components/Item/Items";
 import { getPlayerStats } from "@/utils/getPlayerStats";
 import { reduceEnergy } from "@/utils/reduceEnergy";
+import { Toaster, toast } from "react-hot-toast";
 
 export default function BattlePage() {
   const initDataState = useSignal(initData.state);
@@ -19,6 +20,7 @@ export default function BattlePage() {
   const [inventory, setInventory] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [energy, setEnergy] = useState(10);
+  const hasShownToast = useRef(false);
 
   const [playerHP, setPlayerHP] = useState(10);
   const [playerDEF, setPlayerDEF] = useState(0);
@@ -64,10 +66,38 @@ export default function BattlePage() {
         console.error("Помилка завантаження даних:", error);
       } else if (data) {
         setEnergy(data.energy);
+        if (data.energy <= 0 && !hasShownToast.current) {
+          toast.error("У вас закінчилася енергія ⚡");
+          hasShownToast.current = true;
+        }
       }
     };
     fetchUserData();
-  }, [userId]);  
+  }, [userId]);
+
+  const handleStartBattle = async () => {
+    if (energy > 0) {
+      if (!userId) {
+        toast.error("Користувач не авторизований");
+        return;
+      }
+  
+      const success = await reduceEnergy(userId, 1);
+      if (success) {
+        setEnergy(energy - 1);
+        toast.success("Використано 1⚡");
+        setShowPreBattle(false);
+      } else {
+        toast.error("Помилка оновлення енергії. Спробуйте пізніше.");
+      }
+      return;
+    }
+  
+    if (energy <= 0) {
+      toast.error("У вас закінчилася енергія ⚡");
+      return;
+    }
+  };
 
   const fetchInventory = async () => {
     if (!userId) return;
@@ -189,6 +219,7 @@ export default function BattlePage() {
     setEnemyDEF(newEnemyDEF);
     setEnemyHP(newEnemyHP);
     setLog((prev) => [`🧍 Гравець завдає ${playerHit.defenseLoss + playerHit.healthLoss} шкоди.`, ...prev]);
+    toast.success("Успішна атака!");
     setHitText({ value: playerHit.defenseLoss + playerHit.healthLoss, id: hitIdRef.current++ });
     setTimeout(() => setHitText(null), 800); // Прибрати через 800мс
 
@@ -249,11 +280,10 @@ export default function BattlePage() {
     };
   }, []);
 
-  if (isLoading) return <div>Завантаження бою...</div>;
-
   if (showPreBattle) {
     return (
       <Page>
+        <Toaster position="top-center" toastOptions={{ duration: 2000 }} />
         <Card
           className="page"
           style={{
@@ -364,31 +394,12 @@ export default function BattlePage() {
               color: "#fff",
               animation: "fadeIn 0.6s ease forwards",
             }}>
-            <Button  style={{ marginLeft:66, animation: "fadeIn 0.6s ease forwards", backgroundColor:"#4caf50" }}
+            <Button
+              style={{animation: "fadeIn 0.6s ease forwards", backgroundColor: "#4caf50" }}
               disabled={isLoading}
-              onClick={async () => {
-                if (!userId || isLoading) return;
-                setIsLoading(true);
-
-                const success = await reduceEnergy(userId, 1);
-
-                if (!success) {
-                  alert("Недостатньо енергії для початку бою!");
-                  setIsLoading(false);
-                  return;
-                }
-
-                setShowPreBattle(false);
-                startTurnTimer();
-                setIsLoading(false);
-              }}
+              onClick={handleStartBattle}
             >
-              {isLoading ? "..." : "⚔️ Почати бій ⚔️"}
-            </Button>
-            <Button mode="filled"
-              style={{ paddingRight:10, marginLeft:5, animation: "fadeIn 0.6s ease forwards", border:"1px solid rgba(255, 251, 0, 0.73)",backgroundColor:"rgba(255, 255, 255, 0)" }}
-            >
-           - 1⚡
+              ⚔️ Почати бій ⚔️
             </Button>
           </div>
 
