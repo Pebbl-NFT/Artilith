@@ -256,6 +256,7 @@ export default function HomePage() {
         .eq('user_id', userId)
         .eq('id', selectedItem.id); // зміна тут
     } else {
+
       // Зняти всі предмети такого типу
       const idsToUnequip = inventory
         .filter(item => item.type === itemType && item.equipped)
@@ -279,6 +280,7 @@ export default function HomePage() {
   
     await fetchInventory();
   };
+
 
   // Завантажуємо інвентар при зміні userId
   useEffect(() => {
@@ -566,6 +568,8 @@ export default function HomePage() {
         </div>
       );
     case "hero":
+      const equippedItems = inventory.filter(item => item.equipped);
+      const unequippedItems = inventory.filter(item => !item.equipped);
       return (
         <Page back>
           <Placeholder>
@@ -600,7 +604,14 @@ export default function HomePage() {
               </p>
 
               <Card className="page">
-                <h3>Характеристики</h3>
+              <h2 style={{ 
+                fontSize: "1rem", 
+                fontWeight: "bold", 
+                textAlign: "center", 
+                color: "#fff" }}
+              >
+                Характеристики
+              </h2>
                 <div
                   style={{
                     display: "flex",
@@ -609,7 +620,6 @@ export default function HomePage() {
                     alignItems: "center",
                     gap: "30px",
                     padding:20,
-                    marginTop: "20px",
                     color: "#fff",
                     animation: "fadeIn 0.6s ease forwards",
                   }}
@@ -632,9 +642,104 @@ export default function HomePage() {
                     </div>
                 </div>
               </Card>
+
+              <h2 style={{ 
+                fontSize: "1rem", 
+                fontWeight: "bold", 
+                marginTop: "50px", 
+                marginBottom: "40px", 
+                textAlign: "center", 
+                color: "#fff" }}
+              >
+                ЕКІПІРУВАННЯ
+              </h2>
+
+              <div
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "repeat(auto-fill, minmax(100px, 1fr))", // адаптуємо колонки
+                  gap: "20px",
+                  width: "100%",
+                  margin: "0 auto",
+                }}
+              >
+                {equippedItems.length === 0 && (
+                  <p style={{ color: "#ccc", gridColumn: "1 / -1", textAlign: "center" }}>
+                    Немає екіпірованих предметів
+                  </p>
+                )}
+
+                {equippedItems.map((item, index) => (
+                  <div
+                    key={index}
+                    className={`relative flex flex-col items-center bg-white/[0.05] rounded-lg p-2 animate-fadeIn opacity-0 rarity-${item.rarity?.toLowerCase()}`}
+                    style={{
+                      border: "1px solid rgba(255, 255, 255, 0.1)",
+                      borderRadius: "10px",
+                      padding: "20px",
+                      animationDelay: `${index * 0.1}s`,
+                      animation: "fadeIn 0.7s ease forwards",
+                    }}>
+                    <div style={{
+                      width: "100%",
+                      aspectRatio: "1 / 1",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      fontSize: "2rem",
+                      color: item ? "#fff" : "#777",
+                      marginBottom: "10px",
+                      position: "relative", // важливо для абсолютного позиціонування rarity-label
+                      }}
+                    >
+                      <div className="rarity-label">
+                        {item.rarity?.toUpperCase()}
+                      </div>
+                      {item?.image ? (
+                        <img
+                          src={typeof item.image === "string" ? item.image : item.image.src}
+                          alt={item.name}
+                          className={`item-image rarity-border-${item.rarity?.toLowerCase()}`}
+                          style={{
+                            backgroundColor: "rgba(255, 255, 255, 0.05)",
+                            padding: "10px",
+                            borderRadius: "10px",
+                            marginTop: 10,
+                            boxShadow: "rgba(0, 0, 0, 0.3) 0px 19px 38px, rgba(0, 0, 0, 0.22) 0px 15px 12px",
+                            maxWidth: "100%",
+                            height: "auto"
+                          }}
+                        />
+                      ) : item?.name ? (
+                        item.name
+                      ) : (
+                        "+"
+                      )}
+                  </div>
+                      <button
+                        style={{
+                          backgroundColor: item.equipped ? "#f44336" : "#4caf50",
+                          color: "#fff",
+                          border: "none",
+                          borderRadius: "5px",
+                          padding: "5px",
+                          fontSize: "11px",
+                          cursor: "pointer",
+                          transition: "background-color 0.3s",
+                          width: "100%",
+                          marginTop: "10px",
+                        }}
+                        onClick={() => toggleEquip(inventory.indexOf(item))}
+                      >
+                        {item.equipped ? "Скинути" : "Екіпірувати"}
+                      </button>
+                    </div>
+                  ))}
+              </div>
+
               
               <h2 style={{ 
-                fontSize: "1.4rem", 
+                fontSize: "1rem", 
                 fontWeight: "bold", 
                 marginTop: "50px", 
                 marginBottom: "40px", 
@@ -659,9 +764,7 @@ export default function HomePage() {
                   margin: "0 auto",
                 }}
               >
-                {/* Медіа-запити для адаптації на мобільних пристроях */}
-                {inventory.length > 0 &&
-                  inventory.map((item, index) => (
+                {unequippedItems.map((item, index) => (
                     <div
                       key={index}
                       className={`relative flex flex-col items-center bg-white/[0.05] rounded-lg p-2 animate-fadeIn opacity-0 rarity-${item.rarity?.toLowerCase()}`}
