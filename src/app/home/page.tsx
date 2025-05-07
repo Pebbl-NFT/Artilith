@@ -441,11 +441,10 @@ export default function HomePage() {
     case "home":
       return (
         <div
-          className="HIJtihMA8FHczS02iWF5"
-          style={{ overflow: "visible" }}
-          onClick={handleClick}
         >
-          <Placeholder>
+          <Placeholder className="HIJtihMA8FHczS02iWF5"
+          style={{ overflow: "visible" }}
+          onClick={handleClick}>
             <div
               className="page"
               style={{
@@ -455,13 +454,13 @@ export default function HomePage() {
                 justifyContent: "center",
                 marginTop: "50px",
                 width: "100%",
-                height: "300px",
+                height: "150px",
                 animation: "fadeIn 0.5s ease forwards",
               }}
             >
               <h1
                 style={{
-                  fontSize: "1.5rem",
+                  fontSize: "1rem",
                   fontWeight: "bold",
                   marginTop: "20px",
                   textAlign: "center",
@@ -480,7 +479,6 @@ export default function HomePage() {
                   alignItems: "center",
                   overflow: "visible",
                   marginTop: "-20px",
-                  marginBottom: "0px",
                   width: "90%",
                   height: "90%",
                 }}
@@ -489,10 +487,9 @@ export default function HomePage() {
                   className="blue"
                   alt="Artilith Logo Blue"
                   src={artilithLogo}
-                  width={100}
-                  height={100}
+                  width={50}
+                  height={50}
                   style={{
-                    position: "absolute",
                     width: "auto",
                     height: "auto",
                     maxWidth: "200px",
@@ -507,7 +504,7 @@ export default function HomePage() {
                   textAlign: "center",
                   lineHeight: "1",
                   fontFamily: "Arial, sans-serif",
-                  marginTop: "-20px",
+                  marginTop: "-10px",
                 }}
               >
                 <span>
@@ -525,21 +522,19 @@ export default function HomePage() {
                 alignItems: "center",
                 justifyContent: "center",
                 width: "100%",
-                height: "100px",
+                height: "90px",
                 animation: "fadeIn 0.5s ease forwards",
               }}
             >
               <h1
                 style={{
-                  fontSize: "1.5rem",
+                  fontSize: "1rem",
                   fontWeight: "bold",
-                  marginTop: "20px",
                   textAlign: "center",
-                  lineHeight: "1",
                   color: "#fff",
                 }}
               >
-              Битва
+              Тренування
               </h1>
               <div
                 className="imgWrap"
@@ -562,10 +557,65 @@ export default function HomePage() {
                   textAlign: "center",
                   lineHeight: "1",
                   fontFamily: "Arial, sans-serif",
-                }}><p
+                }}>
+                  <Button
+              style={{animation: "fadeIn 0.6s ease forwards", backgroundColor: "#4caf50" }}
+            >
+              ⚔️ Почати бій ⚔️
+            </Button>
+              </Link>
+            </div>
+          </Placeholder>
+          <Placeholder>
+          <div
+              className="page"
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                justifyContent: "center",
+                width: "100%",
+                height: "90px",
+                animation: "fadeIn 0.5s ease forwards",
+              }}
+            >
+              <h1
+                style={{
+                  fontSize: "1rem",
+                  fontWeight: "bold",
+                  textAlign: "center",
+                  color: "#fff",
+                }}
               >
-                Тисни щоб відкрити тестовий бій
-              </p>
+              В розробці
+              </h1>
+              <div
+                className="imgWrap"
+                style={{
+                  position: "relative",
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  overflow: "visible",
+                  marginTop: "-20px",
+                  width: "90%",
+                  height: "30%",
+                }}
+              >
+              </div>
+              <Link href="" style={{
+                  fontSize: "0.9rem",
+                  fontWeight: "lighter",
+                  color: "#fff",
+                  textAlign: "center",
+                  lineHeight: "1",
+                  fontFamily: "Arial, sans-serif",
+                }}>
+                  <Button
+              style={{animation: "fadeIn 0.6s ease forwards", backgroundColor: "#4caf50" }}
+            >
+              ⚔️
+            </Button>
               </Link>
             </div>
           </Placeholder>
