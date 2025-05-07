@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState, useRef, useCallback } from "react";
+import React, { useEffect, useState, useRef, useCallback,useMemo } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import {
@@ -46,6 +46,10 @@ export default function HomePage() {
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const initDataState = useSignal(initData.state);
   const userId = initDataState?.user?.id;
+
+  const username = useMemo(() => {
+      return initDataState?.user?.firstName || 'User';
+    }, [initDataState]);
 
   const [heroStats, setHeroStats] = useState({
     health: 10,
@@ -327,7 +331,7 @@ export default function HomePage() {
               </h1>
               <p
                 style={{
-                  fontSize: "1rem",
+                  fontSize: "0.8rem",
                   color: "#ddd",
                   textAlign: "center",
                   marginBottom: "30px",
@@ -581,7 +585,7 @@ export default function HomePage() {
                 alignItems: "center",
                 justifyContent: "center",
                 marginTop: "50px",
-                animation: "fadeIn 1s ease forwards",
+                animation: "fadeIn 0.6s ease forwards",
               }}
             >
               <h1 style={{ 
@@ -594,7 +598,7 @@ export default function HomePage() {
                 ДІМ</h1>
               <p
                 style={{
-                  fontSize: "1rem",
+                  fontSize: "0.8rem",
                   color: "#ddd",
                   textAlign: "center",
                   marginBottom: "30px",
@@ -604,14 +608,31 @@ export default function HomePage() {
               </p>
 
               <Card className="page">
-              <h2 style={{ 
-                fontSize: "1rem", 
-                fontWeight: "bold", 
-                textAlign: "center", 
-                color: "#fff" }}
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: "row",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  marginLeft:-100,
+                  marginTop:-50,
+                  marginBottom:-20,
+                  gap: "30px",
+                  padding: 10,
+                  color: "#fff",
+                  animation: "fadeIn 0.6s ease forwards",
+                }}
               >
-                Характеристики
-              </h2>
+                <img 
+                  src="/hero/heroidle.gif" 
+                  alt="Персонаж" 
+                  style={{ width: 200, height: 200, objectFit: "contain" }} 
+                />
+                <div>
+                  <p>{username}</p><p> Lv. 1</p> 
+                </div>
+              </div>
+
                 <div
                   style={{
                     display: "flex",
@@ -619,7 +640,7 @@ export default function HomePage() {
                     justifyContent: "center",
                     alignItems: "center",
                     gap: "30px",
-                    padding:20,
+                    padding:10,
                     color: "#fff",
                     animation: "fadeIn 0.6s ease forwards",
                   }}
@@ -642,6 +663,7 @@ export default function HomePage() {
                     </div>
                 </div>
               </Card>
+              
 
               <h2 style={{ 
                 fontSize: "1rem", 
