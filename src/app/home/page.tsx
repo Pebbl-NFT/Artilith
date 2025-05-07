@@ -653,7 +653,6 @@ export default function HomePage() {
               >
                 ЕКІПІРУВАННЯ
               </h2>
-
               <div
                 style={{
                   display: "grid",
@@ -749,12 +748,6 @@ export default function HomePage() {
                 ІНВЕНТАР
               </h2>
 
-              {inventory.length === 0 && (
-                <p style={{ fontSize: "1.1rem", fontWeight: "lighter", color: "#ccc", textAlign: "center", marginBottom: "20px", lineHeight: "1.4", fontFamily: "Arial, sans-serif", maxWidth: "90%" }}>
-                  Інвентар порожній — купіть предмети в магазині!
-                </p>
-              )}
-
               <div
                 style={{
                   display: "grid",
@@ -764,6 +757,11 @@ export default function HomePage() {
                   margin: "0 auto",
                 }}
               >
+                {inventory.length === 0 && (
+                <p style={{ fontSize: "1.1rem", fontWeight: "lighter", color: "#ccc", textAlign: "center", marginBottom: "20px", lineHeight: "1.4", fontFamily: "Arial, sans-serif", maxWidth: "90%" }}>
+                  Інвентар порожній — купіть предмети в магазині!
+                </p>
+                )}
                 {unequippedItems.map((item, index) => (
                     <div
                       key={index}
