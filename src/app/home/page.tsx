@@ -607,7 +607,8 @@ export default function HomePage() {
                     flexDirection: "row",
                     justifyContent: "center",
                     alignItems: "center",
-                    gap: "20px",
+                    gap: "30px",
+                    padding:20,
                     marginTop: "20px",
                     color: "#fff",
                     animation: "fadeIn 0.6s ease forwards",
@@ -652,7 +653,7 @@ export default function HomePage() {
               <div
                 style={{
                   display: "grid",
-                  gridTemplateColumns: "repeat(auto-fill, minmax(130px, 1fr))", // адаптуємо колонки
+                  gridTemplateColumns: "repeat(auto-fill, minmax(100px, 1fr))", // адаптуємо колонки
                   gap: "20px",
                   width: "100%",
                   margin: "0 auto",
@@ -694,8 +695,9 @@ export default function HomePage() {
                           className={`item-image rarity-border-${item.rarity?.toLowerCase()}`}
                           style={{
                             backgroundColor: "rgba(255, 255, 255, 0.05)",
-                            padding: "20px",
+                            padding: "10px",
                             borderRadius: "10px",
+                            marginTop: 10,
                             boxShadow: "rgba(0, 0, 0, 0.3) 0px 19px 38px, rgba(0, 0, 0, 0.22) 0px 15px 12px",
                             maxWidth: "100%",
                             height: "auto",
@@ -714,13 +716,12 @@ export default function HomePage() {
                             color: "#fff",
                             border: "none",
                             borderRadius: "5px",
-                            padding: "5px 10px",
-                            fontSize: "0.9rem",
+                            padding: "5px",
+                            fontSize: "11px",
                             cursor: "pointer",
                             transition: "background-color 0.3s",
                             width: "100%",
-                            maxWidth: "150px",
-                            marginTop: "-10px",
+                            marginTop: "10px",
                           }}
                           onClick={() => toggleEquip(index)}
                         >
