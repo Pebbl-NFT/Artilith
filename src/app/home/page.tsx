@@ -46,6 +46,9 @@ export default function HomePage() {
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const initDataState = useSignal(initData.state);
   const userId = initDataState?.user?.id;
+  const [experience, setExperience] = useState(0);
+  const [level, setLevel] = useState(1);
+
 
   const username = useMemo(() => {
       return initDataState?.user?.firstName || 'User';
@@ -57,6 +60,11 @@ export default function HomePage() {
     defense: 0,
   });
 
+  // Функція для розрахунку досвіду
+  const getRequiredExp = (level: number): number => {
+    return 100 * Math.pow(2, level - 1); // 1 lvl = 100 XP, 2 lvl = 200, 3 lvl = 400 і т.д.
+  };
+  
   // Перемикач, який показує заблокований контент (наприклад, рівень 2)
   const [locked, setLocked] = useState(true);
 
@@ -79,9 +87,10 @@ export default function HomePage() {
       if (!userId) return;
       const { data, error } = await supabase
         .from("users")
-        .select("points, click_delay, energy")
+        .select("points, click_delay, energy, experience, level")
         .eq("id", userId)
         .single();
+
   
       if (error) {
         console.error("Помилка завантаження даних:", error);
@@ -90,11 +99,13 @@ export default function HomePage() {
         setClickDelay(data.click_delay);
         setEnergy(data.energy);
         setAnimationTime(data.click_delay + 100);
+        setExperience(data.experience ?? 0);
+        setLevel(data.level ?? 1);
+
       }
     };
     fetchUserData();
   }, [userId]);  
-
 
   // підтвердження покупки
   const confirmBuy = async () => {
@@ -201,6 +212,32 @@ export default function HomePage() {
       setTimeout(() => {
         imgWrap.classList.remove("active");
       }, 1000);
+
+    const xpGain = 1; // Кожен клік — 10 XP
+      let newExperience = experience + xpGain;
+      let newLevel = level;
+
+      while (newExperience >= getRequiredExp(newLevel)) {
+        newExperience -= getRequiredExp(newLevel);
+        newLevel++;
+        toast.success(`🎉 Новий рівень! Тепер ви рівень ${newLevel}`);
+      }
+
+      setExperience(newExperience);
+      setLevel(newLevel);
+
+    await supabase
+      .from("users")
+      .upsert([
+        {
+          id: userId,
+          points: newPoints,
+          click_delay: newClickDelay,
+          experience: newExperience,
+          level: newLevel,
+        },
+      ], { onConflict: "id" });
+
     }
   };
 
@@ -658,59 +695,123 @@ export default function HomePage() {
               </p>
 
               <Card className="page">
-              <div
-                style={{
-                  display: "flex",
-                  flexDirection: "row",
-                  justifyContent: "center",
-                  alignItems: "center",
-                  marginLeft:-100,
-                  marginTop:-50,
-                  marginBottom:-20,
-                  gap: "30px",
-                  padding: 10,
-                  color: "#fff",
-                  animation: "fadeIn 0.6s ease forwards",
-                }}
-              >
-                <img 
-                  src="/hero/heroidle.gif" 
-                  alt="Персонаж" 
-                  style={{ width: 200, height: 200, objectFit: "contain" }} 
-                />
-                <div>
-                  <p>{username}</p><p> Lv. 1</p> 
-                </div>
-              </div>
-
                 <div
-                  style={{
-                    display: "flex",
-                    flexDirection: "row",
-                    justifyContent: "center",
-                    alignItems: "center",
-                    gap: "30px",
-                    padding:10,
-                    color: "#fff",
-                    animation: "fadeIn 0.6s ease forwards",
-                  }}
+                    style={{
+                      display: "flex",
+                      flexDirection: "row",
+                      justifyContent: "center",
+                      alignItems: "center",
+                      marginBottom:-30,
+                      gap: "30px",
+                      padding: 10,
+                      color: "#fff",
+                      animation: "fadeIn 0.6s ease forwards",
+                    }}
                   >
-                    <div style={{ display: "flex", justifyContent: "space-between", width: "50%" }}>
-                      <span>❤️ </span>
-                      <span> {heroStats.health}</span>
+                    <p>{username}</p><p>Lv. {level}</p> 
+                  </div>
+
+                  <div
+                    style={{
+                      display: "flex",
+                      flexDirection: "row",
+                      justifyContent: "center",
+                      alignItems: "center",
+                      marginTop:-30,
+                      marginBottom:-50,
+                      gap: "30px",
+                      padding: 10,
+                      color: "#fff",
+                      animation: "fadeIn 0.6s ease forwards",
+                    }}
+                  >
+                    <img 
+                      src="/hero/heroidle.gif" 
+                      alt="Персонаж" 
+                      style={{ width: 220, height: 220, objectFit: "contain" }} 
+                    />
+                    <div></div>
+                  </div>
+                    <div 
+                      style={{
+                        display: "flex",
+                        flexDirection: "row",
+                        justifyContent: "center",
+                        alignItems: "center",
+                        fontSize: 10,
+                        gap: "10px",
+                        padding:10,
+                        color: "#fff",
+                        animation: "fadeIn 0.6s ease forwards",
+                      }}
+                    >
+                      <p>🔷 XP :</p>
+                    <strong>{experience} / {getRequiredExp(level)} 🔷</strong>
                     </div>
-                    <div style={{ display: "flex", justifyContent: "space-between", width: "50%" }}>
-                      <span>🗡️ </span>
-                      <span>{heroStats.attack}</span>
-                    </div>
-                    <div style={{ display: "flex", justifyContent: "space-between", width: "50%" }}>
-                      <span>🛡️</span>
-                      <span>{heroStats.defense}</span>
-                    </div>
-                    <div style={{ display: "flex", justifyContent: "space-between", width: "50%" }}>
-                      <span>⚡</span>
-                      <span>{energy}</span>
-                    </div>
+
+                  <div
+                    style={{
+                      display: "flex",
+                      flexDirection: "row",
+                      justifyContent: "center",
+                      alignItems: "center",
+                      gap: "30px",
+                      padding:10,
+                      color: "#fff",
+                      animation: "fadeIn 0.6s ease forwards",
+                    }}
+                    >
+                      <div style={{ display: "flex", justifyContent: "space-between", width: "50%" }}>
+                        <span>❤️ </span>
+                        <span> {heroStats.health}</span>
+                      </div>
+                      <div style={{ display: "flex", justifyContent: "space-between", width: "50%" }}>
+                        <span>🗡️ </span>
+                        <span>{heroStats.attack}</span>
+                      </div>
+                      <div style={{ display: "flex", justifyContent: "space-between", width: "50%" }}>
+                        <span>🛡️</span>
+                        <span>{heroStats.defense}</span>
+                      </div>
+                      <div style={{ display: "flex", justifyContent: "space-between", width: "50%" }}>
+                        <span>⚡</span>
+                        <span>{energy}</span>
+                      </div>
+                  </div>
+
+                  <div
+                    style={{
+                      display: "flex",
+                      flexDirection: "row",
+                      justifyContent: "center",
+                      alignItems: "center",
+                      marginTop:20,
+                      fontSize: 12,
+                      gap: "30px",
+                      padding:10,
+                      color: "#fff",
+                      animation: "fadeIn 0.6s ease forwards",
+                    }}
+                    >
+                    <Button style={{
+                    border:"1px solid rgb(99, 99, 99)", 
+                    backgroundColor:"rgba(0, 0, 0, 0)",
+                    borderRadius: 8, 
+                    }}>
+                    Здібності</Button>
+
+                    <Button style={{
+                      border:"1px solid rgb(99, 99, 99)", 
+                      backgroundColor:"rgba(0, 0, 0, 0)",
+                      borderRadius: 8, 
+                      }}>
+                      📜</Button>
+                    <Button style={{
+                    border:"1px solid rgb(99, 99, 99)", 
+                    backgroundColor:"rgba(0, 0, 0, 0)",
+                    borderRadius: 8, 
+                    }}>
+                    Завдання</Button>
                 </div>
               </Card>
               
