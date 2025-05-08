@@ -491,7 +491,9 @@ export default function HomePage() {
                 justifyContent: "center",
                 marginTop: "50px",
                 width: "100%",
-                height: "150px",
+                height: "170px",
+                paddingBottom: 60,
+                paddingTop: 40,
                 animation: "fadeIn 0.5s ease forwards",
               }}
             >
@@ -516,8 +518,8 @@ export default function HomePage() {
                   alignItems: "center",
                   overflow: "visible",
                   marginTop: "-20px",
-                  width: "90%",
-                  height: "90%",
+                  width: "100%",
+                  height: "100%",
                 }}
               >
                 <Image
@@ -542,12 +544,16 @@ export default function HomePage() {
                   lineHeight: "1",
                   fontFamily: "Arial, sans-serif",
                   marginTop: "-10px",
+                  marginBottom: 20,
                 }}
               >
                 <span>
-                  {countdown > 0 ? `${formatTime(countdown)}` : "Тисни щоб відправитись на пошуки!"}
+                  {countdown > 0 ? `${formatTime(countdown)}` : "Тисни щоб відправитись на пошуки! "}
                 </span>
               </p>
+                <span>
+                1🪨 / 1🔷
+                </span>
             </div>
           </Placeholder>
           <Placeholder>

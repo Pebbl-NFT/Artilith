@@ -87,6 +87,17 @@ export default function BattlePage() {
         setEnergy(energy - 1);
         toast.success("Використано 1⚡");
         setShowPreBattle(false);
+  
+        // ІНІЦІАЛІЗАЦІЯ СТАТІВ БОЮ
+        const stats = getPlayerStats(inventory);
+        setPlayerStats(stats);
+        setPlayerHP(stats.health);
+        setPlayerDEF(stats.defense);
+        setEnemyHP(enemyStats.health);
+        setEnemyDEF(enemyStats.defense);
+        setCanAttack(true);
+        startTurnTimer(); // 👈 Лише тут
+  
       } else {
         toast.error("Помилка оновлення енергії. Спробуйте пізніше.");
       }
@@ -98,6 +109,7 @@ export default function BattlePage() {
       return;
     }
   };
+  
 
   const fetchInventory = async () => {
     if (!userId) return;
@@ -176,37 +188,32 @@ export default function BattlePage() {
   };
 
   const handleMissedTurn = () => {
-    if (!canAttack || playerHP <= 0 || enemyHP <= 0) return;
-  
-    setCanAttack(false); // блокуємо дублювання
-    setLog((prev) => ["⏱️ Ви пропустили хід!", ...prev]);
-  
-    setPlayerDEF(prevDEF => {
-      const enemyHit = calculateDamage(enemyStats.attack, prevDEF);
-      const newDEF = Math.max(prevDEF - enemyHit.defenseLoss, 0);
-  
-      setPlayerHP(prevHP => {
-        const newHP = Math.max(prevHP - enemyHit.healthLoss, 0);
-  
-        setLog((prev) => [
-          `👾 Ворог завдає ${enemyHit.defenseLoss + enemyHit.healthLoss} шкоди.`,
-          ...(newHP <= 0 ? ["💀 Поразка!"] : []),
-          ...prev,
-        ]);
-  
-        if (newHP <= 0) {
-          setBattleResult("lose");
-        } else {
-          setCanAttack(true);
-          startTurnTimer(); // 👉 Додаємо початок нового ходу
-        }
-  
-        return newHP;
-      });
-  
-      return newDEF;
-    });
-  };  
+  if (!canAttack || playerHP <= 0 || enemyHP <= 0) return;
+
+  setCanAttack(false);
+
+  const enemyHit = calculateDamage(enemyStats.attack, playerDEF);
+  const newDEF = Math.max(playerDEF - enemyHit.defenseLoss, 0);
+  const newHP = Math.max(playerHP - enemyHit.healthLoss, 0);
+
+  const newLog = [
+    `⏱️ Ви пропустили хід!`,
+    `👾 Ворог завдає ${enemyHit.defenseLoss + enemyHit.healthLoss} шкоди.`,
+    ...(newHP <= 0 ? ["💀 Поразка!"] : []),
+  ];
+
+  setPlayerDEF(newDEF);
+  setPlayerHP(newHP);
+  setLog(prev => [...newLog, ...prev]);
+
+  if (newHP <= 0) {
+    setBattleResult("lose");
+  } else {
+    setCanAttack(true);
+    startTurnTimer();
+  }
+};
+ 
 
   const handleAttack = () => {
     if (!canAttack || playerHP <= 0 || enemyHP <= 0 || battleResult) return;
@@ -253,7 +260,7 @@ export default function BattlePage() {
 
       setCanAttack(true);
       startTurnTimer();
-    }, 1000);
+    }, 400);
   };
 
   useEffect(() => {
