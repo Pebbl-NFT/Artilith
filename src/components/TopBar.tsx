@@ -24,46 +24,15 @@ export default function TopBar({ points }: { points: number }) {
         justifyContent: 'space-between',
         alignItems: 'center',
         width: '100%',
+        height: 50,
         background: 'var(--tgui--secondary_bg_color)',
         backdropFilter: "blur(2px)",
         transition: "filter 0.3s ease",
         pointerEvents: "auto",
-        top: -5,
+        top: 0,
         position: 'fixed',
         zIndex: 10,
     }}>
-      <div style={{ position: 'relative', margin: 20 }}>
-        <Link href="/home/profile">
-          <Button
-            mode="filled"
-            size="s"
-            style={{
-              background: 'var(--tgui--secondary_bg_color)',
-              padding: 10,
-              borderRadius: 50,
-              width: '110px',
-              border: '1px solid rgb(255, 255, 255)',
-            }}
-            name="greeting"
-          >
-            👋 {username}
-          </Button>
-        </Link>
-
-        {/* індикатор */}
-        <span
-          style={{
-            position: 'absolute',
-            top: -1,
-            right: 2,
-            width: 8,
-            height: 8,
-            backgroundColor: '#ff3b30',
-            borderRadius: '50%',
-            border: '1px solid white',
-          }}
-        />
-      </div>
       <Button
         mode="filled"
         size="s"
@@ -77,7 +46,7 @@ export default function TopBar({ points }: { points: number }) {
         }}
         name="score-button"
       >
-        0 🪙
+        💎 0 
       </Button>
       <Button
         mode="filled"
@@ -92,7 +61,22 @@ export default function TopBar({ points }: { points: number }) {
         }}
         name="score-button"
       >
-        {points} 🪨
+        🪙 0 
+      </Button>
+      <Button
+        mode="filled"
+        size="s"
+        target="_blank"
+        style={{
+          background: 'var(--tgui--secondary_bg_color)',
+          padding: 10,
+          margin: 20,
+          borderRadius: 50,
+          border: '0px solid rgb(255, 255, 255)',
+        }}
+        name="score-button"
+      >
+        🪨 {points} 
       </Button>
     </div>
   );

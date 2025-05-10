@@ -91,6 +91,12 @@ export default function ProfilePage() {
             <p style={styles.statText}>
             💎 <strong>0</strong> TON
             </p>
+
+            <div style={styles.gameBadges}>
+              <span style={styles.gameBadge}>💎 Обміняти 🪙</span>
+              <span style={styles.gameBadge}>Вивести 💎🪙</span>
+            </div>
+
             <p style={styles.statText}>
               ⏱️ <strong>{userData.click_delay}</strong> с. на клік
             </p>

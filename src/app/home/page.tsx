@@ -322,7 +322,6 @@ export default function HomePage() {
     await fetchInventory();
   };
 
-
   // Завантажуємо інвентар при зміні userId
   useEffect(() => {
     if (activeTab === "hero" && userId) {
@@ -333,7 +332,6 @@ export default function HomePage() {
   useEffect(() => {
     updateHeroStats();
   }, [inventory, updateHeroStats]); 
-
 
   // Функція рендеринга контенту для різних вкладок
   const renderContent = () => {
@@ -805,13 +803,26 @@ export default function HomePage() {
                     borderRadius: 8, 
                     }}>
                     Здібності</Button>
-
-                    <Button style={{
-                      border:"1px solid rgb(99, 99, 99)", 
-                      backgroundColor:"rgba(0, 0, 0, 0)",
-                      borderRadius: 8, 
-                      }}>
-                      📜</Button>
+                    <Link href="/home/profile">
+                      <Button style={{
+                        border:"1px solid rgb(99, 99, 99)", 
+                        backgroundColor:"rgba(0, 0, 0, 0)",
+                        borderRadius: 8, 
+                        }}>
+                        📜<span
+                        style={{
+                          position: 'absolute',
+                          top: -5,
+                          right: -4,
+                          width: 8,
+                          height: 8,
+                          backgroundColor: '#ff3b30',
+                          borderRadius: '50%',
+                          border: '1px solid white',
+                        }}
+                      />
+                      </Button>
+                    </Link>
                     <Button style={{
                     border:"1px solid rgb(99, 99, 99)", 
                     backgroundColor:"rgba(0, 0, 0, 0)",
