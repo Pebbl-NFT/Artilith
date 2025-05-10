@@ -699,139 +699,145 @@ export default function HomePage() {
               </p>
 
               <Card className="page">
-                <div
-                    style={{
-                      display: "flex",
-                      flexDirection: "row",
-                      justifyContent: "center",
-                      alignItems: "center",
-                      marginBottom:-30,
-                      gap: "30px",
-                      padding: 10,
-                      color: "#fff",
-                      animation: "fadeIn 0.6s ease forwards",
-                    }}
-                  >
-                    <p>{username}</p><p>Lv. {level}</p> 
-                  </div>
+                <div style={{
+                  display: "flex",
+                  flexDirection: "row",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  marginBottom: -30,
+                  gap: "30px",
+                  padding: 10,
+                  color: "#fff",
+                  animation: "fadeIn 0.6s ease forwards",
+                }}>
+                  <p>{username}</p><p>Lv. {level}</p>
+                </div>
+                                {/* Досвід */}
+                <div style={{
+                  display: "flex",
+                  flexDirection: "row",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  fontSize: 10,
+                  gap: "10px",
+                  padding: 10,
+                  color: "#fff",
+                  animation: "fadeIn 0.6s ease forwards",
+                }}>
+                  <p>🔷 XP :</p>
+                  <strong>{experience} / {getRequiredExp(level)} 🔷</strong>
+                </div>
 
-                  <div
-                    style={{
-                      display: "flex",
-                      flexDirection: "row",
-                      justifyContent: "center",
-                      alignItems: "center",
-                      marginTop:-30,
-                      marginBottom:-50,
-                      gap: "30px",
-                      padding: 10,
-                      color: "#fff",
-                      animation: "fadeIn 0.6s ease forwards",
-                    }}
-                  >
-                    <img 
-                      src="/hero/heroidle.gif" 
-                      alt="Персонаж" 
-                      style={{ width: 220, height: 220, objectFit: "contain" }} 
-                    />
-                    <div></div>
-                  </div>
-                    <div 
-                      style={{
-                        display: "flex",
-                        flexDirection: "row",
-                        justifyContent: "center",
-                        alignItems: "center",
-                        fontSize: 10,
-                        gap: "10px",
-                        padding:10,
-                        color: "#fff",
-                        animation: "fadeIn 0.6s ease forwards",
-                      }}
-                    >
-                      <p>🔷 XP :</p>
-                    <strong>{experience} / {getRequiredExp(level)} 🔷</strong>
+                <div style={{
+                  position: "relative",
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  marginTop: -50,
+                  color: "#fff",
+                }}>
+                  <img 
+                    src="/hero/heroidle.gif" 
+                    alt="Персонаж" 
+                    style={{ width: 220, height: 220, objectFit: "contain" , marginLeft:-50,}}
+                  />
+
+                  {/* Слоти для екіпіровки */}
+                  <div style={{
+                    position: "absolute",
+                    top: "50%",
+                    left: "-20%",
+                    transform: "translate(-80%, -50%)",
+                    display: "grid",
+                    gridTemplateColumns: "repeat(1, 1fr)",
+                    gap: -10,
+                  }}>
+
+                    <div style={{
+                            padding: "10px",
+                            borderRadius: "10px",
+                            maxWidth: "100%",
+                            height: "auto"
+                          }}>
+                      {equippedItems.find(item => item.type === "weapon") ? (
+                        <img
+                          src={typeof equippedItems.find(item => item.type === "weapon").image === "string" 
+                            ? equippedItems.find(item => item.type === "weapon").image 
+                            : equippedItems.find(item => item.type === "weapon").image.src}
+                          alt="Зброя"
+                          className={`item-image rarity-border-${equippedItems.find(item => item.type === "weapon").rarity?.toLowerCase()}`}
+                          style={{
+                            width:25,
+                            backgroundColor: "rgba(255, 255, 255, 0.05)",
+                            padding: "10px",
+                            borderRadius: "10px",
+                            boxShadow: "rgba(0, 0, 0, 0.3) 0px 19px 38px, rgba(0, 0, 0, 0.22) 0px 15px 12px",
+                            maxWidth: "100%",
+                            height: "auto"
+                          }}
+                        />
+                      ) : "🔪"}
                     </div>
 
-                  <div
-                    style={{
-                      display: "flex",
-                      flexDirection: "row",
-                      justifyContent: "center",
-                      alignItems: "center",
-                      gap: "30px",
-                      padding:10,
-                      color: "#fff",
-                      animation: "fadeIn 0.6s ease forwards",
-                    }}
-                    >
-                      <div style={{ display: "flex", justifyContent: "space-between", width: "50%" }}>
-                        <span>❤️ </span>
-                        <span> {heroStats.health}</span>
-                      </div>
-                      <div style={{ display: "flex", justifyContent: "space-between", width: "50%" }}>
-                        <span>🗡️ </span>
-                        <span>{heroStats.attack}</span>
-                      </div>
-                      <div style={{ display: "flex", justifyContent: "space-between", width: "50%" }}>
-                        <span>🛡️</span>
-                        <span>{heroStats.defense}</span>
-                      </div>
-                      <div style={{ display: "flex", justifyContent: "space-between", width: "50%" }}>
-                        <span>⚡</span>
-                        <span>{energy}</span>
-                      </div>
+                    <div style={{
+                            padding: "10px",
+                            borderRadius: "10px",
+                            maxWidth: "100%",
+                            height: "auto"
+                          }}>
+                      {equippedItems.find(item => item.type === "shield") ? (
+                        <img
+                          src={typeof equippedItems.find(item => item.type === "shield").image === "string" 
+                            ? equippedItems.find(item => item.type === "shield").image 
+                            : equippedItems.find(item => item.type === "shield").image.src}
+                          alt="Щит"
+                          className={`item-image rarity-border-${equippedItems.find(item => item.type === "shield").rarity?.toLowerCase()}`}
+                          style={{
+                            width:25,
+                            backgroundColor: "rgba(255, 255, 255, 0.05)",
+                            padding: "10px",
+                            borderRadius: "10px",
+                            boxShadow: "rgba(0, 0, 0, 0.3) 0px 19px 38px, rgba(0, 0, 0, 0.22) 0px 15px 12px",
+                            maxWidth: "100%",
+                            height: "auto"
+                          }}
+                        />
+                      ) : "🛡️"}
+                    </div>
                   </div>
-
-                  <div
-                    style={{
-                      display: "flex",
-                      flexDirection: "row",
-                      justifyContent: "center",
-                      alignItems: "center",
-                      marginTop:20,
-                      fontSize: 12,
-                      gap: "30px",
-                      padding:10,
-                      color: "#fff",
-                      animation: "fadeIn 0.6s ease forwards",
-                    }}
-                    >
-                    <Button style={{
-                    border:"1px solid rgb(99, 99, 99)", 
-                    backgroundColor:"rgba(0, 0, 0, 0)",
-                    borderRadius: 8, 
-                    }}>
-                    Здібності</Button>
-                    <Link href="/home/profile">
-                      <Button style={{
-                        border:"1px solid rgb(99, 99, 99)", 
-                        backgroundColor:"rgba(0, 0, 0, 0)",
-                        borderRadius: 8, 
-                        }}>
-                        📜<span
-                        style={{
-                          position: 'absolute',
-                          top: -5,
-                          right: -4,
-                          width: 8,
-                          height: 8,
-                          backgroundColor: '#ff3b30',
-                          borderRadius: '50%',
-                          border: '1px solid white',
-                        }}
-                      />
-                      </Button>
-                    </Link>
-                    <Button style={{
-                    border:"1px solid rgb(99, 99, 99)", 
-                    backgroundColor:"rgba(0, 0, 0, 0)",
-                    borderRadius: 8, 
-                    }}>
-                    Завдання</Button>
                 </div>
+
+                {/* Статистики героя */}
+                <div style={{
+                  display: "flex",
+                  flexDirection: "row",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  gap: "30px",
+                  padding: 10,
+                  color: "#fff",
+                  animation: "fadeIn 0.6s ease forwards",
+                }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", width: "50%" }}>
+                    <span>❤️ </span>
+                    <span>{heroStats.health}</span>
+                  </div>
+                  <div style={{ display: "flex", justifyContent: "space-between", width: "50%" }}>
+                    <span>🗡️ </span>
+                    <span>{heroStats.attack}</span>
+                  </div>
+                  <div style={{ display: "flex", justifyContent: "space-between", width: "50%" }}>
+                    <span>🛡️</span>
+                    <span>{heroStats.defense}</span>
+                  </div>
+                  <div style={{ display: "flex", justifyContent: "space-between", width: "50%" }}>
+                    <span>⚡</span>
+                    <span>{energy}</span>
+                  </div>
+                </div>
+
               </Card>
-              
 
               <h2 style={{ 
                 fontSize: "1rem", 
@@ -846,7 +852,7 @@ export default function HomePage() {
               <div
                 style={{
                   display: "grid",
-                  gridTemplateColumns: "repeat(auto-fill, minmax(100px, 1fr))", // адаптуємо колонки
+                  gridTemplateColumns: "repeat(auto-fill, minmax(100px, 1fr))",
                   gap: "20px",
                   width: "100%",
                   margin: "0 auto",
