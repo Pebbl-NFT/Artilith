@@ -9,22 +9,26 @@ import { AllItems } from "@/components/Item/Items";
 import { getPlayerStats } from "@/utils/getPlayerStats";
 import { reduceEnergy } from "@/utils/reduceEnergy";
 import { Toaster, toast } from "react-hot-toast";
+import { generateEnemy, Enemy } from '@/lib/generateEnemy';
 
 export default function BattlePage() {
   const initDataState = useSignal(initData.state);
   const userId = initDataState?.user?.id;
 
   const [playerStats, setPlayerStats] = useState({ health: 10, attack: 0, defense: 0});
-  const [enemyStats, setEnemyStats] = useState({ name: "Слиз", health: 8, attack: 2, defense: 0 });
 
   const [inventory, setInventory] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [energy, setEnergy] = useState(10);
   const hasShownToast = useRef(false);
 
+  const [playerLevel, setPlayerLevel] = useState(1); // за замовчуванням рівень 1
+
+  const [enemyStats, setEnemyStats] = useState<Enemy | null>(null);
+  const [enemyHP, setEnemyHP] = useState(0);
+  const [enemyImage, setEnemyImage] = useState<string>("");
   const [playerHP, setPlayerHP] = useState(10);
   const [playerDEF, setPlayerDEF] = useState(0);
-  const [enemyHP, setEnemyHP] = useState(8);
   const [enemyDEF, setEnemyDEF] = useState(0);
 
   const [isHit, setIsHit] = useState(false);
@@ -44,14 +48,9 @@ export default function BattlePage() {
   const [isEnemyAttacking, setIsEnemyAttacking] = useState(false);
   const [isEnemyHit, setIsEnemyHit] = useState(false);
 
-
   const hasMissedTurnRef = useRef(false);
 
-  const enemyImage = (() => {
-    if (isEnemyAttacking) return "/enemies/slimeattack.gif";
-    if (isEnemyHit) return "/enemies/slimehit.gif";
-    return "/enemies/slimeidle.gif";
-  })();
+  
 
     // Завантажуємо дані користувача із Supabase
   useEffect(() => {
@@ -59,7 +58,7 @@ export default function BattlePage() {
       if (!userId) return;
       const { data, error } = await supabase
         .from("users")
-        .select("points, click_delay, energy")
+        .select("points, click_delay, energy, level")
         .eq("id", userId)
         .single();
   
@@ -67,6 +66,7 @@ export default function BattlePage() {
         console.error("Помилка завантаження даних:", error);
       } else if (data) {
         setEnergy(data.energy);
+        setPlayerLevel(data.level);
         if (data.energy <= 0 && !hasShownToast.current) {
           toast.error("У вас закінчилася енергія ⚡");
           hasShownToast.current = true;
@@ -110,8 +110,8 @@ export default function BattlePage() {
         setPlayerStats(stats);
         setPlayerHP(stats.health);
         setPlayerDEF(stats.defense);
-        setEnemyHP(enemyStats.health);
-        setEnemyDEF(enemyStats.defense);
+        setEnemyHP(enemyStats ? enemyStats.currentHealth : 0);
+        setEnemyDEF(enemyStats ? enemyStats.defense : 0);
         setCanAttack(true);
         startTurnTimer(); // 👈 Лише тут
   
@@ -205,11 +205,11 @@ export default function BattlePage() {
   };
 
   const handleMissedTurn = () => {
-  if (!canAttack || playerHP <= 0 || enemyHP <= 0) return;
+  if (!canAttack || playerHP <= 0 || enemyHP <= 0 || !enemyStats) return;
 
   setCanAttack(false);
 
-  const enemyHit = calculateDamage(enemyStats.attack, playerDEF);
+  const enemyHit = calculateDamage(enemyStats.damage, playerDEF);
   const newDEF = Math.max(playerDEF - enemyHit.defenseLoss, 0);
   const newHP = Math.max(playerHP - enemyHit.healthLoss, 0);
 
@@ -259,7 +259,9 @@ export default function BattlePage() {
     setTimeout(() => {
       if (battleResult) return;
 
-      const enemyHit = calculateDamage(enemyStats.attack, playerDEF);
+      if (!enemyStats) return;
+
+      const enemyHit = calculateDamage(enemyStats.damage, playerDEF);
       const newPlayerDEF = Math.max(playerDEF - enemyHit.defenseLoss, 0);
       const newPlayerHP = Math.max(playerHP - enemyHit.healthLoss, 0);
       setPlayerDEF(newPlayerDEF);
@@ -281,7 +283,16 @@ export default function BattlePage() {
     }, 400);
   };
 
+  useEffect(() => {
+    if (showPreBattle && playerLevel) {
+      const generated = generateEnemy(playerLevel);
+      setEnemyStats(generated);
+      setEnemyHP(generated.maxHealth);
+      setEnemyImage(generated.image);
+    }
+  }, [showPreBattle, playerLevel]);
 
+// Removed redundant useEffect that referenced undefined 'newEnemy'
 
   useEffect(() => {
     fetchInventory();
@@ -292,8 +303,10 @@ export default function BattlePage() {
     setPlayerStats(stats);
     setPlayerHP(stats.health);
     setPlayerDEF(stats.defense);
-    setEnemyHP(enemyStats.health);
-    setEnemyDEF(enemyStats.defense);
+    if (enemyStats) {
+      setEnemyHP(enemyStats.currentHealth);
+      setEnemyDEF(enemyStats.defense);
+    }
     setIsLoading(false);
     setCanAttack(true);
     if (!showPreBattle) {
@@ -311,131 +324,134 @@ export default function BattlePage() {
     return (
       <Page>
         <Toaster position="top-center" toastOptions={{ duration: 2000 }} />
-        <Card
-          className="page"
-          style={{
-            position: "fixed",
-            top: 0,
-            left: 1,
-            width: "100vw",
-            height: "100vh",
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            flexDirection: "column",
-            color: "#fff",
-            padding: "16px", // трохи внутрішнього відступу
-            boxSizing: "border-box",
-          }}
-        >
-          <h2 
+          <Card
+            className="page"
             style={{
+              position: "fixed",
+              top: 0,
+              left: 1,
+              width: "100vw",
+              height: "100vh",
               display: "flex",
-              flexDirection: "row",
               justifyContent: "center",
               alignItems: "center",
+              flexDirection: "column",
               color: "#fff",
-              animation: "fadeIn 0.6s ease forwards",
+              padding: "16px", // трохи внутрішнього відступу
+              boxSizing: "border-box",
             }}
           >
-            ⚔️ Ви натрапили на ворога ! ⚔️</h2>
-
-          <h1 style={{ animation: "fadeIn 3s ease forwards",marginBottom:20, }}>{enemyStats.name}</h1>
-          <div
-            style={{
-              display: "flex",
-              flexDirection: "row",
-              justifyContent: "center",
-              alignItems: "center",
-              gap: "40px",
-              color: "#fff",
-              animation: "fadeIn 3s ease forwards",
-              marginBottom: "0px"
-            }}
+            <h2 
+              style={{
+                display: "flex",
+                flexDirection: "row",
+                justifyContent: "center",
+                alignItems: "center",
+                color: "#fff",
+                animation: "fadeIn 0.6s ease forwards",
+              }}
             >
-              <div style={{ display: "flex", justifyContent: "space-between", width: "50%" }}>
-                <span>{enemyHP} </span>
+              ⚔️ Ви натрапили на ворога ! ⚔️</h2>
+
+            <h1 style={{ animation: "fadeIn 3s ease forwards",marginBottom:20, }}>{enemyStats?.name}</h1>
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "row",
+                justifyContent: "center",
+                alignItems: "center",
+                gap: "40px",
+                color: "#fff",
+                animation: "fadeIn 3s ease forwards",
+                marginBottom: "0px"
+              }}
+              >
+                <div style={{ display: "flex", justifyContent: "space-between", width: "50%" }}>
+                  <span>{enemyHP} </span>
+                  <span>❤️ </span>
+                </div>
+                <div style={{ display: "flex", justifyContent: "space-between", width: "50%" }}>
+                  <span>🗡️ </span>
+                  <span>{enemyStats?.damage} </span>
+                </div>
+                <div style={{ display: "flex", justifyContent: "space-between", width: "50%" }}>            
+                  <span>🛡️</span>
+                  <span>{enemyDEF} </span>
+                </div>
+            </div>
+            <img
+              src={enemyImage}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                animation: "fadeIn 0.6s ease forwards",
+              }}
+            />
+
+            <h2
+              style={{
+                display: "flex",
+                flexDirection: "row",
+                justifyContent: "center",
+                alignItems: "center",
+                gap: "40px",
+                color: "#fff",
+                animation: "fadeIn 0.6s ease forwards",
+              }}
+            > 
+              Ваші характеристики :</h2>
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "row",
+                justifyContent: "center",
+                alignItems: "center",
+                gap: "40px",
+                marginBottom: "30px",
+                color: "#fff",
+                animation: "fadeIn 0.6s ease forwards",
+              }}
+              >
+                <div style={{ display: "flex", justifyContent: "space-between", width: "50%" }}>
+                <span>{playerHP} </span>
                 <span>❤️ </span>
-              </div>
-              <div style={{ display: "flex", justifyContent: "space-between", width: "50%" }}>
-                <span>🗡️ </span>
-                <span>{enemyStats.attack} </span>
-              </div>
-              <div style={{ display: "flex", justifyContent: "space-between", width: "50%" }}>            
-                <span>🛡️</span>
-                <span>{enemyDEF} </span>
-              </div>
-          </div>
+                </div>
+                <div style={{ display: "flex", justifyContent: "space-between", width: "50%" }}>
+                  <span>🗡️ </span>
+                  <span>{playerStats.attack} </span>
+                </div>
+                <div style={{ display: "flex", justifyContent: "space-between", width: "50%" }}>            
+                  <span>🛡️</span>
+                  <span>{playerDEF} </span>
+                </div>
+                <div style={{ display: "flex", justifyContent: "space-between", width: "50%" }}>
+                <span>⚡</span>
+                <span>{energy}</span>
+                </div>
+            </div>
 
-          <img
-            src={enemyImage}
-            alt={enemyStats.name} style={{ animation: "fadeIn 3s ease forwards", }}
-          />
+            <div style={{
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                color: "#fff",
+                animation: "fadeIn 0.6s ease forwards",
+              }}>
+              <Button
+                style={{animation: "fadeIn 0.6s ease forwards", backgroundColor: "#4caf50" }}
+                disabled={isLoading}
+                onClick={handleStartBattle}
+              >
+                ⚔️ Почати бій ⚔️
+              </Button>
+            </div>
 
-          <h2
-            style={{
-              display: "flex",
-              flexDirection: "row",
-              justifyContent: "center",
-              alignItems: "center",
-              gap: "40px",
-              color: "#fff",
-              animation: "fadeIn 0.6s ease forwards",
-            }}
-          > 
-            Ваші характеристики :</h2>
-          <div
-            style={{
-              display: "flex",
-              flexDirection: "row",
-              justifyContent: "center",
-              alignItems: "center",
-              gap: "40px",
-              marginBottom: "30px",
-              color: "#fff",
-              animation: "fadeIn 0.6s ease forwards",
-            }}
-            >
-              <div style={{ display: "flex", justifyContent: "space-between", width: "50%" }}>
-              <span>{playerHP} </span>
-              <span>❤️ </span>
-              </div>
-              <div style={{ display: "flex", justifyContent: "space-between", width: "50%" }}>
-                <span>🗡️ </span>
-                <span>{playerStats.attack} </span>
-              </div>
-              <div style={{ display: "flex", justifyContent: "space-between", width: "50%" }}>            
-                <span>🛡️</span>
-                <span>{playerDEF} </span>
-              </div>
-              <div style={{ display: "flex", justifyContent: "space-between", width: "50%" }}>
-              <span>⚡</span>
-              <span>{energy}</span>
-              </div>
-          </div>
-
-          <div style={{
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-              color: "#fff",
-              animation: "fadeIn 0.6s ease forwards",
-            }}>
-            <Button
-              style={{animation: "fadeIn 0.6s ease forwards", backgroundColor: "#4caf50" }}
-              disabled={isLoading}
-              onClick={handleStartBattle}
-            >
-              ⚔️ Почати бій ⚔️
-            </Button>
-          </div>
-
-          <Link href="/home">
-            <Button style={{ animation: "fadeIn 0.6s ease forwards",marginTop: 12, marginBottom: -20, backgroundColor:"#f44336" }}>
-              Втекти
-            </Button>
-          </Link>
-        </Card>
+            <Link href="/home">
+              <Button style={{ animation: "fadeIn 0.6s ease forwards",marginTop: 12, marginBottom: -20, backgroundColor:"#f44336" }}>
+                Втекти
+              </Button>
+            </Link>
+          </Card>
       </Page>
     );
   }
@@ -468,7 +484,7 @@ export default function BattlePage() {
               alignItems: "center",
               color: "#fff",
               animation: "fadeIn 0.6s ease forwards",
-            }}> {enemyStats.name}</h3>
+            }}> {enemyStats?.name}</h3>
           <div
             style={{
               display: "flex",
@@ -486,7 +502,7 @@ export default function BattlePage() {
               </div>
               <div style={{ display: "flex", justifyContent: "space-between", width: "50%" }}>
                 <span>🗡️ </span>
-                <span>{enemyStats.attack} </span>
+                <span>{enemyStats?.damage} </span>
               </div>
               <div style={{ display: "flex", justifyContent: "space-between", width: "50%" }}>            
                 <span>🛡️</span>
@@ -494,7 +510,7 @@ export default function BattlePage() {
               </div>
           </div>
         </Card>
-        <ProgressBar value={enemyHP} max={enemyStats.health} color="#f44336" />
+        <ProgressBar value={enemyHP} max={enemyStats ? enemyStats.currentHealth : 1} color="#f44336" />
         <div
           style={{
             position: "relative",
@@ -514,7 +530,7 @@ export default function BattlePage() {
           <div style={{ position: "relative", display: "inline-block", zIndex: 2 }}>
             <img
               src={enemyImage}
-              alt={enemyStats.name}
+              alt={enemyStats?.name}
               style={{
                 width: "200px",
                 height: "200px",
