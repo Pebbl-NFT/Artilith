@@ -29,6 +29,7 @@ export default function BattlePage() {
 
   const [isHit, setIsHit] = useState(false);
   const [canAttack, setCanAttack] = useState(true);
+  const canAttackRef = useRef(true);
   const [log, setLog] = useState<string[]>([]);
   const [turnTimer, setTurnTimer] = useState(30);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
@@ -74,6 +75,22 @@ export default function BattlePage() {
     };
     fetchUserData();
   }, [userId]);
+
+  const updateCanAttack = (value: boolean) => {
+    setCanAttack(value);
+    canAttackRef.current = value;
+  };
+
+
+  const appendToLog = (newEntries: string[]) => {
+    setLog(prev => {
+      if (prev.some(line => line.includes("Перемога") || line.includes("Поразка"))) {
+        return prev; // лог вже завершений
+      }
+      return [...newEntries, ...prev];
+    });
+  };
+
 
   const handleStartBattle = async () => {
     if (energy > 0) {
@@ -216,52 +233,55 @@ export default function BattlePage() {
  
 
   const handleAttack = () => {
-    if (!canAttack || playerHP <= 0 || enemyHP <= 0 || battleResult) return;
+    if (!canAttackRef.current || playerHP <= 0 || enemyHP <= 0 || battleResult) return;
 
     if (timerRef.current) clearInterval(timerRef.current);
+    updateCanAttack(false);
 
     const playerHit = calculateDamage(playerStats.attack, enemyDEF);
     const newEnemyDEF = Math.max(enemyDEF - playerHit.defenseLoss, 0);
     const newEnemyHP = Math.max(enemyHP - playerHit.healthLoss, 0);
     setEnemyDEF(newEnemyDEF);
     setEnemyHP(newEnemyHP);
-    setLog((prev) => [`🧍 Гравець завдає ${playerHit.defenseLoss + playerHit.healthLoss} шкоди.`, ...prev]);
+
+    appendToLog([`🧍 Гравець завдає ${playerHit.defenseLoss + playerHit.healthLoss} шкоди.`]);
     toast.success("Успішна атака!");
     setHitText({ value: playerHit.defenseLoss + playerHit.healthLoss, id: hitIdRef.current++ });
-    setTimeout(() => setHitText(null), 800); // Прибрати через 800мс
-
+    setTimeout(() => setHitText(null), 800);
 
     if (newEnemyHP <= 0) {
-      setLog((prev) => ["🎉 Перемога!", ...prev]);
+      appendToLog(["🎉 Перемога!"]);
       setBattleResult("win");
-      setCanAttack(false);
       clearInterval(timerRef.current!);
       return;
     }
 
-    setCanAttack(false);
-
     setTimeout(() => {
+      if (battleResult) return;
+
       const enemyHit = calculateDamage(enemyStats.attack, playerDEF);
       const newPlayerDEF = Math.max(playerDEF - enemyHit.defenseLoss, 0);
       const newPlayerHP = Math.max(playerHP - enemyHit.healthLoss, 0);
       setPlayerDEF(newPlayerDEF);
       setPlayerHP(newPlayerHP);
-      setLog((prev) => [`👾 Ворог завдає ${enemyHit.defenseLoss + enemyHit.healthLoss} шкоди.`, ...prev]);
+
+      appendToLog([`👾 Ворог завдає ${enemyHit.defenseLoss + enemyHit.healthLoss} шкоди.`]);
       setIsEnemyAttacking(true);
-      setTimeout(() => setIsEnemyAttacking(false), 500); // довжина анімації атаки
+      setTimeout(() => setIsEnemyAttacking(false), 500);
 
       if (newPlayerHP <= 0) {
-        setLog((prev) => ["💀 Поразка!", ...prev]);
+        appendToLog(["💀 Поразка!"]);
         setBattleResult("lose");
         clearInterval(timerRef.current!);
         return;
       }
 
-      setCanAttack(true);
+      updateCanAttack(true);
       startTurnTimer();
     }, 400);
   };
+
+
 
   useEffect(() => {
     fetchInventory();
