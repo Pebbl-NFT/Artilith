@@ -712,7 +712,8 @@ export default function HomePage() {
                 }}>
                   <p>{username}</p><p>Lv. {level}</p>
                 </div>
-                                {/* Досвід */}
+
+                {/* Досвід */}
                 <div style={{
                   display: "flex",
                   flexDirection: "row",
@@ -723,7 +724,7 @@ export default function HomePage() {
                   padding: 10,
                   color: "#fff",
                   animation: "fadeIn 0.6s ease forwards",
-                }}>
+                  }}>
                   <p>🔷 XP :</p>
                   <strong>{experience} / {getRequiredExp(level)} 🔷</strong>
                 </div>
@@ -736,6 +737,7 @@ export default function HomePage() {
                   justifyContent: "center",
                   marginTop: -50,
                   color: "#fff",
+                  animation: "fadeIn 0.6s ease forwards",
                 }}>
                   <img 
                     src="/hero/heroidle.gif" 
@@ -752,6 +754,7 @@ export default function HomePage() {
                     display: "grid",
                     gridTemplateColumns: "repeat(1, 1fr)",
                     gap: -10,
+                    
                   }}>
 
                     <div style={{
@@ -837,6 +840,55 @@ export default function HomePage() {
                   </div>
                 </div>
 
+                <div
+                    style={{
+                      display: "flex",
+                      flexDirection: "row",
+                      justifyContent: "center",
+                      alignItems: "center",
+                      marginTop:20,
+                      fontSize: 12,
+                      gap: "30px",
+                      padding:10,
+                      color: "#fff",
+                      animation: "fadeIn 0.6s ease forwards",
+                    }}
+                    >
+
+                    <Button style={{
+                    border:"1px solid rgb(99, 99, 99)",
+                    backgroundColor:"rgba(0, 0, 0, 0)",
+                    borderRadius: 8,
+                    }}>
+
+                    Здібності</Button>
+                    <Link href="/home/profile">
+                      <Button style={{
+                        border:"1px solid rgb(99, 99, 99)",
+                        backgroundColor:"rgba(0, 0, 0, 0)",
+                        borderRadius: 8,
+                        }}>
+                        📜<span
+                        style={{
+                          position: 'absolute',
+                          top: -5,
+                          right: -4,
+                          width: 8,
+                          height: 8,
+                          backgroundColor: '#ff3b30',
+                          borderRadius: '50%',
+                          border: '1px solid white',
+                        }}
+                      />
+                      </Button>
+                    </Link>
+                    <Button style={{
+                    border:"1px solid rgb(99, 99, 99)",
+                    backgroundColor:"rgba(0, 0, 0, 0)",
+                    borderRadius: 8,
+                    }}>
+                    Завдання</Button>
+                </div>
               </Card>
 
               <h2 style={{ 
