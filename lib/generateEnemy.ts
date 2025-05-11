@@ -9,7 +9,7 @@ export type Enemy = {
   missChance: number;
 };
 
-type EnemyBase = {
+export type EnemyBase = {
   name: string;
   image: string;
   baseHealth: number;
@@ -19,7 +19,7 @@ type EnemyBase = {
   baseMissChance: number;
 };
 
-const baseEnemies: EnemyBase[] = [
+export const baseEnemies: EnemyBase[] = [
   {
     name: 'Слайм',
     image: '/enemies/slimeidle.gif',
@@ -41,9 +41,9 @@ const baseEnemies: EnemyBase[] = [
   {
     name: 'Гриб',
     image: '/enemies/mushroomidle.gif',
-    baseHealth: 20,
-    baseDamage: 9,
-    baseDefense: 30,
+    baseHealth: 14,
+    baseDamage: 5,
+    baseDefense: 11,
     baseCritChance: 0.12,
     baseMissChance: 0.05,
   },

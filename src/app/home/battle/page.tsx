@@ -9,7 +9,8 @@ import { AllItems } from "@/components/Item/Items";
 import { getPlayerStats } from "@/utils/getPlayerStats";
 import { reduceEnergy } from "@/utils/reduceEnergy";
 import { Toaster, toast } from "react-hot-toast";
-import { generateEnemy, Enemy } from '@/lib/generateEnemy';
+import { generateEnemy, Enemy} from '@/lib/generateEnemy';
+import { baseEnemies, EnemyBase } from '@/lib/generateEnemy';
 
 export default function BattlePage() {
   const initDataState = useSignal(initData.state);
@@ -48,6 +49,10 @@ export default function BattlePage() {
   const [isEnemyAttacking, setIsEnemyAttacking] = useState(false);
   const [isEnemyHit, setIsEnemyHit] = useState(false);
 
+  const [rewardPoints, setRewardPoints] = useState<number | null>(null);
+  const [rewardExp, setRewardExp] = useState<number | null>(null);
+
+
   const hasMissedTurnRef = useRef(false);
 
   
@@ -58,7 +63,7 @@ export default function BattlePage() {
       if (!userId) return;
       const { data, error } = await supabase
         .from("users")
-        .select("points, click_delay, energy, level")
+        .select("points, click_delay, energy, level, experience")
         .eq("id", userId)
         .single();
   
@@ -81,7 +86,6 @@ export default function BattlePage() {
     canAttackRef.current = value;
   };
 
-
   const appendToLog = (newEntries: string[]) => {
     setLog(prev => {
       if (prev.some(line => line.includes("Перемога") || line.includes("Поразка"))) {
@@ -90,7 +94,6 @@ export default function BattlePage() {
       return [...newEntries, ...prev];
     });
   };
-
 
   const handleStartBattle = async () => {
     if (energy > 0) {
@@ -127,7 +130,6 @@ export default function BattlePage() {
     }
   };
   
-
   const fetchInventory = async () => {
     if (!userId) return;
 
@@ -165,11 +167,12 @@ export default function BattlePage() {
     return (
       <div style={{
         width: '100%',
-        height: 12,
+        height: 5,
         backgroundColor: '#333',
         borderRadius: 6,
+        border: '1px solid rgb(32, 32, 32)',
         overflow: 'hidden',
-        marginTop: 4,
+        marginTop: 0,
       }}>
         <div style={{
           width: `${percent}%`,
@@ -184,7 +187,7 @@ export default function BattlePage() {
   const startTurnTimer = () => {
     if (battleResult) return; // Не запускаємо таймер, якщо бій завершено
 
-    setTurnTimer(5);
+    setTurnTimer(15);
     hasMissedTurnRef.current = false;
 
     if (timerRef.current) clearInterval(timerRef.current);
@@ -231,7 +234,6 @@ export default function BattlePage() {
   }
 };
  
-
   const handleAttack = () => {
     if (!canAttackRef.current || playerHP <= 0 || enemyHP <= 0 || battleResult) return;
 
@@ -292,8 +294,6 @@ export default function BattlePage() {
     }
   }, [showPreBattle, playerLevel]);
 
-// Removed redundant useEffect that referenced undefined 'newEnemy'
-
   useEffect(() => {
     fetchInventory();
   }, [userId]);
@@ -309,9 +309,6 @@ export default function BattlePage() {
     }
     setIsLoading(false);
     setCanAttack(true);
-    if (!showPreBattle) {
-      startTurnTimer();
-    }
   }, [inventory]);
 
   useEffect(() => {
@@ -319,6 +316,55 @@ export default function BattlePage() {
       if (timerRef.current) clearInterval(timerRef.current);
     };
   }, []);
+
+  useEffect(() => {
+    const handleReward = async () => {
+      if (battleResult === "win" && enemyStats) {
+        const { rewardPoints, rewardExp } = calculateReward(enemyStats);
+        setRewardPoints(rewardPoints);
+        setRewardExp(rewardExp);
+        await updateRewardInSupabase(rewardPoints, rewardExp);
+      }
+    };
+
+    handleReward();
+  }, [battleResult]);
+
+    function calculateReward(enemy: Enemy): { rewardPoints: number; rewardExp: number } {
+      const base = baseEnemies.find((e: EnemyBase) => e.name === enemy.name);
+      if (!base) return { rewardPoints: 0, rewardExp: 0 };
+
+      const baseValue = base.baseHealth + base.baseDamage + base.baseDefense;
+      const scaleFactor = enemy.maxHealth / base.baseHealth;
+
+      const rewardPoints = Math.floor(baseValue * 2 * scaleFactor);
+      const rewardExp = Math.floor(baseValue * 1.5 * scaleFactor);
+
+      return { rewardPoints, rewardExp };
+    }
+
+  async function updateRewardInSupabase(rewardPoints: number, rewardExp: number) {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("points, experience")
+      .eq("id", user.id)
+      .single();
+
+    if (!profile) return;
+
+    const { error } = await supabase
+      .from("profiles")
+      .update({
+        point: profile.points + rewardPoints,
+        experience: profile.experience + rewardExp,
+      })
+      .eq("id", user.id);
+
+    if (error) console.error("Помилка оновлення:", error.message);
+  }
 
   if (showPreBattle) {
     return (
@@ -510,30 +556,34 @@ export default function BattlePage() {
               </div>
           </div>
         </Card>
-        <ProgressBar value={enemyHP} max={enemyStats ? enemyStats.currentHealth : 1} color="#f44336" />
         <div
           style={{
             position: "relative",
             width: "100%",
-            height: "400px", // або більше/менше залежно від дизайну
+            height: "100%", // або більше/менше залежно від дизайну
             backgroundImage: "url('/bg/bgforest.png')",
             backgroundSize: "cover",
             backgroundPosition: "center",
-            marginTop: "20px",
-            marginBottom: "20px",
+            marginTop: "0px",
+            marginBottom: "0px",
             display: "flex",
             justifyContent: "center",
             alignItems: "center",
           }}
-          onClick={handleAttack}
+          
         >
           <div style={{ position: "relative", display: "inline-block", zIndex: 2 }}>
+            <div style={{ width: 100, marginLeft: 30, marginTop: 40}}>
+            <ProgressBar value={enemyHP} max={enemyStats ? enemyStats.currentHealth : 1} color="#f44336" />  
+            </div>
             <img
               src={enemyImage}
               alt={enemyStats?.name}
               style={{
-                width: "200px",
-                height: "200px",
+                marginLeft: 10,
+                marginTop: -20,
+                width: "140px",
+                height: "140px",
                 objectFit: "contain",
                 animation: isHit ? "hitFlash 0.3s ease" : undefined,
                 cursor: canAttack && !battleResult ? "pointer" : "default",
@@ -554,29 +604,47 @@ export default function BattlePage() {
                 key={hitText.id}
                 style={{
                   position: "absolute",
-                  top: 20,
-                  left: "50%",
+                  top: -30,
+                  left: "60%",
                   transform: "translateX(-50%)",
                   fontSize: "20px",
                   color: "#ff4747",
                   animation: "hit-float 1s ease-out forwards",
                   pointerEvents: "none",
+                  fontWeight: "bold"
                 }}
               >
                 - {hitText.value}
               </div>
             )}
           </div>
+
+          <div style={{ position: "relative", display: "inline-block", zIndex: 100 }}>
+            
+            <div style={{ width: 100, marginLeft: 65, marginTop: 80}}>
+            <ProgressBar value={playerHP} max={playerStats.health} color="rgba(60, 255, 0, 0.73)" />
+            </div>
+            <img
+              src="/hero/heroidle.gif"
+              style={{
+                marginLeft: 0,
+                marginTop: -40,
+                width: "200px",
+                height: "200px",
+                objectFit: "contain",
+                transition: "transform 0.2s ease",
+              }}
+            />
+          </div>
         </div>
-        <ProgressBar value={turnTimer} max={5} color="#fbbf24" />
-        <ProgressBar value={playerHP} max={playerStats.health} color="rgba(60, 255, 0, 0.73)" />
+        <ProgressBar value={turnTimer} max={15} color="#fbbf24" />
         <Card className="page"
         style={{ 
           display: "flex", 
           justifyContent: "space-between",
-          marginTop:10,
-          marginBottom:-30,
-          padding:30,
+          marginTop:0,
+          marginBottom:0,
+          padding:10,
           width: "100%",
           }}>
             <h2> Ваші характеристики :</h2>
@@ -587,8 +655,8 @@ export default function BattlePage() {
               justifyContent: "center",
               alignItems: "center",
               gap: "50px",
-              marginTop: "10px",
-              marginBottom:20,
+              marginTop: "0px",
+              marginBottom:40,
               color: "#fff",
               animation: "fadeIn 0.6s ease forwards",
             }}
@@ -620,7 +688,11 @@ export default function BattlePage() {
             <h2 style={{fontSize: 40, marginTop:20, marginBottom:100, color:"rgb(255, 255, 255)", }}>{battleResult === "win" ? "🎊" : "💀 "}</h2>
             <h2 style={{fontSize: 40, marginTop:0, marginBottom:100, color:"rgb(255, 255, 255)", }}>{battleResult === "win" ? "Перемога!" : "Поразка!"}</h2>
             <p style={{fontSize: 20, marginTop:-50, marginBottom:50, }}>{battleResult === "win" ? "✨ Ваша нагорода ✨" : "Схоже не пощатисло"}</p>
-            <p style={{fontSize: 20, marginTop:-30, marginBottom:50, }}>{battleResult === "win" ? "🪨 ? / 💡 ?" : ""}</p>
+            <p style={{fontSize: 20, marginTop:-30, marginBottom:50 }}>
+              {battleResult === "win" && rewardPoints !== null && rewardExp !== null
+                ? `🪨 ${rewardPoints} / 💡 ${rewardExp}`
+                : ""}
+            </p>
 
             <Button onClick={() => setShowLog(prev => !prev)} style={{ marginTop: 30, backgroundColor:"rgb(0, 0, 0)",border:"1px solid #fff", borderRadius: 8, }}>
               📜 {showLog ? "Сховати лог бою" : "Переглянути лог бою"}
