@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef} from "react";
 import { Button, Link, Card, Placeholder } from '@telegram-apps/telegram-ui';
 import { Page } from "@/components/Page";
 import { useSignal, initData } from "@telegram-apps/sdk-react";
@@ -23,7 +23,9 @@ export default function BattlePage() {
   const [energy, setEnergy] = useState(10);
   const hasShownToast = useRef(false);
 
+  const [points, setPoints] = useState(0);
   const [playerLevel, setPlayerLevel] = useState(1); // за замовчуванням рівень 1
+  const [experience, setExperience] = useState(0);
 
   const [enemyStats, setEnemyStats] = useState<Enemy | null>(null);
   const [enemyHP, setEnemyHP] = useState(0);
@@ -46,7 +48,6 @@ export default function BattlePage() {
 
   const [hitText, setHitText] = useState<null | { value: number, id: number }>(null);
   const hitIdRef = useRef(0);
-  const [isEnemyAttacking, setIsEnemyAttacking] = useState(false);
   const [isEnemyHit, setIsEnemyHit] = useState(false);
 
   const [rewardPoints, setRewardPoints] = useState<number | null>(null);
@@ -55,30 +56,35 @@ export default function BattlePage() {
 
   const hasMissedTurnRef = useRef(false);
 
-  
-
-    // Завантажуємо дані користувача із Supabase
-  useEffect(() => {
-    const fetchUserData = async () => {
+  // Завантажуємо дані користувача із Supabase
+  const fetchUserData = async () => {
       if (!userId) return;
+
       const { data, error } = await supabase
-        .from("users")
-        .select("points, click_delay, energy, level, experience")
-        .eq("id", userId)
-        .single();
-  
+          .from("users")
+          .select("points, click_delay, energy, experience, level")
+          .eq("id", userId)
+          .single();
+
       if (error) {
-        console.error("Помилка завантаження даних:", error);
+          console.error("Помилка завантаження даних користувача:", error);
+          toast.error("Не вдалося завантажити дані користувача.");
       } else if (data) {
-        setEnergy(data.energy);
-        setPlayerLevel(data.level);
-        if (data.energy <= 0 && !hasShownToast.current) {
-          toast.error("У вас закінчилася енергія ⚡");
-          hasShownToast.current = true;
-        }
+          setPoints(data.points);
+          setEnergy(data.energy);
+          setPlayerLevel(data.level);
+          setExperience(data.experience ?? 0);
+
+          if (data.energy <= 0 && !hasShownToast.current) {
+              toast.error("У вас закінчилася енергія ⚡");
+              hasShownToast.current = true;
+          }
       }
-    };
-    fetchUserData();
+  };
+
+  // Використовуйте fetchUserData у useEffect
+  useEffect(() => {
+      fetchUserData(); // Викликаємо функцію
   }, [userId]);
 
   const updateCanAttack = (value: boolean) => {
@@ -185,112 +191,184 @@ export default function BattlePage() {
   };
 
   const startTurnTimer = () => {
-    if (battleResult) return; // Не запускаємо таймер, якщо бій завершено
+    if (battleResult) return; // Не запускаємо таймер, якщо бій завершено
 
-    setTurnTimer(15);
-    hasMissedTurnRef.current = false;
+    setTurnTimer(15);
+    hasMissedTurnRef.current = false;
 
-    if (timerRef.current) clearInterval(timerRef.current);
+    if (timerRef.current) clearInterval(timerRef.current);
 
-    timerRef.current = setInterval(() => {
-      setTurnTimer(prev => {
-        if (prev <= 1) {
-          clearInterval(timerRef.current!);
-          if (!hasMissedTurnRef.current && !battleResult) {
-            hasMissedTurnRef.current = true;
-            handleMissedTurn();
-          }
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 500);
+    timerRef.current = setInterval(() => {
+      setTurnTimer(prev => {
+        if (prev <= 1) {
+          clearInterval(timerRef.current!); // Зупинка таймера
+
+          // Викликаємо handleMissedTurn
+          handleMissedTurn();
+
+          return 0; // Повертаємо 0, вичерпавши таймер
+        }
+        return prev - 1; // Зниження таймера
+      });
+    }, 1000); // Зменшення таймера кожну секунду
   };
 
   const handleMissedTurn = () => {
-  if (!canAttack || playerHP <= 0 || enemyHP <= 0 || !enemyStats) return;
+    if (!enemyStats) return; // Переконайтеся, що ворог існує
 
-  setCanAttack(false);
+    toast.error("Ви пропустили свій хід!"); // Сповіщення про пропущений хід
 
-  const enemyHit = calculateDamage(enemyStats.damage, playerDEF);
-  const newDEF = Math.max(playerDEF - enemyHit.defenseLoss, 0);
-  const newHP = Math.max(playerHP - enemyHit.healthLoss, 0);
+    // Розрахунок шкоди від ворога
+    const enemyHit = calculateDamage(enemyStats.damage, playerDEF);
+    const newDEF = Math.max(playerDEF - enemyHit.defenseLoss, 0);
+    const newHP = Math.max(playerHP - enemyHit.healthLoss, 0);
 
-  const newLog = [
-    `⏱️ Ви пропустили хід!`,
-    `👾 Ворог завдає ${enemyHit.defenseLoss + enemyHit.healthLoss} шкоди.`,
-    ...(newHP <= 0 ? ["💀 Поразка!"] : []),
-  ];
+    // Оновлення логів
+    const newLog = [
+      `⏱️ Ви пропустили хід!`,
+      `👾 Ворог завдає ${enemyHit.defenseLoss + enemyHit.healthLoss} шкоди.`,
+      ...(newHP <= 0 ? ["💀 Поразка!"] : []),
+    ];
 
-  setPlayerDEF(newDEF);
-  setPlayerHP(newHP);
-  setLog(prev => [...newLog, ...prev]);
+    // Оновлення станів
+    setPlayerDEF(newDEF);
+    setPlayerHP(newHP);
+    setLog(prev => [...newLog, ...prev]);
 
-  if (newHP <= 0) {
-    setBattleResult("lose");
-  } else {
-    setCanAttack(true);
-    startTurnTimer();
-  }
-};
- 
-  const handleAttack = () => {
-    if (!canAttackRef.current || playerHP <= 0 || enemyHP <= 0 || battleResult) return;
+    // Перевірка на поразку
+    if (newHP <= 0) {
+      setBattleResult("lose"); // Якщо гравець програв
+      clearInterval(timerRef.current!); // Зупинка таймера
+    } else {
+      setCanAttack(true); // Дозволити гравцеві атакувати
+      startTurnTimer(); // Запускаємо таймер на наступний хід
+    }
+  };
 
-    if (timerRef.current) clearInterval(timerRef.current);
-    updateCanAttack(false);
+  // Функція оновлення нагород
+  async function updateRewardInSupabase(rewardPoints: number, rewardExp: number) {
+      console.log(`Оновлення нагороди: ${rewardPoints} очок, ${rewardExp} досвіду`);
 
-    const playerHit = calculateDamage(playerStats.attack, enemyDEF);
-    const newEnemyDEF = Math.max(enemyDEF - playerHit.defenseLoss, 0);
-    const newEnemyHP = Math.max(enemyHP - playerHit.healthLoss, 0);
-    setEnemyDEF(newEnemyDEF);
-    setEnemyHP(newEnemyHP);
+      const { data: userData, error: fetchError } = await supabase
+          .from("users")
+          .select("points, experience, level")
+          .eq("id", userId) // Використовуємо userId з state, а не запитуємо getUser()
+          .single();
 
-    appendToLog([`🧍 Гравець завдає ${playerHit.defenseLoss + playerHit.healthLoss} шкоди.`]);
-    toast.success("Успішна атака!");
-    setHitText({ value: playerHit.defenseLoss + playerHit.healthLoss, id: hitIdRef.current++ });
-    setTimeout(() => setHitText(null), 800);
-
-    if (newEnemyHP <= 0) {
-      appendToLog(["🎉 Перемога!"]);
-      setBattleResult("win");
-      clearInterval(timerRef.current!);
-      return;
-    }
-
-    setTimeout(() => {
-      if (battleResult) return;
-
-      if (!enemyStats) return;
-
-      const enemyHit = calculateDamage(enemyStats.damage, playerDEF);
-      const newPlayerDEF = Math.max(playerDEF - enemyHit.defenseLoss, 0);
-      const newPlayerHP = Math.max(playerHP - enemyHit.healthLoss, 0);
-      setPlayerDEF(newPlayerDEF);
-      setPlayerHP(newPlayerHP);
-
-      appendToLog([`👾 Ворог завдає ${enemyHit.defenseLoss + enemyHit.healthLoss} шкоди.`]);
-      setIsEnemyAttacking(true);
-      setTimeout(() => setIsEnemyAttacking(false), 500);
-
-      if (newPlayerHP <= 0) {
-        appendToLog(["💀 Поразка!"]);
-        setBattleResult("lose");
-        clearInterval(timerRef.current!);
-        return;
+      if (fetchError) {
+          console.error("Помилка завантаження даних:", fetchError.message);
+          return;
       }
 
-      updateCanAttack(true);
-      startTurnTimer();
-    }, 400);
+      const currentPoints = (userData?.points || 0);
+      const currentExperience = (userData?.experience || 0);
+      const currentLevel = (userData?.level || 1);
+
+      const newPoints = currentPoints + rewardPoints;
+      let newExperience = currentExperience + rewardExp;
+      let newLevel = currentLevel;
+
+      // Підрахунок нового рівня
+      while (newExperience >= getRequiredExp(newLevel)) {
+          newExperience -= getRequiredExp(newLevel);
+          newLevel++;
+          console.log(`Перейшли на новий рівень! Тепер ви рівень ${newLevel}`);
+      }
+
+      // Оновлення даних
+      const { error } = await supabase
+          .from("users")
+          .upsert({
+              id: userId, // Використовуємо userId для оновлення даних
+              points: newPoints,
+              experience: newExperience,
+              level: newLevel,
+          }, { onConflict: "id" });
+
+      if (error) {
+          console.error("Помилка оновлення:", error.message);
+      } else {
+          console.log(`Нагорода оновлена: ${rewardPoints} очок і ${rewardExp} досвіду успішно.`);
+      }
+  }
+    // Функція для розрахунку досвіду
+  const getRequiredExp = (level: number): number => {
+      return 100 * Math.pow(2, level - 1); // 1 рівень = 100 XP, 2 рівень = 200, 3 рівень = 400 і т.д.
+  };
+
+  const handleAttack = async () => {
+    if (!canAttackRef.current || playerHP <= 0 || enemyHP <= 0 || battleResult) return;
+
+    // Зупиняємо таймер, якщо гравець атакує
+    if (timerRef.current) clearInterval(timerRef.current);
+    updateCanAttack(false); // Забороняємо можливість атакувати
+
+    // Розрахунок атаки гравця
+    const playerHit = calculateDamage(playerStats.attack, enemyDEF);
+    const newEnemyDEF = Math.max(enemyDEF - playerHit.defenseLoss, 0);
+    const newEnemyHP = Math.max(enemyHP - playerHit.healthLoss, 0);
+
+    // Оновлення стану
+    setEnemyDEF(newEnemyDEF);
+    setEnemyHP(newEnemyHP);
+    appendToLog([`🧍 Гравець завдає ${playerHit.defenseLoss + playerHit.healthLoss} шкоди.`]);
+
+    // Відображення тексту удара
+    setHitText({ value: playerHit.defenseLoss + playerHit.healthLoss, id: hitIdRef.current++ });
+    setTimeout(() => setHitText(null), 800);
+
+    // Перемога
+    if (newEnemyHP <= 0) {
+      appendToLog(["🎉 Перемога!"]);
+      setBattleResult("win");
+
+      if (enemyStats) {
+        const { rewardPoints, rewardExp } = calculateReward(enemyStats);
+        toast.success(`Ви отримали: 🪨 ${rewardPoints}`);
+        toast.success(`Ви отримали: 🔷 ${rewardExp} досвіду`);
+        await updateRewardInSupabase(rewardPoints, rewardExp);
+        await fetchUserData();
+      }
+
+      clearInterval(timerRef.current!); // Очищення таймера при перемозі
+      return; // Вихід після перемоги
+    }
+
+    // Логіка атаки ворога
+    setTimeout(() => {
+      if (battleResult) return; // Перевірка, чи бій не закінчився
+      if (!enemyStats) return; // Перевірка на наявність ворога
+
+      // Розрахунок шкоди від ворога
+      const enemyHit = calculateDamage(enemyStats.damage, playerDEF);
+      const newPlayerDEF = Math.max(playerDEF - enemyHit.defenseLoss, 0);
+      const newPlayerHP = Math.max(playerHP - enemyHit.healthLoss, 0);
+
+      // Оновлення стану
+      setPlayerDEF(newPlayerDEF);
+      setPlayerHP(newPlayerHP);
+      appendToLog([`👾 Ворог завдає ${enemyHit.defenseLoss + enemyHit.healthLoss} шкоди.`]);
+
+      // Перемога ворога
+      if (newPlayerHP <= 0) {
+        appendToLog(["💀 Поразка!"]);
+        setBattleResult("lose");
+        clearInterval(timerRef.current!); // Очищення таймера при поразці
+        return;
+      }
+
+      // Дозволяємо гравцеві атакувати знову
+      updateCanAttack(true);
+      startTurnTimer(); // Запускаємо таймер на наступний хід
+    }, 400); // Затримка перед атакою ворога
   };
 
   useEffect(() => {
     if (showPreBattle && playerLevel) {
-      const generated = generateEnemy(playerLevel);
-      setEnemyStats(generated);
-      setEnemyHP(generated.maxHealth);
-      setEnemyImage(generated.image);
+        const generated = generateEnemy(playerLevel);
+        setEnemyStats(generated);
+        setEnemyHP(generated.maxHealth);
+        setEnemyImage(generated.image);
     }
   }, [showPreBattle, playerLevel]);
 
@@ -317,54 +395,20 @@ export default function BattlePage() {
     };
   }, []);
 
-  useEffect(() => {
-    const handleReward = async () => {
-      if (battleResult === "win" && enemyStats) {
-        const { rewardPoints, rewardExp } = calculateReward(enemyStats);
-        setRewardPoints(rewardPoints);
-        setRewardExp(rewardExp);
-        await updateRewardInSupabase(rewardPoints, rewardExp);
-      }
-    };
+    function calculateReward(enemy: Enemy | null): { rewardPoints: number; rewardExp: number } {
+      if (!enemy) return { rewardPoints: 0, rewardExp: 0 };
 
-    handleReward();
-  }, [battleResult]);
-
-    function calculateReward(enemy: Enemy): { rewardPoints: number; rewardExp: number } {
       const base = baseEnemies.find((e: EnemyBase) => e.name === enemy.name);
       if (!base) return { rewardPoints: 0, rewardExp: 0 };
 
       const baseValue = base.baseHealth + base.baseDamage + base.baseDefense;
       const scaleFactor = enemy.maxHealth / base.baseHealth;
 
-      const rewardPoints = Math.floor(baseValue * 2 * scaleFactor);
-      const rewardExp = Math.floor(baseValue * 1.5 * scaleFactor);
+      const rewardPoints = Math.floor(baseValue * 1 * scaleFactor);
+      const rewardExp = Math.floor(baseValue * 0.5 * scaleFactor);
 
       return { rewardPoints, rewardExp };
     }
-
-  async function updateRewardInSupabase(rewardPoints: number, rewardExp: number) {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return;
-
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select("points, experience")
-      .eq("id", user.id)
-      .single();
-
-    if (!profile) return;
-
-    const { error } = await supabase
-      .from("profiles")
-      .update({
-        point: profile.points + rewardPoints,
-        experience: profile.experience + rewardExp,
-      })
-      .eq("id", user.id);
-
-    if (error) console.error("Помилка оновлення:", error.message);
-  }
 
   if (showPreBattle) {
     return (
@@ -504,6 +548,7 @@ export default function BattlePage() {
   
   return (
     <Page back >
+      <Toaster position="top-center" toastOptions={{ duration: 3000 }} />
       <Placeholder>
       <div
         style={{
@@ -561,7 +606,7 @@ export default function BattlePage() {
             position: "relative",
             width: "100%",
             height: "100%", // або більше/менше залежно від дизайну
-            backgroundImage: "url('/bg/bgforest.png')",
+            backgroundImage: "url('/bg/bgforestnght.png')",
             backgroundSize: "cover",
             backgroundPosition: "center",
             marginTop: "0px",
@@ -678,61 +723,64 @@ export default function BattlePage() {
       </div>
       </Placeholder>
       <Card>
-      {battleResult && (
-          <div style={{
-            position: "fixed", top: 0, left: 0, width: "100%", height: "100%",
-            backgroundColor: "rgb(0, 0, 0)", display: "flex",
-            justifyContent: "center", alignItems: "center",
-            flexDirection: "column", color: "#fff",
-          }}>
-            <h2 style={{fontSize: 40, marginTop:20, marginBottom:100, color:"rgb(255, 255, 255)", }}>{battleResult === "win" ? "🎊" : "💀 "}</h2>
-            <h2 style={{fontSize: 40, marginTop:0, marginBottom:100, color:"rgb(255, 255, 255)", }}>{battleResult === "win" ? "Перемога!" : "Поразка!"}</h2>
-            <p style={{fontSize: 20, marginTop:-50, marginBottom:50, }}>{battleResult === "win" ? "✨ Ваша нагорода ✨" : "Схоже не пощатисло"}</p>
-            <p style={{fontSize: 20, marginTop:-30, marginBottom:50 }}>
-              {battleResult === "win" && rewardPoints !== null && rewardExp !== null
-                ? `🪨 ${rewardPoints} / 💡 ${rewardExp}`
-                : ""}
-            </p>
+          {battleResult && (
+              <div
+                  style={{
+                      position: "fixed", top: 0, left: 0, width: "100%", height: "100%",
+                      backgroundColor: "rgb(0, 0, 0)", display: "flex",
+                      justifyContent: "center", alignItems: "center",
+                      flexDirection: "column", color: "#fff",
+                  }}
+              >
+                  <h2 style={{ fontSize: 40, marginTop: 20, marginBottom: 100, color: "rgb(255, 255, 255)", }}>
+                      {battleResult === "win" ? "🎊" : "💀 "}
+                  </h2>
+                  <h2 style={{ fontSize: 40, marginTop: 0, marginBottom: 100, color: "rgb(255, 255, 255)", }}>
+                      {battleResult === "win" ? "Перемога!" : "Поразка!"}
+                  </h2>
+                  <p style={{ fontSize: 20, marginTop: -50, marginBottom: 50, }}>
+                      {battleResult === "win" ? "✨ Вам зараховано винагороду✨" : "Схоже не пощастило"}
+                  </p>
 
-            <Button onClick={() => setShowLog(prev => !prev)} style={{ marginTop: 30, backgroundColor:"rgb(0, 0, 0)",border:"1px solid #fff", borderRadius: 8, }}>
-              📜 {showLog ? "Сховати лог бою" : "Переглянути лог бою"}
-            </Button>
+                  <Button onClick={() => setShowLog(prev => !prev)} style={{ marginTop: 30, backgroundColor: "rgb(0, 0, 0)", border: "1px solid #fff", borderRadius: 8, }}>
+                      📜 {showLog ? "Сховати лог бою" : "Переглянути лог бою"}
+                  </Button>
 
-            <div style={{
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-              color: "#fff",
-              animation: "fadeIn 0.6s ease forwards",
-              marginTop: 30,
-            }}>
-            <Button
-              mode="filled"
-              style={{ animation: "fadeIn 0.6s ease forwards", backgroundColor:"#4caf50" }}
-              onClick={() => location.reload()}
-            >⚔️ Новий бій ⚔️ 
-            </Button>
-          </div>
+                  <div style={{
+                      display: "flex",
+                      justifyContent: "center",
+                      alignItems: "center",
+                      color: "#fff",
+                      animation: "fadeIn 0.6s ease forwards",
+                      marginTop: 30,
+                  }}>
+                      <Button
+                          mode="filled"
+                          style={{ animation: "fadeIn 0.6s ease forwards", backgroundColor: "#4caf50" }}
+                          onClick={() => location.reload()}
+                      >⚔️ Новий бій ⚔️ 
+                      </Button>
+                  </div>
 
-          <Link href="/home">
-            <Button style={{ marginTop: 30, animation: "fadeIn 0.6s ease forwards", backgroundColor:"#f44336" }}>
-              Втекти
-            </Button>
-          </Link>
+                  <Link href="/home">
+                      <Button style={{ marginTop: 30, animation: "fadeIn 0.6s ease forwards", backgroundColor: "#f44336" }}>
+                          Втекти
+                      </Button>
+                  </Link>
 
-            {showLog && (
-              <div style={{
-                marginTop: 20, maxHeight: 200, overflowY: "auto",
-                padding: 12, border: "1px solid #fff", borderRadius: 8,
-                backgroundColor: "#111", width: "90%",
-              }}>
-                {log.map((entry, idx) => (
-                  <div key={idx}>{entry}</div>
-                ))}
+                  {showLog && (
+                      <div style={{
+                          marginTop: 20, maxHeight: 200, overflowY: "auto",
+                          padding: 12, border: "1px solid #fff", borderRadius: 8,
+                          backgroundColor: "#111", width: "90%",
+                          }}>
+                          {log.map((entry, idx) => (
+                              <div key={idx}>{entry}</div>
+                          ))}
+                      </div>
+                  )}
               </div>
-            )}
-          </div>
-        )}
+          )}
       </Card>
     </Page>
   );

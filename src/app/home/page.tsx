@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState, useRef, useCallback,useMemo } from "react";
+import React, { useEffect, useState, useRef, useCallback, useMemo } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import {
@@ -101,7 +101,6 @@ export default function HomePage() {
         setAnimationTime(data.click_delay + 100);
         setExperience(data.experience ?? 0);
         setLevel(data.level ?? 1);
-
       }
     };
     fetchUserData();
@@ -213,7 +212,7 @@ export default function HomePage() {
         imgWrap.classList.remove("active");
       }, 1000);
 
-    const xpGain = 1; // Кожен клік — 10 XP
+    const xpGain = 1; // Кожен клік — 1 XP
       let newExperience = experience + xpGain;
       let newLevel = level;
 
