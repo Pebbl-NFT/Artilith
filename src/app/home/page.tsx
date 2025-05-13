@@ -18,6 +18,7 @@ import { Page } from "@/components/Page";
 import TopBar from "@/components/TopBar";
 import BottomBar from "@/components/BottomBar";
 import { ItemCard } from "@/components/ItemCard";
+import EquippedItemSlot from "@/components/Item/EquippedItemSlot";
 
 // Дані та логіка
 import { supabase } from "@/lib/supabaseClient";
@@ -50,6 +51,7 @@ export default function HomePage() {
   const [level, setLevel] = useState(1);
 
 
+
   const username = useMemo(() => {
       return initDataState?.user?.firstName || 'User';
     }, [initDataState]);
@@ -71,6 +73,7 @@ export default function HomePage() {
   // Модальне вікно для підтвердження покупки
   const [selectedItem, setSelectedItem] = useState<SelectedItemType>(null);
   type SelectedItemType = {
+    mode: "city" | "inventory" | "equipped";
     item_id: number;
     type: string;
     name: string;
@@ -332,6 +335,7 @@ export default function HomePage() {
     updateHeroStats();
   }, [inventory, updateHeroStats]); 
   
+  
 
   // Функція рендеринга контенту для різних вкладок
   const renderContent = () => {
@@ -387,6 +391,7 @@ export default function HomePage() {
               >
                 {AllItems.map((item) => (
                   <ItemCard
+                    mode={"city"}
                     key={item.item_id}
                     item_id={item.item_id}
                     type={item.type}
@@ -456,6 +461,7 @@ export default function HomePage() {
                   }}
                 >
                   <ItemCard
+                    mode={"city"}
                     item_id={0}
                     type="weapon"
                     name="Хитрун"
@@ -564,61 +570,10 @@ export default function HomePage() {
                     transform: "translate(-80%, -50%)",
                     display: "grid",
                     gridTemplateColumns: "repeat(1, 1fr)",
-                    gap: -10,
-                    
+                    gap: -10
                   }}>
-
-                    <div style={{
-                            padding: "10px",
-                            borderRadius: "10px",
-                            maxWidth: "100%",
-                            height: "auto"
-                          }}>
-                      {equippedItems.find(item => item.type === "weapon") ? (
-                        <img
-                          src={typeof equippedItems.find(item => item.type === "weapon").image === "string" 
-                            ? equippedItems.find(item => item.type === "weapon").image 
-                            : equippedItems.find(item => item.type === "weapon").image.src}
-                          alt="Зброя"
-                          className={`item-image rarity-border-${equippedItems.find(item => item.type === "weapon").rarity?.toLowerCase()}`}
-                          style={{
-                            width:25,
-                            backgroundColor: "rgba(255, 255, 255, 0.05)",
-                            padding: "10px",
-                            borderRadius: "10px",
-                            boxShadow: "rgba(0, 0, 0, 0.3) 0px 19px 38px, rgba(0, 0, 0, 0.22) 0px 15px 12px",
-                            maxWidth: "100%",
-                            height: "auto"
-                          }}
-                        />
-                      ) : "🔪"}
-                    </div>
-
-                    <div style={{
-                            padding: "10px",
-                            borderRadius: "10px",
-                            maxWidth: "100%",
-                            height: "auto"
-                          }}>
-                      {equippedItems.find(item => item.type === "shield") ? (
-                        <img
-                          src={typeof equippedItems.find(item => item.type === "shield").image === "string" 
-                            ? equippedItems.find(item => item.type === "shield").image 
-                            : equippedItems.find(item => item.type === "shield").image.src}
-                          alt="Щит"
-                          className={`item-image rarity-border-${equippedItems.find(item => item.type === "shield").rarity?.toLowerCase()}`}
-                          style={{
-                            width:25,
-                            backgroundColor: "rgba(255, 255, 255, 0.05)",
-                            padding: "10px",
-                            borderRadius: "10px",
-                            boxShadow: "rgba(0, 0, 0, 0.3) 0px 19px 38px, rgba(0, 0, 0, 0.22) 0px 15px 12px",
-                            maxWidth: "100%",
-                            height: "auto"
-                          }}
-                        />
-                      ) : "🛡️"}
-                    </div>
+                    <EquippedItemSlot item={equippedItems.find(i => i.type === "weapon")} fallbackIcon="🔪" size={25} />
+                    <EquippedItemSlot item={equippedItems.find(i => i.type === "shield")} fallbackIcon="🛡️" size={25} />
                   </div>
                 </div>
 
@@ -849,7 +804,7 @@ export default function HomePage() {
                         </div>
 
                         {item?.image ? (
-                          <img
+                          <img 
                           src={typeof item.image === "string" ? item.image : item.image.src}
                           alt={item.name}
                           className={`item-image rarity-border-${item.rarity?.toLowerCase()}`}
@@ -870,7 +825,7 @@ export default function HomePage() {
                         )}
                       </div>
                       {item && (
-                        <button
+                        <button 
                           style={{
                             backgroundColor: item.equipped ? "#f44336" : "#4caf50",
                             color: "#fff",
