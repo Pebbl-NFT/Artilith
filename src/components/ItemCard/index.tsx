@@ -10,7 +10,7 @@ type ItemCardProps = {
   image: string;
   description: string;
   damage?: string;
-  strength?: string;
+  defense?: string;
   price: number;
   onBuyRequest?: (item: ItemCardProps) => void;
   onEquipRequest?: (item: ItemCardProps) => void;
@@ -27,7 +27,7 @@ export const ItemCard: React.FC<ItemCardProps> = ({
   image,
   description,
   damage,
-  strength,
+  defense,
   price,
   onBuyRequest,
   onEquipRequest,
@@ -56,8 +56,8 @@ export const ItemCard: React.FC<ItemCardProps> = ({
       </h3>
       <p style={{ color: "#ddd", marginBottom: "15px" }}>{description}</p>
       {damage && <p style={{ color: "#ddd", marginBottom: "5px" }}>{damage}</p>}
-      {strength && (
-        <p style={{ color: "#ddd", marginBottom: "15px" }}>{strength}</p>
+      {defense && (
+        <p style={{ color: "#ddd", marginBottom: "15px" }}>{defense}</p>
       )}
     </>
   );
@@ -89,7 +89,7 @@ export const ItemCard: React.FC<ItemCardProps> = ({
               image,
               description,
               damage,
-              strength,
+              defense,
               price,
               onBuyRequest,
             })
@@ -114,7 +114,7 @@ export const ItemCard: React.FC<ItemCardProps> = ({
                 image,
                 description,
                 damage,
-                strength,
+                defense,
                 price,
               })
             }
@@ -133,7 +133,7 @@ export const ItemCard: React.FC<ItemCardProps> = ({
                 image,
                 description,
                 damage,
-                strength,
+                defense,
                 price,
               })
             }
@@ -157,7 +157,7 @@ export const ItemCard: React.FC<ItemCardProps> = ({
               image,
               description,
               damage,
-              strength,
+              defense,
               price,
             })
           }

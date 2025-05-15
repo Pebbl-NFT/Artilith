@@ -80,6 +80,7 @@ export default function HomePage() {
     image: string;
     description: string;
     damage?: string;
+    defense?: string;
     strength?: string;
     price: number;
     rarity?: string;
@@ -401,7 +402,7 @@ export default function HomePage() {
                     image={item.image}
                     description={item.description}
                     damage={item.damage ? `Шкода: ${item.damage}` : ""}
-                    strength={item.defense ? `Захист: ${item.defense}` : ""}
+                    defense={item.defense ? `Захист: ${item.defense}` : ""}
                     price={item.price}
                     onBuyRequest={(item) => setSelectedItem(item)}
                   />
@@ -470,7 +471,7 @@ export default function HomePage() {
                     image={sword01a.src}
                     description="Хитрун"
                     damage="Шкода: 999999"
-                    strength="Міцність: 999999"
+                    defense="Міцність: 999999"
                     price={999999}
                     onBuyRequest={(item) => setSelectedItem(item)}
                   />
@@ -1144,6 +1145,9 @@ export default function HomePage() {
                   </p>
                   <p style={{ fontSize: "0.9rem", color: "#ccc", marginBottom: "20px" }}>
                     Шкода: <strong>{selectedItem.damage}</strong>
+                  </p>
+                  <p style={{ fontSize: "0.9rem", color: "#ccc", marginBottom: "20px" }}>
+                    Захист: <strong>{selectedItem.defense}</strong>
                   </p>
                   <p style={{ fontSize: "0.9rem", color: "#ccc", marginBottom: "20px" }}>
                     Рівень: 1

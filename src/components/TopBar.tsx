@@ -40,7 +40,7 @@ export default function TopBar({ points }: { points: number }) {
         style={{
           background: 'var(--tgui--secondary_bg_color)',
           padding: 10,
-          margin: 20,
+          margin: 10,
           borderRadius: 50,
           border: '0px solid rgb(255, 255, 255)',
         }}
@@ -55,7 +55,7 @@ export default function TopBar({ points }: { points: number }) {
         style={{
           background: 'var(--tgui--secondary_bg_color)',
           padding: 10,
-          margin: 20,
+          margin: 10,
           borderRadius: 50,
           border: '0px solid rgb(255, 255, 255)',
         }}
@@ -70,7 +70,7 @@ export default function TopBar({ points }: { points: number }) {
         style={{
           background: 'var(--tgui--secondary_bg_color)',
           padding: 10,
-          margin: 20,
+          margin: 10,
           borderRadius: 50,
           border: '0px solid rgb(255, 255, 255)',
         }}
