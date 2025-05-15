@@ -5,6 +5,7 @@ interface EquippedItemSlotProps {
   fallbackIcon: string;
   onClick?: () => void;
   size?: number;
+  
 }
 
 const EquippedItemSlot: React.FC<EquippedItemSlotProps> = ({ item, fallbackIcon, onClick, size = 50 }) => {

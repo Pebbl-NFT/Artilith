@@ -13,7 +13,9 @@ type ItemCardProps = {
   strength?: string;
   price: number;
   onBuyRequest?: (item: ItemCardProps) => void;
-  onClickDetails?: (item: ItemCardProps) => void;
+  onEquipRequest?: (item: ItemCardProps) => void;
+  onUnequipRequest?: (item: ItemCardProps) => void;
+  onDismantleRequest?: (item: ItemCardProps) => void;
 };
 
 export const ItemCard: React.FC<ItemCardProps> = ({
@@ -28,46 +30,18 @@ export const ItemCard: React.FC<ItemCardProps> = ({
   strength,
   price,
   onBuyRequest,
-  onClickDetails,
+  onEquipRequest,
+  onUnequipRequest,
+  onDismantleRequest,
 }) => {
-  
-  const handleClick = () => {
-    if (mode !== "inventory" && onClickDetails) {
-      onClickDetails({
-        mode,
-        item_id,
-        type,
-        rarity,
-        name,
-        image,
-        description,
-        damage,
-        strength,
-        price,
-        onBuyRequest,
-        onClickDetails,
-      });
-    }
-  };
-
-  return (
-    <div
-      onClick={mode !== "city" ? handleClick : undefined}
-      style={{
-        borderRadius: "10px",
-        padding: "20px",
-        textAlign: "center",
-        boxShadow: "0 2px 9px rgba(0, 0, 0, 0.3)",
-        border: "1px solid rgba(255, 255, 255, 0.1)",
-        cursor: mode !== "city" ? "pointer" : "default",
-      }}
-    >
+  const commonInfo = (
+    <>
       <img
         src={image}
         alt={name}
         width={50}
         height={50}
-        className={`item-image rarity-border-${rarity?.toLowerCase()}`}
+        className={`item-image rarity-border-${rarity?.toLowerCase?.()}`}
         style={{
           backgroundColor: "rgba(255, 255, 255, 0.05)",
           padding: "20px",
@@ -85,21 +59,27 @@ export const ItemCard: React.FC<ItemCardProps> = ({
       {strength && (
         <p style={{ color: "#ddd", marginBottom: "15px" }}>{strength}</p>
       )}
+    </>
+  );
+
+  return (
+    <div
+      style={{
+        borderRadius: "10px",
+        padding: "20px",
+        textAlign: "center",
+        boxShadow: "0 2px 9px rgba(0, 0, 0, 0.3)",
+        border: "1px solid rgba(255, 255, 255, 0.1)",
+        backgroundColor: "rgba(255,255,255,0.02)",
+      }}
+    >
+      {commonInfo}
+
+      {/* City: Покупка */}
       {mode === "city" && (
         <button
-          style={{
-            backgroundColor: "#00bcd4",
-            border: "none",
-            padding: "12px 24px",
-            fontSize: "1rem",
-            color: "#fff",
-            borderRadius: "6px",
-            cursor: "pointer",
-            transition: "all 0.3s ease",
-            marginTop: "10px",
-          }}
-          onClick={(e) => {
-            e.stopPropagation(); // Щоб не триггерив `onClickDetails`
+          style={buttonStyle()}
+          onClick={() =>
             onBuyRequest?.({
               mode,
               item_id,
@@ -112,13 +92,91 @@ export const ItemCard: React.FC<ItemCardProps> = ({
               strength,
               price,
               onBuyRequest,
-              onClickDetails,
-            });
-          }}
+            })
+          }
         >
           Купити за {price} 🪨
+        </button>
+      )}
+
+      {/* Inventory: Спорядити + Розібрати */}
+      {mode === "inventory" && (
+        <>
+          <button
+            style={buttonStyle()}
+            onClick={() =>
+              onEquipRequest?.({
+                mode,
+                item_id,
+                type,
+                rarity,
+                name,
+                image,
+                description,
+                damage,
+                strength,
+                price,
+              })
+            }
+          >
+            ⚔️ Спорядити
+          </button>
+          <button
+            style={{ ...buttonStyle(), backgroundColor: "#c62828" }}
+            onClick={() =>
+              onDismantleRequest?.({
+                mode,
+                item_id,
+                type,
+                rarity,
+                name,
+                image,
+                description,
+                damage,
+                strength,
+                price,
+              })
+            }
+          >
+            🧨 Розібрати
+          </button>
+        </>
+      )}
+
+      {/* Equipped: Зняти */}
+      {mode === "equipped" && (
+        <button
+          style={buttonStyle()}
+          onClick={() =>
+            onUnequipRequest?.({
+              mode,
+              item_id,
+              type,
+              rarity,
+              name,
+              image,
+              description,
+              damage,
+              strength,
+              price,
+            })
+          }
+        >
+          🛡️ Зняти
         </button>
       )}
     </div>
   );
 };
+
+const buttonStyle = () => ({
+  backgroundColor: "#00bcd4",
+  border: "none",
+  padding: "12px 24px",
+  fontSize: "1rem",
+  color: "#fff",
+  borderRadius: "6px",
+  cursor: "pointer",
+  transition: "all 0.3s ease",
+  marginTop: "10px",
+});

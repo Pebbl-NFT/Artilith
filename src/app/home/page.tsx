@@ -82,6 +82,7 @@ export default function HomePage() {
     damage?: string;
     strength?: string;
     price: number;
+    rarity?: string;
   } | null;
 
   // Завантажуємо дані користувача із Supabase
@@ -566,14 +567,31 @@ export default function HomePage() {
                   <div style={{
                     position: "absolute",
                     top: "50%",
-                    left: "-20%",
+                    left: "0%",
                     transform: "translate(-80%, -50%)",
                     display: "grid",
                     gridTemplateColumns: "repeat(1, 1fr)",
                     gap: -10
                   }}>
-                    <EquippedItemSlot item={equippedItems.find(i => i.type === "weapon")} fallbackIcon="🔪" size={25} />
-                    <EquippedItemSlot item={equippedItems.find(i => i.type === "shield")} fallbackIcon="🛡️" size={25} />
+                    <EquippedItemSlot
+                      item={equippedItems.find(i => i.type === "weapon")}
+                      fallbackIcon=""
+                      size={25}
+                      onClick={() => {
+                        const item = equippedItems.find(i => i.type === "weapon");
+                        if (item) setSelectedItem({ ...item, mode: "equipped" });
+                      }}
+                    />
+
+                    <EquippedItemSlot
+                      item={equippedItems.find(i => i.type === "shield")}
+                      fallbackIcon=""
+                      size={25}
+                      onClick={() => {
+                        const item = equippedItems.find(i => i.type === "shield");
+                        if (item) setSelectedItem({ ...item, mode: "equipped" });
+                      }}
+                    />
                   </div>
                 </div>
 
@@ -656,99 +674,6 @@ export default function HomePage() {
                     Завдання</Button>
                 </div>
               </Card>
-
-              <h2 style={{ 
-                fontSize: "1rem", 
-                fontWeight: "bold", 
-                marginTop: "50px", 
-                marginBottom: "40px", 
-                textAlign: "center", 
-                color: "#fff" }}
-              >
-                ЕКІПІРУВАННЯ
-              </h2>
-              <div
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: "repeat(auto-fill, minmax(100px, 1fr))",
-                  gap: "20px",
-                  width: "100%",
-                  margin: "0 auto",
-                }}
-              >
-                {equippedItems.length === 0 && (
-                  <p style={{ color: "#ccc", gridColumn: "1 / -1", textAlign: "center" }}>
-                    Немає екіпірованих предметів
-                  </p>
-                )}
-
-                {equippedItems.map((item, index) => (
-                  <div
-                    key={index}
-                    className={`relative flex flex-col items-center bg-white/[0.05] rounded-lg p-2 animate-fadeIn opacity-0 rarity-${item.rarity?.toLowerCase()}`}
-                    style={{
-                      border: "1px solid rgba(255, 255, 255, 0.1)",
-                      borderRadius: "10px",
-                      padding: "20px",
-                      animationDelay: `${index * 0.1}s`,
-                      animation: "fadeIn 0.7s ease forwards",
-                    }}>
-                    <div style={{
-                      width: "100%",
-                      aspectRatio: "1 / 1",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      fontSize: "2rem",
-                      color: item ? "#fff" : "#777",
-                      marginBottom: "10px",
-                      position: "relative", // важливо для абсолютного позиціонування rarity-label
-                      }}
-                    >
-                      <div className="rarity-label">
-                        {item.rarity?.toUpperCase()}
-                      </div>
-                      {item?.image ? (
-                        <img
-                          src={typeof item.image === "string" ? item.image : item.image.src}
-                          alt={item.name}
-                          className={`item-image rarity-border-${item.rarity?.toLowerCase()}`}
-                          style={{
-                            backgroundColor: "rgba(255, 255, 255, 0.05)",
-                            padding: "10px",
-                            borderRadius: "10px",
-                            marginTop: 10,
-                            boxShadow: "rgba(0, 0, 0, 0.3) 0px 19px 38px, rgba(0, 0, 0, 0.22) 0px 15px 12px",
-                            maxWidth: "100%",
-                            height: "auto"
-                          }}
-                        />
-                      ) : item?.name ? (
-                        item.name
-                      ) : (
-                        "+"
-                      )}
-                  </div>
-                      <button
-                        style={{
-                          backgroundColor: item.equipped ? "#f44336" : "#4caf50",
-                          color: "#fff",
-                          border: "none",
-                          borderRadius: "5px",
-                          padding: "5px",
-                          fontSize: "11px",
-                          cursor: "pointer",
-                          transition: "background-color 0.3s",
-                          width: "100%",
-                          marginTop: "10px",
-                        }}
-                        onClick={() => toggleEquip(inventory.indexOf(item))}
-                      >
-                        {item.equipped ? "Скинути" : "Екіпірувати"}
-                      </button>
-                    </div>
-                  ))}
-              </div>
 
               
               <h2 style={{ 
@@ -1044,23 +969,218 @@ export default function HomePage() {
   }
   };
 
+  async function handleEquip(selectedItem: { mode: "city" | "inventory" | "equipped"; item_id: number; type: string; name: string; image: string; description: string; damage?: string; strength?: string; price: number; }) {
+    if (!userId) {
+      toast.error("Користувач не знайдений!");
+      return;
+    }
+
+    // Знайти індекс предмета в inventory
+    const index = inventory.findIndex(
+      (item) => item.item_id === selectedItem.item_id && !item.equipped
+    );
+    if (index === -1) {
+      toast.error("Предмет не знайдено в інвентарі!");
+      return;
+    }
+
+    // Зняти всі предмети такого типу
+    const idsToUnequip = inventory
+      .filter(item => item.type === selectedItem.type && item.equipped)
+      .map(item => item.id);
+
+    if (idsToUnequip.length > 0) {
+      await supabase
+        .from('inventory')
+        .update({ equipped: false })
+        .eq('user_id', userId)
+        .in('id', idsToUnequip);
+    }
+
+    // Екіпірувати вибраний предмет
+    await supabase
+      .from('inventory')
+      .update({ equipped: true })
+      .eq('user_id', userId)
+      .eq('id', inventory[index].id);
+
+    toast.success(`Ви екіпірували ${selectedItem.name}!`);
+    await fetchInventory();
+  }
+
+  async function handleDismantle(selectedItem: { mode: "city" | "inventory" | "equipped"; item_id: number; type: string; name: string; image: string; description: string; damage?: string; strength?: string; price: number; }) {
+    if (!userId) {
+      toast.error("Користувач не знайдений!");
+      return;
+    }
+
+    // Знайти інстанс предмета в inventory
+    const itemInstance = inventory.find(
+      (item) => item.item_id === selectedItem.item_id && !item.equipped
+    );
+    if (!itemInstance) {
+      toast.error("Предмет не знайдено в інвентарі!");
+      return;
+    }
+
+    // Видалити предмет з інвентаря
+    const { error } = await supabase
+      .from("inventory")
+      .delete()
+      .eq("user_id", userId)
+      .eq("id", itemInstance.id);
+
+    if (error) {
+      toast.error("Не вдалося розібрати предмет!");
+      return;
+    }
+
+    // Дати гравцю частину ціни предмета (наприклад, 50%)
+    const dismantleReward = Math.floor(selectedItem.price * 0.5);
+    const newPoints = points + dismantleReward;
+
+    await updateUserPoints(String(userId), newPoints);
+    setPoints(newPoints);
+
+    toast.success(`Ви розібрали ${selectedItem.name} і отримали ${dismantleReward} уламків!`);
+    await fetchInventory();
+  }
+
+  async function handleUnequip(selectedItem: { mode: "city" | "inventory" | "equipped"; item_id: number; type: string; name: string; image: string; description: string; damage?: string; strength?: string; price: number; }) {
+    if (!userId) {
+      toast.error("Користувач не знайдений!");
+      return;
+    }
+
+    // Знайти інстанс предмета в inventory, який екіпіровано
+    const itemInstance = inventory.find(
+      (item) => item.item_id === selectedItem.item_id && item.equipped
+    );
+    if (!itemInstance) {
+      toast.error("Екіпірований предмет не знайдено!");
+      return;
+    }
+
+    // Зняти екіпіровку
+    const { error } = await supabase
+      .from("inventory")
+      .update({ equipped: false })
+      .eq("user_id", userId)
+      .eq("id", itemInstance.id);
+
+    if (error) {
+      toast.error("Не вдалося зняти екіпіровку!");
+      return;
+    }
+
+    toast.success(`Ви зняли ${selectedItem.name}!`);
+    await fetchInventory();
+  }
+
   return (
     <Page back={false}>
       <List>
         <TopBar points={points} />
         <div style={{ paddingBottom: 100 }}>{renderContent()}</div>
         {selectedItem && (
-            <div className="modal-overlay" onClick={() => setSelectedItem(null)}>
-              <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-                <h3>Підтвердження покупки</h3>
-                <p>Придбати <strong>{selectedItem.name}</strong> за <strong>{selectedItem.price}</strong> уламків?</p>
-                <div style={{ display: "flex", justifyContent: "center", gap: "10px" }}>
-                  <button onClick={confirmBuy}>Так</button>
-                  <button onClick={() => setSelectedItem(null)}>Ні</button>
+          <div className="modal-overlay" onClick={() => setSelectedItem(null)}>
+              
+              {selectedItem.mode === "city" && (
+                <>
+                <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+                  <p>Придбати <strong>{selectedItem.name}</strong> за <strong>{selectedItem.price}</strong> уламків?</p>
+                  <div style={{ display: "flex", justifyContent: "center", gap: "50px" }}>
+                    <button onClick={() => {
+                      confirmBuy();
+                      setSelectedItem(null);
+                    }}>Так</button>
+                    <button onClick={() => setSelectedItem(null)}>Ні</button>
+                  </div>
                 </div>
-              </div>
+                </>
+              )}
+
+              {selectedItem.mode === "inventory" && (
+                <div style={{ display: "flex", justifyContent: "center", gap: "10px" }}>
+                  <button onClick={() => {
+                    handleEquip(selectedItem);
+                    setSelectedItem(null);
+                  }}>🛡️ Спорядити</button>
+                  <button onClick={() => {
+                    handleDismantle(selectedItem);
+                    setSelectedItem(null);
+                  }}>🧨 Розібрати</button>
+                </div>
+              )}
+
+              {selectedItem.mode === "equipped" && (
+                <div
+                  className={`item-image rarity-border-${selectedItem.rarity?.toLowerCase()}`}
+                  onClick={(e) => e.stopPropagation()}
+                  style={{
+                    backgroundColor: "#1e1e1e",
+                    padding: "20px",
+                    borderRadius: "10px",
+                    color: "#fff",
+                    maxWidth: "300px",
+                    width: "90%",
+                    textAlign: "center",
+                    boxShadow: "0 0 10px rgba(253, 253, 253, 0.5)",
+                  }}
+                >
+                  <h2 className={` rarity-border-${selectedItem.rarity?.toLowerCase()}`} style={{ fontSize: "1.2rem", marginBottom: "10px" }}>{selectedItem.name}</h2>
+                  {selectedItem.image && (
+                    <img
+                      src={typeof selectedItem.image === "string" ? selectedItem.image : (selectedItem.image as { src: string }).src}
+                      alt={selectedItem.name}
+                      style={{ width: "50px", height: "50px", objectFit: "contain", marginBottom: "30px", marginTop: "20px" }}
+                    />
+                  )}
+                  <p style={{ fontSize: "0.9rem", color: "#ccc", marginBottom: "20px" }}>
+                    Тип: <strong>{selectedItem.type}</strong>
+                  </p>
+                  <p style={{ fontSize: "0.9rem", color: "#ccc", marginBottom: "20px" }}>
+                    Рідкість: <strong>{selectedItem.rarity}</strong>
+                  </p>
+                  <p style={{ fontSize: "0.9rem", color: "#ccc", marginBottom: "20px" }}>
+                    Шкода: <strong>{selectedItem.damage}</strong>
+                  </p>
+                  <p style={{ fontSize: "0.9rem", color: "#ccc", marginBottom: "20px" }}>
+                    Рівень: 1
+                  </p>
+                  <p style={{ fontSize: "0.9rem", color: "#ccc", marginBottom: "20px" }}>
+                    Міцність: 10 / 10
+                  </p>
+                  <div style={{ display: "flex", justifyContent: "center", gap: "50px", marginTop: "50px" }}>
+                    <button onClick={() => {handleUnequip(selectedItem);setSelectedItem(null);}}
+                        style={{
+                          backgroundColor: "#444",
+                          padding: "8px 12px",
+                          border: "none",
+                          borderRadius: "6px",
+                          color: "#fff",
+                          marginTop: "10px",
+                          cursor: "pointer",
+                        }}>
+                          🗑️ Зняти </button>
+
+                      <button onClick={() => setSelectedItem(null)}
+                        style={{
+                          backgroundColor: "#444",
+                          padding: "8px 12px",
+                          border: "none",
+                          borderRadius: "6px",
+                          color: "#fff",
+                          marginTop: "10px",
+                          cursor: "pointer",
+                        }}>
+                            Закрити </button>
+                  </div>
+                </div>
+              )}
             </div>
-          )}
+        )}
+
         <BottomBar activeTab={activeTab} setActiveTab={setActiveTab} />
       </List>
       <Toaster position="top-center" reverseOrder={false} />
