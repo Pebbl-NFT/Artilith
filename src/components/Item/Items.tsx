@@ -5,5 +5,4 @@ import { PotionItems } from "./PotionItem";
 export const AllItems = [
     ...WeaponItems,
     ...ShieldItems,
-    ...PotionItems
 ];
