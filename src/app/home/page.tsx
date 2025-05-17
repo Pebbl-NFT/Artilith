@@ -530,26 +530,6 @@ export default function HomePage() {
                   animation: "fadeIn 1s ease forwards",
                 }}
               >
-                                <Button onClick={() => setActiveTab("shop")}
-              mode="filled"
-              style={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                width: "100%",
-                background: 'rgba(255, 255, 255, 0)',
-                padding: 10,
-                marginBottom: '10px',
-              }}
-              name="back"
-            >
-              <p style={{ 
-                fontSize: "12px", 
-                color: "#fff", 
-                fontWeight: "bold" 
-              }}>
-                👈 back</p>
-            </Button>
                 <h1
                   style={{
                     fontSize: "2rem",
@@ -574,6 +554,26 @@ export default function HomePage() {
                 >
                   Обирай свою зброю якщо зможеш розрахуватись
                 </p>
+                <Button onClick={() => setActiveTab("shop")}
+                  mode="filled"
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    width: "100%",
+                    background: 'rgba(255, 255, 255, 0)',
+                    padding: 10,
+                    marginBottom: '20px',
+                  }}
+                  name="back"
+                >
+                  <p style={{ 
+                    fontSize: "12px", 
+                    color: "#fff", 
+                    fontWeight: "bold" 
+                  }}>
+                    👈 back</p>
+                </Button>
                 <div
                   style={{
                     display: "grid",
@@ -601,27 +601,6 @@ export default function HomePage() {
                     />
                   ))}
                 </div>
-                <Button onClick={() => setActiveTab("shop")}
-                  mode="filled"
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    width: "100%",
-                    background: 'rgba(255, 255, 255, 0)',
-                    padding: 10,
-                    marginBottom: '10px',
-                    marginTop: '30px',
-                  }}
-                  name="back"
-                >
-                  <p style={{ 
-                    fontSize: "20px", 
-                    color: "#fff", 
-                    fontWeight: "bold" 
-                  }}>
-                    👈 back</p>
-                </Button>
               </div>
             </Placeholder>
           </Page>
@@ -665,6 +644,26 @@ export default function HomePage() {
                   >
                     Обирай свою зброю якщо зможеш розрахуватись
                   </p>
+                  <Button onClick={() => setActiveTab("shop")}
+                  mode="filled"
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    width: "100%",
+                    background: 'rgba(255, 255, 255, 0)',
+                    padding: 10,
+                    marginBottom: '20px',
+                  }}
+                  name="back"
+                >
+                  <p style={{ 
+                    fontSize: "12px", 
+                    color: "#fff", 
+                    fontWeight: "bold" 
+                  }}>
+                    👈 back</p>
+                </Button>
                   <div
                     style={{
                       display: "grid",
