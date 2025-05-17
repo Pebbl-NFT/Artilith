@@ -129,6 +129,8 @@ export default function BottomBar({ activeTab, setActiveTab }: { activeTab: stri
         >
           <span style={{
             fontSize: 26, // Розмір емодзі
+            paddingTop: 10,
+            marginTop: -10,
           }}>
             🧭
           </span>

@@ -68,7 +68,7 @@ export default function InitDataPage() {
             <span className="w-3 h-3 bg-green-500 rounded-full animate-bounce [animation-delay:-0.15s]"></span>
             <span className="w-3 h-3 bg-green-500 rounded-full animate-bounce"></span>
           </div>
-          <div className="text-gray-600 text-sm font-medium mt-3 text-center">
+          <div className="text-gray-600 text-sm font-medium mt-50 text-center">
             Завантаження...
           </div>
         </div>
