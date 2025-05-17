@@ -23,6 +23,8 @@ import EquippedItemSlot from "@/components/Item/EquippedItemSlot";
 // Дані та логіка
 import { supabase } from "@/lib/supabaseClient";
 import { AllItems } from "@/components/Item/Items";
+import { WeaponItems } from "@/components/Item/WeaponItem";
+import { ShieldItems } from "@/components/Item/ShieldItem";
 import { formatTime } from "@/utils/formatTime";
 import { getPlayerStats } from "@/utils/getPlayerStats";
 import { updateUserPoints } from "@/hooks/useUserPoints";
@@ -346,7 +348,7 @@ export default function HomePage() {
       return (
         <Page back>
           <Placeholder>
-            <div
+            <div onClick={() => setActiveTab("shop")}
               className="page"
               style={{
                 display: "flex",
@@ -359,65 +361,424 @@ export default function HomePage() {
             >
               <h1
                 style={{
-                  fontSize: "2rem",
+                  fontSize: "1rem",
                   fontWeight: "bold",
-                  marginBottom: "20px",
-                  marginTop: "5px",
                   textAlign: "center",
                   lineHeight: "1",
                   color: "#fff",
                 }}
               >
-                МАГАЗИН ПРЕДМЕТІВ
+                ТОРГОВЕЦЬ
               </h1>
-              <p
+            </div>
+            <div 
+              className="page"
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                justifyContent: "center",
+                marginTop: "20px",
+                animation: "fadeIn 1s ease forwards",
+              }}
+            >
+              <h1
                 style={{
-                  fontSize: "0.8rem",
-                  color: "#ddd",
+                  fontSize: "1rem",
+                  fontWeight: "bold",
                   textAlign: "center",
-                  marginBottom: "30px",
-                  maxWidth: "600px",
+                  lineHeight: "1",
+                  color: "#fff",
                 }}
               >
-                Тут ви можете придбати початкове спорядження для пригод: зброю, броню та зілля.
-              </p>
-              <div
+                КУЗНЕЦЬ
+              </h1>
+            </div>
+            <div
+              className="page"
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                justifyContent: "center",
+                marginTop: "20px",
+                animation: "fadeIn 1s ease forwards",
+              }}
+            >
+              <h1
                 style={{
-                  display: "grid",
-                  gridTemplateColumns: "repeat(1, 1fr)",
-                  gap: "20px",
-                  width: "100%",
-                  maxWidth: "1200px",
-                  animation: "fadeIn 1s ease forwards",
+                  fontSize: "1rem",
+                  fontWeight: "bold",
+                  textAlign: "center",
+                  lineHeight: "1",
+                  color: "#fff",
                 }}
               >
-                {AllItems.map((item) => (
-                  <ItemCard
-                    mode={"city"}
-                    key={item.item_id}
-                    item_id={item.item_id}
-                    type={item.type}
-                    rarity={item.rarity}
-                    name={item.name}
-                    image={item.image}
-                    description={item.description}
-                    damage={item.damage ? `Шкода: ${item.damage}` : ""}
-                    defense={item.defense ? `Захист: ${item.defense}` : ""}
-                    price={item.price}
-                    onBuyRequest={(item) => setSelectedItem(item)}
-                  />
-                ))}
-              </div>
+                ГІЛЬДІЯ
+              </h1>
+            </div>
+            <div
+              className="page"
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                justifyContent: "center",
+                marginTop: "20px",
+                animation: "fadeIn 1s ease forwards",
+              }}
+            >
+              <h1
+                style={{
+                  fontSize: "1rem",
+                  fontWeight: "bold",
+                  textAlign: "center",
+                  lineHeight: "1",
+                  color: "#fff",
+                }}
+              >
+                АЛЕЯ ГЕРОЇВ
+              </h1>
             </div>
           </Placeholder>
         </Page>
       );
+    case "shop":
+          return (
+            <Page back>
+              <Placeholder>
+                <div
+                  className="page"
+                  style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    marginTop: "50px",
+                    animation: "fadeIn 1s ease forwards",
+                  }}
+                >
+                  <h1
+                    style={{
+                      fontSize: "2rem",
+                      fontWeight: "bold",
+                      marginBottom: "20px",
+                      marginTop: "5px",
+                      textAlign: "center",
+                      lineHeight: "1",
+                      color: "#fff",
+                    }}
+                  >
+                    ТОРГОВЕЦЬ
+                  </h1>
+                  <p
+                    style={{
+                      fontSize: "0.8rem",
+                      color: "#ddd",
+                      textAlign: "center",
+                      marginBottom: "30px",
+                      maxWidth: "600px",
+                    }}
+                  >
+                    Не затримуй мене, я маю багато справ!
+                  </p>
+                  <Card className="page" onClick={() => setActiveTab("weapons")}
+                  style={{
+                    display: "flex",
+                    flexDirection: "row",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    marginBottom: 20,
+                    gap: "30px",
+                    padding: 5,
+                    color: "#fff",
+                    animation: "fadeIn 0.6s ease forwards",
+                  }}>
+                    ЗБРОЯ
+                  </Card>
+
+                  <Card className="page" onClick={() => setActiveTab("shields")}
+                  style={{
+                  display: "flex",
+                  flexDirection: "row",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  marginBottom: 20,
+                  gap: "30px",
+                  padding: 5,
+                  color: "#fff",
+                  animation: "fadeIn 0.6s ease forwards",
+                }}>
+                    БРОНЯ
+                  </Card>
+                </div>
+              </Placeholder>
+            </Page>
+        );
+      case "weapons":
+        return (
+          <Page back>
+            <Placeholder>
+              <div
+                className="page"
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  marginTop: "50px",
+                  animation: "fadeIn 1s ease forwards",
+                }}
+              >
+                                <Button onClick={() => setActiveTab("shop")}
+              mode="filled"
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                width: "100%",
+                background: 'rgba(255, 255, 255, 0)',
+                padding: 10,
+                marginBottom: '10px',
+              }}
+              name="back"
+            >
+              <p style={{ 
+                fontSize: "12px", 
+                color: "#fff", 
+                fontWeight: "bold" 
+              }}>
+                👈 back</p>
+            </Button>
+                <h1
+                  style={{
+                    fontSize: "2rem",
+                    fontWeight: "bold",
+                    marginBottom: "20px",
+                    marginTop: "5px",
+                    textAlign: "center",
+                    lineHeight: "1",
+                    color: "#fff",
+                  }}
+                >
+                  ТОРГОВЕЦЬ
+                </h1>
+                <p
+                  style={{
+                    fontSize: "0.8rem",
+                    color: "#ddd",
+                    textAlign: "center",
+                    marginBottom: "30px",
+                    maxWidth: "600px",
+                  }}
+                >
+                  Обирай свою зброю якщо зможеш розрахуватись
+                </p>
+                <div
+                  style={{
+                    display: "grid",
+                    gridTemplateColumns: "repeat(1, 1fr)",
+                    gap: "20px",
+                    width: "100%",
+                    maxWidth: "1200px",
+                    animation: "fadeIn 1s ease forwards",
+                  }}
+                >
+                  {WeaponItems.map((item) => (
+                    <ItemCard
+                      mode={"city"}
+                      key={item.item_id}
+                      item_id={item.item_id}
+                      type={item.type}
+                      rarity={item.rarity}
+                      name={item.name}
+                      image={item.image}
+                      description={item.description}
+                      damage={item.damage ? `Шкода: ${item.damage}` : ""}
+                      defense={item.defense ? `Захист: ${item.defense}` : ""}
+                      price={item.price}
+                      onBuyRequest={(item) => setSelectedItem(item)}
+                    />
+                  ))}
+                </div>
+                <Button onClick={() => setActiveTab("shop")}
+                  mode="filled"
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    width: "100%",
+                    background: 'rgba(255, 255, 255, 0)',
+                    padding: 10,
+                    marginBottom: '10px',
+                    marginTop: '30px',
+                  }}
+                  name="back"
+                >
+                  <p style={{ 
+                    fontSize: "20px", 
+                    color: "#fff", 
+                    fontWeight: "bold" 
+                  }}>
+                    👈 back</p>
+                </Button>
+              </div>
+            </Placeholder>
+          </Page>
+      );
+      case "shields":
+          return (
+            <Page back>
+              <Placeholder>
+                <div
+                  className="page"
+                  style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    marginTop: "50px",
+                    animation: "fadeIn 1s ease forwards",
+                  }}
+                >
+                  <h1
+                    style={{
+                      fontSize: "2rem",
+                      fontWeight: "bold",
+                      marginBottom: "20px",
+                      marginTop: "5px",
+                      textAlign: "center",
+                      lineHeight: "1",
+                      color: "#fff",
+                    }}
+                  >
+                    ТОРГОВЕЦЬ
+                  </h1>
+                  <p
+                    style={{
+                      fontSize: "0.8rem",
+                      color: "#ddd",
+                      textAlign: "center",
+                      marginBottom: "30px",
+                      maxWidth: "600px",
+                    }}
+                  >
+                    Обирай свою зброю якщо зможеш розрахуватись
+                  </p>
+                  <div
+                    style={{
+                      display: "grid",
+                      gridTemplateColumns: "repeat(1, 1fr)",
+                      gap: "20px",
+                      width: "100%",
+                      maxWidth: "1200px",
+                      animation: "fadeIn 1s ease forwards",
+                    }}
+                  >
+                    {ShieldItems.map((item) => (
+                      <ItemCard
+                        mode={"city"}
+                        key={item.item_id}
+                        item_id={item.item_id}
+                        type={item.type}
+                        rarity={item.rarity}
+                        name={item.name}
+                        image={item.image}
+                        description={item.description}
+                        damage={item.damage ? `Шкода: ${item.damage}` : ""}
+                        defense={item.defense ? `Захист: ${item.defense}` : ""}
+                        price={item.price}
+                        onBuyRequest={(item) => setSelectedItem(item)}
+                      />
+                    ))}
+                  </div>
+                </div>
+              </Placeholder>
+            </Page>
+        );
+          return (
+            <Page back>
+              <Placeholder>
+                <div
+                  className="page"
+                  style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    marginTop: "50px",
+                    animation: "fadeIn 1s ease forwards",
+                  }}
+                >
+                  <h1
+                    style={{
+                      fontSize: "2rem",
+                      fontWeight: "bold",
+                      marginBottom: "20px",
+                      marginTop: "5px",
+                      textAlign: "center",
+                      lineHeight: "1",
+                      color: "#fff",
+                    }}
+                  >
+                    ТОРГОВЕЦЬ
+                  </h1>
+                  <p
+                    style={{
+                      fontSize: "0.8rem",
+                      color: "#ddd",
+                      textAlign: "center",
+                      marginBottom: "30px",
+                      maxWidth: "600px",
+                    }}
+                  >
+                    Обирай свою зброю якщо зможеш розрахуватись
+                  </p>
+                  <div
+                    style={{
+                      display: "grid",
+                      gridTemplateColumns: "repeat(1, 1fr)",
+                      gap: "20px",
+                      width: "100%",
+                      maxWidth: "1200px",
+                      animation: "fadeIn 1s ease forwards",
+                    }}
+                  >
+                    {WeaponItems.map((item) => (
+                      <ItemCard
+                        mode={"city"}
+                        key={item.item_id}
+                        item_id={item.item_id}
+                        type={item.type}
+                        rarity={item.rarity}
+                        name={item.name}
+                        image={item.image}
+                        description={item.description}
+                        damage={item.damage ? `Шкода: ${item.damage}` : ""}
+                        defense={item.defense ? `Захист: ${item.defense}` : ""}
+                        price={item.price}
+                        onBuyRequest={(item) => setSelectedItem(item)}
+                      />
+                    ))}
+                  </div>
+                </div>
+              </Placeholder>
+            </Page>
+        );
     case "home":
       const equippedItems = inventory.filter(item => item.equipped);
       const unequippedItems = inventory.filter(item => !item.equipped);
       return (
-        <Page back>
-          <Placeholder>
+        <Page back >
+          <Placeholder style={{
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                justifyContent: "center",
+                marginTop: "0px",
+                animation: "fadeIn 0.6s ease forwards",
+                paddingInline: 10,
+              }}>
             <div
               className="page"
               style={{
@@ -436,7 +797,7 @@ export default function HomePage() {
                 textAlign: "center", 
                 color: "#fff", 
                 lineHeight: "1" }}>
-                ДІМ</h1>
+                  ДІМ</h1>
               <p
                 style={{
                   fontSize: "0.8rem",
@@ -485,7 +846,7 @@ export default function HomePage() {
                   flexDirection: "column",
                   alignItems: "center",
                   justifyContent: "center",
-                  marginTop: -50,
+                  marginTop: -30,
                   color: "#fff",
                   animation: "fadeIn 0.6s ease forwards",
                 }}>
@@ -563,8 +924,8 @@ export default function HomePage() {
                       justifyContent: "center",
                       alignItems: "center",
                       marginTop:20,
-                      fontSize: 12,
-                      gap: "30px",
+                      fontSize: 5,
+                      gap: "20px",
                       padding:10,
                       color: "#fff",
                       animation: "fadeIn 0.6s ease forwards",
@@ -576,8 +937,10 @@ export default function HomePage() {
                     backgroundColor:"rgba(0, 0, 0, 0)",
                     borderRadius: 8,
                     }}>
-
-                    Здібності</Button>
+                      <p style={{ fontSize: 12, }} >
+                        Здібності
+                      </p>
+                    </Button>
                     <Link href="/home/profile">
                       <Button style={{
                         border:"1px solid rgb(99, 99, 99)",
@@ -603,11 +966,13 @@ export default function HomePage() {
                     backgroundColor:"rgba(0, 0, 0, 0)",
                     borderRadius: 8,
                     }}>
-                    Завдання</Button>
+                      <p style={{ fontSize: 12, }} >
+                        Завдання
+                      </p>
+                    </Button>
                 </div>
               </Card>
 
-              
               <h2 style={{ 
                 fontSize: "1rem", 
                 fontWeight: "bold", 
@@ -1097,7 +1462,7 @@ export default function HomePage() {
                           marginTop: "10px",
                           cursor: "pointer",
                         }}>
-                          🗑️ Зняти </button>
+                          ❌ Зняти </button>
 
                       <button onClick={() => setSelectedItem(null)}
                         style={{
@@ -1109,7 +1474,7 @@ export default function HomePage() {
                           marginTop: "10px",
                           cursor: "pointer",
                         }}>
-                            Закрити </button>
+                          Закрити </button>
                   </div>
                 </div>
               )}

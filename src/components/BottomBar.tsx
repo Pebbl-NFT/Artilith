@@ -44,16 +44,16 @@ export default function BottomBar({ activeTab, setActiveTab }: { activeTab: stri
           }}
         >
           <span style={{
-            fontSize: 30, // Розмір емодзі
+            fontSize: 26, // Розмір емодзі
           }}>
             🎟️
           </span>
           <Placeholder
             style={{
-              fontSize: 14,
+              fontSize: 12,
               fontWeight: 'lighter',
               color: activeTab === 'city' ? 'rgb(255, 255, 255)' : 'gray',
-              marginTop: -10,
+              marginTop: -20,
               textAlign: 'center',
             }}
           >
@@ -128,16 +128,16 @@ export default function BottomBar({ activeTab, setActiveTab }: { activeTab: stri
           }}
         >
           <span style={{
-            fontSize: 30, // Розмір емодзі
+            fontSize: 26, // Розмір емодзі
           }}>
             🧭
           </span>
           <Placeholder
             style={{
-              fontSize: 14,
+              fontSize: 12,
               fontWeight: 'lighter',
               color: activeTab === 'adventures' ? 'rgb(255, 255, 255)' : 'gray',
-              marginTop: -10,
+              marginTop: -20,
               textAlign: 'center',
             }}
           >
