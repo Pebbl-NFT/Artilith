@@ -904,14 +904,7 @@ export default function HomePage() {
     case "guild":
       return (
         <Page back>
-          <Placeholder style={{
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            justifyContent: "center",
-            animation: "fadeIn 1s ease forwards",
-            marginTop: "40px",
-          }} >
+          <Placeholder>
             <h1
                 style={{
                   fontSize: "2rem",
@@ -1005,14 +998,7 @@ export default function HomePage() {
     case "alleyofheroes":
       return (
         <Page back>
-          <Placeholder style={{
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            justifyContent: "center",
-            animation: "fadeIn 1s ease forwards",
-            marginTop: "40px",
-          }} >
+          <Placeholder>
             <h1
                 style={{
                   fontSize: "2rem",
@@ -2302,11 +2288,34 @@ export default function HomePage() {
                 <div className="modal-content" onClick={(e) => e.stopPropagation()}>
                   <p>Придбати <strong>{selectedItem.name}</strong> за <strong>{selectedItem.price}</strong> уламків?</p>
                   <div style={{ display: "flex", justifyContent: "center", gap: "50px" }}>
-                    <button onClick={() => {
-                      confirmBuy();
-                      setSelectedItem(null);
-                    }}>Так</button>
-                    <button onClick={() => setSelectedItem(null)}>Ні</button>
+                    <button onClick={() => {confirmBuy();setSelectedItem(null);}}
+                      style={{
+                        backgroundColor:"#4caf50",
+                        color: "#fff",
+                        border: "none",
+                        borderRadius: "5px",
+                        padding: "10px",
+                        fontSize: "14px",
+                        cursor: "pointer",
+                        transition: "background-color 0.3s",
+                        width: "100%",
+                        marginTop: "10px",
+                      }}>
+                        Так</button>
+                    <button onClick={() => setSelectedItem(null)}
+                      style={{
+                        backgroundColor:"#f44336",
+                        color: "#fff",
+                        border: "none",
+                        borderRadius: "5px",
+                        padding: "10px",
+                        fontSize: "14px",
+                        cursor: "pointer",
+                        transition: "background-color 0.3s",
+                        width: "100%",
+                        marginTop: "10px",
+                      }}>
+                        Ні</button>
                   </div>
                 </div>
                 </>

@@ -108,10 +108,10 @@ export default function BattlePage() {
         return;
       }
   
-      const success = await reduceEnergy(userId, 1);
+      const success = await reduceEnergy(userId, 2);
       if (success) {
-        setEnergy(energy - 1);
-        toast.success("Використано 1⚡");
+        setEnergy(energy - 2);
+        toast.error("Використано 2⚡");
         setShowPreBattle(false);
   
         // ІНІЦІАЛІЗАЦІЯ СТАТІВ БОЮ

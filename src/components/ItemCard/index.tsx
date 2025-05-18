@@ -78,7 +78,18 @@ export const ItemCard: React.FC<ItemCardProps> = ({
       {/* City: Покупка */}
       {mode === "city" && (
         <button
-          style={buttonStyle()}
+          style={{
+            backgroundColor:"#4caf50",
+            color: "#fff",
+            border: "none",
+            borderRadius: "5px",
+            padding: "10px",
+            fontSize: "14px",
+            cursor: "pointer",
+            transition: "background-color 0.3s",
+            width: "100%",
+            marginTop: "10px",
+          }}
           onClick={() =>
             onBuyRequest?.({
               mode,
@@ -95,7 +106,7 @@ export const ItemCard: React.FC<ItemCardProps> = ({
             })
           }
         >
-          Купити за {price} 🪨
+          Придбати за {price} 🪨
         </button>
       )}
 
