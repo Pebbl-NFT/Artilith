@@ -371,7 +371,7 @@ export default function HomePage() {
             >
               <h1
                 style={{
-                  fontSize: "2rem",
+                  fontSize: "1.2rem",
                   fontWeight: "bold",
                   textAlign: "center",
                   lineHeight: "1",
@@ -404,7 +404,7 @@ export default function HomePage() {
             >
               <h1
                 style={{
-                  fontSize: "2rem",
+                  fontSize: "1.2rem",
                   fontWeight: "bold",
                   textAlign: "center",
                   lineHeight: "1",
@@ -428,7 +428,7 @@ export default function HomePage() {
             >
               <h1
                 style={{
-                  fontSize: "2rem",
+                  fontSize: "1.2rem",
                   fontWeight: "bold",
                   textAlign: "center",
                   lineHeight: "1",
@@ -452,7 +452,7 @@ export default function HomePage() {
             >
               <h1
                 style={{
-                  fontSize: "2rem",
+                  fontSize: "1.2rem",
                   fontWeight: "bold",
                   textAlign: "center",
                   lineHeight: "1",
