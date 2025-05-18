@@ -112,8 +112,24 @@ export default function HomePage() {
         setLevel(data.level ?? 1);
       }
     };
+    
     fetchUserData();
-  }, [userId]); 
+  }, [userId]);
+  // Завантаження рейтингу гравців
+  useEffect(() => {
+    const fetchPlayers = async () => {
+      const { data, error } = await supabase
+        .from("users")
+        .select("id, first_name, level")
+        .order("level", { ascending: false }); // Сортуємо за рівнем
+      if (error) {
+        console.error("Помилка завантаження гравців:", error);
+      } else {
+        setPlayers(data);
+      }
+    };
+    fetchPlayers();
+  }, []); // Викликаємо один раз при монтуванні
 
   // підтвердження покупки
   const confirmBuy = async () => {
@@ -250,6 +266,8 @@ export default function HomePage() {
     const stats = getPlayerStats(inventory);
     setHeroStats(stats);
   }, [inventory]);
+
+  
   
   // Функція додавання предмета в інвентар
   const fetchInventory = async () => {
@@ -337,7 +355,22 @@ export default function HomePage() {
     updateHeroStats();
   }, [inventory, updateHeroStats]); 
   
-  
+
+  const [players, setPlayers] = useState<{ id: any; first_name: any; level: any }[]>([]);
+  useEffect(() => {
+    const fetchPlayers = async () => {
+      const { data, error } = await supabase
+        .from('user')
+        .select('id, first_name, level')
+        .order('level', { ascending: false }); // Сортуємо по рівню
+      if (error) {
+        console.error("Помилка завантаження гравців:", error);
+      } else {
+        setPlayers(data);
+      }
+    };
+    fetchPlayers();
+  }, []);
 
   // Функція рендеринга контенту для різних вкладок
   const renderContent = () => {
@@ -1049,620 +1082,78 @@ export default function HomePage() {
             justifyContent: "center",
             animation: "fadeIn 1s ease forwards",
             marginTop: "-40px",
-          }} >
-            <div
-              className="page"
-              style={{
-                border: "1px solid rgb(255, 152, 0)", 
-                background: "rgba(0, 0, 0, 0.52)",
-                display: "flex",
-                flexDirection: "row",
-                justifyContent: "center",
-                alignItems: "center",
-                marginTop: "40px",
-                marginBottom: "30px",
-                animation: "fadeIn 1s ease forwards",
-                gap: "50px",
-                padding: 10,
-              }}
-            >
-              <h1
-                style={{
-                  fontSize: "1rem",
-                  fontWeight: "bold",
-                  textAlign: "center",
-                  lineHeight: "1",
-                  color: "#fff",
-                }}
-              >
-                №1
-              </h1>
-              <h1
-                style={{
-                  
-                  fontSize: "1rem",
-                  fontWeight: "bold",
-                  textAlign: "center",
-                  lineHeight: "1",
-                  color: "#fff",
-                }}
-              >
-                ???
-              </h1>
-            </div>
-          </Placeholder>
-          <Placeholder style={{
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            justifyContent: "center",
-            animation: "fadeIn 1s ease forwards",
-            marginTop: "-40px",
-          }} >
-            <div
-              className="page"
-              style={{
-                border: "1px solid rgb(156, 39, 176)", 
-                background: "rgba(0, 0, 0, 0.52)",
-                display: "flex",
-                flexDirection: "row",
-                justifyContent: "center",
-                alignItems: "center",
-                marginTop: "20px",
-                animation: "fadeIn 1s ease forwards",
-                gap: "30px",
-                padding: 10,
-              }}
-            >
-              <h1
-                style={{
-                  fontSize: "1rem",
-                  fontWeight: "bold",
-                  textAlign: "center",
-                  lineHeight: "1",
-                  color: "#fff",
-                }}
-              >
-                №2
-              </h1>
-              <h1
-                style={{
-                  
-                  fontSize: "1rem",
-                  fontWeight: "bold",
-                  textAlign: "center",
-                  lineHeight: "1",
-                  color: "#fff",
-                }}
-              >
-                ???
-              </h1>
-            </div>
-            <div
-              className="page"
-              style={{
-                border: "1px solid rgb(156, 39, 176)", 
-                background: "rgba(0, 0, 0, 0.52)",
-                display: "flex",
-                flexDirection: "row",
-                justifyContent: "center",
-                alignItems: "center",
-                marginTop: "5px",
-                animation: "fadeIn 1s ease forwards",
-                gap: "30px",
-                padding: 10,
-              }}
-            >
-              <h1
-                style={{
-                  fontSize: "1rem",
-                  fontWeight: "bold",
-                  textAlign: "center",
-                  lineHeight: "1",
-                  color: "#fff",
-                }}
-              >
-                №3
-              </h1>
-              <h1
-                style={{
-                  
-                  fontSize: "1rem",
-                  fontWeight: "bold",
-                  textAlign: "center",
-                  lineHeight: "1",
-                  color: "#fff",
-                }}
-              >
-                ???
-              </h1>
-            </div>
-            <div
-              className="page"
-              style={{
-                border: "1px solid rgb(156, 39, 176)", 
-                background: "rgba(0, 0, 0, 0.52)",
-                display: "flex",
-                flexDirection: "row",
-                justifyContent: "center",
-                alignItems: "center",
-                marginTop: "5px",
-                animation: "fadeIn 1s ease forwards",
-                gap: "30px",
-                padding: 10,
-              }}
-            >
-              <h1
-                style={{
-                  fontSize: "1rem",
-                  fontWeight: "bold",
-                  textAlign: "center",
-                  lineHeight: "1",
-                  color: "#fff",
-                }}
-              >
-                №4
-              </h1>
-              <h1
-                style={{
-                  
-                  fontSize: "1rem",
-                  fontWeight: "bold",
-                  textAlign: "center",
-                  lineHeight: "1",
-                  color: "#fff",
-                }}
-              >
-                ???
-              </h1>
-            </div>
-            <div
-              className="page"
-              style={{
-                border: "1px solid rgb(156, 39, 176)", 
-                background: "rgba(0, 0, 0, 0.52)",
-                display: "flex",
-                flexDirection: "row",
-                justifyContent: "center",
-                alignItems: "center",
-                marginTop: "5px",
-                animation: "fadeIn 1s ease forwards",
-                gap: "30px",
-                padding: 10,
-              }}
-            >
-              <h1
-                style={{
-                  fontSize: "1rem",
-                  fontWeight: "bold",
-                  textAlign: "center",
-                  lineHeight: "1",
-                  color: "#fff",
-                }}
-              >
-                №5
-              </h1>
-              <h1
-                style={{
-                  
-                  fontSize: "1rem",
-                  fontWeight: "bold",
-                  textAlign: "center",
-                  lineHeight: "1",
-                  color: "#fff",
-                }}
-              >
-                ???
-              </h1>
-            </div>
-          </Placeholder>
-          <Placeholder style={{
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            justifyContent: "center",
-            animation: "fadeIn 1s ease forwards",
-            marginTop: "-40px",
-          }} >
-            <div
-              className="page"
-              style={{
-                border: "1px solid rgb(33, 150, 243)", 
-                background: "rgba(0, 0, 0, 0.52)",
-                display: "flex",
-                flexDirection: "row",
-                justifyContent: "center",
-                alignItems: "center",
-                marginTop: "20px",
-                animation: "fadeIn 1s ease forwards",
-                gap: "30px",
-                padding: 5,
-              }}
-            >
-              <h1
-                style={{
-                  fontSize: "1rem",
-                  fontWeight: "bold",
-                  textAlign: "center",
-                  lineHeight: "1",
-                  color: "#fff",
-                }}
-              >
-                №6
-              </h1>
-              <h1
-                style={{
-                  
-                  fontSize: "1rem",
-                  fontWeight: "bold",
-                  textAlign: "center",
-                  lineHeight: "1",
-                  color: "#fff",
-                }}
-              >
-                ???
-              </h1>
-            </div>
-            <div
-              className="page"
-              style={{
-                border: "1px solid rgb(33, 150, 243)", 
-                background: "rgba(0, 0, 0, 0.52)",
-                display: "flex",
-                flexDirection: "row",
-                justifyContent: "center",
-                alignItems: "center",
-                marginTop: "5px",
-                animation: "fadeIn 1s ease forwards",
-                gap: "30px",
-                padding: 5,
-              }}
-            >
-              <h1
-                style={{
-                  fontSize: "1rem",
-                  fontWeight: "bold",
-                  textAlign: "center",
-                  lineHeight: "1",
-                  color: "#fff",
-                }}
-              >
-                №7
-              </h1>
-              <h1
-                style={{
-                  
-                  fontSize: "1rem",
-                  fontWeight: "bold",
-                  textAlign: "center",
-                  lineHeight: "1",
-                  color: "#fff",
-                }}
-              >
-                ???
-              </h1>
-            </div>
-            <div
-              className="page"
-              style={{
-                border: "1px solid rgb(33, 150, 243)", 
-                background: "rgba(0, 0, 0, 0.52)",
-                display: "flex",
-                flexDirection: "row",
-                justifyContent: "center",
-                alignItems: "center",
-                marginTop: "5px",
-                animation: "fadeIn 1s ease forwards",
-                gap: "30px",
-                padding: 5,
-              }}
-            >
-              <h1
-                style={{
-                  fontSize: "1rem",
-                  fontWeight: "bold",
-                  textAlign: "center",
-                  lineHeight: "1",
-                  color: "#fff",
-                }}
-              >
-                №8
-              </h1>
-              <h1
-                style={{
-                  
-                  fontSize: "1rem",
-                  fontWeight: "bold",
-                  textAlign: "center",
-                  lineHeight: "1",
-                  color: "#fff",
-                }}
-              >
-                ???
-              </h1>
-            </div>
-            <div
-              className="page"
-              style={{
-                border: "1px solid rgb(33, 150, 243)", 
-                background: "rgba(0, 0, 0, 0.52)",
-                display: "flex",
-                flexDirection: "row",
-                justifyContent: "center",
-                alignItems: "center",
-                marginTop: "5px",
-                animation: "fadeIn 1s ease forwards",
-                gap: "30px",
-                padding: 5,
-              }}
-            >
-              <h1
-                style={{
-                  fontSize: "1rem",
-                  fontWeight: "bold",
-                  textAlign: "center",
-                  lineHeight: "1",
-                  color: "#fff",
-                }}
-              >
-                №9
-              </h1>
-              <h1
-                style={{
-                  
-                  fontSize: "1rem",
-                  fontWeight: "bold",
-                  textAlign: "center",
-                  lineHeight: "1",
-                  color: "#fff",
-                }}
-              >
-                ???
-              </h1>
-            </div>
-            <div
-              className="page"
-              style={{
-                border: "1px solid rgb(33, 150, 243)", 
-                background: "rgba(0, 0, 0, 0.52)",
-                display: "flex",
-                flexDirection: "row",
-                justifyContent: "center",
-                alignItems: "center",
-                marginTop: "5px",
-                animation: "fadeIn 1s ease forwards",
-                gap: "30px",
-                padding: 5,
-              }}
-            >
-              <h1
-                style={{
-                  fontSize: "1rem",
-                  fontWeight: "bold",
-                  textAlign: "center",
-                  lineHeight: "1",
-                  color: "#fff",
-                }}
-              >
-                №10
-              </h1>
-              <h1
-                style={{
-                  
-                  fontSize: "1rem",
-                  fontWeight: "bold",
-                  textAlign: "center",
-                  lineHeight: "1",
-                  color: "#fff",
-                }}
-              >
-                ???
-              </h1>
-            </div>
-          </Placeholder>
-          <Placeholder style={{
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            justifyContent: "center",
-            animation: "fadeIn 1s ease forwards",
-            marginTop: "-40px",
-          }} >
-            <div
-              className="page"
-              style={{
-                border: "1px solid rgb(76, 175, 80)", 
-                background: "rgba(0, 0, 0, 0.52)",
-                display: "flex",
-                flexDirection: "row",
-                justifyContent: "center",
-                alignItems: "center",
-                marginTop: "20px",
-                animation: "fadeIn 1s ease forwards",
-                gap: "30px",
-                padding: 0,
-              }}
-            >
-              <h1
-                style={{
-                  fontSize: "1rem",
-                  fontWeight: "bold",
-                  textAlign: "center",
-                  lineHeight: "1",
-                  color: "#fff",
-                }}
-              >
-                №11
-              </h1>
-              <h1
-                style={{
-                  
-                  fontSize: "1rem",
-                  fontWeight: "bold",
-                  textAlign: "center",
-                  lineHeight: "1",
-                  color: "#fff",
-                }}
-              >
-                ???
-              </h1>
-            </div>
-            <div
-              className="page"
-              style={{
-                border: "1px solid rgb(76, 175, 80)", 
-                background: "rgba(0, 0, 0, 0.52)",
-                display: "flex",
-                flexDirection: "row",
-                justifyContent: "center",
-                alignItems: "center",
-                marginTop: "5px",
-                animation: "fadeIn 1s ease forwards",
-                gap: "30px",
-                padding: 0,
-              }}
-            >
-              <h1
-                style={{
-                  fontSize: "1rem",
-                  fontWeight: "bold",
-                  textAlign: "center",
-                  lineHeight: "1",
-                  color: "#fff",
-                }}
-              >
-                №12
-              </h1>
-              <h1
-                style={{
-                  
-                  fontSize: "1rem",
-                  fontWeight: "bold",
-                  textAlign: "center",
-                  lineHeight: "1",
-                  color: "#fff",
-                }}
-              >
-                ???
-              </h1>
-            </div>
-            <div
-              className="page"
-              style={{
-                border: "1px solid rgb(76, 175, 80)", 
-                background: "rgba(0, 0, 0, 0.52)",
-                display: "flex",
-                flexDirection: "row",
-                justifyContent: "center",
-                alignItems: "center",
-                marginTop: "5px",
-                animation: "fadeIn 1s ease forwards",
-                gap: "30px",
-                padding: 0,
-              }}
-            >
-              <h1
-                style={{
-                  fontSize: "1rem",
-                  fontWeight: "bold",
-                  textAlign: "center",
-                  lineHeight: "1",
-                  color: "#fff",
-                }}
-              >
-                №13
-              </h1>
-              <h1
-                style={{
-                  
-                  fontSize: "1rem",
-                  fontWeight: "bold",
-                  textAlign: "center",
-                  lineHeight: "1",
-                  color: "#fff",
-                }}
-              >
-                ???
-              </h1>
-            </div>
-            <div
-              className="page"
-              style={{
-                border: "1px solid rgb(76, 175, 80)", 
-                background: "rgba(0, 0, 0, 0.52)",
-                display: "flex",
-                flexDirection: "row",
-                justifyContent: "center",
-                alignItems: "center",
-                marginTop: "5px",
-                animation: "fadeIn 1s ease forwards",
-                gap: "30px",
-                padding: 0,
-              }}
-            >
-              <h1
-                style={{
-                  fontSize: "1rem",
-                  fontWeight: "bold",
-                  textAlign: "center",
-                  lineHeight: "1",
-                  color: "#fff",
-                }}
-              >
-                №14
-              </h1>
-              <h1
-                style={{
-                  
-                  fontSize: "1rem",
-                  fontWeight: "bold",
-                  textAlign: "center",
-                  lineHeight: "1",
-                  color: "#fff",
-                }}
-              >
-                ???
-              </h1>
-            </div>
-            <div
-              className="page"
-              style={{
-                border: "1px solid rgb(76, 175, 80)", 
-                background: "rgba(0, 0, 0, 0.52)",
-                display: "flex",
-                flexDirection: "row",
-                justifyContent: "center",
-                alignItems: "center",
-                marginTop: "5px",
-                animation: "fadeIn 1s ease forwards",
-                gap: "30px",
-                padding: 0,
-              }}
-            >
-              <h1
-                style={{
-                  fontSize: "1rem",
-                  fontWeight: "bold",
-                  textAlign: "center",
-                  lineHeight: "1",
-                  color: "#fff",
-                }}
-              >
-                №15
-              </h1>
-              <h1
-                style={{
-                  
-                  fontSize: "1rem",
-                  fontWeight: "bold",
-                  textAlign: "center",
-                  lineHeight: "1",
-                  color: "#fff",
-                }}
-              >
-                ???
-              </h1>
-            </div>
+          }}>
+            {/* Відображення рейтингу гравців */}
+            {players.map((player, index) => {
+              // Визначаємо колір бордера в залежності від позиції
+              let borderColor;
+
+              if (index === 0) {
+                borderColor = "rgb(255, 152, 0)"; // Для №1
+              } else if (index >= 1 && index <= 4) {
+                borderColor = "rgb(156, 39, 176)"; // Для №2 - 5
+              } else if (index >= 5 && index <= 9) {
+                borderColor = "rgb(33, 150, 243)"; // Для №6 - 10
+              } else if (index >= 10 && index <= 19) {
+                borderColor = "rgb(76, 175, 80)"; // Для №1 - 20
+              } else {
+                borderColor = "rgb(143, 143, 143)"; // Для №1 - 20
+              }
+              
+
+              return (
+                <div
+                  key={player.id}
+                  className="page"
+                  style={{
+                    border: `1px solid ${borderColor}`,
+                    background: "rgba(0, 0, 0, 0.52)",
+                    display: "flex",
+                    flexDirection: "row",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    marginTop: "10px",
+                    animation: "fadeIn 1s ease forwards",
+                    gap: "30px",
+                    padding: 10,
+                  }}
+                >
+                  <h1
+                    style={{
+                      fontSize: "1rem",
+                      fontWeight: "bold",
+                      textAlign: "center",
+                      lineHeight: "1",
+                      color: "#fff",
+                    }}
+                  >
+                    №{index + 1}
+                  </h1>
+                  <h1
+                    style={{
+                      fontSize: "1rem",
+                      fontWeight: "bold",
+                      textAlign: "center",
+                      lineHeight: "1",
+                      color: "#fff",
+                    }}
+                  >
+                    {player.first_name}
+                  </h1>
+                  <h1
+                    style={{
+                      fontSize: "0.9rem",
+                      fontWeight: "bold",
+                      textAlign: "center",
+                      lineHeight: "1",
+                      color: "#fff",
+                    }}
+                  >
+                    Lv. {player.level}
+                  </h1>
+                </div>
+              );
+            })}
           </Placeholder>
         </Page>
       ); 
