@@ -356,7 +356,7 @@ export default function HomePage() {
             flexDirection: "column",
             alignItems: "center",
             justifyContent: "center",
-            marginTop: "50px",
+            marginTop: "20px",
             animation: "fadeIn 1s ease forwards",
             backgroundSize: 'cover', // Покрити весь блок
             backgroundPosition: 'center', // Центрувати зображення
