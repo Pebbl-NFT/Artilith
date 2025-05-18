@@ -371,7 +371,7 @@ export default function HomePage() {
                 flexDirection: "column",
                 alignItems: "center",
                 justifyContent: "center",
-                marginTop: "50px",
+                marginTop: "20px",
                 animation: "fadeIn 1s ease forwards",
               }}
             >
@@ -387,7 +387,16 @@ export default function HomePage() {
                 ТОРГОВЕЦЬ
               </h1>
             </div>
-            <div 
+          </Placeholder>
+          <Placeholder style={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            animation: "fadeIn 1s ease forwards",
+            marginTop: "-40px",
+          }} >
+            <div onClick={() => setActiveTab("blacksmith")}
               className="page"
               style={{
                 backgroundImage: `url(${blacksmithbg.src})`,
@@ -408,10 +417,10 @@ export default function HomePage() {
                   color: "#fff",
                 }}
               >
-                КУЗНЕЦЬ
+                КОВАЛЬ
               </h1>
             </div>
-            <div
+            <div onClick={() => setActiveTab("guild")}
               className="page"
               style={{
                 backgroundImage: `url(${citybg.src})`,
@@ -435,10 +444,10 @@ export default function HomePage() {
                 ГІЛЬДІЯ
               </h1>
             </div>
-            <div
+            <div onClick={() => setActiveTab("alleyofheroes")}
               className="page"
               style={{
-                backgroundImage: `url(${alleyofheroesnbg.src})`,
+                backgroundImage: `url(${alleyofheroesnbg.src})`, 
                 display: "flex",
                 flexDirection: "column",
                 alignItems: "center",
@@ -560,61 +569,95 @@ export default function HomePage() {
         return (
           <Page back>
             <Placeholder>
-              <div
-                className="page"
+            <h1
                 style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "center",
-                  justifyContent: "center",
+                  fontSize: "2rem",
+                  fontWeight: "bold",
                   marginTop: "50px",
-                  animation: "fadeIn 1s ease forwards",
+                  textAlign: "center",
+                  lineHeight: "1",
+                  color: "#fff",
                 }}
               >
-                <h1
-                  style={{
-                    fontSize: "2rem",
-                    fontWeight: "bold",
-                    marginBottom: "20px",
-                    marginTop: "5px",
-                    textAlign: "center",
-                    lineHeight: "1",
-                    color: "#fff",
-                  }}
-                >
-                  ТОРГОВЕЦЬ
-                </h1>
-                <p
-                  style={{
-                    fontSize: "0.8rem",
-                    color: "#ddd",
-                    textAlign: "center",
-                    marginBottom: "30px",
-                    maxWidth: "600px",
-                  }}
-                >
-                  Обирай свою зброю якщо зможеш розрахуватись
-                </p>
-                <Button onClick={() => setActiveTab("shop")}
-                  mode="filled"
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    width: "100%",
-                    background: 'rgba(255, 255, 255, 0)',
-                    padding: 10,
-                    marginBottom: '20px',
-                  }}
-                  name="back"
-                >
-                  <p style={{ 
-                    fontSize: "12px", 
-                    color: "#fff", 
-                    fontWeight: "bold" 
-                  }}>
-                    👈 back</p>
-                </Button>
+                ТОРГОВЕЦЬ
+              </h1>
+            <div
+              className="page"
+              style={{
+                backgroundImage: `url(${shopbg.src})`,
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                justifyContent: "center",
+                animation: "fadeIn 1s ease forwards",
+                backgroundSize: 'cover', // Покрити весь блок
+                backgroundPosition: 'center', // Центрувати зображення
+                height: '100%', // Зайняти всю висоту вікна
+                color: "#fff", // Текст навколо, щоб бути білішим на фоні
+              }}
+            >
+              <p
+                style={{
+                  fontSize: "0.8rem",
+                  color: "#ddd",
+                  textAlign: "center",
+                  marginBottom: "20px",
+                  marginTop: "0px",
+                  maxWidth: "600px",
+                  background: "rgba(0, 0, 0, 0.59)",
+                  padding: "5px",
+                  animation: "fadeIn 2s ease forwards",
+                }}
+              >
+                Не затримуй мене, я маю багато справ!
+              </p>
+              <h1
+                style={{
+                  fontSize: "1rem",
+                  fontWeight: "bold",
+                  marginBottom: "70px",
+                  marginTop: "5px",
+                  textAlign: "center",
+                  lineHeight: "1",
+                  color: "#fff",
+                }}
+              >
+                
+              </h1>
+              <Card className="page" onClick={() => setActiveTab("weapons")}
+              style={{
+                display: "flex",
+                flexDirection: "row",
+                justifyContent: "center",
+                alignItems: "center",
+                marginBottom: 20,
+                gap: "30px",
+                padding: 5,
+                color: "#fff",
+                animation: "fadeIn 0.6s ease forwards",
+                background: "rgba(0, 0, 0, 0.45)",
+              }}>
+                ЗБРОЯ
+              </Card>
+
+              <Card className="page" onClick={() => setActiveTab("shields")}
+              style={{
+              display: "flex",
+              flexDirection: "row",
+              justifyContent: "center",
+              alignItems: "center",
+              marginBottom: 20,
+              gap: "30px",
+              padding: 5,
+              color: "#fff",
+              animation: "fadeIn 0.6s ease forwards",
+              background: "rgba(0, 0, 0, 0.59)",
+            }}>
+                БРОНЯ
+              </Card>
+            </div>
+          </Placeholder>
+            <Placeholder>
                 <div
                   style={{
                     display: "grid",
@@ -623,6 +666,7 @@ export default function HomePage() {
                     width: "100%",
                     maxWidth: "1200px",
                     animation: "fadeIn 1s ease forwards",
+                    marginTop: "-30px",
                   }}
                 >
                   {WeaponItems.map((item) => (
@@ -642,7 +686,6 @@ export default function HomePage() {
                     />
                   ))}
                 </div>
-              </div>
             </Placeholder>
           </Page>
       );
@@ -650,23 +693,11 @@ export default function HomePage() {
           return (
             <Page back>
               <Placeholder>
-                <div
-                  className="page"
-                  style={{
-                    display: "flex",
-                    flexDirection: "column",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    marginTop: "50px",
-                    animation: "fadeIn 1s ease forwards",
-                  }}
-                >
-                  <h1
+                <h1
                     style={{
                       fontSize: "2rem",
                       fontWeight: "bold",
-                      marginBottom: "20px",
-                      marginTop: "5px",
+                      marginTop: "50px",
                       textAlign: "center",
                       lineHeight: "1",
                       color: "#fff",
@@ -674,47 +705,94 @@ export default function HomePage() {
                   >
                     ТОРГОВЕЦЬ
                   </h1>
+                <div
+                  className="page"
+                  style={{
+                    backgroundImage: `url(${shopbg.src})`,
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    animation: "fadeIn 1s ease forwards",
+                    backgroundSize: 'cover', // Покрити весь блок
+                    backgroundPosition: 'center', // Центрувати зображення
+                    height: '100%', // Зайняти всю висоту вікна
+                    color: "#fff", // Текст навколо, щоб бути білішим на фоні
+                  }}
+                >
                   <p
                     style={{
                       fontSize: "0.8rem",
                       color: "#ddd",
                       textAlign: "center",
-                      marginBottom: "30px",
+                      marginBottom: "20px",
+                      marginTop: "0px",
                       maxWidth: "600px",
+                      background: "rgba(0, 0, 0, 0.59)",
+                      padding: "5px",
+                      animation: "fadeIn 2s ease forwards",
                     }}
                   >
-                    Обирай свою зброю якщо зможеш розрахуватись
+                    Не затримуй мене, я маю багато справ!
                   </p>
-                  <Button onClick={() => setActiveTab("shop")}
-                  mode="filled"
+                  <h1
+                    style={{
+                      fontSize: "1rem",
+                      fontWeight: "bold",
+                      marginBottom: "70px",
+                      marginTop: "5px",
+                      textAlign: "center",
+                      lineHeight: "1",
+                      color: "#fff",
+                    }}
+                  >
+                    
+                  </h1>
+                  <Card className="page" onClick={() => setActiveTab("weapons")}
                   style={{
                     display: "flex",
-                    alignItems: "center",
+                    flexDirection: "row",
                     justifyContent: "center",
-                    width: "100%",
-                    background: 'rgba(255, 255, 255, 0)',
-                    padding: 10,
-                    marginBottom: '20px',
-                  }}
-                  name="back"
-                >
-                  <p style={{ 
-                    fontSize: "12px", 
-                    color: "#fff", 
-                    fontWeight: "bold" 
+                    alignItems: "center",
+                    marginBottom: 20,
+                    gap: "30px",
+                    padding: 5,
+                    color: "#fff",
+                    animation: "fadeIn 0.6s ease forwards",
+                    background: "rgba(0, 0, 0, 0.45)",
                   }}>
-                    👈 back</p>
-                </Button>
+                    ЗБРОЯ
+                  </Card>
+
+                  <Card className="page" onClick={() => setActiveTab("shields")}
+                  style={{
+                  display: "flex",
+                  flexDirection: "row",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  marginBottom: 20,
+                  gap: "30px",
+                  padding: 5,
+                  color: "#fff",
+                  animation: "fadeIn 0.6s ease forwards",
+                  background: "rgba(0, 0, 0, 0.59)",
+                }}>
+                    БРОНЯ
+                  </Card>
+                </div>
+              </Placeholder>
+              <Placeholder>
                   <div
-                    style={{
-                      display: "grid",
-                      gridTemplateColumns: "repeat(1, 1fr)",
-                      gap: "20px",
-                      width: "100%",
-                      maxWidth: "1200px",
-                      animation: "fadeIn 1s ease forwards",
-                    }}
-                  >
+                  style={{
+                    display: "grid",
+                    gridTemplateColumns: "repeat(1, 1fr)",
+                    gap: "20px",
+                    width: "100%",
+                    maxWidth: "1200px",
+                    animation: "fadeIn 1s ease forwards",
+                    marginTop: "-30px",
+                  }}
+                >
                     {ShieldItems.map((item) => (
                       <ItemCard
                         mode={"city"}
@@ -732,79 +810,305 @@ export default function HomePage() {
                       />
                     ))}
                   </div>
-                </div>
               </Placeholder>
             </Page>
         );
-          return (
-            <Page back>
-              <Placeholder>
-                <div
-                  className="page"
-                  style={{
-                    display: "flex",
-                    flexDirection: "column",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    marginTop: "50px",
-                    animation: "fadeIn 1s ease forwards",
-                  }}
-                >
-                  <h1
-                    style={{
-                      fontSize: "2rem",
-                      fontWeight: "bold",
-                      marginBottom: "20px",
-                      marginTop: "5px",
-                      textAlign: "center",
-                      lineHeight: "1",
-                      color: "#fff",
-                    }}
-                  >
-                    ТОРГОВЕЦЬ
-                  </h1>
-                  <p
-                    style={{
-                      fontSize: "0.8rem",
-                      color: "#ddd",
-                      textAlign: "center",
-                      marginBottom: "30px",
-                      maxWidth: "600px",
-                    }}
-                  >
-                    Обирай свою зброю якщо зможеш розрахуватись
-                  </p>
-                  <div
-                    style={{
-                      display: "grid",
-                      gridTemplateColumns: "repeat(1, 1fr)",
-                      gap: "20px",
-                      width: "100%",
-                      maxWidth: "1200px",
-                      animation: "fadeIn 1s ease forwards",
-                    }}
-                  >
-                    {WeaponItems.map((item) => (
-                      <ItemCard
-                        mode={"city"}
-                        key={item.item_id}
-                        item_id={item.item_id}
-                        type={item.type}
-                        rarity={item.rarity}
-                        name={item.name}
-                        image={item.image}
-                        description={item.description}
-                        damage={item.damage ? `Шкода: ${item.damage}` : ""}
-                        defense={item.defense ? `Захист: ${item.defense}` : ""}
-                        price={item.price}
-                        onBuyRequest={(item) => setSelectedItem(item)}
-                      />
-                    ))}
-                  </div>
-                </div>
-              </Placeholder>
-            </Page>
-        );
+    case "blacksmith":
+      return (
+        <Page back>
+          <Placeholder>
+            <h1
+                style={{
+                  fontSize: "2rem",
+                  fontWeight: "bold",
+                  marginTop: "50px",
+                  textAlign: "center",
+                  lineHeight: "1",
+                  color: "#fff",
+                }}
+              >
+                КОВАЛЬ
+              </h1>
+            <div
+              className="page"
+              style={{
+                backgroundImage: `url(${blacksmithbg.src})`,
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                justifyContent: "center",
+                animation: "fadeIn 1s ease forwards",
+                backgroundSize: 'cover', // Покрити весь блок
+                backgroundPosition: 'center', // Центрувати зображення
+                height: '100%', // Зайняти всю висоту вікна
+                color: "#fff", // Текст навколо, щоб бути білішим на фоні
+              }}
+            >
+              <p
+                style={{
+                  fontSize: "0.8rem",
+                  color: "#ddd",
+                  textAlign: "center",
+                  marginBottom: "20px",
+                  marginTop: "0px",
+                  maxWidth: "600px",
+                  background: "rgba(0, 0, 0, 0.59)",
+                  padding: "5px",
+                  animation: "fadeIn 3s ease forwards",
+                }}
+              >
+                Знову щось зламав? Я не можу вічно тебе рятувати!
+              </p>
+              <h1
+                style={{
+                  fontSize: "1rem",
+                  fontWeight: "bold",
+                  marginBottom: "70px",
+                  marginTop: "5px",
+                  textAlign: "center",
+                  lineHeight: "1",
+                  color: "#fff",
+                }}
+              >
+                
+              </h1>
+              <Card className="page"
+              style={{
+                display: "flex",
+                flexDirection: "row",
+                justifyContent: "center",
+                alignItems: "center",
+                marginBottom: 20,
+                gap: "30px",
+                padding: 5,
+                color: "#fff",
+                animation: "fadeIn 0.6s ease forwards",
+                background: "rgba(0, 0, 0, 0.45)",
+              }}>
+                ВІДРЕМОНТУВАТИ
+              </Card>
+
+              <Card className="page" 
+              style={{
+              display: "flex",
+              flexDirection: "row",
+              justifyContent: "center",
+              alignItems: "center",
+              marginBottom: 20,
+              gap: "30px",
+              padding: 5,
+              color: "#fff",
+              animation: "fadeIn 0.6s ease forwards",
+              background: "rgba(0, 0, 0, 0.59)",
+            }}>
+                ПОКРАЩИТИ
+              </Card>
+            </div>
+          </Placeholder>
+        </Page>
+      ); 
+    case "guild":
+      return (
+        <Page back>
+          <Placeholder style={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            animation: "fadeIn 1s ease forwards",
+            marginTop: "40px",
+          }} >
+            <h1
+                style={{
+                  fontSize: "2rem",
+                  fontWeight: "bold",
+                  marginTop: "50px",
+                  textAlign: "center",
+                  lineHeight: "1",
+                  color: "#fff",
+                }}
+              >
+                ГІЛЬДІЯ
+              </h1> 
+            <div
+              className="page"
+              style={{
+                backgroundImage: `url(${citybg.src})`,
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                justifyContent: "center",
+                animation: "fadeIn 1s ease forwards",
+                backgroundSize: 'cover', // Покрити весь блок
+                backgroundPosition: 'center', // Центрувати зображення
+                height: '100%', // Зайняти всю висоту вікна
+                color: "#fff", // Текст навколо, щоб бути білішим на фоні
+              }}
+            >
+              <p
+                style={{
+                  fontSize: "0.8rem",
+                  color: "#ddd",
+                  textAlign: "center",
+                  marginTop: "0px",
+                  maxWidth: "600px",
+                  background: "rgba(0, 0, 0, 0.59)",
+                  padding: "5px",
+                  animation: "fadeIn 3s ease forwards",
+                }}
+              >
+                Це місце не для тебе, тут справжні герої!
+              </p>
+            </div>
+          </Placeholder>
+          <Placeholder style={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            animation: "fadeIn 1s ease forwards",
+            marginTop: "-40px",
+          }} >
+            <div
+              className="page"
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                justifyContent: "center",
+                marginTop: "20px",
+                animation: "fadeIn 1s ease forwards",
+              }}
+            >
+              <h1
+                style={{
+                  fontSize: "1rem",
+                  fontWeight: "bold",
+                  textAlign: "center",
+                  lineHeight: "1",
+                  color: "#fff",
+                }}
+              >
+                Доступно з 12 рівня
+              </h1>
+              <h1
+                style={{
+                  
+                  fontSize: "1rem",
+                  fontWeight: "bold",
+                  textAlign: "center",
+                  lineHeight: "1",
+                  color: "#fff",
+                  marginTop: "40px",
+                }}
+              >
+                Ваш рівень: Lv. {level}
+              </h1>
+            </div>
+          </Placeholder>
+        </Page>
+      ); 
+    case "alleyofheroes":
+      return (
+        <Page back>
+          <Placeholder style={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            animation: "fadeIn 1s ease forwards",
+            marginTop: "40px",
+          }} >
+            <h1
+                style={{
+                  fontSize: "2rem",
+                  fontWeight: "bold",
+                  marginTop: "50px",
+                  textAlign: "center",
+                  lineHeight: "1",
+                  color: "#fff",
+                }}
+              >
+                АЛЕЯ ГЕРОЇВ
+              </h1> 
+            <div
+              className="page"
+              style={{
+                backgroundImage: `url(${alleyofheroesnbg.src})`, 
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                justifyContent: "center",
+                animation: "fadeIn 1s ease forwards",
+                backgroundSize: 'cover', // Покрити весь блок
+                backgroundPosition: 'center', // Центрувати зображення
+                height: '100%', // Зайняти всю висоту вікна
+                color: "#fff", // Текст навколо, щоб бути білішим на фоні
+              }}
+            >
+              <p
+                style={{
+                  fontSize: "0.8rem",
+                  color: "#ddd",
+                  textAlign: "center",
+                  marginTop: "0px",
+                  maxWidth: "600px",
+                  background: "rgba(0, 0, 0, 0.59)",
+                  padding: "5px",
+                  animation: "fadeIn 3s ease forwards",
+                }}
+              >
+                Вшануймо шляхетних героїв та їхні подвиги!
+              </p>
+            </div>
+          </Placeholder>
+          <Placeholder style={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            animation: "fadeIn 1s ease forwards",
+            marginTop: "-40px",
+          }} >
+            <div
+              className="page"
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                justifyContent: "center",
+                marginTop: "20px",
+                animation: "fadeIn 1s ease forwards",
+              }}
+            >
+              <h1
+                style={{
+                  fontSize: "1rem",
+                  fontWeight: "bold",
+                  textAlign: "center",
+                  lineHeight: "1",
+                  color: "#fff",
+                }}
+              >
+                №1
+              </h1>
+              <h1
+                style={{
+                  
+                  fontSize: "1rem",
+                  fontWeight: "bold",
+                  textAlign: "center",
+                  lineHeight: "1",
+                  color: "#fff",
+                  marginTop: "40px",
+                }}
+              >
+                Герой: {username}
+              </h1>
+            </div>
+          </Placeholder>
+        </Page>
+      ); 
     case "home":
       const equippedItems = inventory.filter(item => item.equipped);
       const unequippedItems = inventory.filter(item => !item.equipped);
