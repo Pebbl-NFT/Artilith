@@ -1073,12 +1073,17 @@ export default function HomePage() {
             <div
               className="page"
               style={{
+                border: "1px solid rgb(255, 152, 0)", 
+                background: "rgba(0, 0, 0, 0.52)",
                 display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
+                flexDirection: "row",
                 justifyContent: "center",
-                marginTop: "20px",
+                alignItems: "center",
+                marginTop: "40px",
+                marginBottom: "30px",
                 animation: "fadeIn 1s ease forwards",
+                gap: "50px",
+                padding: 10,
               }}
             >
               <h1
@@ -1100,10 +1105,582 @@ export default function HomePage() {
                   textAlign: "center",
                   lineHeight: "1",
                   color: "#fff",
-                  marginTop: "40px",
                 }}
               >
-                Герой: {username}
+                ???
+              </h1>
+            </div>
+          </Placeholder>
+          <Placeholder style={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            animation: "fadeIn 1s ease forwards",
+            marginTop: "-40px",
+          }} >
+            <div
+              className="page"
+              style={{
+                border: "1px solid rgb(156, 39, 176)", 
+                background: "rgba(0, 0, 0, 0.52)",
+                display: "flex",
+                flexDirection: "row",
+                justifyContent: "center",
+                alignItems: "center",
+                marginTop: "20px",
+                animation: "fadeIn 1s ease forwards",
+                gap: "30px",
+                padding: 10,
+              }}
+            >
+              <h1
+                style={{
+                  fontSize: "1rem",
+                  fontWeight: "bold",
+                  textAlign: "center",
+                  lineHeight: "1",
+                  color: "#fff",
+                }}
+              >
+                №2
+              </h1>
+              <h1
+                style={{
+                  
+                  fontSize: "1rem",
+                  fontWeight: "bold",
+                  textAlign: "center",
+                  lineHeight: "1",
+                  color: "#fff",
+                }}
+              >
+                ???
+              </h1>
+            </div>
+            <div
+              className="page"
+              style={{
+                border: "1px solid rgb(156, 39, 176)", 
+                background: "rgba(0, 0, 0, 0.52)",
+                display: "flex",
+                flexDirection: "row",
+                justifyContent: "center",
+                alignItems: "center",
+                marginTop: "5px",
+                animation: "fadeIn 1s ease forwards",
+                gap: "30px",
+                padding: 10,
+              }}
+            >
+              <h1
+                style={{
+                  fontSize: "1rem",
+                  fontWeight: "bold",
+                  textAlign: "center",
+                  lineHeight: "1",
+                  color: "#fff",
+                }}
+              >
+                №3
+              </h1>
+              <h1
+                style={{
+                  
+                  fontSize: "1rem",
+                  fontWeight: "bold",
+                  textAlign: "center",
+                  lineHeight: "1",
+                  color: "#fff",
+                }}
+              >
+                ???
+              </h1>
+            </div>
+            <div
+              className="page"
+              style={{
+                border: "1px solid rgb(156, 39, 176)", 
+                background: "rgba(0, 0, 0, 0.52)",
+                display: "flex",
+                flexDirection: "row",
+                justifyContent: "center",
+                alignItems: "center",
+                marginTop: "5px",
+                animation: "fadeIn 1s ease forwards",
+                gap: "30px",
+                padding: 10,
+              }}
+            >
+              <h1
+                style={{
+                  fontSize: "1rem",
+                  fontWeight: "bold",
+                  textAlign: "center",
+                  lineHeight: "1",
+                  color: "#fff",
+                }}
+              >
+                №4
+              </h1>
+              <h1
+                style={{
+                  
+                  fontSize: "1rem",
+                  fontWeight: "bold",
+                  textAlign: "center",
+                  lineHeight: "1",
+                  color: "#fff",
+                }}
+              >
+                ???
+              </h1>
+            </div>
+            <div
+              className="page"
+              style={{
+                border: "1px solid rgb(156, 39, 176)", 
+                background: "rgba(0, 0, 0, 0.52)",
+                display: "flex",
+                flexDirection: "row",
+                justifyContent: "center",
+                alignItems: "center",
+                marginTop: "5px",
+                animation: "fadeIn 1s ease forwards",
+                gap: "30px",
+                padding: 10,
+              }}
+            >
+              <h1
+                style={{
+                  fontSize: "1rem",
+                  fontWeight: "bold",
+                  textAlign: "center",
+                  lineHeight: "1",
+                  color: "#fff",
+                }}
+              >
+                №5
+              </h1>
+              <h1
+                style={{
+                  
+                  fontSize: "1rem",
+                  fontWeight: "bold",
+                  textAlign: "center",
+                  lineHeight: "1",
+                  color: "#fff",
+                }}
+              >
+                ???
+              </h1>
+            </div>
+          </Placeholder>
+          <Placeholder style={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            animation: "fadeIn 1s ease forwards",
+            marginTop: "-40px",
+          }} >
+            <div
+              className="page"
+              style={{
+                border: "1px solid rgb(33, 150, 243)", 
+                background: "rgba(0, 0, 0, 0.52)",
+                display: "flex",
+                flexDirection: "row",
+                justifyContent: "center",
+                alignItems: "center",
+                marginTop: "20px",
+                animation: "fadeIn 1s ease forwards",
+                gap: "30px",
+                padding: 5,
+              }}
+            >
+              <h1
+                style={{
+                  fontSize: "1rem",
+                  fontWeight: "bold",
+                  textAlign: "center",
+                  lineHeight: "1",
+                  color: "#fff",
+                }}
+              >
+                №6
+              </h1>
+              <h1
+                style={{
+                  
+                  fontSize: "1rem",
+                  fontWeight: "bold",
+                  textAlign: "center",
+                  lineHeight: "1",
+                  color: "#fff",
+                }}
+              >
+                ???
+              </h1>
+            </div>
+            <div
+              className="page"
+              style={{
+                border: "1px solid rgb(33, 150, 243)", 
+                background: "rgba(0, 0, 0, 0.52)",
+                display: "flex",
+                flexDirection: "row",
+                justifyContent: "center",
+                alignItems: "center",
+                marginTop: "5px",
+                animation: "fadeIn 1s ease forwards",
+                gap: "30px",
+                padding: 5,
+              }}
+            >
+              <h1
+                style={{
+                  fontSize: "1rem",
+                  fontWeight: "bold",
+                  textAlign: "center",
+                  lineHeight: "1",
+                  color: "#fff",
+                }}
+              >
+                №7
+              </h1>
+              <h1
+                style={{
+                  
+                  fontSize: "1rem",
+                  fontWeight: "bold",
+                  textAlign: "center",
+                  lineHeight: "1",
+                  color: "#fff",
+                }}
+              >
+                ???
+              </h1>
+            </div>
+            <div
+              className="page"
+              style={{
+                border: "1px solid rgb(33, 150, 243)", 
+                background: "rgba(0, 0, 0, 0.52)",
+                display: "flex",
+                flexDirection: "row",
+                justifyContent: "center",
+                alignItems: "center",
+                marginTop: "5px",
+                animation: "fadeIn 1s ease forwards",
+                gap: "30px",
+                padding: 5,
+              }}
+            >
+              <h1
+                style={{
+                  fontSize: "1rem",
+                  fontWeight: "bold",
+                  textAlign: "center",
+                  lineHeight: "1",
+                  color: "#fff",
+                }}
+              >
+                №8
+              </h1>
+              <h1
+                style={{
+                  
+                  fontSize: "1rem",
+                  fontWeight: "bold",
+                  textAlign: "center",
+                  lineHeight: "1",
+                  color: "#fff",
+                }}
+              >
+                ???
+              </h1>
+            </div>
+            <div
+              className="page"
+              style={{
+                border: "1px solid rgb(33, 150, 243)", 
+                background: "rgba(0, 0, 0, 0.52)",
+                display: "flex",
+                flexDirection: "row",
+                justifyContent: "center",
+                alignItems: "center",
+                marginTop: "5px",
+                animation: "fadeIn 1s ease forwards",
+                gap: "30px",
+                padding: 5,
+              }}
+            >
+              <h1
+                style={{
+                  fontSize: "1rem",
+                  fontWeight: "bold",
+                  textAlign: "center",
+                  lineHeight: "1",
+                  color: "#fff",
+                }}
+              >
+                №9
+              </h1>
+              <h1
+                style={{
+                  
+                  fontSize: "1rem",
+                  fontWeight: "bold",
+                  textAlign: "center",
+                  lineHeight: "1",
+                  color: "#fff",
+                }}
+              >
+                ???
+              </h1>
+            </div>
+            <div
+              className="page"
+              style={{
+                border: "1px solid rgb(33, 150, 243)", 
+                background: "rgba(0, 0, 0, 0.52)",
+                display: "flex",
+                flexDirection: "row",
+                justifyContent: "center",
+                alignItems: "center",
+                marginTop: "5px",
+                animation: "fadeIn 1s ease forwards",
+                gap: "30px",
+                padding: 5,
+              }}
+            >
+              <h1
+                style={{
+                  fontSize: "1rem",
+                  fontWeight: "bold",
+                  textAlign: "center",
+                  lineHeight: "1",
+                  color: "#fff",
+                }}
+              >
+                №10
+              </h1>
+              <h1
+                style={{
+                  
+                  fontSize: "1rem",
+                  fontWeight: "bold",
+                  textAlign: "center",
+                  lineHeight: "1",
+                  color: "#fff",
+                }}
+              >
+                ???
+              </h1>
+            </div>
+          </Placeholder>
+          <Placeholder style={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            animation: "fadeIn 1s ease forwards",
+            marginTop: "-40px",
+          }} >
+            <div
+              className="page"
+              style={{
+                border: "1px solid rgb(76, 175, 80)", 
+                background: "rgba(0, 0, 0, 0.52)",
+                display: "flex",
+                flexDirection: "row",
+                justifyContent: "center",
+                alignItems: "center",
+                marginTop: "20px",
+                animation: "fadeIn 1s ease forwards",
+                gap: "30px",
+                padding: 0,
+              }}
+            >
+              <h1
+                style={{
+                  fontSize: "1rem",
+                  fontWeight: "bold",
+                  textAlign: "center",
+                  lineHeight: "1",
+                  color: "#fff",
+                }}
+              >
+                №11
+              </h1>
+              <h1
+                style={{
+                  
+                  fontSize: "1rem",
+                  fontWeight: "bold",
+                  textAlign: "center",
+                  lineHeight: "1",
+                  color: "#fff",
+                }}
+              >
+                ???
+              </h1>
+            </div>
+            <div
+              className="page"
+              style={{
+                border: "1px solid rgb(76, 175, 80)", 
+                background: "rgba(0, 0, 0, 0.52)",
+                display: "flex",
+                flexDirection: "row",
+                justifyContent: "center",
+                alignItems: "center",
+                marginTop: "5px",
+                animation: "fadeIn 1s ease forwards",
+                gap: "30px",
+                padding: 0,
+              }}
+            >
+              <h1
+                style={{
+                  fontSize: "1rem",
+                  fontWeight: "bold",
+                  textAlign: "center",
+                  lineHeight: "1",
+                  color: "#fff",
+                }}
+              >
+                №12
+              </h1>
+              <h1
+                style={{
+                  
+                  fontSize: "1rem",
+                  fontWeight: "bold",
+                  textAlign: "center",
+                  lineHeight: "1",
+                  color: "#fff",
+                }}
+              >
+                ???
+              </h1>
+            </div>
+            <div
+              className="page"
+              style={{
+                border: "1px solid rgb(76, 175, 80)", 
+                background: "rgba(0, 0, 0, 0.52)",
+                display: "flex",
+                flexDirection: "row",
+                justifyContent: "center",
+                alignItems: "center",
+                marginTop: "5px",
+                animation: "fadeIn 1s ease forwards",
+                gap: "30px",
+                padding: 0,
+              }}
+            >
+              <h1
+                style={{
+                  fontSize: "1rem",
+                  fontWeight: "bold",
+                  textAlign: "center",
+                  lineHeight: "1",
+                  color: "#fff",
+                }}
+              >
+                №13
+              </h1>
+              <h1
+                style={{
+                  
+                  fontSize: "1rem",
+                  fontWeight: "bold",
+                  textAlign: "center",
+                  lineHeight: "1",
+                  color: "#fff",
+                }}
+              >
+                ???
+              </h1>
+            </div>
+            <div
+              className="page"
+              style={{
+                border: "1px solid rgb(76, 175, 80)", 
+                background: "rgba(0, 0, 0, 0.52)",
+                display: "flex",
+                flexDirection: "row",
+                justifyContent: "center",
+                alignItems: "center",
+                marginTop: "5px",
+                animation: "fadeIn 1s ease forwards",
+                gap: "30px",
+                padding: 0,
+              }}
+            >
+              <h1
+                style={{
+                  fontSize: "1rem",
+                  fontWeight: "bold",
+                  textAlign: "center",
+                  lineHeight: "1",
+                  color: "#fff",
+                }}
+              >
+                №14
+              </h1>
+              <h1
+                style={{
+                  
+                  fontSize: "1rem",
+                  fontWeight: "bold",
+                  textAlign: "center",
+                  lineHeight: "1",
+                  color: "#fff",
+                }}
+              >
+                ???
+              </h1>
+            </div>
+            <div
+              className="page"
+              style={{
+                border: "1px solid rgb(76, 175, 80)", 
+                background: "rgba(0, 0, 0, 0.52)",
+                display: "flex",
+                flexDirection: "row",
+                justifyContent: "center",
+                alignItems: "center",
+                marginTop: "5px",
+                animation: "fadeIn 1s ease forwards",
+                gap: "30px",
+                padding: 0,
+              }}
+            >
+              <h1
+                style={{
+                  fontSize: "1rem",
+                  fontWeight: "bold",
+                  textAlign: "center",
+                  lineHeight: "1",
+                  color: "#fff",
+                }}
+              >
+                №15
+              </h1>
+              <h1
+                style={{
+                  
+                  fontSize: "1rem",
+                  fontWeight: "bold",
+                  textAlign: "center",
+                  lineHeight: "1",
+                  color: "#fff",
+                }}
+              >
+                ???
               </h1>
             </div>
           </Placeholder>

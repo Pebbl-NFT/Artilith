@@ -119,7 +119,7 @@ export default function ProfilePage() {
             <h3 style={styles.cardTitle}>Оновлення</h3>
             <div style={styles.gameBadges}>
               <span style={styles.gameBadge}>Telegram</span>
-              <span style={styles.gameBadge}>v. alpha 0.25.1</span>
+              <span style={styles.gameBadge}>v. alpha 0.25.5</span>
             </div>
           </Card>
         </Placeholder>
