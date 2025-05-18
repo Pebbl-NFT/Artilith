@@ -33,6 +33,10 @@ import {addInventoryItem} from "@/hooks/useItemActions";
 // Зображення
 import artilithLogo from "../_assets/Artilith_logo-no-bg.png";
 import sword01a from "../_assets/item/sword01a.png";
+import citybg from '../_assets/citybg.jpg';
+import shopbg from '../_assets/shopbg.jpg';
+import blacksmithbg from '../_assets/blacksmithbg.jpg';
+import alleyofheroesnbg from '../_assets/alleyofheroesnbg.jpg';
 
 
 export default function HomePage() {
@@ -346,11 +350,23 @@ export default function HomePage() {
   switch (activeTab) {
     case "city":
       return (
-        <Page back>
-          <Placeholder>
+        <Page back >
+          <Placeholder style={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            marginTop: "50px",
+            animation: "fadeIn 1s ease forwards",
+            backgroundSize: 'cover', // Покрити весь блок
+            backgroundPosition: 'center', // Центрувати зображення
+            height: '100%', // Зайняти всю висоту вікна
+            color: "#fff", // Текст навколо, щоб бути білішим на фоні
+          }} >
             <div onClick={() => setActiveTab("shop")}
               className="page"
               style={{
+                backgroundImage: `url(${shopbg.src})`,
                 display: "flex",
                 flexDirection: "column",
                 alignItems: "center",
@@ -361,7 +377,7 @@ export default function HomePage() {
             >
               <h1
                 style={{
-                  fontSize: "1rem",
+                  fontSize: "2rem",
                   fontWeight: "bold",
                   textAlign: "center",
                   lineHeight: "1",
@@ -374,6 +390,7 @@ export default function HomePage() {
             <div 
               className="page"
               style={{
+                backgroundImage: `url(${blacksmithbg.src})`,
                 display: "flex",
                 flexDirection: "column",
                 alignItems: "center",
@@ -384,7 +401,7 @@ export default function HomePage() {
             >
               <h1
                 style={{
-                  fontSize: "1rem",
+                  fontSize: "2rem",
                   fontWeight: "bold",
                   textAlign: "center",
                   lineHeight: "1",
@@ -397,6 +414,7 @@ export default function HomePage() {
             <div
               className="page"
               style={{
+                backgroundImage: `url(${citybg.src})`,
                 display: "flex",
                 flexDirection: "column",
                 alignItems: "center",
@@ -407,7 +425,7 @@ export default function HomePage() {
             >
               <h1
                 style={{
-                  fontSize: "1rem",
+                  fontSize: "2rem",
                   fontWeight: "bold",
                   textAlign: "center",
                   lineHeight: "1",
@@ -420,6 +438,7 @@ export default function HomePage() {
             <div
               className="page"
               style={{
+                backgroundImage: `url(${alleyofheroesnbg.src})`,
                 display: "flex",
                 flexDirection: "column",
                 alignItems: "center",
@@ -430,7 +449,7 @@ export default function HomePage() {
             >
               <h1
                 style={{
-                  fontSize: "1rem",
+                  fontSize: "2rem",
                   fontWeight: "bold",
                   textAlign: "center",
                   lineHeight: "1",
@@ -444,77 +463,77 @@ export default function HomePage() {
         </Page>
       );
     case "shop":
-          return (
-            <Page back>
-              <Placeholder>
-                <div
-                  className="page"
-                  style={{
-                    display: "flex",
-                    flexDirection: "column",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    marginTop: "50px",
-                    animation: "fadeIn 1s ease forwards",
-                  }}
-                >
-                  <h1
-                    style={{
-                      fontSize: "2rem",
-                      fontWeight: "bold",
-                      marginBottom: "20px",
-                      marginTop: "5px",
-                      textAlign: "center",
-                      lineHeight: "1",
-                      color: "#fff",
-                    }}
-                  >
-                    ТОРГОВЕЦЬ
-                  </h1>
-                  <p
-                    style={{
-                      fontSize: "0.8rem",
-                      color: "#ddd",
-                      textAlign: "center",
-                      marginBottom: "30px",
-                      maxWidth: "600px",
-                    }}
-                  >
-                    Не затримуй мене, я маю багато справ!
-                  </p>
-                  <Card className="page" onClick={() => setActiveTab("weapons")}
-                  style={{
-                    display: "flex",
-                    flexDirection: "row",
-                    justifyContent: "center",
-                    alignItems: "center",
-                    marginBottom: 20,
-                    gap: "30px",
-                    padding: 5,
-                    color: "#fff",
-                    animation: "fadeIn 0.6s ease forwards",
-                  }}>
-                    ЗБРОЯ
-                  </Card>
-
-                  <Card className="page" onClick={() => setActiveTab("shields")}
-                  style={{
-                  display: "flex",
-                  flexDirection: "row",
-                  justifyContent: "center",
-                  alignItems: "center",
-                  marginBottom: 20,
-                  gap: "30px",
-                  padding: 5,
+      return (
+        <Page back>
+          <Placeholder>
+            <div
+              className="page"
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                justifyContent: "center",
+                marginTop: "50px",
+                animation: "fadeIn 1s ease forwards",
+              }}
+            >
+              <h1
+                style={{
+                  fontSize: "2rem",
+                  fontWeight: "bold",
+                  marginBottom: "20px",
+                  marginTop: "5px",
+                  textAlign: "center",
+                  lineHeight: "1",
                   color: "#fff",
-                  animation: "fadeIn 0.6s ease forwards",
-                }}>
-                    БРОНЯ
-                  </Card>
-                </div>
-              </Placeholder>
-            </Page>
-        );
+                }}
+              >
+                ТОРГОВЕЦЬ
+              </h1>
+              <p
+                style={{
+                  fontSize: "0.8rem",
+                  color: "#ddd",
+                  textAlign: "center",
+                  marginBottom: "30px",
+                  maxWidth: "600px",
+                }}
+              >
+                Не затримуй мене, я маю багато справ!
+              </p>
+              <Card className="page" onClick={() => setActiveTab("weapons")}
+              style={{
+                display: "flex",
+                flexDirection: "row",
+                justifyContent: "center",
+                alignItems: "center",
+                marginBottom: 20,
+                gap: "30px",
+                padding: 5,
+                color: "#fff",
+                animation: "fadeIn 0.6s ease forwards",
+              }}>
+                ЗБРОЯ
+              </Card>
+
+              <Card className="page" onClick={() => setActiveTab("shields")}
+              style={{
+              display: "flex",
+              flexDirection: "row",
+              justifyContent: "center",
+              alignItems: "center",
+              marginBottom: 20,
+              gap: "30px",
+              padding: 5,
+              color: "#fff",
+              animation: "fadeIn 0.6s ease forwards",
+            }}>
+                БРОНЯ
+              </Card>
+            </div>
+          </Placeholder>
+        </Page>
+      );
       case "weapons":
         return (
           <Page back>
