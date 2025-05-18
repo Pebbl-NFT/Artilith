@@ -466,23 +466,11 @@ export default function HomePage() {
       return (
         <Page back>
           <Placeholder>
-            <div
-              className="page"
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                justifyContent: "center",
-                marginTop: "50px",
-                animation: "fadeIn 1s ease forwards",
-              }}
-            >
-              <h1
+            <h1
                 style={{
                   fontSize: "2rem",
                   fontWeight: "bold",
-                  marginBottom: "20px",
-                  marginTop: "5px",
+                  marginTop: "50px",
                   textAlign: "center",
                   lineHeight: "1",
                   color: "#fff",
@@ -490,17 +478,49 @@ export default function HomePage() {
               >
                 ТОРГОВЕЦЬ
               </h1>
+            <div
+              className="page"
+              style={{
+                backgroundImage: `url(${shopbg.src})`,
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                justifyContent: "center",
+                animation: "fadeIn 1s ease forwards",
+                backgroundSize: 'cover', // Покрити весь блок
+                backgroundPosition: 'center', // Центрувати зображення
+                height: '100%', // Зайняти всю висоту вікна
+                color: "#fff", // Текст навколо, щоб бути білішим на фоні
+              }}
+            >
               <p
                 style={{
                   fontSize: "0.8rem",
                   color: "#ddd",
                   textAlign: "center",
-                  marginBottom: "30px",
+                  marginBottom: "20px",
+                  marginTop: "0px",
                   maxWidth: "600px",
+                  background: "rgba(0, 0, 0, 0.59)",
+                  padding: "5px",
+                  animation: "fadeIn 2s ease forwards",
                 }}
               >
                 Не затримуй мене, я маю багато справ!
               </p>
+              <h1
+                style={{
+                  fontSize: "1rem",
+                  fontWeight: "bold",
+                  marginBottom: "70px",
+                  marginTop: "5px",
+                  textAlign: "center",
+                  lineHeight: "1",
+                  color: "#fff",
+                }}
+              >
+                
+              </h1>
               <Card className="page" onClick={() => setActiveTab("weapons")}
               style={{
                 display: "flex",
@@ -512,6 +532,7 @@ export default function HomePage() {
                 padding: 5,
                 color: "#fff",
                 animation: "fadeIn 0.6s ease forwards",
+                background: "rgba(0, 0, 0, 0.45)",
               }}>
                 ЗБРОЯ
               </Card>
@@ -527,6 +548,7 @@ export default function HomePage() {
               padding: 5,
               color: "#fff",
               animation: "fadeIn 0.6s ease forwards",
+              background: "rgba(0, 0, 0, 0.59)",
             }}>
                 БРОНЯ
               </Card>
