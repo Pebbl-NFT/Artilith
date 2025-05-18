@@ -49,7 +49,7 @@ export default function HomePage() {
   const [activeTab, setActiveTab] = useState("home");
   const [loading, setLoading] = useState(false);
   const [inventory, setInventory] = useState<any[]>([]);
-  const [energy, setEnergy] = useState(null);
+  const [energy, setEnergy] = useState<number | null>(null);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const initDataState = useSignal(initData.state);
   const userId = initDataState?.user?.id;
@@ -101,21 +101,19 @@ export default function HomePage() {
         .select("points, click_delay, energy, experience, level")
         .eq("id", userId)
         .single();
-
-  
       if (error) {
         console.error("Помилка завантаження даних:", error);
       } else if (data) {
         setPoints(data.points);
         setClickDelay(data.click_delay);
-        setEnergy(data.energy);
+        setEnergy(data.energy); // Встановлюємо енергію користувача
         setAnimationTime(data.click_delay + 100);
         setExperience(data.experience ?? 0);
         setLevel(data.level ?? 1);
       }
     };
     fetchUserData();
-  }, [userId]);  
+  }, [userId]); 
 
   // підтвердження покупки
   const confirmBuy = async () => {
@@ -192,50 +190,44 @@ export default function HomePage() {
   // Клік на "HOLD"
   const handleClick = async () => {
     if (!isClickable) return;
-
     const nextAvailableClick = Date.now() + clickDelay;
     localStorage.setItem("nextClickTime", nextAvailableClick.toString());
-
     setIsClickable(false);
     updateCountdown(nextAvailableClick);
-
     const newPoints = points + 1;
+    const newEnergy = (energy ?? 0) + 1; // Додаємо +1 до енергії, якщо energy null, беремо 0
     const newClickDelay = clickDelay + 1000;
-
     setPoints(newPoints);
+    setEnergy(newEnergy); // Оновлюємо стан енергії
     setClickDelay(newClickDelay);
     setAnimationTime(newClickDelay + 100);
-
     if (!userId) return;
-
     const { error } = await supabase
       .from("users")
-      .upsert([{ id: userId, points: newPoints, click_delay: newClickDelay }], {
+      .upsert([{ id: userId, points: newPoints, click_delay: newClickDelay, energy: newEnergy }], { // Додаємо energy до оновлення
         onConflict: "id",
       });
-
-    if (error) console.error("Помилка збереження:", error);
-
+    if (error) {
+      console.error("Помилка збереження:", error);
+    }
     const imgWrap = document.querySelector(".imgWrap");
     if (imgWrap) {
       imgWrap.classList.add("active");
       setTimeout(() => {
         imgWrap.classList.remove("active");
       }, 1000);
-
-    const xpGain = 1; // Кожен клік — 1 XP
-      let newExperience = experience + xpGain;
-      let newLevel = level;
-
-      while (newExperience >= getRequiredExp(newLevel)) {
-        newExperience -= getRequiredExp(newLevel);
-        newLevel++;
-        toast.success(`🎉 Новий рівень! Тепер ви рівень ${newLevel}`);
-      }
-
-      setExperience(newExperience);
-      setLevel(newLevel);
-
+    }
+    const xpGain = 1; // Кожен клік — +1 XP
+    let newExperience = experience + xpGain;
+    let newLevel = level;
+    // Підвищення рівня
+    while (newExperience >= getRequiredExp(newLevel)) {
+      newExperience -= getRequiredExp(newLevel);
+      newLevel++;
+      toast.success(`🎉 Новий рівень! Тепер ви рівень ${newLevel}`);
+    }
+    setExperience(newExperience);
+    setLevel(newLevel);
     await supabase
       .from("users")
       .upsert([
@@ -243,12 +235,11 @@ export default function HomePage() {
           id: userId,
           points: newPoints,
           click_delay: newClickDelay,
+          energy: newEnergy, // Додаємо energy до оновлення
           experience: newExperience,
           level: newLevel,
         },
       ], { onConflict: "id" });
-
-    }
   };
 
   // Функція обрахунку характеристик героя
@@ -2070,7 +2061,7 @@ export default function HomePage() {
                 </span>
               </p>
                 <span>
-                1🪨 / 1🔷
+                1🪨 / 1🔷 / 1⚡
                 </span>
             </div>
           </Placeholder>
