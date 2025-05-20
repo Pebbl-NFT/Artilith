@@ -29,6 +29,7 @@ import { formatTime } from "@/utils/formatTime";
 import { getPlayerStats } from "@/utils/getPlayerStats";
 import { updateUserPoints } from "@/hooks/useUserPoints";
 import {addInventoryItem} from "@/hooks/useItemActions";
+import HeroEnergyAutoRegeneration from '@/hooks/HeroEnergyAutoRegeneration';
 
 // Зображення
 import artilithLogo from "../_assets/Artilith_logo-no-bg.png";
@@ -49,7 +50,7 @@ export default function HomePage() {
   const [activeTab, setActiveTab] = useState("home");
   const [loading, setLoading] = useState(false);
   const [inventory, setInventory] = useState<any[]>([]);
-  const [energy, setEnergy] = useState<number | null>(null);
+  const [energy, setEnergy] = useState(0);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const initDataState = useSignal(initData.state);
   const userId = initDataState?.user?.id;
@@ -267,7 +268,6 @@ export default function HomePage() {
     setHeroStats(stats);
   }, [inventory]);
 
-  
   
   // Функція додавання предмета в інвентар
   const fetchInventory = async () => {
@@ -1433,33 +1433,13 @@ export default function HomePage() {
                 </div>
 
                 {/* Статистики героя */}
-                <div style={{
-                  display: "flex",
-                  flexDirection: "row",
-                  justifyContent: "center",
-                  alignItems: "center",
-                  gap: "30px",
-                  padding: 10,
-                  color: "#fff",
-                  animation: "fadeIn 0.6s ease forwards",
-                }}>
-                  <div style={{ display: "flex", justifyContent: "space-between", width: "50%" }}>
-                    <span>❤️ </span>
-                    <span>{heroStats.health}</span>
-                  </div>
-                  <div style={{ display: "flex", justifyContent: "space-between", width: "50%" }}>
-                    <span>🗡️ </span>
-                    <span>{heroStats.attack}</span>
-                  </div>
-                  <div style={{ display: "flex", justifyContent: "space-between", width: "50%" }}>
-                    <span>🛡️</span>
-                    <span>{heroStats.defense}</span>
-                  </div>
-                  <div style={{ display: "flex", justifyContent: "space-between", width: "50%" }}>
-                    <span>⚡</span>
-                    <span>{energy}</span>
-                  </div>
-                </div>
+                <HeroEnergyAutoRegeneration
+                  userId={userId}
+                  energy={energy}
+                  setEnergy={setEnergy}
+                  supabase={supabase}
+                  heroStats={heroStats}
+                />
 
                 <div
                     style={{
