@@ -502,11 +502,36 @@ export default function HomePage() {
       return (
         <Page back>
           <Placeholder>
+            <div onClick={() => setActiveTab("city")}
+              style={{
+              display: "flex",
+              flexDirection: "row",
+              gap: "20px",
+              alignItems: "center", 
+              marginLeft: "auto",
+              marginRight: "auto",}}>
+              <p 
+                style={{  
+                  fontSize: "0.8rem",
+                  color: "#ddd",
+                  position: "absolute",
+                  top: "60px",
+                  right: "20px",
+                  background: "rgba(0, 0, 0, 0.59)",
+                  animation: "fadeIn 1s ease forwards",
+                  borderRadius: "50px",
+                  padding: "10px",
+                  paddingInline: "15px",
+                  marginBottom: "-40px",
+                }}>
+                x
+              </p>
+            </div>
             <h1
                 style={{
                   fontSize: "2rem",
                   fontWeight: "bold",
-                  marginTop: "50px",
+                  marginTop: "20px",
                   textAlign: "center",
                   lineHeight: "1",
                   color: "#fff",
@@ -544,6 +569,8 @@ export default function HomePage() {
               >
                 Не затримуй мене, я маю багато справ!
               </p>
+
+
               <h1
                 style={{
                   fontSize: "1rem",
@@ -596,11 +623,35 @@ export default function HomePage() {
         return (
           <Page back>
             <Placeholder>
+            <div onClick={() => setActiveTab("city")}
+              style={{
+              display: "flex",
+              flexDirection: "row",
+              gap: "20px",
+              alignItems: "center", 
+              marginLeft: "auto",
+              marginRight: "auto",}}>
+              <p 
+                style={{  
+                  fontSize: "0.8rem",
+                  color: "#ddd",
+                  position: "absolute",
+                  top: "60px",
+                  right: "20px",
+                  background: "rgba(0, 0, 0, 0.59)",
+                  borderRadius: "50px",
+                  padding: "10px",
+                  paddingInline: "15px",
+                  marginBottom: "-40px",
+                }}>
+                x
+              </p>
+            </div>
             <h1
                 style={{
                   fontSize: "2rem",
                   fontWeight: "bold",
-                  marginTop: "50px",
+                  marginTop: "20px",
                   textAlign: "center",
                   lineHeight: "1",
                   color: "#fff",
@@ -1827,7 +1878,7 @@ export default function HomePage() {
 
               {selectedItem.mode === "equipped" && (
                 <div
-                  className={`item-image rarity-border-${selectedItem.rarity?.toLowerCase()}`}
+                  className={`item-image rarity-border-${selectedItem.rarity?.toLowerCase()} rarity-shadow-${selectedItem.rarity?.toLowerCase()}`}
                   onClick={(e) => e.stopPropagation()}
                   style={{
                     backgroundColor: "#1e1e1e",
@@ -1837,15 +1888,14 @@ export default function HomePage() {
                     maxWidth: "300px",
                     width: "90%",
                     textAlign: "center",
-                    boxShadow: "0 0 10px rgba(253, 253, 253, 0.5)",
                   }}
                 >
-                  <h2 className={` rarity-border-${selectedItem.rarity?.toLowerCase()}`} style={{ fontSize: "1.2rem", marginBottom: "10px" }}>{selectedItem.name}</h2>
+                  <h2 className={` rarity-font-${selectedItem.rarity?.toLowerCase()}`} style={{ fontSize: "1.2rem", marginBottom: "10px" }}>{selectedItem.name}</h2>
                   {selectedItem.image && (
-                    <img
+                      <img 
                       src={typeof selectedItem.image === "string" ? selectedItem.image : (selectedItem.image as { src: string }).src}
                       alt={selectedItem.name}
-                      style={{ width: "50px", height: "50px", objectFit: "contain", marginBottom: "30px", marginTop: "20px" }}
+                      style={{ width: "130px", height: "80px", objectFit: "contain", marginBottom: "30px", marginTop: "30px", boxShadow: "0 0 40 rgba(253, 253, 253, 0.5)", borderRadius: "50px", }}
                     />
                   )}
                   <p style={{ fontSize: "0.9rem", color: "#ccc", marginBottom: "20px" }}>

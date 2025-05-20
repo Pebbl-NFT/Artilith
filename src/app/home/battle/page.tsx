@@ -560,15 +560,53 @@ export default function BattlePage() {
           animation: "fadeIn 1s ease forwards",
         }}
       > 
-        <Card className="page"
-        style={{ 
-          display: "flex", 
-          justifyContent: "space-between",
-          marginTop:-30,
-          padding:40,
-          width: "100%",
+        <div
+          style={{
+            position: "absolute",
+            width: "100%",
+            height: "100%", // або більше/менше залежно від дизайну
+            backgroundImage: "url('/bg/bgforestnght1.jpg')",
+            backgroundRepeat: "no-repeat",
+            backgroundSize: "cover",
+            backgroundPosition: "center",
+            marginTop: "0px",
+            marginBottom: "0px",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+        >
+          <div style={{
+            position: "absolute",
+            width: "100%",
+            top: 0,
+            backgroundRepeat: "no-repeat",
+            backgroundSize: "cover",
+            backgroundPosition: "center",
+            marginTop: "0px",
+            marginBottom: "0px",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
           }}>
-            <h3 style={{
+            <ProgressBar value={turnTimer} max={15} color="#fbbf24" />
+          </div>
+          <div
+            style={{
+              position: "absolute",
+              display: "flex",
+              flexDirection: "row",
+              justifyContent: "center",
+              alignItems: "center",
+              gap: "40px",
+              color: "#fff",
+              bottom: 70,
+              animation: "fadeIn 0.6s ease forwards",
+              backgroundColor: "rgba(0, 0, 0, 0.5)",
+              paddingInline: "100%",
+            }}
+            >
+              <h3 style={{
               display: "flex",
               flexDirection: "row",
               justifyContent: "center",
@@ -576,17 +614,6 @@ export default function BattlePage() {
               color: "#fff",
               animation: "fadeIn 0.6s ease forwards",
             }}> {enemyStats?.name}</h3>
-          <div
-            style={{
-              display: "flex",
-              flexDirection: "row",
-              justifyContent: "center",
-              alignItems: "center",
-              gap: "40px",
-              color: "#fff",
-              animation: "fadeIn 0.6s ease forwards",
-            }}
-            >
               <div style={{ display: "flex", justifyContent: "space-between", width: "50%" }}>
               <span>❤️ </span>
               <span>{enemyHP} </span>
@@ -600,32 +627,16 @@ export default function BattlePage() {
                 <span>{enemyDEF} </span>
               </div>
           </div>
-        </Card>
-        <div
-          style={{
-            position: "relative",
-            width: "100%",
-            height: "100%", // або більше/менше залежно від дизайну
-            backgroundImage: "url('/bg/bgforestnght.png')",
-            backgroundSize: "cover",
-            backgroundPosition: "center",
-            marginTop: "0px",
-            marginBottom: "0px",
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-          }}
-          
-        >
-          <div style={{ position: "relative", display: "inline-block", zIndex: 2 }}>
-            <div style={{ width: 100, marginLeft: 30, marginTop: 40}}>
+          <div style={{
+                position: "absolute",
+                bottom: 120,
+              }}>
             <ProgressBar value={enemyHP} max={enemyStats ? enemyStats.currentHealth : 1} color="#f44336" />  
-            </div>
             <img
               src={enemyImage}
               alt={enemyStats?.name}
               style={{
-                marginLeft: 10,
+                marginLeft: 0,
                 marginTop: -20,
                 width: "140px",
                 height: "140px",
@@ -663,63 +674,90 @@ export default function BattlePage() {
               </div>
             )}
           </div>
-
-          <div style={{ position: "relative", display: "inline-block", zIndex: 100 }}>
-            
-            <div style={{ width: 100, marginLeft: 65, marginTop: 80}}>
+          
+          <div style={{
+            position: "absolute",
+            width: "100%",
+            bottom: 0,
+            backgroundRepeat: "no-repeat",
+            backgroundSize: "cover",
+            backgroundPosition: "center",
+            marginTop: "0px",
+            marginBottom: "0px",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            backgroundColor: "rgba(0, 0, 0, 0.5)",
+          }}>
+            <div style={{
+            position: "absolute",
+            width: "100%",
+            top: 0,
+            backgroundRepeat: "no-repeat",
+            backgroundSize: "cover",
+            backgroundPosition: "center",
+            marginTop: "0px",
+            marginBottom: "0px",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+          }}>
             <ProgressBar value={playerHP} max={playerStats.health} color="rgba(60, 255, 0, 0.73)" />
             </div>
-            <img
-              src="/hero/heroidle.gif"
-              style={{
-                marginLeft: 0,
-                marginTop: -40,
-                width: "200px",
-                height: "200px",
-                objectFit: "contain",
-                transition: "transform 0.2s ease",
-              }}
-            />
-          </div>
-        </div>
-        <ProgressBar value={turnTimer} max={15} color="#fbbf24" />
-        <Card className="page"
-        style={{ 
-          display: "flex", 
-          justifyContent: "space-between",
-          marginTop:0,
-          marginBottom:0,
-          padding:10,
-          width: "100%",
-          }}>
-            <h2> Ваші характеристики :</h2>
-          <div
+            <div
             style={{
               display: "flex",
-              flexDirection: "row",
+              flexDirection: "column",
               justifyContent: "center",
               alignItems: "center",
-              gap: "50px",
+              gap: "10px",
               marginTop: "0px",
-              marginBottom:40,
+              marginBottom:10,
               color: "#fff",
               animation: "fadeIn 0.6s ease forwards",
+              
             }}
             > 
-              <div style={{ display: "flex", justifyContent: "space-between", width: "50%" }}>
-              <span>❤️ </span>
-              <span>{playerHP} </span>
-              </div>
-              <div style={{ display: "flex", justifyContent: "space-between", width: "50%" }}>
-                <span>🗡️ </span>
-                <span>{playerStats.attack} </span>
-              </div>
-              <div style={{ display: "flex", justifyContent: "space-between", width: "50%" }}>            
-                <span>🛡️</span>
-                <span>{playerDEF} </span>
+              <h2 style={{
+              display: "flex",
+              flexDirection: "column",
+              justifyContent: "center",
+              alignItems: "center",
+              marginTop: 20,
+              marginBottom:5,
+              color: "#fff",
+              animation: "fadeIn 0.6s ease forwards",
+              
+            }}> Ваші характеристики :</h2>
+              <div
+                  style={{
+                  display: "flex",
+                  flexDirection: "row",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  gap: "50px",
+                  marginTop: "0px",
+                  marginBottom:0,
+                  color: "#fff",
+                  animation: "fadeIn 0.6s ease forwards",
+                }}
+                > 
+                <div style={{ display: "flex", justifyContent: "space-between", width: "50%" }}>
+                <span>❤️ </span>
+                <span>{playerHP} </span>
+                </div>
+                <div style={{ display: "flex", justifyContent: "space-between", width: "50%" }}>
+                  <span>🗡️ </span>
+                  <span>{playerStats.attack} </span>
+                </div>
+                <div style={{ display: "flex", justifyContent: "space-between", width: "50%" }}>            
+                  <span>🛡️</span>
+                  <span>{playerDEF} </span>
+                </div>
               </div>
           </div>
-        </Card>
+          </div>
+        </div>
       </div>
       </Placeholder>
       <Card>

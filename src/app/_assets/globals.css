@@ -309,21 +309,52 @@ button:hover {
 .rarity-border-common {
   border-color: #b0b0b0;
 }
+.rarity-shadow-common {
+  box-shadow: 0 0 5px #b0b0b0;
+}
+.rarity-font-common {
+  color: #b0b0b0;
+}
 
 .rarity-border-uncommon {
   border-color: #4caf50;
+}
+.rarity-shadow-uncommon {
+  box-shadow: 0 0 15px #4caf50;
+}
+.rarity-font-uncommon {
+  color: #4caf50;
 }
 
 .rarity-border-rare {
   border-color: #2196f3;
 }
+.rarity-shadow-rare {
+  box-shadow: 0 0 15px #2196f3;
+}
+.rarity-font-rare {
+  color: #2196f3;
+}
 
 .rarity-border-epic {
   border-color: #9c27b0;
 }
+.rarity-shadow-epic {
+  box-shadow: 0 0 15px #9c27b0;
+}
+.rarity-font-epic {
+  color: #9c27b0;
+}
+
 
 .rarity-border-legendary {
   border-color: #ff9800;
+}
+.rarity-shadow-legendary {
+  box-shadow: 0 0 15px #ff9800;
+}
+.rarity-font-legendary {
+  color: #ff9800;
 }
 
 .rarity-label {
