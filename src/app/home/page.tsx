@@ -639,6 +639,7 @@ export default function HomePage() {
                   top: "60px",
                   right: "20px",
                   background: "rgba(0, 0, 0, 0.59)",
+                  animation: "fadeIn 1s ease forwards",
                   borderRadius: "50px",
                   padding: "10px",
                   paddingInline: "15px",
@@ -771,18 +772,43 @@ export default function HomePage() {
           return (
             <Page back>
               <Placeholder>
-                <h1
-                    style={{
-                      fontSize: "2rem",
-                      fontWeight: "bold",
-                      marginTop: "50px",
-                      textAlign: "center",
-                      lineHeight: "1",
-                      color: "#fff",
-                    }}
-                  >
-                    ТОРГОВЕЦЬ
-                  </h1>
+                <div onClick={() => setActiveTab("city")}
+              style={{
+              display: "flex",
+              flexDirection: "row",
+              gap: "20px",
+              alignItems: "center", 
+              marginLeft: "auto",
+              marginRight: "auto",}}>
+              <p 
+                style={{  
+                  fontSize: "0.8rem",
+                  color: "#ddd",
+                  position: "absolute",
+                  top: "60px",
+                  right: "20px",
+                  background: "rgba(0, 0, 0, 0.59)",
+                  animation: "fadeIn 1s ease forwards",
+                  borderRadius: "50px",
+                  padding: "10px",
+                  paddingInline: "15px",
+                  marginBottom: "-40px",
+                }}>
+                x
+              </p>
+            </div>
+            <h1
+                style={{
+                  fontSize: "2rem",
+                  fontWeight: "bold",
+                  marginTop: "20px",
+                  textAlign: "center",
+                  lineHeight: "1",
+                  color: "#fff",
+                }}
+              >
+                ТОРГОВЕЦЬ
+              </h1>
                 <div
                   className="page"
                   style={{
@@ -895,11 +921,36 @@ export default function HomePage() {
       return (
         <Page back>
           <Placeholder>
+            <div onClick={() => setActiveTab("city")}
+              style={{
+              display: "flex",
+              flexDirection: "row",
+              gap: "20px",
+              alignItems: "center", 
+              marginLeft: "auto",
+              marginRight: "auto",}}>
+              <p 
+                style={{  
+                  fontSize: "0.8rem",
+                  color: "#ddd",
+                  position: "absolute",
+                  top: "60px",
+                  right: "20px",
+                  background: "rgba(0, 0, 0, 0.59)",
+                  animation: "fadeIn 1s ease forwards",
+                  borderRadius: "50px",
+                  padding: "10px",
+                  paddingInline: "15px",
+                  marginBottom: "-40px",
+                }}>
+                x
+              </p>
+            </div>
             <h1
                 style={{
                   fontSize: "2rem",
                   fontWeight: "bold",
-                  marginTop: "50px",
+                  marginTop: "20px",
                   textAlign: "center",
                   lineHeight: "1",
                   color: "#fff",
@@ -989,18 +1040,43 @@ export default function HomePage() {
       return (
         <Page back>
           <Placeholder>
+            <div onClick={() => setActiveTab("city")}
+              style={{
+              display: "flex",
+              flexDirection: "row",
+              gap: "20px",
+              alignItems: "center", 
+              marginLeft: "auto",
+              marginRight: "auto",}}>
+              <p 
+                style={{  
+                  fontSize: "0.8rem",
+                  color: "#ddd",
+                  position: "absolute",
+                  top: "60px",
+                  right: "20px",
+                  background: "rgba(0, 0, 0, 0.59)",
+                  animation: "fadeIn 1s ease forwards",
+                  borderRadius: "50px",
+                  padding: "10px",
+                  paddingInline: "15px",
+                  marginBottom: "-40px",
+                }}>
+                x
+              </p>
+            </div>
             <h1
                 style={{
                   fontSize: "2rem",
                   fontWeight: "bold",
-                  marginTop: "50px",
+                  marginTop: "20px",
                   textAlign: "center",
                   lineHeight: "1",
                   color: "#fff",
                 }}
               >
                 ГІЛЬДІЯ
-              </h1> 
+              </h1>
             <div
               className="page"
               style={{
@@ -1083,18 +1159,43 @@ export default function HomePage() {
       return (
         <Page back>
           <Placeholder>
+            <div onClick={() => setActiveTab("city")}
+              style={{
+              display: "flex",
+              flexDirection: "row",
+              gap: "20px",
+              alignItems: "center", 
+              marginLeft: "auto",
+              marginRight: "auto",}}>
+              <p 
+                style={{  
+                  fontSize: "0.8rem",
+                  color: "#ddd",
+                  position: "absolute",
+                  top: "60px",
+                  right: "20px",
+                  background: "rgba(0, 0, 0, 0.59)",
+                  animation: "fadeIn 1s ease forwards",
+                  borderRadius: "50px",
+                  padding: "10px",
+                  paddingInline: "15px",
+                  marginBottom: "-40px",
+                }}>
+                x
+              </p>
+            </div>
             <h1
                 style={{
                   fontSize: "2rem",
                   fontWeight: "bold",
-                  marginTop: "50px",
+                  marginTop: "20px",
                   textAlign: "center",
                   lineHeight: "1",
                   color: "#fff",
                 }}
               >
                 АЛЕЯ ГЕРОЇВ
-              </h1> 
+              </h1>
             <div
               className="page"
               style={{
