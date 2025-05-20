@@ -1,8 +1,9 @@
 import { Button } from '@telegram-apps/telegram-ui';
 import tonSvg from '../app/_assets/ton.svg';
-import { useMemo, useEffect } from 'react';
+import { useMemo, useEffect, useState, } from 'react';
 import { useSignal, initData } from '@telegram-apps/sdk-react';
-import Link from 'next/link';
+import HeroEnergyAutoRegeneration from '@/hooks/HeroEnergyAutoRegeneration';
+import { supabase } from "@/lib/supabaseClient";
 
 export default function TopBar({ points }: { points: number }) {
   const initDataState = useSignal(initData.state);
@@ -16,6 +17,15 @@ export default function TopBar({ points }: { points: number }) {
       console.log('User data before saving:', user);
     }
   }, [initDataState?.user]);
+
+    const [heroStats, setHeroStats] = useState({
+      health: 20,
+      attack: 1,
+      defense: 0,
+    });
+
+  const [energy, setEnergy] = useState(0);
+  const userId = initDataState?.user?.id;
 
   return (
     <div className='top-bar' 

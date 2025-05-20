@@ -1,6 +1,6 @@
 export function getPlayerStats(inventory: any[]) {
   const baseStats = {
-    health: 10,
+    health: 20,
     attack: 1,
     defense: 0,
   };

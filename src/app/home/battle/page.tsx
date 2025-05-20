@@ -472,6 +472,9 @@ export default function BattlePage() {
             <img
               src={enemyImage}
               style={{
+                marginTop: "50px",
+                marginBottom: "30px",
+                width: "100px",
                 display: "flex",
                 alignItems: "center",
                 animation: "fadeIn 0.6s ease forwards",
@@ -637,7 +640,8 @@ export default function BattlePage() {
               alt={enemyStats?.name}
               style={{
                 marginLeft: 0,
-                marginTop: -20,
+                marginTop: 10,
+                marginBottom: 16,
                 width: "140px",
                 height: "140px",
                 objectFit: "contain",

@@ -64,7 +64,7 @@ export default function HomePage() {
     }, [initDataState]);
 
   const [heroStats, setHeroStats] = useState({
-    health: 10,
+    health: 20,
     attack: 1,
     defense: 0,
   });
@@ -1320,7 +1320,7 @@ export default function HomePage() {
                 flexDirection: "column",
                 alignItems: "center",
                 justifyContent: "center",
-                marginTop: "0px",
+                marginTop: "-10px",
                 animation: "fadeIn 0.6s ease forwards",
                 paddingInline: 10,
               }}>
