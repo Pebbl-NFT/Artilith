@@ -116,6 +116,7 @@ export default function HomePage() {
     
     fetchUserData();
   }, [userId]);
+  
   // Завантаження рейтингу гравців
   useEffect(() => {
     const fetchPlayers = async () => {
