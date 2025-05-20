@@ -19,9 +19,9 @@ export const ShieldItems = [
       rarity: 'uncommon',
       name: "Сталевий щит",
       description: "",
-      damage: 0,
+      damage: 0, 
       defense: 12,
       price: 1600,
       image: shield02a.src,
     },
-  ];
+  ]; 
