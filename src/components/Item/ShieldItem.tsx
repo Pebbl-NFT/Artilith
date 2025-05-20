@@ -1,5 +1,5 @@
 import shield01a from "../../app/_assets/item/shield01a.png";
-import shield02a from "../../app/_assets/item/shield02a.png";
+import shield01b from "../../app/_assets/item/shield01b.png";
 
 export const ShieldItems = [
     {
@@ -22,6 +22,6 @@ export const ShieldItems = [
       damage: 0, 
       defense: 12,
       price: 1600,
-      image: shield02a.src,
+      image: shield01b.src,
     },
   ]; 
