@@ -535,7 +535,7 @@ export default function BattlePage() {
                 mode="filled"
                 onClick={() => {
                   setShowPreBattle(false); // перейти у фазу бою
-                  setCanAttack(true);      // тепер можна атакувати
+                  setCanAttack(true);// тепер можна атакувати
                 }}
               >
                 Почати бій!
