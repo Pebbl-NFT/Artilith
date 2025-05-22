@@ -9,7 +9,7 @@ import { AllItems } from "@/components/Item/Items";
 import { getPlayerStats } from "@/utils/getPlayerStats";
 import { reduceEnergy } from "@/utils/reduceEnergy";
 import { Toaster, toast } from "react-hot-toast";
-import { generateEnemy, Enemy} from '@/lib/generateEnemy';
+import { generateSequentialEnemy, Enemy} from '@/lib/generateEnemy';
 import { baseEnemies, EnemyBase } from '@/lib/generateEnemy';
 
 export default function BattlePage() {
@@ -29,10 +29,11 @@ export default function BattlePage() {
 
   const [enemyStats, setEnemyStats] = useState<Enemy | null>(null);
   const [enemyHP, setEnemyHP] = useState(0);
-  const [enemyImage, setEnemyImage] = useState<string>("");
+  const [enemyImage, setEnemyImage] = useState("");
   const [playerHP, setPlayerHP] = useState(10);
   const [playerDEF, setPlayerDEF] = useState(0);
   const [enemyDEF, setEnemyDEF] = useState(0);
+  const [encounterNumber, setEncounterNumber] = useState(1);
 
   const [isHit, setIsHit] = useState(false);
   const [canAttack, setCanAttack] = useState(true);
@@ -49,10 +50,6 @@ export default function BattlePage() {
   const [hitText, setHitText] = useState<null | { value: number, id: number }>(null);
   const hitIdRef = useRef(0);
   const [isEnemyHit, setIsEnemyHit] = useState(false);
-
-  const [rewardPoints, setRewardPoints] = useState<number | null>(null);
-  const [rewardExp, setRewardExp] = useState<number | null>(null);
-
 
   const hasMissedTurnRef = useRef(false);
 
@@ -365,12 +362,16 @@ export default function BattlePage() {
 
   useEffect(() => {
     if (showPreBattle && playerLevel) {
-        const generated = generateEnemy(playerLevel);
-        setEnemyStats(generated);
-        setEnemyHP(generated.maxHealth);
-        setEnemyImage(generated.image);
+      const generated = generateSequentialEnemy(encounterNumber, playerLevel);
+      setEnemyStats(generated);
+      setEnemyImage(generated.image);
+      setEnemyHP(generated.maxHealth);
+      setEnemyDEF(generated.defense);
+      setCanAttack(false); // Не можна бити поки екран підготовки!
+      setTurnTimer(15);
+      setIsHit(false);
     }
-  }, [showPreBattle, playerLevel]);
+  }, [showPreBattle, playerLevel, encounterNumber]);
 
   useEffect(() => {
     fetchInventory();
@@ -531,11 +532,13 @@ export default function BattlePage() {
                 animation: "fadeIn 0.6s ease forwards",
               }}>
               <Button
-                style={{animation: "fadeIn 0.6s ease forwards", backgroundColor: "#4caf50" }}
-                disabled={isLoading}
-                onClick={handleStartBattle}
+                mode="filled"
+                onClick={() => {
+                  setShowPreBattle(false); // перейти у фазу бою
+                  setCanAttack(true);      // тепер можна атакувати
+                }}
               >
-                ⚔️ Почати бій ⚔️
+                Почати бій!
               </Button>
             </div>
 
@@ -797,10 +800,25 @@ export default function BattlePage() {
                       marginTop: 30,
                   }}>
                       <Button
-                          mode="filled"
-                          style={{ animation: "fadeIn 0.6s ease forwards", backgroundColor: "#4caf50" }}
-                          onClick={() => location.reload()}
-                      >⚔️ Новий бій ⚔️ 
+                        mode="filled"
+                        style={{
+                          animation: "fadeIn 0.6s ease forwards",
+                          backgroundColor: "#4caf50"
+                        }}
+                        onClick={() => {
+                          setEncounterNumber(prev => prev + 1);
+                          setPlayerHP(playerStats.health);
+                          setPlayerDEF(playerStats.defense);
+                          setBattleResult(null);
+                          setLog([]);
+                          setShowLog(false);
+                          setCanAttack(false); // не можна бити у preBattle!
+                          setTurnTimer(15);
+                          setShowPreBattle(true);    // показати екран підготовки БОЮ
+                          setIsHit(false);
+                        }}
+                      >
+                        ⚔️ Наступний ворог ⚔️
                       </Button>
                   </div>
 

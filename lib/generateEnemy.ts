@@ -76,18 +76,68 @@ export const baseEnemies: EnemyBase[] = [
   },
 ];
 
-export function generateEnemy(level: number): Enemy {
-  const enemyTemplate = baseEnemies[Math.floor(Math.random() * baseEnemies.length)];
-  const scaleFactor = 1 + level * 0.2;
+// Мінібоси
+export const miniBosses: EnemyBase[] = [
+  {
+    name: 'Лісовий страшило (мінібос)',
+    image: '/enemies/forest/miniboss1.png',
+    baseHealth: 120,
+    baseDamage: 14,
+    baseDefense: 12,
+    baseCritChance: 0.12,
+    baseMissChance: 0.08,
+  }
+];
+// Боси
+export const bosses: EnemyBase[] = [
+  {
+    name: 'Головний Лісовий Древень (Бос)',
+    image: '/enemies/forest/boss1.png',
+    baseHealth: 350,
+    baseDamage: 32,
+    baseDefense: 32,
+    baseCritChance: 0.22,
+    baseMissChance: 0.04,
+  }
+];
+
+/**
+ * Генерує послідовного ворога для wave-бою:
+ * @param encounterNumber Номер поточного бою (1, 2, 3, ...)
+ * @param playerLevel Поточний рівень гравця (для масштабу)
+ */
+export function generateSequentialEnemy(
+  encounterNumber: number,
+  playerLevel: number
+): Enemy {
+  let template: EnemyBase;
+  let type: 'normal' | 'miniBoss' | 'boss' = 'normal';
+
+  if (encounterNumber % 20 === 0) {
+    // БОС кожен 20-й
+    template = bosses[(Math.floor(encounterNumber / 20) - 1) % bosses.length];
+    type = 'boss';
+  } else if (encounterNumber % 6 === 0) {
+    // Мінібос кожен 6-й (але не 20-й!)
+    template = miniBosses[(Math.floor(encounterNumber / 6) - 1) % miniBosses.length];
+    type = 'miniBoss';
+  } else {
+    // Звичайні вороги — СТРОГО ПО ПОРЯДКУ (НЕ рандом!)
+    template = baseEnemies[(encounterNumber - 1) % baseEnemies.length];
+    type = 'normal';
+  }
+
+  // Масштабування залежить від типу ворога і рівня гравця
+  let scaleFactor = 1 + playerLevel * (type === 'boss' ? 0.33 : type === 'miniBoss' ? 0.21 : 0.13);
 
   return {
-    name: enemyTemplate.name,
-    image: enemyTemplate.image,
-    maxHealth: Math.round(enemyTemplate.baseHealth * scaleFactor),
-    currentHealth: Math.round(enemyTemplate.baseHealth * scaleFactor),
-    damage: Math.round(enemyTemplate.baseDamage * scaleFactor),
-    defense: Math.round(enemyTemplate.baseDefense * scaleFactor),
-    critChance: Math.min(enemyTemplate.baseCritChance + level * 0.01, 0.5),
-    missChance: Math.max(enemyTemplate.baseMissChance - level * 0.005, 0.01),
+    name: template.name,
+    image: template.image,
+    maxHealth: Math.round(template.baseHealth * scaleFactor),
+    currentHealth: Math.round(template.baseHealth * scaleFactor),
+    damage: Math.round(template.baseDamage * scaleFactor),
+    defense: Math.round(template.baseDefense * scaleFactor),
+    critChance: Math.min(template.baseCritChance + playerLevel * 0.01 + (type === 'boss' ? 0.08 : type === 'miniBoss' ? 0.04 : 0), 0.55),
+    missChance: Math.max(template.baseMissChance - playerLevel * 0.004 - (type === 'boss' ? 0.02 : 0), 0.01),
   };
 }
