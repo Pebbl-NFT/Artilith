@@ -32,7 +32,8 @@ import {addInventoryItem} from "@/hooks/useItemActions";
 import HeroEnergyAutoRegeneration from '@/hooks/HeroEnergyAutoRegeneration';
 
 // Зображення
-import artilithLogo from "../_assets/Artilith_logo-no-bg.png";
+import victim from "../_assets/victim.png";
+import travel from "../_assets/travel.png";
 import sword01a from "../_assets/item/sword01a.png";
 import citybg from '../_assets/citybg.jpg';
 import shopbg from '../_assets/shopbg.jpg';
@@ -1391,14 +1392,17 @@ export default function HomePage() {
                   flexDirection: "column",
                   alignItems: "center",
                   justifyContent: "center",
-                  marginTop: -30,
+                  marginTop: 10,
+                  marginBottom: 30,
                   color: "#fff",
                   animation: "fadeIn 0.6s ease forwards",
                 }}>
                   <img 
-                    src="/hero/heroidle.gif" 
+                    src="/hero/heroidle.png" 
                     alt="Персонаж" 
-                    style={{ width: 220, height: 220, objectFit: "contain" , marginLeft:-50,}}
+                    style={{ width: 270, height: 270, objectFit: "contain" , marginRight:-50,
+                      marginLeft: -30,
+                    }}
                   />
 
                   {/* Слоти для екіпіровки */}
@@ -1599,57 +1603,133 @@ export default function HomePage() {
       );
     case "adventures":
       return (
-        <div
-        >
+        <div>
           <Placeholder className="HIJtihMA8FHczS02iWF5"
           style={{ overflow: "visible" }}
           onClick={handleClick}>
+            
             <div
               className="page"
               style={{
                 display: "flex",
-                flexDirection: "column",
+                flexDirection: "row",
                 alignItems: "center",
                 justifyContent: "center",
                 marginTop: "50px",
                 width: "100%",
-                height: "170px",
-                paddingBottom: 60,
+                height: "100px",
+                paddingBottom: 40,
                 paddingTop: 40,
                 animation: "fadeIn 0.5s ease forwards",
               }}
             >
-              <h1
-                style={{
-                  fontSize: "1rem",
-                  fontWeight: "bold",
-                  marginTop: "20px",
-                  textAlign: "center",
-                  lineHeight: "1",
-                  color: "#fff",
-                }}
-              >
-              Експедиція
-              </h1>
+              
               <div
                 className="imgWrap"
                 style={{
                   position: "relative",
+                  flexDirection: "column",
                   display: "flex",
                   justifyContent: "center",
                   alignItems: "center",
                   overflow: "visible",
-                  marginTop: "-20px",
-                  width: "100%",
-                  height: "100%",
+                  marginTop: "0px",
+                  width: "80%",
+                  height: "80%",
                 }}
               >
                 <Image
                   className="blue"
                   alt="Artilith Logo Blue"
-                  src={artilithLogo}
-                  width={50}
-                  height={50}
+                  src={victim}
+                  width= {65}
+                  height={65}
+                  style={{
+                    width: "auto",
+                    height: "auto",
+                    maxWidth: "200px",
+                  }}
+                />
+                <p
+                style={{
+                  fontSize: "0.9rem",
+                  fontWeight: "lighter",
+                  color: "#ccc",
+                  textAlign: "center",
+                  fontFamily: "Arial, sans-serif",
+                  marginTop: "200px",
+                }}
+              >
+              </p>
+              </div>
+              <div>
+                  <span style={{
+                  position: "relative",
+                  flexDirection: "row",
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  overflow: "visible",
+                  marginBottom: "20px",
+                  width: "155px",
+                  height: "100%",
+                }} >
+                 1🪨  1🔷  1⚡
+                </span> 
+                <Link href="" style={{
+                  fontSize: "0.9rem",
+                  fontWeight: "lighter",
+                  color: "#fff",
+                  textAlign: "center",
+                  lineHeight: "1",
+                  fontFamily: "Arial, sans-serif",
+                  marginLeft: "auto",
+                }}>
+                  <Button
+                    style={{animation: "fadeIn 0.6s ease forwards", backgroundColor: "#4caf50", width:"100%" }}
+                  >
+                    {countdown > 0 ? `${formatTime(countdown)}` : "Отримати дари!"}
+                  </Button>
+              </Link>
+              </div>
+            </div>
+          </Placeholder>
+          <Placeholder>
+            <div
+              className="page"
+              style={{
+                display: "flex",
+                flexDirection: "row",
+                alignItems: "center",
+                justifyContent: "center",
+                marginTop: "0px",
+                width: "100%",
+                height: "100px",
+                paddingBottom: 40,
+                paddingTop: 40,
+                animation: "fadeIn 0.5s ease forwards",
+              }}
+            >
+              <div
+                className="imgWrap"
+                style={{
+                  position: "relative",
+                  flexDirection: "column",
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  overflow: "visible",
+                  marginTop: "0px",
+                  width: "80%",
+                  height: "80%",
+                }}
+              >
+                <Image
+                  className="blue"
+                  alt="Artilith Logo Blue"
+                  src={travel}
+                  width= {65}
+                  height={65}
                   style={{
                     width: "auto",
                     height: "auto",
@@ -1657,131 +1737,36 @@ export default function HomePage() {
                   }}
                 />
               </div>
-              <p
-                style={{
-                  fontSize: "0.9rem",
-                  fontWeight: "lighter",
-                  color: "#ccc",
-                  textAlign: "center",
-                  lineHeight: "1",
-                  fontFamily: "Arial, sans-serif",
-                  marginTop: "-10px",
-                  marginBottom: 20,
-                }}
-              >
-                <span>
-                  {countdown > 0 ? `${formatTime(countdown)}` : "Тисни щоб відправитись на пошуки! "}
-                </span>
-              </p>
-                <span>
-                1🪨 / 1🔷 / 1⚡
-                </span>
-            </div>
-          </Placeholder>
-          <Placeholder>
-            <div
-              className="page"
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                justifyContent: "center",
-                width: "100%",
-                height: "90px",
-                animation: "fadeIn 0.5s ease forwards",
-              }}
-            >
-              <h1
-                style={{
-                  fontSize: "1rem",
-                  fontWeight: "bold",
-                  textAlign: "center",
-                  color: "#fff",
-                }}
-              >
-              Тренування
-              </h1>
-              <div
-                className="imgWrap"
-                style={{
+              <div>
+                  <span style={{
                   position: "relative",
+                  flexDirection: "row",
                   display: "flex",
                   justifyContent: "center",
                   alignItems: "center",
                   overflow: "visible",
-                  marginTop: "-20px",
-                  width: "90%",
-                  height: "30%",
-                }}
-              >
-              </div>
-              <Link href="/home/battle" style={{
+                  marginBottom: "20px",
+                  width: "100%",
+                  height: "100%",
+                }} >
+                 +🪨  +🔷  -7⚡
+                </span>
+                <Link href="/home/battle" style={{
                   fontSize: "0.9rem",
                   fontWeight: "lighter",
                   color: "#fff",
                   textAlign: "center",
                   lineHeight: "1",
                   fontFamily: "Arial, sans-serif",
+                  marginLeft: "auto",
                 }}>
                   <Button
-              style={{animation: "fadeIn 0.6s ease forwards", backgroundColor: "#4caf50" }}
-            >
-              ⚔️ Почати бій ⚔️
-            </Button>
+                    style={{animation: "fadeIn 0.6s ease forwards", backgroundColor: "#4caf50", width:"100%" }}
+                  >
+                    ⚔️ Почати бій ⚔️
+                  </Button>
               </Link>
-            </div>
-          </Placeholder>
-          <Placeholder>
-          <div
-              className="page"
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                justifyContent: "center",
-                width: "100%",
-                height: "90px",
-                animation: "fadeIn 0.5s ease forwards",
-              }}
-            >
-              <h1
-                style={{
-                  fontSize: "1rem",
-                  fontWeight: "bold",
-                  textAlign: "center",
-                  color: "#fff",
-                }}
-              >
-              В розробці
-              </h1>
-              <div
-                className="imgWrap"
-                style={{
-                  position: "relative",
-                  display: "flex",
-                  justifyContent: "center",
-                  alignItems: "center",
-                  overflow: "visible",
-                  marginTop: "-20px",
-                  width: "90%",
-                  height: "30%",
-                }}
-              >
               </div>
-              <Link href="" style={{
-                  fontSize: "0.9rem",
-                  fontWeight: "lighter",
-                  color: "#fff",
-                  textAlign: "center",
-                  lineHeight: "1",
-                  fontFamily: "Arial, sans-serif",
-                }}>
-                  <Button
-              style={{animation: "fadeIn 0.6s ease forwards", backgroundColor: "#4caf50" }}
-            >
-              ⚔️
-            </Button>
-              </Link>
             </div>
           </Placeholder>
         </div>
