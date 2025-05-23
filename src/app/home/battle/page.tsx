@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useRef} from "react";
+import { useEffect, useState, useRef, useCallback} from "react";
 import { Button, Link, Card, Placeholder } from '@telegram-apps/telegram-ui';
 import { Page } from "@/components/Page";
 import { useSignal, initData } from "@telegram-apps/sdk-react";
@@ -96,41 +96,6 @@ export default function BattlePage() {
       }
       return [...newEntries, ...prev];
     });
-  };
-
-  const handleStartBattle = async () => {
-    if (energy > 0) {
-      if (!userId) {
-        toast.error("Користувач не авторизований");
-        return;
-      }
-  
-      const success = await reduceEnergy(userId, 2);
-      if (success) {
-        setEnergy(energy - 2);
-        toast.error("Використано 2⚡");
-        setShowPreBattle(false);
-  
-        // ІНІЦІАЛІЗАЦІЯ СТАТІВ БОЮ
-        const stats = getPlayerStats(inventory);
-        setPlayerStats(stats);
-        setPlayerHP(stats.health);
-        setPlayerDEF(stats.defense);
-        setEnemyHP(enemyStats ? enemyStats.currentHealth : 0);
-        setEnemyDEF(enemyStats ? enemyStats.defense : 0);
-        setCanAttack(true);
-        startTurnTimer(); // 👈 Лише тут
-  
-      } else {
-        toast.error("Помилка оновлення енергії. Спробуйте пізніше.");
-      }
-      return;
-    }
-  
-    if (energy <= 0) {
-      toast.error("У вас закінчилася енергія ⚡");
-      return;
-    }
   };
   
   const fetchInventory = async () => {
@@ -283,9 +248,10 @@ export default function BattlePage() {
           }, { onConflict: "id" });
 
       if (error) {
-          console.error("Помилка оновлення:", error.message);
+        console.error("Помилка оновлення:", error.message);
       } else {
-          console.log(`Нагорода оновлена: ${rewardPoints} очок і ${rewardExp} досвіду успішно.`);
+        console.log(`Нагорода оновлена: ${rewardPoints} очок і ${rewardExp} досвіду успішно.`);
+        toast.success(`+${rewardPoints} очок та +${rewardExp} XP!`);
       }
   }
     // Функція для розрахунку досвіду
@@ -293,84 +259,60 @@ export default function BattlePage() {
       return 100 * Math.pow(2, level - 1); // 1 рівень = 100 XP, 2 рівень = 200, 3 рівень = 400 і т.д.
   };
 
-  const handleAttack = async () => {
-    if (!canAttackRef.current || playerHP <= 0 || enemyHP <= 0 || battleResult) return;
+    const handleAttack = () => {
+    if (!enemyStats) return;
+    if (!canAttack || playerHP <= 0 || enemyHP <= 0 || battleResult) return;
+    setCanAttack(false);
 
-    // Зупиняємо таймер, якщо гравець атакує
-    if (timerRef.current) clearInterval(timerRef.current);
-    updateCanAttack(false); // Забороняємо можливість атакувати
+    // Рахуємо і одразу задаємо нові стани
+    const playerHit = calculateDamage(playerStats.attack, enemyDEF);
+    const afterEnemyDEF = Math.max(enemyDEF - playerHit.defenseLoss, 0);
+    const afterEnemyHP = Math.max(enemyHP - playerHit.healthLoss, 0);
 
-    // Розрахунок атаки гравця
-    const playerHit = calculateDamage(playerStats.attack, enemyDEF);
-    const newEnemyDEF = Math.max(enemyDEF - playerHit.defenseLoss, 0);
-    const newEnemyHP = Math.max(enemyHP - playerHit.healthLoss, 0);
+    setEnemyDEF(afterEnemyDEF);
+    setEnemyHP(afterEnemyHP);
 
-    // Оновлення стану
-    setEnemyDEF(newEnemyDEF);
-    setEnemyHP(newEnemyHP);
-    appendToLog([`🧍 Гравець завдає ${playerHit.defenseLoss + playerHit.healthLoss} шкоди.`]);
+    setHitText({ value: playerHit.defenseLoss + playerHit.healthLoss, id: Date.now() });
+    appendToLog([`🧍 Гравець завдає ${playerHit.defenseLoss + playerHit.healthLoss} шкоди.`]);
 
-    // Відображення тексту удара
-    setHitText({ value: playerHit.defenseLoss + playerHit.healthLoss, id: hitIdRef.current++ });
-    setTimeout(() => setHitText(null), 800);
+    if (afterEnemyHP <= 0) {
+      appendToLog(["🎉 Перемога!"]);
+      setBattleResult("win");
+      return;
+    }
 
-    // Перемога
-    if (newEnemyHP <= 0) {
-      appendToLog(["🎉 Перемога!"]);
-      setBattleResult("win");
+    // ==== Ворог відповідає ====
+    setTimeout(() => {
+      if (!enemyStats) return;
 
-      if (enemyStats) {
-        const { rewardPoints, rewardExp } = calculateReward(enemyStats);
-        toast.success(`Ви отримали: 🪨 ${rewardPoints}`);
-        toast.success(`Ви отримали: 🔷 ${rewardExp} досвіду`);
-        await updateRewardInSupabase(rewardPoints, rewardExp);
-        await fetchUserData();
-      }
+      const enemyHit = calculateDamage(enemyStats.damage, playerDEF);
+      const afterPlayerDEF = Math.max(playerDEF - enemyHit.defenseLoss, 0);
+      const afterPlayerHP = Math.max(playerHP - enemyHit.healthLoss, 0);
 
-      clearInterval(timerRef.current!); // Очищення таймера при перемозі
-      return; // Вихід після перемоги
-    }
+      setPlayerDEF(afterPlayerDEF);
+      setPlayerHP(afterPlayerHP);
+      appendToLog([`👾 Ворог завдає ${enemyHit.defenseLoss + enemyHit.healthLoss} шкоди.`]);
 
-    // Логіка атаки ворога
-    setTimeout(() => {
-      if (battleResult) return; // Перевірка, чи бій не закінчився
-      if (!enemyStats) return; // Перевірка на наявність ворога
-
-      // Розрахунок шкоди від ворога
-      const enemyHit = calculateDamage(enemyStats.damage, playerDEF);
-      const newPlayerDEF = Math.max(playerDEF - enemyHit.defenseLoss, 0);
-      const newPlayerHP = Math.max(playerHP - enemyHit.healthLoss, 0);
-
-      // Оновлення стану
-      setPlayerDEF(newPlayerDEF);
-      setPlayerHP(newPlayerHP);
-      appendToLog([`👾 Ворог завдає ${enemyHit.defenseLoss + enemyHit.healthLoss} шкоди.`]);
-
-      // Перемога ворога
-      if (newPlayerHP <= 0) {
-        appendToLog(["💀 Поразка!"]);
-        setBattleResult("lose");
-        clearInterval(timerRef.current!); // Очищення таймера при поразці
-        return;
-      }
-
-      // Дозволяємо гравцеві атакувати знову
-      updateCanAttack(true);
-      startTurnTimer(); // Запускаємо таймер на наступний хід
-    }, 400); // Затримка перед атакою ворога
+      if (afterPlayerHP <= 0) {
+        appendToLog(["💀 Поразка!"]);
+        setBattleResult("lose");
+        return;
+      }
+      setCanAttack(true);
+    }, 500);
   };
 
   useEffect(() => {
-    if (showPreBattle && playerLevel) {
-      const generated = generateSequentialEnemy(encounterNumber, playerLevel);
-      setEnemyStats(generated);
-      setEnemyImage(generated.image);
-      setEnemyHP(generated.maxHealth);
-      setEnemyDEF(generated.defense);
-      setCanAttack(false); // Не можна бити поки екран підготовки!
-      setTurnTimer(15);
-      setIsHit(false);
-    }
+  if (showPreBattle && playerLevel) {
+    const generated = generateSequentialEnemy(encounterNumber, playerLevel);
+    setEnemyStats(generated);
+    setEnemyImage(generated.image);
+    setEnemyHP(generated.maxHealth);
+    setEnemyDEF(generated.defense);
+    setTurnTimer(15);
+    setIsHit(false);
+    setCanAttack(false); // Дозволити напад тільки після "Почати бій"
+  }
   }, [showPreBattle, playerLevel, encounterNumber]);
 
   useEffect(() => {
@@ -396,20 +338,20 @@ export default function BattlePage() {
     };
   }, []);
 
-    function calculateReward(enemy: Enemy | null): { rewardPoints: number; rewardExp: number } {
-      if (!enemy) return { rewardPoints: 0, rewardExp: 0 };
+  function calculateReward(enemy: Enemy | null): { rewardPoints: number; rewardExp: number } {
+    if (!enemy) return { rewardPoints: 0, rewardExp: 0 };
 
-      const base = baseEnemies.find((e: EnemyBase) => e.name === enemy.name);
-      if (!base) return { rewardPoints: 0, rewardExp: 0 };
+    const base = baseEnemies.find((e: EnemyBase) => e.name === enemy.name);
+    if (!base) return { rewardPoints: 0, rewardExp: 0 };
 
-      const baseValue = base.baseHealth + base.baseDamage + base.baseDefense;
-      const scaleFactor = enemy.maxHealth / base.baseHealth;
+    const baseValue = base.baseHealth + base.baseDamage + base.baseDefense;
+    const scaleFactor = enemy.maxHealth / base.baseHealth;
 
-      const rewardPoints = Math.floor(baseValue * 1 * scaleFactor);
-      const rewardExp = Math.floor(baseValue * 0.5 * scaleFactor);
+    const rewardPoints = Math.floor(baseValue * 1 * scaleFactor);
+    const rewardExp = Math.floor(baseValue * 0.5 * scaleFactor);
 
-      return { rewardPoints, rewardExp };
-    }
+    return { rewardPoints, rewardExp };
+  }
 
   if (showPreBattle) {
     return (
@@ -528,17 +470,16 @@ export default function BattlePage() {
                 display: "flex",
                 justifyContent: "center",
                 alignItems: "center",
-                color: "#fff",
+                backgroundColor: "#4caf50",
                 animation: "fadeIn 0.6s ease forwards",
               }}>
               <Button
-                mode="filled"
                 onClick={() => {
-                  setShowPreBattle(false); // перейти у фазу бою
-                  setCanAttack(true);// тепер можна атакувати
+                  setShowPreBattle(false);
+                  setCanAttack(true);
                 }}
               >
-                Почати бій!
+               ⚔️ Почати бій ⚔️
               </Button>
             </div>
 
@@ -769,79 +710,117 @@ export default function BattlePage() {
       </Placeholder>
       <Card>
           {battleResult && (
-              <div
-                  style={{
-                      position: "fixed", top: 0, left: 0, width: "100%", height: "100%",
-                      backgroundColor: "rgb(0, 0, 0)", display: "flex",
-                      justifyContent: "center", alignItems: "center",
-                      flexDirection: "column", color: "#fff",
-                  }}
+            <div
+              style={{
+                position: "fixed",
+                top: 0, left: 0, width: "100%", height: "100%",
+                backgroundColor: "rgba(0,0,0,0.95)",
+                display: "flex", flexDirection: "column",
+                justifyContent: "center", alignItems: "center",
+                color: "#fff", zIndex: 9999,
+              }}
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="battleResultTitle"
+            >
+              <h2
+                id="battleResultTitle"
+                style={{
+                  fontSize: 40,
+                  marginTop: 20,
+                  marginBottom: 32,
+                  color: "#fffc",
+                }}
               >
-                  <h2 style={{ fontSize: 40, marginTop: 20, marginBottom: 100, color: "rgb(255, 255, 255)", }}>
-                      {battleResult === "win" ? "🎊" : "💀 "}
-                  </h2>
-                  <h2 style={{ fontSize: 40, marginTop: 0, marginBottom: 100, color: "rgb(255, 255, 255)", }}>
-                      {battleResult === "win" ? "Перемога!" : "Поразка!"}
-                  </h2>
-                  <p style={{ fontSize: 20, marginTop: -50, marginBottom: 50, }}>
-                      {battleResult === "win" ? "✨ Вам зараховано винагороду✨" : "Схоже не пощастило"}
-                  </p>
+                {battleResult === "win" ? "🎊" : "💀"}
+              </h2>
+              <h2 style={{ fontSize: 40, margin: 0, marginBottom: 40 }}>
+                {battleResult === "win" ? "Перемога!" : "Поразка!"}
+              </h2>
+              <p style={{ fontSize: 16, margin: 0, marginBottom: 40 }}>
+                {battleResult === "win"
+                  ? "✨ Вам зараховано винагороду! ✨"
+                  : "Схоже, не пощастило цього разу..."}
+              </p>
 
-                  <Button onClick={() => setShowLog(prev => !prev)} style={{ marginTop: 30, backgroundColor: "rgb(0, 0, 0)", border: "1px solid #fff", borderRadius: 8, }}>
-                      📜 {showLog ? "Сховати лог бою" : "Переглянути лог бою"}
-                  </Button>
+              <Button
+                onClick={() => setShowLog(prev => !prev)}
+                style={{
+                  marginBottom: 25,
+                  backgroundColor: "transparent",
+                  border: "1px solid #fff",
+                  borderRadius: 8,
+                  color: "#fff",
+                }}
+                aria-label={showLog ? "Сховати лог бою" : "Показати лог бою"}
+              >
+                📜 {showLog ? "Сховати лог бою" : "Переглянути лог бою"}
+              </Button>
 
-                  <div style={{
-                      display: "flex",
-                      justifyContent: "center",
-                      alignItems: "center",
-                      color: "#fff",
-                      animation: "fadeIn 0.6s ease forwards",
-                      marginTop: 30,
-                  }}>
-                      <Button
-                        mode="filled"
-                        style={{
-                          animation: "fadeIn 0.6s ease forwards",
-                          backgroundColor: "#4caf50"
-                        }}
-                        onClick={() => {
-                          setEncounterNumber(prev => prev + 1);
-                          setPlayerHP(playerStats.health);
-                          setPlayerDEF(playerStats.defense);
-                          setBattleResult(null);
-                          setLog([]);
-                          setShowLog(false);
-                          setCanAttack(false); // не можна бити у preBattle!
-                          setTurnTimer(15);
-                          setShowPreBattle(true);    // показати екран підготовки БОЮ
-                          setIsHit(false);
-                        }}
-                      >
-                        ⚔️ Наступний ворог ⚔️
-                      </Button>
-                  </div>
+              {battleResult === "win" && (
+                <Button
+                  mode="filled"
+                  style={{
+                    marginBottom: 20,
+                    animation: "fadeIn 0.6s ease forwards",
+                    backgroundColor: "#4caf50",
+                    color: "#fff"
+                  }}
+                  aria-label="Наступний ворог"
+                  onClick={() => {
+                    setEncounterNumber(prev => prev + 1);
+                    setPlayerHP(playerStats.health);
+                    setPlayerDEF(playerStats.defense);
+                    setBattleResult(null);
+                    setLog([]);
+                    setShowLog(false);
+                    setTurnTimer(15);
+                    setShowPreBattle(true); // екран підготовки нового бою
+                  }}
+                >
+                  ⚔️ Наступний ворог ⚔️
+                </Button>
+              )}
 
-                  <Link href="/home">
-                      <Button style={{ marginTop: 30, animation: "fadeIn 0.6s ease forwards", backgroundColor: "#f44336" }}>
-                          Втекти
-                      </Button>
-                  </Link>
+              <Link href="/home">
+                <Button
+                  style={{
+                    marginBottom: 10,
+                    backgroundColor: "#f44336",
+                    color: "#fff",
+                    animation: "fadeIn 0.6s ease forwards",
+                  }}
+                  aria-label="Втекти додому"
+                >
+                  Втекти
+                </Button>
+              </Link>
 
-                  {showLog && (
-                      <div style={{
-                          marginTop: 20, maxHeight: 200, overflowY: "auto",
-                          padding: 12, border: "1px solid #fff", borderRadius: 8,
-                          backgroundColor: "#111", width: "90%",
-                          }}>
-                          {log.map((entry, idx) => (
-                              <div key={idx}>{entry}</div>
-                          ))}
-                      </div>
-                  )}
-              </div>
+              {showLog && (
+                <div
+                  style={{
+                    marginTop: 20,
+                    maxHeight: 200,
+                    overflowY: "auto",
+                    padding: 12,
+                    border: "1px solid #fff",
+                    borderRadius: 8,
+                    backgroundColor: "#111",
+                    width: "90%",
+                    color: "#fff",
+                  }}
+                  aria-label="Журнал бою"
+                >
+                  {log.length === 0
+                    ? <div style={{ opacity: 0.6 }}>Лог ще порожній</div>
+                    : log.map((entry, idx) => (
+                      <div key={idx}>{entry}</div>
+                    ))}
+                </div>
+              )}
+            </div>
           )}
-      </Card>
+        </Card>
     </Page>
   );
 }

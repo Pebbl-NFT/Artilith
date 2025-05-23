@@ -30,6 +30,7 @@ import { getPlayerStats } from "@/utils/getPlayerStats";
 import { updateUserPoints } from "@/hooks/useUserPoints";
 import {addInventoryItem} from "@/hooks/useItemActions";
 import HeroEnergyAutoRegeneration from '@/hooks/HeroEnergyAutoRegeneration';
+import { reduceEnergy } from "@/utils/reduceEnergy";
 
 // Зображення
 import victim from "../_assets/victim.png";
@@ -373,6 +374,31 @@ export default function HomePage() {
     };
     fetchPlayers();
   }, []);
+
+  const handleStartBattle = async () => {
+    if (energy > 0) {
+      if (!userId) {
+        toast.error("Користувач не авторизований");
+        return;
+      }
+  
+      const success = await reduceEnergy(userId, 7);
+      if (success) {
+        setEnergy(energy - 7);
+        toast.error("Використано 7⚡");
+        setActiveTab("battle");
+  
+      } else {
+        toast.error("Помилка оновлення енергії. Спробуйте пізніше.");
+      }
+      return;
+    }
+  
+    if (energy <= 0) {
+      toast.error("У вас закінчилася енергія ⚡");
+      return;
+    }
+  };
 
   // Функція рендеринга контенту для різних вкладок
   const renderContent = () => {
@@ -1623,7 +1649,26 @@ export default function HomePage() {
                 animation: "fadeIn 0.5s ease forwards",
               }}
             >
-              
+               <div>
+                  <p 
+                    style={{  
+                      fontSize: "0.8rem",
+                      fontWeight: "lighter",
+                      fontFamily: "Arial, sans-serif",
+                      fontVariantEmoji: "emoji",
+                      color: "#ddd",
+                      position: "absolute",
+                      top: "-5px",
+                      right: "10px",
+                      background: "rgba(0, 0, 0, 0.35)",
+                      borderRadius: "50px",
+                      padding: "5px",
+                      width: "10px",
+                      height: "10px",
+                    }}>
+                    ?
+                  </p>
+                </div>
               <div
                 className="imgWrap"
                 style={{
@@ -1686,7 +1731,7 @@ export default function HomePage() {
                   marginLeft: "auto",
                 }}>
                   <Button
-                    style={{animation: "fadeIn 0.6s ease forwards", backgroundColor: "#4caf50", width:"100%" }}
+                    style={{animation: "fadeIn 0.5s ease forwards", backgroundColor: "#4caf50", width:"100%" }}
                   >
                     {countdown > 0 ? `${formatTime(countdown)}` : "Отримати дари!"}
                   </Button>
@@ -1710,6 +1755,26 @@ export default function HomePage() {
                 animation: "fadeIn 0.5s ease forwards",
               }}
             >
+              <div>
+                  <p 
+                    style={{  
+                      fontSize: "0.8rem",
+                      fontWeight: "lighter",
+                      fontFamily: "Arial, sans-serif",
+                      fontVariantEmoji: "emoji",
+                      color: "#ddd",
+                      position: "absolute",
+                      top: "-5px",
+                      right: "10px",
+                      background: "rgba(0, 0, 0, 0.35)",
+                      borderRadius: "50px",
+                      padding: "5px",
+                      width: "10px",
+                      height: "10px",
+                    }}>
+                    ?
+                  </p>
+                </div>
               <div
                 className="imgWrap"
                 style={{
@@ -1749,7 +1814,7 @@ export default function HomePage() {
                   width: "100%",
                   height: "100%",
                 }} >
-                 +🪨  +🔷  -7⚡
+                 +🪨 +🔷  -7⚡
                 </span>
                 <Link href="/home/battle" style={{
                   fontSize: "0.9rem",
@@ -1760,8 +1825,8 @@ export default function HomePage() {
                   fontFamily: "Arial, sans-serif",
                   marginLeft: "auto",
                 }}>
-                  <Button
-                    style={{animation: "fadeIn 0.6s ease forwards", backgroundColor: "#4caf50", width:"100%" }}
+                  <Button onClick={handleStartBattle}
+                    style={{animation: "fadeIn 0.5s ease forwards", backgroundColor: "#4caf50", width:"100%" }}
                   >
                     ⚔️ Почати бій ⚔️
                   </Button>
