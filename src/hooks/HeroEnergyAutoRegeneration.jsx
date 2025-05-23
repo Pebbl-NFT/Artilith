@@ -39,7 +39,7 @@ function useEnergyRegen({ userId, energy, setEnergy, maxEnergy, supabase }) {
           }
         }
       } 
-    }, 6000); // 5 хвилин = 300 000 мс
+    }, 10000); // 5 хвилин = 300 000 мс
 
     // Очищуємо інтервал при розмонтуванні або зміні енергії/макс енергії
     return () => {

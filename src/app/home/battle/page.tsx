@@ -251,7 +251,8 @@ export default function BattlePage() {
         console.error("Помилка оновлення:", error.message);
       } else {
         console.log(`Нагорода оновлена: ${rewardPoints} очок і ${rewardExp} досвіду успішно.`);
-        toast.success(`+${rewardPoints} очок та +${rewardExp} XP!`);
+        setPoints(newPoints);
+        setExperience(newExperience); 
       }
   }
     // Функція для розрахунку досвіду
@@ -345,7 +346,8 @@ export default function BattlePage() {
       // Уникнути повторного виклику:
       updateRewardInSupabase(rewardPoints, rewardExp)
         .then(() => {
-          toast.success(`+${rewardPoints} очок та +${rewardExp} XP! 🎉`);
+          toast.success(`+ ${rewardPoints} 🪨 уламків!`);
+          toast.success(`+ ${rewardExp} 🔷 досвіду!`);
         })
         .catch((err) => {
           console.error("Помилка оновлення нагороди:", err);
@@ -403,7 +405,7 @@ export default function BattlePage() {
             >
               ⚔️ Ви натрапили на ворога ! ⚔️</h2>
 
-            <h1 style={{ animation: "fadeIn 3s ease forwards",marginBottom:20, }}>{enemyStats?.name}</h1>
+            <h1 style={{ animation: "fadeIn 3s ease forwards",marginBottom:30, }}>{enemyStats?.name}</h1>
             <div
               style={{
                 display: "flex",
@@ -487,10 +489,10 @@ export default function BattlePage() {
                 display: "flex",
                 justifyContent: "center",
                 alignItems: "center",
-                backgroundColor: "#4caf50",
                 animation: "fadeIn 0.6s ease forwards",
               }}>
-              <Button
+              <Button 
+                style={{ animation: "fadeIn 0.6s ease forwards", backgroundColor:"#4caf50" }}
                 onClick={() => {
                   setShowPreBattle(false);
                   setCanAttack(true);
@@ -512,8 +514,8 @@ export default function BattlePage() {
   
   return (
     <Page back >
-      <Toaster position="top-center" toastOptions={{ duration: 3000 }} />
       <Placeholder>
+        <Toaster position="top-center" toastOptions={{ duration: 2000 }} />
       <div
         style={{
           position: "fixed", top: 0, left: 0, width: "100%", height: "100%",
@@ -528,12 +530,12 @@ export default function BattlePage() {
           style={{
             position: "absolute",
             width: "100%",
-            height: "100%", // або більше/менше залежно від дизайну
+            height: "90%", // або більше/менше залежно від дизайну
             backgroundImage: "url('/bg/bgforestnght1.jpg')",
             backgroundRepeat: "no-repeat",
             backgroundSize: "cover",
             backgroundPosition: "center",
-            marginTop: "0px",
+            top: "0px",
             marginBottom: "0px",
             display: "flex",
             justifyContent: "center",
@@ -555,42 +557,6 @@ export default function BattlePage() {
           }}>
             <ProgressBar value={turnTimer} max={15} color="#fbbf24" />
           </div>
-          <div
-            style={{
-              position: "absolute",
-              display: "flex",
-              flexDirection: "row",
-              justifyContent: "center",
-              alignItems: "center",
-              gap: "40px",
-              color: "#fff",
-              bottom: 70,
-              animation: "fadeIn 0.6s ease forwards",
-              backgroundColor: "rgba(0, 0, 0, 0.5)",
-              paddingInline: "100%",
-            }}
-            >
-              <h3 style={{
-              display: "flex",
-              flexDirection: "row",
-              justifyContent: "center",
-              alignItems: "center",
-              color: "#fff",
-              animation: "fadeIn 0.6s ease forwards",
-            }}> {enemyStats?.name}</h3>
-              <div style={{ display: "flex", justifyContent: "space-between", width: "50%" }}>
-              <span>❤️ </span>
-              <span>{enemyHP} </span>
-              </div>
-              <div style={{ display: "flex", justifyContent: "space-between", width: "50%" }}>
-                <span>🗡️ </span>
-                <span>{enemyStats?.damage} </span>
-              </div>
-              <div style={{ display: "flex", justifyContent: "space-between", width: "50%" }}>            
-                <span>🛡️</span>
-                <span>{enemyDEF} </span>
-              </div>
-          </div>
           <div style={{
                 position: "absolute",
                 bottom: 120,
@@ -602,7 +568,7 @@ export default function BattlePage() {
               style={{
                 marginLeft: 0,
                 marginTop: 10,
-                marginBottom: 16,
+                marginBottom: 5,
                 width: "140px",
                 height: "140px",
                 objectFit: "contain",
@@ -639,16 +605,55 @@ export default function BattlePage() {
               </div>
             )}
           </div>
-          
-          <div style={{
+        </div>
+        <div
+          style={{
+            position: "absolute",
+            display: "flex",
+            flexDirection: "row",
+            justifyContent: "center",
+            alignItems: "center",
+            gap: "40px",
+            color: "#fff",
+            bottom: 70,
+            animation: "fadeIn 0.6s ease forwards",
+            backgroundColor: "rgba(0, 0, 0, 0.5)",
+            paddingInline: "100%",
+          }}
+          >
+            <h3 style={{
+            display: "flex",
+            flexDirection: "row",
+            justifyContent: "center",
+            alignItems: "center",
+            color: "#fff",
+            animation: "fadeIn 0.6s ease forwards",
+            fontSize: 14,
+          }}> 
+            {enemyStats?.name}
+          </h3>
+
+            <div style={{ display: "flex", justifyContent: "space-between", width: "50%" }}>
+            <span>❤️ </span>
+            <span>{enemyHP} </span>
+            </div>
+            <div style={{ display: "flex", justifyContent: "space-between", width: "50%" }}>
+              <span>🗡️ </span>
+              <span>{enemyStats?.damage} </span>
+            </div>
+            <div style={{ display: "flex", justifyContent: "space-between", width: "50%" }}>            
+              <span>🛡️</span>
+              <span>{enemyDEF} </span>
+            </div>
+        </div> 
+        <div 
+          style={{
             position: "absolute",
             width: "100%",
             bottom: 0,
             backgroundRepeat: "no-repeat",
             backgroundSize: "cover",
             backgroundPosition: "center",
-            marginTop: "0px",
-            marginBottom: "0px",
             display: "flex",
             justifyContent: "center",
             alignItems: "center",
@@ -721,13 +726,11 @@ export default function BattlePage() {
                 </div>
               </div>
           </div>
-          </div>
         </div>
       </div>
       </Placeholder>
       <Card>
           {battleResult && (
-            
             <div
               style={{
                 position: "fixed",
@@ -740,7 +743,7 @@ export default function BattlePage() {
               role="dialog"
               aria-modal="true"
               aria-labelledby="battleResultTitle"
-            >
+            > <Toaster position="top-center" toastOptions={{ duration: 2000 }} />
               <h2
                 id="battleResultTitle"
                 style={{
