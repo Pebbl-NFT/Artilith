@@ -23,7 +23,7 @@ export const baseEnemies: EnemyBase[] = [
   {
     name: 'Лісовий розвідник',
     image: '/enemies/forest/forestmonster1.png',
-    baseHealth: 20,
+    baseHealth: 15,
     baseDamage: 1,
     baseDefense: 1,
     baseCritChance: 0.05,
@@ -32,7 +32,7 @@ export const baseEnemies: EnemyBase[] = [
   {
     name: 'Лісовий розвідник',
     image: '/enemies/forest/forestmonster2.png',
-    baseHealth: 30,
+    baseHealth: 25,
     baseDamage: 3,
     baseDefense: 3,
     baseCritChance: 0.05,
@@ -41,7 +41,7 @@ export const baseEnemies: EnemyBase[] = [
   {
     name: 'Лісовий розвідник',
     image: '/enemies/forest/forestmonster3.png',
-    baseHealth: 40,
+    baseHealth: 35,
     baseDamage: 4,
     baseDefense: 4,
     baseCritChance: 0.05,
@@ -119,7 +119,7 @@ export function generateSequentialEnemy(
     type = 'boss';
   } else if (encounterNumber % 6 === 0) {
     // Мінібос кожен 6-й (але не 20-й!)
-    template = miniBosses[(Math.floor(encounterNumber / 6) - 1) % miniBosses.length];
+    template = miniBosses[(Math.floor(encounterNumber / 7) - 1) % miniBosses.length];
     type = 'miniBoss';
   } else {
     // Звичайні вороги — СТРОГО ПО ПОРЯДКУ (НЕ рандом!)

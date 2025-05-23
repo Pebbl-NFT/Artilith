@@ -741,7 +741,6 @@ export default function BattlePage() {
               aria-modal="true"
               aria-labelledby="battleResultTitle"
             >
-              <Toaster position="top-center" toastOptions={{ duration: 3000 }} />
               <h2
                 id="battleResultTitle"
                 style={{

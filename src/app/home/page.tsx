@@ -1,8 +1,9 @@
 "use client";
 
-import React, { useEffect, useState, useRef, useCallback, useMemo } from "react";
+import React, { useEffect, useState, useRef, useCallback, useMemo,  } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import {
   List,
   Placeholder,
@@ -48,7 +49,6 @@ export default function HomePage() {
   const [clickDelay, setClickDelay] = useState(1000);
   const [isClickable, setIsClickable] = useState(true);
   const [countdown, setCountdown] = useState(0);
-  const [animationTime, setAnimationTime] = useState(1100);
   const [activeTab, setActiveTab] = useState("home");
   const [loading, setLoading] = useState(false);
   const [inventory, setInventory] = useState<any[]>([]);
@@ -58,6 +58,8 @@ export default function HomePage() {
   const userId = initDataState?.user?.id;
   const [experience, setExperience] = useState(0);
   const [level, setLevel] = useState(1);
+  const router = useRouter();
+
 
 
 
@@ -75,9 +77,6 @@ export default function HomePage() {
   const getRequiredExp = (level: number): number => {
     return 100 * Math.pow(2, level - 1); // 1 lvl = 100 XP, 2 lvl = 200, 3 lvl = 400 і т.д.
   };
-  
-  // Перемикач, який показує заблокований контент (наприклад, рівень 2)
-  const [locked, setLocked] = useState(true);
 
   // Модальне вікно для підтвердження покупки
   const [selectedItem, setSelectedItem] = useState<SelectedItemType>(null);
@@ -110,7 +109,6 @@ export default function HomePage() {
         setPoints(data.points);
         setClickDelay(data.click_delay);
         setEnergy(data.energy); // Встановлюємо енергію користувача
-        setAnimationTime(data.click_delay + 100);
         setExperience(data.experience ?? 0);
         setLevel(data.level ?? 1);
       }
@@ -220,7 +218,6 @@ export default function HomePage() {
     setPoints(newPoints);
     setEnergy(newEnergy); // Оновлюємо стан енергії
     setClickDelay(newClickDelay);
-    setAnimationTime(newClickDelay + 100);
     if (!userId) return;
     const { error } = await supabase
       .from("users")
@@ -360,6 +357,7 @@ export default function HomePage() {
   
 
   const [players, setPlayers] = useState<{ id: any; first_name: any; level: any }[]>([]);
+
   useEffect(() => {
     const fetchPlayers = async () => {
       const { data, error } = await supabase
@@ -376,29 +374,26 @@ export default function HomePage() {
   }, []);
 
   const handleStartBattle = async () => {
-    if (energy > 0) {
-      if (!userId) {
-        toast.error("Користувач не авторизований");
-        return;
-      }
-  
-      const success = await reduceEnergy(userId, 7);
-      if (success) {
-        setEnergy(energy - 7);
-        toast.error("Використано 7⚡");
-        setActiveTab("battle");
-  
-      } else {
-        toast.error("Помилка оновлення енергії. Спробуйте пізніше.");
-      }
-      return;
-    }
-  
-    if (energy <= 0) {
-      toast.error("У вас закінчилася енергія ⚡");
-      return;
-    }
+  if (!userId) {
+    toast.error("Користувач не авторизований");
+    return;
+  }
+
+  if (energy < 7) {
+    toast.error("Недостатньо енергії ⚡");
+    return;
+  }
+
+  const success = await reduceEnergy(userId, 7);
+  if (success) {
+    setEnergy(energy - 7);
+    toast.success("Використано 7⚡");
+    router.push("/home/battle");
+  } else {
+    toast.error("Помилка оновлення енергії. Спробуйте пізніше.");
+  }
   };
+
 
   // Функція рендеринга контенту для різних вкладок
   const renderContent = () => {
@@ -1462,15 +1457,32 @@ export default function HomePage() {
                     />
                   </div>
                 </div>
-
-                {/* Статистики героя */}
-                <HeroEnergyAutoRegeneration
-                  userId={userId}
-                  energy={energy}
-                  setEnergy={setEnergy}
-                  supabase={supabase}
-                  heroStats={heroStats}
-                />
+                <div
+                  style={{
+                    display: "flex",
+                    flexDirection: "row",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    gap: "30px",
+                    padding: 10,
+                    color: "#fff",
+                    animation: "fadeIn 0.6s ease forwards",
+                    marginLeft: 20,
+                  }}
+                >
+                  <div style={{ display: "flex", justifyContent: "space-between", width: "100%" }}>
+                    <span>❤️ </span>
+                    <span>{heroStats.health}</span>
+                  </div>
+                  <div style={{ display: "flex", justifyContent: "space-between", width: "100%" }}>
+                    <span>🗡️ </span>
+                    <span>{heroStats.attack}</span>
+                  </div>
+                  <div style={{ display: "flex", justifyContent: "space-between", width: "100%" }}>
+                    <span>🛡️</span>
+                    <span>{heroStats.defense}</span>
+                  </div>
+                </div>
 
                 <div
                     style={{
@@ -1756,25 +1768,25 @@ export default function HomePage() {
               }}
             >
               <div>
-                  <p 
-                    style={{  
-                      fontSize: "0.8rem",
-                      fontWeight: "lighter",
-                      fontFamily: "Arial, sans-serif",
-                      fontVariantEmoji: "emoji",
-                      color: "#ddd",
-                      position: "absolute",
-                      top: "-5px",
-                      right: "10px",
-                      background: "rgba(0, 0, 0, 0.35)",
-                      borderRadius: "50px",
-                      padding: "5px",
-                      width: "10px",
-                      height: "10px",
-                    }}>
-                    ?
-                  </p>
-                </div>
+                <p 
+                  style={{  
+                    fontSize: "0.8rem",
+                    fontWeight: "lighter",
+                    fontFamily: "Arial, sans-serif",
+                    fontVariantEmoji: "emoji",
+                    color: "#ddd",
+                    position: "absolute",
+                    top: "-5px",
+                    right: "10px",
+                    background: "rgba(0, 0, 0, 0.35)",
+                    borderRadius: "50px",
+                    padding: "5px",
+                    width: "10px",
+                    height: "10px",
+                  }}>
+                  ?
+                </p>
+              </div>
               <div
                 className="imgWrap"
                 style={{
@@ -1816,21 +1828,20 @@ export default function HomePage() {
                 }} >
                  +🪨 +🔷  -7⚡
                 </span>
-                <Link href="/home/battle" style={{
+                  <Button style={{
                   fontSize: "0.9rem",
                   fontWeight: "lighter",
                   color: "#fff",
+                  backgroundColor: "#4caf50",
                   textAlign: "center",
                   lineHeight: "1",
                   fontFamily: "Arial, sans-serif",
                   marginLeft: "auto",
-                }}>
-                  <Button onClick={handleStartBattle}
-                    style={{animation: "fadeIn 0.5s ease forwards", backgroundColor: "#4caf50", width:"100%" }}
+                  animation: "fadeIn 0.5s ease forwards",
+                }} onClick={handleStartBattle}
                   >
                     ⚔️ Почати бій ⚔️
                   </Button>
-              </Link>
               </div>
             </div>
           </Placeholder>

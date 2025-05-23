@@ -100,23 +100,10 @@ function HeroEnergyAutoRegeneration({ userId, energy, setEnergy, supabase, heroS
         animation: "fadeIn 0.6s ease forwards",
       }}
     >
-      <div style={{ display: "flex", justifyContent: "space-between", width: "50%" }}>
-        <span>❤️ </span>
-        <span>{heroStats.health}</span>
-      </div>
-      <div style={{ display: "flex", justifyContent: "space-between", width: "50%" }}>
-        <span>🗡️ </span>
-        <span>{heroStats.attack}</span>
-      </div>
-      <div style={{ display: "flex", justifyContent: "space-between", width: "50%" }}>
-        <span>🛡️</span>
-        <span>{heroStats.defense}</span>
-      </div>
       <div
         style={{
           display: "flex",
           justifyContent: "space-between",
-          width: "50%",
           position: "relative",
         }}
       >
@@ -138,7 +125,7 @@ function HeroEnergyAutoRegeneration({ userId, energy, setEnergy, supabase, heroS
             aria-label="Максимальна енергія"
             style={{
               marginLeft: 6,
-              fontSize: 14,
+              fontSize: 10,
               color: "#48e19f",
               fontWeight: 600,
               transition: "color 0.2s",
