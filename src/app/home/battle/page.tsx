@@ -338,6 +338,23 @@ export default function BattlePage() {
     };
   }, []);
 
+  useEffect(() => {
+    if (battleResult === "win" && enemyStats) {
+      const { rewardPoints, rewardExp } = calculateReward(enemyStats);
+
+      // Уникнути повторного виклику:
+      updateRewardInSupabase(rewardPoints, rewardExp)
+        .then(() => {
+          toast.success(`+${rewardPoints} очок та +${rewardExp} XP! 🎉`);
+        })
+        .catch((err) => {
+          console.error("Помилка оновлення нагороди:", err);
+          toast.error("Помилка при нарахуванні нагороди!");
+        });
+    }
+  }, [battleResult, enemyStats]);
+
+
   function calculateReward(enemy: Enemy | null): { rewardPoints: number; rewardExp: number } {
     if (!enemy) return { rewardPoints: 0, rewardExp: 0 };
 
@@ -710,6 +727,7 @@ export default function BattlePage() {
       </Placeholder>
       <Card>
           {battleResult && (
+            
             <div
               style={{
                 position: "fixed",
@@ -723,6 +741,7 @@ export default function BattlePage() {
               aria-modal="true"
               aria-labelledby="battleResultTitle"
             >
+              <Toaster position="top-center" toastOptions={{ duration: 3000 }} />
               <h2
                 id="battleResultTitle"
                 style={{
