@@ -20,6 +20,7 @@ import TopBar from "@/components/TopBar";
 import BottomBar from "@/components/BottomBar";
 import { ItemCard } from "@/components/ItemCard";
 import EquippedItemSlot from "@/components/Item/EquippedItemSlot";
+import InventoryItemSlot from "@/components/Item/InventoryItemSlot";
 
 // Дані та логіка
 import { supabase } from "@/lib/supabaseClient";
@@ -1540,102 +1541,58 @@ export default function HomePage() {
                 </div>
               </Card>
 
-              <h2 style={{ 
-                fontSize: "1rem", 
-                fontWeight: "bold", 
-                marginTop: "50px", 
-                marginBottom: "40px", 
-                textAlign: "center", 
-                color: "#fff" }}
-              >
-                ІНВЕНТАР
-              </h2>
+                <h2 style={{
+                    fontSize: "1rem",
+                    fontWeight: "bold",
+                    marginTop: "50px",
+                    marginBottom: "40px",
+                    textAlign: "center",
+                    color: "#fff"
+                }}>
+                  ІНВЕНТАР
+                </h2>
 
-              <div
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: "repeat(auto-fill, minmax(100px, 1fr))", // адаптуємо колонки
-                  gap: "20px",
-                  width: "100%",
-                  margin: "0 auto",
-                }}
-              >
-                {inventory.length === 0 && (
-                <p style={{ fontSize: "1rem", fontWeight: "lighter", color: "#ccc", textAlign: "center", marginBottom: "20px", lineHeight: "1.4", fontFamily: "Arial, sans-serif", maxWidth: "100%" }}>
-                  Інвентар порожній — купіть предмети в магазині!
-                </p>
-                )}
-                {unequippedItems.map((item, index) => (
-                    <div
-                      key={index}
-                      className={`relative flex flex-col items-center bg-white/[0.05] rounded-lg p-2 animate-fadeIn opacity-0 rarity-${item.rarity?.toLowerCase()}`}
-                      style={{
-                        border: "1px solid rgba(255, 255, 255, 0.1)",
-                        borderRadius: "10px",
-                        padding: "20px",
-                        animationDelay: `${index * 0.1}s`,
-                        animation: "fadeIn 0.7s ease forwards",
+                <div
+                  style={{
+                    display: "grid",
+                    gridTemplateColumns: "repeat(auto-fill, minmax(100px, 1fr))", // Адаптивна сітка
+                    gap: "20px", // Відступ між картками
+                    width: "100%",
+                    margin: "0 auto",
+                  }}
+                >
+                  {/* Повідомлення про порожній інвентар, якщо немає жодного предмета (не тільки неекипірованих) */}
+                  {inventory.length === 0 && (
+                    <p style={{
+                      fontSize: "1rem",
+                      fontWeight: "lighter",
+                      color: "#ccc",
+                      textAlign: "center",
+                      marginBottom: "20px",
+                      lineHeight: "1.4",
+                      fontFamily: "Arial, sans-serif",
+                      maxWidth: "100%",
+                      gridColumn: "1 / -1" // Розтягнути текст на всю ширину сітки
+                    }}>
+                      Інвентар порожній — купіть предмети в магазині!
+                    </p>
+                  )}
+
+                  {/* Відображення неекипірованих предметів за допомогою нового компонента */}
+                  {unequippedItems.map((item, index) => (
+                    <InventoryItemSlot
+                      key={item.id || index}
+                      item={item}
+                      index={index}
+                      fallbackIcon=""
+                      onClick={() => {
+                        if (item) setSelectedItem({ ...item, mode: "inventory" });
                       }}
-                    >
-                      <div style={{
-                        width: "100%",
-                        aspectRatio: "1 / 1",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        fontSize: "2rem",
-                        color: item ? "#fff" : "#777",
-                        marginBottom: "10px",
-                        position: "relative", // важливо для абсолютного позиціонування rarity-label
-                      }}>
-                        <div className="rarity-label">
-                          {item.rarity?.toUpperCase()}
-                        </div>
-
-                        {item?.image ? (
-                          <img 
-                          src={typeof item.image === "string" ? item.image : item.image.src}
-                          alt={item.name}
-                          className={`item-image rarity-border-${item.rarity?.toLowerCase()}`}
-                          style={{
-                            backgroundColor: "rgba(255, 255, 255, 0.05)",
-                            padding: "10px",
-                            borderRadius: "10px",
-                            marginTop: 10,
-                            boxShadow: "rgba(0, 0, 0, 0.3) 0px 19px 38px, rgba(0, 0, 0, 0.22) 0px 15px 12px",
-                            maxWidth: "100%",
-                            height: "auto",
-                          }}
-                        />
-                        ) : item?.name ? (
-                          item.name
-                        ) : (
-                          "+"
-                        )}
-                      </div>
-                      {item && (
-                        <button 
-                          style={{
-                            backgroundColor: item.equipped ? "#f44336" : "#4caf50",
-                            color: "#fff",
-                            border: "none",
-                            borderRadius: "5px",
-                            padding: "5px",
-                            fontSize: "11px",
-                            cursor: "pointer",
-                            transition: "background-color 0.3s",
-                            width: "100%",
-                            marginTop: "10px",
-                          }}
-                          onClick={() => toggleEquip(index)}
-                        >
-                          {item.equipped ? "Скинути" : "Екіпірувати"}
-                        </button>
-                      )}
-                    </div>
+                      onEquipToggle={() => toggleEquip(index)}
+                    />
                   ))}
+                </div>
               </div>
-            </div>
           </Placeholder>
         </Page>
       );
@@ -2007,15 +1964,83 @@ export default function HomePage() {
               )}
 
               {selectedItem.mode === "inventory" && (
-                <div style={{ display: "flex", justifyContent: "center", gap: "10px" }}>
-                  <button onClick={() => {
-                    handleEquip(selectedItem);
-                    setSelectedItem(null);
-                  }}>🛡️ Спорядити</button>
-                  <button onClick={() => {
-                    handleDismantle(selectedItem);
-                    setSelectedItem(null);
-                  }}>🧨 Розібрати</button>
+                <div
+                  className={`item-image rarity-border-${selectedItem.rarity?.toLowerCase()} rarity-shadow-${selectedItem.rarity?.toLowerCase()}`}
+                  onClick={(e) => e.stopPropagation()}
+                  style={{
+                    backgroundColor: "#1e1e1e",
+                    padding: "20px",
+                    borderRadius: "10px",
+                    color: "#fff",
+                    maxWidth: "300px",
+                    width: "90%",
+                    textAlign: "center",
+                  }}
+                >
+                  <h2 className={` rarity-font-${selectedItem.rarity?.toLowerCase()}`} style={{ fontSize: "1.2rem", marginBottom: "10px" }}>{selectedItem.name}</h2>
+                  {selectedItem.image && (
+                      <img 
+                      src={typeof selectedItem.image === "string" ? selectedItem.image : (selectedItem.image as { src: string }).src}
+                      alt={selectedItem.name}
+                      style={{ width: "130px", height: "80px", objectFit: "contain", marginBottom: "30px", marginTop: "30px", boxShadow: "0 0 40 rgba(253, 253, 253, 0.5)", borderRadius: "50px", }}
+                    />
+                  )}
+                  <p style={{ fontSize: "0.9rem", color: "#ccc", marginBottom: "20px" }}>
+                    Тип: <strong>{selectedItem.type}</strong>
+                  </p>
+                  <p style={{ fontSize: "0.9rem", color: "#ccc", marginBottom: "20px" }}>
+                    Рідкість: <strong>{selectedItem.rarity}</strong>
+                  </p>
+                  <p style={{ fontSize: "0.9rem", color: "#ccc", marginBottom: "20px" }}>
+                    Шкода: <strong>{selectedItem.damage}</strong>
+                  </p>
+                  <p style={{ fontSize: "0.9rem", color: "#ccc", marginBottom: "20px" }}>
+                    Захист: <strong>{selectedItem.defense}</strong>
+                  </p>
+                  <p style={{ fontSize: "0.9rem", color: "#ccc", marginBottom: "20px" }}>
+                    Рівень: 1
+                  </p>
+                  <p style={{ fontSize: "0.9rem", color: "#ccc", marginBottom: "20px" }}>
+                    Міцність: 10 / 10
+                  </p>
+                  <div style={{ display: "flex", justifyContent: "center", gap: "20px", marginTop: "50px" }}>
+                    <button onClick={() => {handleEquip(selectedItem);setSelectedItem(null);}}
+                        style={{
+                          backgroundColor: "#444",
+                          padding: "8px 12px",
+                          border: "none",
+                          borderRadius: "6px",
+                          color: "#fff",
+                          marginTop: "10px",
+                          cursor: "pointer",
+                        }}>
+                          🫴 Екіпірувати </button>
+
+                      <button onClick={() => setSelectedItem(null)}
+                        style={{
+                          backgroundColor: "#444",
+                          padding: "8px 12px",
+                          border: "none",
+                          borderRadius: "6px",
+                          color: "#fff",
+                          marginTop: "10px",
+                          cursor: "pointer",
+                        }}>
+                          Закрити </button>
+                          <div style={{ display: "flex", justifyContent: "center", gap: "10px" }}>
+                      <button onClick={() => {handleDismantle(selectedItem);setSelectedItem(null);}}
+                        style={{
+                          backgroundColor: "#444",
+                          padding: "8px 12px",
+                          border: "none",
+                          borderRadius: "6px",
+                          color: "#fff",
+                          marginTop: "10px",
+                          cursor: "pointer",
+                        }}>
+                          💥 Розібрати </button>
+                </div>
+                  </div>
                 </div>
               )}
 
@@ -2070,7 +2095,7 @@ export default function HomePage() {
                           marginTop: "10px",
                           cursor: "pointer",
                         }}>
-                          ❌ Зняти </button>
+                          🫳 Зняти </button>
 
                       <button onClick={() => setSelectedItem(null)}
                         style={{
