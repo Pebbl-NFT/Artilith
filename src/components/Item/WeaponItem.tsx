@@ -15,17 +15,6 @@ export const WeaponItems = [
       image: sword01a.src,
     },
     {
-      item_id: 2,
-      type: "weapon",
-      rarity: 'common',
-      name: "Тяжкий навчальний меч",
-      description: "",
-      damage: 3,
-      defense: 1,
-      price: 500,
-      image: sword01b.src,
-    },
-    {
       item_id: 10,
       type: "weapon",
       rarity: 'uncommon',

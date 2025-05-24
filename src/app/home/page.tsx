@@ -374,27 +374,6 @@ export default function HomePage() {
     fetchPlayers();
   }, []);
 
-  const handleStartBattle = async () => {
-  if (!userId) {
-    toast.error("Користувач не авторизований");
-    return;
-  }
-
-  if (energy < 7) {
-    toast.error("Недостатньо енергії ⚡");
-    return;
-  }
-
-  const success = await reduceEnergy(userId, 7);
-  if (success) {
-    setEnergy(energy - 7);
-    toast.success("Використано 7⚡");
-    router.push("/home/battle");
-  } else {
-    toast.error("Помилка оновлення енергії. Спробуйте пізніше.");
-  }
-  };
-
 
   // Функція рендеринга контенту для різних вкладок
   const renderContent = () => {
@@ -763,13 +742,14 @@ export default function HomePage() {
             <Placeholder>
                 <div
                   style={{
-                    display: "grid",
-                    gridTemplateColumns: "repeat(1, 1fr)",
-                    gap: "20px",
-                    width: "100%",
-                    maxWidth: "1200px",
-                    animation: "fadeIn 1s ease forwards",
                     marginTop: "-30px",
+                    marginLeft:"-10px",
+                    alignItems: "center",
+                    position: "relative",
+                    display: "grid",
+                    gridTemplateColumns: "repeat(auto-fill, minmax(40px, 1fr))", // Адаптивна сітка
+                    gap: "20px", // Відступ між картками
+                    width: "100%",
                   }}
                 >
                   {WeaponItems.map((item) => (
@@ -782,8 +762,8 @@ export default function HomePage() {
                       name={item.name}
                       image={item.image}
                       description={item.description}
-                      damage={item.damage ? `Шкода: ${item.damage}` : ""}
-                      defense={item.defense ? `Захист: ${item.defense}` : ""}
+                      damage={item.damage ? ` ${item.damage}` : "0"}
+                        defense={item.defense ? ` ${item.defense}` : "0"}
                       price={item.price}
                       onBuyRequest={(item) => setSelectedItem(item)}
                     />
@@ -912,13 +892,14 @@ export default function HomePage() {
               <Placeholder>
                   <div
                   style={{
-                    display: "grid",
-                    gridTemplateColumns: "repeat(1, 1fr)",
-                    gap: "20px",
-                    width: "100%",
-                    maxWidth: "1200px",
-                    animation: "fadeIn 1s ease forwards",
                     marginTop: "-30px",
+                    marginLeft:"-10px",
+                    alignItems: "center",
+                    position: "relative",
+                    display: "grid",
+                    gridTemplateColumns: "repeat(auto-fill, minmax(40px, 1fr))", // Адаптивна сітка
+                    gap: "20px", // Відступ між картками
+                    width: "100%",
                   }}
                 >
                     {ShieldItems.map((item) => (
@@ -931,8 +912,8 @@ export default function HomePage() {
                         name={item.name}
                         image={item.image}
                         description={item.description}
-                        damage={item.damage ? `Шкода: ${item.damage}` : ""}
-                        defense={item.defense ? `Захист: ${item.defense}` : ""}
+                        damage={item.damage ? ` ${item.damage}` : "0"}
+                        defense={item.defense ? `${item.defense}` : "0"}
                         price={item.price}
                         onBuyRequest={(item) => setSelectedItem(item)}
                       />
@@ -1783,7 +1764,7 @@ export default function HomePage() {
                   width: "100%",
                   height: "100%",
                 }} >
-                 +🪨 +🔷  -7⚡
+                 +🪨 +🔷 -1⚡
                 </span>
                   <Button style={{
                   fontSize: "0.9rem",
@@ -1795,7 +1776,7 @@ export default function HomePage() {
                   fontFamily: "Arial, sans-serif",
                   marginLeft: "auto",
                   animation: "fadeIn 0.5s ease forwards",
-                }} onClick={handleStartBattle}
+                }} onClick={() => router.push("/home/battle")}
                   >
                     ⚔️ Почати бій ⚔️
                   </Button>
@@ -1926,9 +1907,47 @@ export default function HomePage() {
           <div className="modal-overlay" onClick={() => setSelectedItem(null)}>
               
               {selectedItem.mode === "city" && (
-                <>
-                <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-                  <p>Придбати <strong>{selectedItem.name}</strong> за <strong>{selectedItem.price}</strong> уламків?</p>
+                <div
+                  className={`item-image rarity-border-${selectedItem.rarity?.toLowerCase()} rarity-shadow-${selectedItem.rarity?.toLowerCase()}`}
+                  onClick={(e) => e.stopPropagation()}
+                  style={{
+                    backgroundColor: "#1e1e1e",
+                    padding: "20px",
+                    borderRadius: "10px",
+                    color: "#fff",
+                    maxWidth: "300px",
+                    width: "90%",
+                    textAlign: "center",
+                  }}
+                >
+                  <h2 className={` rarity-font-${selectedItem.rarity?.toLowerCase()}`} style={{ fontSize: "1.2rem", marginBottom: "10px" }}>{selectedItem.name}</h2>
+                 {selectedItem.image && (
+                      <img 
+                      src={typeof selectedItem.image === "string" ? selectedItem.image : (selectedItem.image as { src: string }).src}
+                      alt={selectedItem.name}
+                      style={{ width: "130px", height: "80px", objectFit: "contain", marginBottom: "30px", marginTop: "30px", boxShadow: "0 0 40 rgba(253, 253, 253, 0.5)", borderRadius: "50px", }}
+                    />
+                  )}
+                  <p style={{ fontSize: "0.9rem", color: "#ccc", marginBottom: "20px" }}>
+                    Тип: <strong>{selectedItem.type}</strong>
+                  </p>
+                  <p style={{ fontSize: "0.9rem", color: "#ccc", marginBottom: "20px" }}>
+                    Рідкість: <strong>{selectedItem.rarity}</strong>
+                  </p>
+                  <p style={{ fontSize: "0.9rem", color: "#ccc", marginBottom: "20px" }}>
+                    Шкода: <strong>{selectedItem.damage}</strong>
+                  </p>
+                  <p style={{ fontSize: "0.9rem", color: "#ccc", marginBottom: "20px" }}>
+                    Захист: <strong>{selectedItem.defense}</strong>
+                  </p>
+                  <p style={{ fontSize: "0.9rem", color: "#ccc", marginBottom: "20px" }}>
+                    Рівень: 1
+                  </p>
+                  <p style={{ fontSize: "0.9rem", color: "#ccc", marginBottom: "50px" }}>
+                    Міцність: 10 / 10
+                  </p>
+                <div onClick={(e) => e.stopPropagation()}>
+                  <p>Придбати за <strong>{selectedItem.price}</strong> уламків?</p>
                   <div style={{ display: "flex", justifyContent: "center", gap: "50px" }}>
                     <button onClick={() => {confirmBuy();setSelectedItem(null);}}
                       style={{
@@ -1960,7 +1979,7 @@ export default function HomePage() {
                         Ні</button>
                   </div>
                 </div>
-                </>
+                </div>
               )}
 
               {selectedItem.mode === "inventory" && (
@@ -2004,42 +2023,47 @@ export default function HomePage() {
                     Міцність: 10 / 10
                   </p>
                   <div style={{ display: "flex", justifyContent: "center", gap: "20px", marginTop: "50px" }}>
+                    <button onClick={() => {handleDismantle(selectedItem);setSelectedItem(null);}}
+                      style={{
+                        backgroundColor: "#444",
+                        padding: "8px 12px",
+                        border: "none",
+                        borderRadius: "6px",
+                        color: "#fff",
+                        marginTop: "10px",
+                        cursor: "pointer",
+                      }}>
+                        💥 Розібрати 
+                    </button>
+                    <p onClick={() => setSelectedItem(null)}
+                      style={{  
+                        fontSize: "0.8rem",
+                        color: "#ddd",
+                        top: "20px",
+                        right: "20px",
+                        background: "rgba(0, 0, 0, 0.59)",
+                        border:"1px solid rgb(99, 99, 99)",
+                        animation: "fadeIn 1s ease forwards",
+                        borderRadius: "50px",
+                        padding: "10px",
+                        paddingInline: "10px",
+                        paddingTop: "16px",
+                        marginBottom: "0px",
+                      }}>
+                      x
+                    </p>
                     <button onClick={() => {handleEquip(selectedItem);setSelectedItem(null);}}
-                        style={{
-                          backgroundColor: "#444",
-                          padding: "8px 12px",
-                          border: "none",
-                          borderRadius: "6px",
-                          color: "#fff",
-                          marginTop: "10px",
-                          cursor: "pointer",
-                        }}>
-                          🫴 Екіпірувати </button>
-
-                      <button onClick={() => setSelectedItem(null)}
-                        style={{
-                          backgroundColor: "#444",
-                          padding: "8px 12px",
-                          border: "none",
-                          borderRadius: "6px",
-                          color: "#fff",
-                          marginTop: "10px",
-                          cursor: "pointer",
-                        }}>
-                          Закрити </button>
-                          <div style={{ display: "flex", justifyContent: "center", gap: "10px" }}>
-                      <button onClick={() => {handleDismantle(selectedItem);setSelectedItem(null);}}
-                        style={{
-                          backgroundColor: "#444",
-                          padding: "8px 12px",
-                          border: "none",
-                          borderRadius: "6px",
-                          color: "#fff",
-                          marginTop: "10px",
-                          cursor: "pointer",
-                        }}>
-                          💥 Розібрати </button>
-                </div>
+                      style={{
+                        backgroundColor: "#444",
+                        padding: "8px 12px",
+                        border: "none",
+                        borderRadius: "6px",
+                        color: "#fff",
+                        marginTop: "10px",
+                        cursor: "pointer",
+                      }}>
+                        🫴 Екіпірувати 
+                    </button>
                   </div>
                 </div>
               )}

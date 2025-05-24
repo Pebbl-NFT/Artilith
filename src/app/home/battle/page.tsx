@@ -356,6 +356,26 @@ export default function BattlePage() {
     }
   }, [battleResult, enemyStats]);
 
+  const handleStartBattle = async () => {
+    if (!userId) {
+      toast.error("Користувач не авторизований");
+      return;
+    }
+  
+    if (energy < 7) {
+      toast.error("Недостатньо енергії ⚡");
+      return;
+    }
+  
+    const success = await reduceEnergy(userId, 1);
+    if (success) {
+      setEnergy(energy - 1);
+      toast.success("Використано 1⚡");
+    } else {
+      toast.error("Помилка оновлення енергії. Спробуйте пізніше.");
+    }
+    };
+
 
   function calculateReward(enemy: Enemy | null): { rewardPoints: number; rewardExp: number } {
     if (!enemy) return { rewardPoints: 0, rewardExp: 0 };
@@ -485,7 +505,7 @@ export default function BattlePage() {
                 </div>
             </div>
 
-            <div style={{
+            <div onClick={handleStartBattle} style={{
                 display: "flex",
                 justifyContent: "center",
                 alignItems: "center",

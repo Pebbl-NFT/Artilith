@@ -35,79 +35,48 @@ export const ItemCard: React.FC<ItemCardProps> = ({
   onDismantleRequest,
 }) => {
   const commonInfo = (
-    <>
-      <img
-        src={image}
-        alt={name}
-        width={50}
-        height={50}
-        className={`item-image rarity-border-${rarity?.toLowerCase?.()}`}
-        style={{
-          backgroundColor: "rgba(255, 255, 255, 0.05)",
-          padding: "20px",
-          borderRadius: "10px",
-          marginBottom: "15px",
-          boxShadow:
-            "rgba(0, 0, 0, 0.3) 0px 19px 38px, rgba(0, 0, 0, 0.22) 0px 15px 12px",
-        }}
-      />
-      <h3 style={{ color: "rgba(253, 253, 253, 0.37)", marginBottom: "10px" }}>
-        {name}
-      </h3>
-      <p style={{ color: "#ddd", marginBottom: "15px" }}>{description}</p>
-      {damage && <p style={{ color: "#ddd", marginBottom: "5px" }}>{damage}</p>}
-      {defense && (
-        <p style={{ color: "#ddd", marginBottom: "15px" }}>{defense}</p>
-      )}
-    </>
+    <div>
+    </div>
   );
 
   return (
-    <div
-      style={{
-        borderRadius: "10px",
-        padding: "20px",
-        textAlign: "center",
-        boxShadow: "0 2px 9px rgba(0, 0, 0, 0.3)",
-        border: "1px solid rgba(255, 255, 255, 0.1)",
-        backgroundColor: "rgba(255,255,255,0.02)",
-      }}
-    >
+    <div>
       {commonInfo}
 
       {/* City: Покупка */}
       {mode === "city" && (
-        <button
-          style={{
-            backgroundColor:"#4caf50",
-            color: "#fff",
-            border: "none",
-            borderRadius: "5px",
-            padding: "10px",
-            fontSize: "14px",
-            cursor: "pointer",
-            transition: "background-color 0.3s",
-            width: "100%",
-            marginTop: "10px",
-          }}
-          onClick={() =>
-            onBuyRequest?.({
-              mode,
-              item_id,
-              type,
-              rarity,
-              name,
-              image,
-              description,
-              damage,
-              defense,
-              price,
-              onBuyRequest,
-            })
-          }
-        >
-          Придбати за {price} 🪨
-        </button>
+        <div>
+          <div>
+              <img onClick={() =>
+              onBuyRequest?.({
+                mode,
+                item_id,
+                type,
+                rarity,
+                name,
+                image,
+                description,
+                damage,
+                defense,
+                price,
+                onBuyRequest,
+                })
+              }
+                src={image}
+                alt={name}
+                width={30}
+                height={30}
+                className={`item-image rarity-border-${rarity?.toLowerCase?.()}`}
+                style={{
+                  backgroundColor: "rgba(255, 255, 255, 0.05)",
+                  padding: "10px",
+                  borderRadius: "10px",
+                  boxShadow:
+                    "rgba(0, 0, 0, 0.3) 0px 19px 38px, rgba(0, 0, 0, 0.22) 0px 15px 12px",
+                }}
+              />
+          </div>
+        </div>
       )}
 
       {/* Inventory: Спорядити + Розібрати */}
