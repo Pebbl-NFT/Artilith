@@ -41,7 +41,7 @@ export const baseEnemies: EnemyBase[] = [
   {
     name: 'Лісовий розвідник',
     image: '/enemies/forest/forestmonster3.png',
-    baseHealth: 35,
+    baseHealth: 30,
     baseDamage: 4,
     baseDefense: 4,
     baseCritChance: 0.05,
@@ -50,7 +50,7 @@ export const baseEnemies: EnemyBase[] = [
   {
     name: 'Лісовий розвідник',
     image: '/enemies/forest/forestmonster4.png',
-    baseHealth: 50,
+    baseHealth: 40,
     baseDamage: 5,
     baseDefense: 5,
     baseCritChance: 0.05,
