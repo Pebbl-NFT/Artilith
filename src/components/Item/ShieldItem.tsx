@@ -20,8 +20,8 @@ export const ShieldItems = [
       name: "Навчальний щит",
       description: "",
       damage: 0,
-      defense: 8,
-      price: 65,
+      defense: 9,
+      price: 165,
       image: shield01a.src,
     },
     {
@@ -31,8 +31,8 @@ export const ShieldItems = [
       name: "Навчальний щит",
       description: "",
       damage: 0,
-      defense: 8,
-      price: 65,
+      defense: 10,
+      price: 650, 
       image: shield01a.src,
     },
     {
@@ -53,8 +53,8 @@ export const ShieldItems = [
       name: "Сталевий щит",
       description: "",
       damage: 0, 
-      defense: 12,
-      price: 1600,
+      defense: 13,
+      price: 7700,
       image: shield01b.src,
     },
     {
@@ -64,8 +64,8 @@ export const ShieldItems = [
       name: "Сталевий щит",
       description: "",
       damage: 0, 
-      defense: 12,
-      price: 1600,
+      defense: 14,
+      price: 19000,
       image: shield01b.src,
     },
   ]; 

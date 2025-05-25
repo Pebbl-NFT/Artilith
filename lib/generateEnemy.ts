@@ -81,9 +81,9 @@ export const miniBosses: EnemyBase[] = [
   {
     name: 'Лісовий страшило (мінібос)',
     image: '/enemies/forest/miniboss1.png',
-    baseHealth: 120,
+    baseHealth: 90,
     baseDamage: 14,
-    baseDefense: 12,
+    baseDefense: 9,
     baseCritChance: 0.12,
     baseMissChance: 0.08,
   }
@@ -128,7 +128,7 @@ export function generateSequentialEnemy(
   }
 
   // Масштабування залежить від типу ворога і рівня гравця
-  let scaleFactor = 1 + playerLevel * (type === 'boss' ? 0.33 : type === 'miniBoss' ? 0.21 : 0.13);
+  let scaleFactor = 0.3 + playerLevel * (type === 'boss' ? 0.33 : type === 'miniBoss' ? 0.21 : 0.13);
 
   return {
     name: template.name,
