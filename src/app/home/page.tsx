@@ -1331,14 +1331,15 @@ export default function HomePage() {
                 flexDirection: "column",
                 alignItems: "center",
                 justifyContent: "center",
-                marginTop: "50px",
+                marginTop: "40px",
                 animation: "fadeIn 0.6s ease forwards",
               }}
             >
               <h1 style={{ 
                 fontSize: "2rem", 
                 fontWeight: "bold", 
-                marginBottom: "10px", 
+                marginBottom: "30px", 
+                marginTop: "0px",
                 textAlign: "center", 
                 color: "#fff", 
                 lineHeight: "1" }}>
