@@ -31,8 +31,6 @@ import { formatTime } from "@/utils/formatTime";
 import { getPlayerStats } from "@/utils/getPlayerStats";
 import { updateUserPoints } from "@/hooks/useUserPoints";
 import {addInventoryItem} from "@/hooks/useItemActions";
-import HeroEnergyAutoRegeneration from '@/hooks/HeroEnergyAutoRegeneration';
-import { reduceEnergy } from "@/utils/reduceEnergy";
 
 // Зображення
 import victim from "../_assets/victim.png";
@@ -1901,7 +1899,7 @@ export default function HomePage() {
   return (
     <Page back={false}>
       <List>
-        <TopBar points={points} />
+        <TopBar points={points} energy={energy} setEnergy={setEnergy} />
         <div style={{ paddingBottom: 100 }}>{renderContent()}</div>
         {selectedItem && (
           <div className="modal-overlay" onClick={() => setSelectedItem(null)}>

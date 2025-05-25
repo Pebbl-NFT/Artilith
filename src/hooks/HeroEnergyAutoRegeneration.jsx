@@ -57,7 +57,7 @@ function useEnergyRegen({ userId, energy, setEnergy, maxEnergy, supabase }) {
 const maxEnergy = 20; // Можна винести у конфіг
 // energy, setEnergy, userId, supabase - вже існують у вашому стані/component
 
-function HeroEnergyAutoRegeneration({ userId, energy, setEnergy, supabase, heroStats }) {
+function HeroEnergyAutoRegeneration({ userId, energy, setEnergy, supabase }) {
   // Після отримання з БД поточного energy
 
   // Підключаємо хук

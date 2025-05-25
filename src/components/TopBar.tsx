@@ -5,8 +5,13 @@ import { useSignal, initData } from '@telegram-apps/sdk-react';
 import HeroEnergyAutoRegeneration from '@/hooks/HeroEnergyAutoRegeneration';
 import { supabase } from "@/lib/supabaseClient";
 
-export default function TopBar({ points }: { points: number }) {
-  const [energy, setEnergy] = useState(0);
+interface TopBarProps {
+    points: number;
+    energy: number; // Тепер енергія приходить як пропс
+    setEnergy: (energy: number) => void; // Функція оновлення енергії також приходить як пропс
+  }
+
+export default function TopBar({ points, energy, setEnergy }: TopBarProps) {
   const initDataState = useSignal(initData.state);
   const userId = initDataState?.user?.id;
 
@@ -14,37 +19,12 @@ export default function TopBar({ points }: { points: number }) {
     return initDataState?.user?.firstName || 'User';
   }, [initDataState]);
 
-  // Завантажуємо дані користувача із Supabase
-    useEffect(() => {
-      const fetchUserData = async () => {
-        if (!userId) return;
-        const { data, error } = await supabase
-          .from("users")
-          .select("points, click_delay, energy, experience, level")
-          .eq("id", userId)
-          .single();
-        if (error) {
-          console.error("Помилка завантаження даних:", error);
-        } else if (data) {
-          setEnergy(data.energy); // Встановлюємо енергію користувача
-        }
-      };
-      
-      fetchUserData();
-    }, [userId]);
-
   useEffect(() => {
     if (initDataState?.user) {
       const user = initDataState.user;
       console.log('User data before saving:', user);
     }
   }, [initDataState?.user]);
-
-    const [heroStats, setHeroStats] = useState({
-      health: 20,
-      attack: 1,
-      defense: 0,
-    });
 
   return (
     <div className='top-bar' 
@@ -137,7 +117,6 @@ export default function TopBar({ points }: { points: number }) {
           energy={energy}
           setEnergy={setEnergy}
           supabase={supabase}
-          heroStats={heroStats}
         />
       </div>
     </div>

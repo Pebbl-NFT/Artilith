@@ -2,6 +2,8 @@
 
 import { Button, Placeholder } from '@telegram-apps/telegram-ui';
 import Artilith from '../app/_assets/Artilith_logo-no-bg.png';
+import City from '../app/_assets/citytab.png';
+import Adv from '../app/_assets/advtab.png';
 
 export default function BottomBar({ activeTab, setActiveTab }: { activeTab: string, setActiveTab: (value: string) => void }) {
   return (
@@ -16,7 +18,7 @@ export default function BottomBar({ activeTab, setActiveTab }: { activeTab: stri
         bottom: 0,
         background: 'rgb(33, 46, 58)',
         borderTop: '1px solid rgb(255, 255, 255)',
-        zIndex: 50,
+        zIndex: 150,
       }}
     >
       {/* Місто */}
@@ -43,17 +45,26 @@ export default function BottomBar({ activeTab, setActiveTab }: { activeTab: stri
             justifyContent: 'center',
           }}
         >
-          <span style={{
-            fontSize: 26, // Розмір емодзі
-          }}>
-            🎟️
-          </span>
+          <img
+            alt="Дім"
+            src={City.src}
+            style={{
+              width: 90,
+              height: 90,
+              objectFit: 'contain',
+              borderRadius: '100%',
+              padding: 1,
+              boxSizing: 'border-box',
+              marginBottom: -5,
+              marginTop: 0,
+            }}
+          />
           <Placeholder
             style={{
               fontSize: 12,
               fontWeight: 'lighter',
               color: activeTab === 'city' ? 'rgb(255, 255, 255)' : 'gray',
-              marginTop: -20,
+              marginTop: -50,
               textAlign: 'center',
             }}
           >
@@ -90,8 +101,8 @@ export default function BottomBar({ activeTab, setActiveTab }: { activeTab: stri
             alt="Дім"
             src={Artilith.src}
             style={{
-              width: 60,
-              height: 60,
+              width: 70,
+              height: 70,
               objectFit: 'contain',
               borderRadius: '100%',
               backgroundColor: activeTab === 'home' ? 'rgb(255, 255, 255)' : 'gray',
@@ -127,19 +138,25 @@ export default function BottomBar({ activeTab, setActiveTab }: { activeTab: stri
             justifyContent: 'center',
           }}
         >
-          <span style={{
-            fontSize: 26, // Розмір емодзі
-            paddingTop: 10,
-            marginTop: -10,
-          }}>
-            🧭
-          </span>
+          <img
+            alt="Дім"
+            src={Adv.src}
+            style={{
+              width: 90,
+              height: 90,
+              objectFit: 'contain',
+              borderRadius: '100%',
+              padding: 1,
+              boxSizing: 'border-box',
+              marginBottom: -5,
+            }}
+          />
           <Placeholder
             style={{
               fontSize: 12,
               fontWeight: 'lighter',
               color: activeTab === 'adventures' ? 'rgb(255, 255, 255)' : 'gray',
-              marginTop: -20,
+              marginTop: -50,
               textAlign: 'center',
             }}
           >

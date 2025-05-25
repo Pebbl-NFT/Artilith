@@ -353,23 +353,36 @@ export default function BattlePage() {
 
   const handleStartBattle = async () => {
     if (!userId) {
-      toast.error("Користувач не авторизований");
-      return;
+        toast.error("Користувач не авторизований");
+        return; // Зупиняємо виконання, якщо користувач не авторизований
     }
-  
+
+    // Перевірка енергії ПЕРЕД спробою її зменшити
     if (energy < 1) {
-      toast.error("Недостатньо енергії ⚡");
-      return;
+        toast.error("Недостатньо енергії ⚡");
+        return; // Зупиняємо виконання, якщо енергії недостатньо
     }
-  
-    const success = await reduceEnergy(userId, 1);
+
+    // Якщо енергії достатньо, намагаємося її зменшити на сервері/у стані
+    const success = await reduceEnergy(userId, 1); // Припустимо, що reduceEnergy взаємодіє з бекендом/станом
+    
     if (success) {
-      setEnergy(energy - 1);
-      toast.success("Використано 1⚡");
+        // Якщо енергія успішно зменшена (на сервері або в стані)
+        setEnergy(energy - 1); // Оновлюємо локальний стан енергії
+        toast.success("Використано 1⚡");
+
+        // === ЛОГІКА ПОЧАТКУ БОЮ ===
+        // Переміщуємо сюди дії, які безпосередньо починають бій
+        setShowPreBattle(false); // Ховаємо екран перед боєм
+        setCanAttack(true);      // Дозволяємо атаку (фактично, починаємо бій)
+        // =========================
+
     } else {
-      toast.error("Помилка оновлення енергії. Спробуйте пізніше.");
+        // Якщо зменшення енергії не вдалося (наприклад, помилка мережі)
+        toast.error("Помилка оновлення енергії. Спробуйте пізніше.");
+        // Бій не починається, оскільки енергія не була успішно списана
     }
-    };
+  };
 
 
   function calculateReward(enemy: Enemy | null): { rewardPoints: number; rewardExp: number } {
@@ -500,21 +513,20 @@ export default function BattlePage() {
                 </div>
             </div>
 
-            <div onClick={handleStartBattle} style={{
+            <div style={{
                 display: "flex",
                 justifyContent: "center",
                 alignItems: "center",
                 animation: "fadeIn 0.6s ease forwards",
-              }}>
-              <Button 
-                style={{ animation: "fadeIn 0.6s ease forwards", backgroundColor:"#4caf50" }}
-                onClick={() => {
-                  setShowPreBattle(false);
-                  setCanAttack(true);
-                }}
-              >
-               ⚔️ Почати бій ⚔️
-              </Button>
+            }}>
+                <Button
+                    style={{ animation: "fadeIn 0.6s ease forwards", backgroundColor:"#4caf50" }}
+                    // Переміщуємо обробник handleStartBattle сюди
+                    // Видаляємо старий обробник () => { setShowPreBattle(false); setCanAttack(true); }
+                    onClick={handleStartBattle}
+                >
+                ⚔️ Почати бій ⚔️
+                </Button>
             </div>
 
             <Link href="/home">
