@@ -20,7 +20,7 @@ export default function BattlePage() {
 
   const [inventory, setInventory] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [energy, setEnergy] = useState(10);
+  const [energy, setEnergy] = useState(0);
   const hasShownToast = useRef(false);
 
   const [points, setPoints] = useState(0);
@@ -83,11 +83,6 @@ export default function BattlePage() {
   useEffect(() => {
       fetchUserData(); // Викликаємо функцію
   }, [userId]);
-
-  const updateCanAttack = (value: boolean) => {
-    setCanAttack(value);
-    canAttackRef.current = value;
-  };
 
   const appendToLog = (newEntries: string[]) => {
     setLog(prev => {
@@ -362,7 +357,7 @@ export default function BattlePage() {
       return;
     }
   
-    if (energy < 7) {
+    if (energy < 1) {
       toast.error("Недостатньо енергії ⚡");
       return;
     }
@@ -759,6 +754,7 @@ export default function BattlePage() {
                 display: "flex", flexDirection: "column",
                 justifyContent: "center", alignItems: "center",
                 color: "#fff", zIndex: 9999,
+                paddingBottom: 30,
               }}
               role="dialog"
               aria-modal="true"
@@ -826,7 +822,7 @@ export default function BattlePage() {
               <Link href="/home">
                 <Button
                   style={{
-                    marginBottom: 10,
+                    marginBottom: -20,
                     backgroundColor: "#f44336",
                     color: "#fff",
                     animation: "fadeIn 0.6s ease forwards",
