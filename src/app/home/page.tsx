@@ -500,7 +500,7 @@ export default function HomePage() {
     case "shop":
       return (
         <Page back>
-          <Placeholder>
+            <Placeholder>
             <div onClick={() => setActiveTab("city")}
               style={{
               display: "flex",
@@ -508,7 +508,8 @@ export default function HomePage() {
               gap: "20px",
               alignItems: "center", 
               marginLeft: "auto",
-              marginRight: "auto",}}>
+              marginRight: "auto",
+              }}>
               <p 
                 style={{  
                   fontSize: "0.8rem",
@@ -568,8 +569,6 @@ export default function HomePage() {
               >
                 Не затримуй мене, я маю багато справ!
               </p>
-
-
               <h1
                 style={{
                   fontSize: "1rem",
@@ -616,7 +615,39 @@ export default function HomePage() {
               </Card>
             </div>
           </Placeholder>
-        </Page>
+            <Placeholder>
+                <div
+                  style={{
+                    marginTop: "-30px",
+                    marginLeft:"-10px",
+                    alignItems: "center",
+                    position: "relative",
+                    display: "grid",
+                    gridTemplateColumns: "repeat(auto-fill, minmax(40px, 1fr))", // Адаптивна сітка
+                    gap: "20px", // Відступ між картками
+                    width: "100%",
+                    animation: "fadeIn 1s ease forwards",
+                  }}
+                >
+                  {AllItems.map((item) => (
+                    <ItemCard
+                      mode={"city"}
+                      key={item.item_id}
+                      item_id={item.item_id}
+                      type={item.type}
+                      rarity={item.rarity}
+                      name={item.name}
+                      image={item.image}
+                      description={item.description}
+                      damage={item.damage ? ` ${item.damage}` : "0"}
+                        defense={item.defense ? ` ${item.defense}` : "0"}
+                      price={item.price}
+                      onBuyRequest={(item) => setSelectedItem(item)}
+                    />
+                  ))}
+                </div>
+            </Placeholder>
+          </Page>
       );
       case "weapons":
         return (
@@ -746,6 +777,7 @@ export default function HomePage() {
                     gridTemplateColumns: "repeat(auto-fill, minmax(40px, 1fr))", // Адаптивна сітка
                     gap: "20px", // Відступ між картками
                     width: "100%",
+                    animation: "fadeIn 1s ease forwards",
                   }}
                 >
                   {WeaponItems.map((item) => (
