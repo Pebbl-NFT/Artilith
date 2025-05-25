@@ -14,7 +14,7 @@ export const ShieldItems = [
       image: shield01a.src,
     },
     {
-      item_id: 10001.2,
+      item_id: 100012,
       type: "shield",
       rarity: 'uncommon',
       name: "Навчальний щит",
@@ -25,7 +25,7 @@ export const ShieldItems = [
       image: shield01a.src,
     },
     {
-      item_id: 10001.3,
+      item_id: 100013,
       type: "shield",
       rarity: 'rare',
       name: "Навчальний щит",
@@ -47,7 +47,7 @@ export const ShieldItems = [
       image: shield01b.src,
     },
     {
-      item_id: 10002.1,
+      item_id: 100021,
       type: "shield",
       rarity: 'uncommon',
       name: "Сталевий щит",
@@ -58,7 +58,7 @@ export const ShieldItems = [
       image: shield01b.src,
     },
     {
-      item_id: 10002.2,
+      item_id: 100022,
       type: "shield",
       rarity: 'rare',
       name: "Сталевий щит",

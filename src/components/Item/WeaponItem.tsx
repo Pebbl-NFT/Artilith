@@ -15,7 +15,7 @@ export const WeaponItems = [
       image: sword01a.src,
     },
     {
-      item_id: 1.1,
+      item_id: 11,
       type: "weapon",
       rarity: 'uncommon',
       name: "Навчальний меч",
@@ -26,7 +26,7 @@ export const WeaponItems = [
       image: sword01a.src,
     },
     {
-      item_id: 1.2,
+      item_id: 12,
       type: "weapon",
       rarity: 'rare',
       name: "Навчальний меч",
@@ -48,7 +48,7 @@ export const WeaponItems = [
       image: sword02a.src,
     },
     {
-      item_id: 2.1,
+      item_id: 21,
       type: "weapon",
       rarity: 'uncommon',
       name: "Сталевий меч",
@@ -59,7 +59,7 @@ export const WeaponItems = [
       image: sword02a.src,
     },
     {
-      item_id: 2.2,
+      item_id: 22,
       type: "weapon",
       rarity: 'rare',
       name: "Сталевий меч",
