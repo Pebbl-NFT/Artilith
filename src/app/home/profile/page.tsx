@@ -126,19 +126,16 @@ export default function ProfilePage() {
       </div>
       <Link href="/home">
         <Button
-          mode="filled"
           style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            width: "100%",
-            height: 100,
-            background: 'var(--tgui--secondary_bg_color)',
-            padding: 10,
-            borderRadius: 50,
-            marginBottom: '20px',
-            border: '0px solid rgb(255, 255, 255)',
-          }}
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        width: '100%',
+        position: 'fixed',
+        bottom: 0,
+        background: 'rgb(33, 46, 58)',
+        zIndex: 150,
+      }}
           name="back"
         >
           <p style={{ 

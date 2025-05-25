@@ -19,8 +19,7 @@ export default function BottomBar({ activeTab, setActiveTab }: { activeTab: stri
         background: 'rgb(33, 46, 58)',
         borderTop: '1px solid rgb(255, 255, 255)',
         zIndex: 150,
-      }}
-    >
+      }}>
       {/* Місто */}
       <Button
         mode="filled"
