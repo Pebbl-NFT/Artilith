@@ -49,8 +49,8 @@ export default function BottomBar({ activeTab, setActiveTab }: { activeTab: stri
             alt="Дім"
             src={City.src}
             style={{
-              width: 90,
-              height: 90,
+              width: 70,
+              height: 70,
               objectFit: 'contain',
               borderRadius: '100%',
               padding: 1,
@@ -101,8 +101,8 @@ export default function BottomBar({ activeTab, setActiveTab }: { activeTab: stri
             alt="Дім"
             src={Artilith.src}
             style={{
-              width: 70,
-              height: 70,
+              width: 60,
+              height: 60,
               objectFit: 'contain',
               borderRadius: '100%',
               backgroundColor: activeTab === 'home' ? 'rgb(255, 255, 255)' : 'gray',
@@ -142,8 +142,8 @@ export default function BottomBar({ activeTab, setActiveTab }: { activeTab: stri
             alt="Дім"
             src={Adv.src}
             style={{
-              width: 90,
-              height: 90,
+              width: 70,
+              height: 70,
               objectFit: 'contain',
               borderRadius: '100%',
               padding: 1,
