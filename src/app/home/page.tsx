@@ -58,9 +58,7 @@ export default function HomePage() {
   const [experience, setExperience] = useState(0);
   const [level, setLevel] = useState(1);
   const router = useRouter();
-
-
-
+  const [showTooltip, setShowTooltip] = useState(false);
 
   const username = useMemo(() => {
       return initDataState?.user?.firstName || 'User';
@@ -1345,16 +1343,59 @@ export default function HomePage() {
                 color: "#fff", 
                 lineHeight: "1" }}>
                   ДІМ</h1>
-              <p
-                style={{
-                  fontSize: "0.8rem",
-                  color: "#ddd",
-                  textAlign: "center",
-                  marginBottom: "30px",
-                }}
-              >
-                Тут ви можете налаштувати свого героя, та підготувати до пригод.
-              </p>
+                <div>
+                  <p
+                    style={{
+                      fontSize: "0.8rem",
+                      fontWeight: "lighter",
+                      fontFamily: "Arial, sans-serif",
+                      fontVariantEmoji: "emoji",
+                      color: "#ddd",
+                      position: "absolute",
+                      top: "-5px", // Позиціонуємо відносно батьківського div з relative
+                      right: "10px", // Позиціонуємо відносно батьківського div з relative
+                      background: "rgba(0, 0, 0, 0.35)",
+                      borderRadius: "50px",
+                      padding: "5px",
+                      width: "10px",
+                      height: "10px",
+                      zIndex: 20, // Переконуємося, що "?" поверх тултіпа, якщо потрібно
+                      cursor: "help", // Змінюємо курсор на знак питання для підказки
+                    }}
+                    onMouseEnter={() => setShowTooltip(true)}
+                    onMouseLeave={() => setShowTooltip(false)}
+                  >
+                    ?
+                  </p>
+                </div>
+
+                {showTooltip && ( // Відображаємо тултіп тільки якщо showTooltip === true
+                  <div
+                    style={{
+                      position: "absolute", // Абсолютне позиціонування відносно батьківського div з relative
+                      top: "20px", // Відступ зверху від батьківського div (можливо, потрібно підлаштувати)
+                      right: "30px", // Позиціонуємо праворуч від батьківського div (можливо, потрібно підлаштувати)
+                      // Можна спробувати позиціонувати ліворуч, якщо праворуч заважає:
+                      // left: "0px",
+                      // top: "20px",
+                      background: "rgba(0, 0, 0, 0.85)", // Темний напівпрозорий фон
+                      color: "#fff", // Білий текст
+                      padding: "8px 12px", // Внутрішні відступи
+                      borderRadius: "8px", // Закруглені кути
+                      whiteSpace: "normal", // Дозволяємо тексту переноситись на новий рядок
+                      maxWidth: "300px", // Обмежуємо максимальну ширину тултіпа
+                      zIndex: 15, // Переконуємося, що тултіп під "?" але поверх іншого вмісту
+                      pointerEvents: "none", // Тултіп не перехоплює події миші
+                      fontSize: "0.9rem", // Розмір шрифту
+                      lineHeight: "1.3", // Міжрядковий інтервал
+                      textAlign: "left", // Вирівнювання тексту
+                      transform: 'translateX(5%)', // Невеличкий зсув праворуч від правої межі батьківського блоку
+                      // Якщо позиціонували ліворуч: transform: 'translateX(-105%)', // Зсув ліворуч від лівої межі батьківського блоку
+                    }}
+                  >
+                    Тут ви можете налаштувати свого героя, та підготувати до пригод.
+                  </div>
+                )}
 
               <Card className="page">
                 <div style={{
