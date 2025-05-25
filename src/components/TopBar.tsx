@@ -54,7 +54,7 @@ export default function TopBar({ points }: { points: number }) {
         alignItems: 'center',
         width: '100%',
         height: 50,
-        background: 'var(--tgui--secondary_bg_color)',
+        background: 'rgb(33, 46, 58)',
         backdropFilter: "blur(2px)",
         transition: "filter 0.3s ease",
         pointerEvents: "auto",
