@@ -59,6 +59,26 @@ export default function HomePage() {
   const [level, setLevel] = useState(1);
   const router = useRouter();
   const [showTooltip, setShowTooltip] = useState(false);
+  type InventoryItemType = {
+    id: string;
+    item_id: number;
+    type: string;
+    name: string;
+    image: string;
+    description: string;
+    damage?: number;
+    defense?: number;
+    strength?: number;
+    price: number;
+    rarity?: string;
+    equipped?: boolean;
+    upgrade_level?: number;
+  };
+
+  const [selectedWeapon, setSelectedWeapon] = useState<InventoryItemType | null>(null);
+  const [selectedScroll, setSelectedScroll] = useState(null);
+  const [isUpgrading, setIsUpgrading] = useState(false);
+  const [result, setResult] = useState<{ type: string; text: string } | null>(null);
 
   const username = useMemo(() => {
       return initDataState?.user?.firstName || 'User';
@@ -89,6 +109,7 @@ export default function HomePage() {
     strength?: string;
     price: number;
     rarity?: string;
+    upgrade_level?: number;
   } | null;
 
   // Завантажуємо дані користувача із Supabase
@@ -259,47 +280,117 @@ export default function HomePage() {
       toast.success(`Вам зараховано + 1 🔷`);
   };
 
+  // Функція для визначення шансів успіху
+  function getEnchantChance(upgradeLevel: number): number {
+    if (upgradeLevel < 1) return 1.0; // 100%
+    if (upgradeLevel === 1) return 0.9; // 90%
+    if (upgradeLevel === 2) return 0.6; // 50%
+    if (upgradeLevel >= 3 && upgradeLevel < 4) return 0.5; // 50% (приклад)
+    if (upgradeLevel >= 4 && upgradeLevel < 5) return 0.45; // %
+    if (upgradeLevel >= 5 && upgradeLevel < 6) return 0.30; // %
+    if (upgradeLevel >= 6 && upgradeLevel < 7) return 0.20; // %
+    if (upgradeLevel >= 7 && upgradeLevel < 8) return 0.14; // %
+    if (upgradeLevel >= 8 && upgradeLevel < 9) return 0.091; // %
+    if (upgradeLevel >= 9 && upgradeLevel < 10) return 0.0585; // %
+    if (upgradeLevel >= 10 && upgradeLevel < 11) return 0.04; // %
+    if (upgradeLevel >= 11 && upgradeLevel < 12) return 0.027; // %
+    if (upgradeLevel >= 12 && upgradeLevel < 13) return 0.0173; // %
+    if (upgradeLevel >= 13 && upgradeLevel < 14) return 0.0116; // %
+    if (upgradeLevel >= 13 && upgradeLevel < 14) return 0.0077; // %
+    return 0; // не можна більше покращувати
+  }
+  // Основна функція спроби прокачки предмета
+  async function tryUpgradeWeapon(inventoryId: string, upgradeLevel: number, useProtectionItem: boolean) {
+    const currentChance = getEnchantChance(upgradeLevel);
+    const isSafeUpgrade = upgradeLevel < 4;
+    // Емуляція кидка кубика
+    const isSuccess = Math.random() < currentChance;
+    if (isSuccess) {
+      // успіх: підвищуємо рівень
+      await supabase.from('inventory').update({ upgrade_level: upgradeLevel + 1 }).eq('id', inventoryId);
+      return { result: 'success', newLevel: upgradeLevel + 1 };
+    } else {
+      if (isSafeUpgrade) {
+        // нічого, предмет залишився цілий
+        return { result: 'safe_fail', newLevel: upgradeLevel };
+      }
+      if (useProtectionItem) {
+        // "Захистили" - рівень не підвищився, предмет не зламаний, але використовуємо protection item
+        return { result: 'protected_fail', newLevel: upgradeLevel };
+      }
+      // зламався: видаляємо з inventory
+      await supabase.from('inventory').delete().eq('id', inventoryId);
+      return { result: 'broken', newLevel: null };
+    }
+  }
+
   // Функція обрахунку характеристик героя
   const updateHeroStats = useCallback(() => {
     const stats = getPlayerStats(inventory);
     setHeroStats(stats);
   }, [inventory]);
 
-  
+  const [hasScroll, setHasScroll] = useState(false);
+
+  // Вибір сувою з inventory (item.type === 'scroll')
+  useEffect(() => {
+    if (!inventory) return;
+    setHasScroll(!!inventory.find(item => item.type==='scroll'));
+  }, [inventory]);
+
+  interface UpgradableItem {
+    damage: number;
+    defense: number;
+  }
+
+  interface UpgradedStats {
+    damage: number;
+    defense: number;
+  }
+
+  const getUpgradedStats = (base: UpgradableItem, level: number): UpgradedStats => {
+    // Наприклад: +15% damage і +8% defense за кожен рівень
+    return {
+      damage: Math.round(base.damage * (1 + 0.10 * level)),
+      defense: Math.round(base.defense * (1 + 0.08 * level)),
+    };
+  };
+
   // Функція додавання предмета в інвентар
   const fetchInventory = async () => {
     if (!userId) return;
     setLoading(true);
-  
+
     const { data, error } = await supabase
       .from("inventory")
       .select(`
         id,
         item_id,
-        equipped
+        equipped,
+        upgrade_level
       `)
       .eq("user_id", userId);
-  
+
     if (error) {
       console.error("Помилка при завантаженні інвентаря:", error.message);
       setLoading(false);
       return;
     }
-  
+
     if (data) {
       const formatted = data.map((entry) => {
         const item = AllItems.find((i) => i.item_id === entry.item_id);
         return {
           ...item,
-          id: entry.id, // унікальний id інстансу предмета
+          id: entry.id,
           equipped: entry.equipped ?? false,
+          upgrade_level: entry.upgrade_level ?? 0,
         };
       });      
-  
-      console.log("Форматований інвентар:", formatted);
+
       setInventory(formatted);
     }
-  
+
     setLoading(false);
   };
 
@@ -501,33 +592,29 @@ export default function HomePage() {
       return (
         <Page back>
             <Placeholder>
-            <div onClick={() => setActiveTab("city")}
+            <Button onClick={() => setActiveTab("city")}
               style={{
               display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
               width: '100%',
               position: 'fixed',
-              zIndex: 1250,
-            }}>
-              <p 
-                style={{  
-                  fontSize: "0.8rem",
-                  color: "#ddd",
-                  position: "fixed",
-                  bottom: 140,
-                  right: "20px",
-                  background: "rgba(0, 0, 0, 0.59)",
-                  animation: "fadeIn 1s ease forwards",
-                  border: "2px ridge rgba(255, 255, 255, 0.6)",
-                  borderRadius: "50px",
-                  padding: "10px",
-                  paddingInline: "15px",
-                  marginBottom: "-40px",
-                }}>
-                x
-              </p>
-            </div>
+              bottom: 90,
+              background: 'rgba(33, 46, 58, 0)',
+              zIndex: 150,
+            }}
+              name="back"
+            >
+              <p style={{
+                fontSize: "20px", 
+                color: "#fff", 
+                fontWeight: "bold",
+                background: "rgba(0, 0, 0, 0.59)",
+                animation: "fadeIn 1s ease forwards",
+                border: "2px ridge rgba(255, 255, 255, 0.6)",
+                borderRadius: "50px",
+                paddingInline: "15px",
+              }}>
+                X</p>
+            </Button>
             <h1
                 style={{
                   fontSize: "2rem",
@@ -654,31 +741,29 @@ export default function HomePage() {
         return (
           <Page back>
             <Placeholder>
-            <div onClick={() => setActiveTab("city")}
+            <Button onClick={() => setActiveTab("shop")}
               style={{
-              display: "flex",
-              flexDirection: "row",
-              gap: "20px",
-              alignItems: "center", 
-              marginLeft: "auto",
-              marginRight: "auto",}}>
-              <p 
-                style={{  
-                  fontSize: "0.8rem",
-                  color: "#ddd",
-                  position: "absolute",
-                  top: "60px",
-                  right: "20px",
-                  background: "rgba(0, 0, 0, 0.59)",
-                  animation: "fadeIn 1s ease forwards",
-                  borderRadius: "50px",
-                  padding: "10px",
-                  paddingInline: "15px",
-                  marginBottom: "-40px",
-                }}>
-                x
-              </p>
-            </div>
+              display: 'flex',
+              width: '100%',
+              position: 'fixed',
+              bottom: 90,
+              background: 'rgba(33, 46, 58, 0)',
+              zIndex: 150,
+            }}
+              name="back"
+            >
+              <p style={{
+                fontSize: "20px", 
+                color: "#fff", 
+                fontWeight: "bold",
+                background: "rgba(0, 0, 0, 0.59)",
+                animation: "fadeIn 1s ease forwards",
+                border: "2px ridge rgba(255, 255, 255, 0.6)",
+                borderRadius: "50px",
+                paddingInline: "15px",
+              }}>
+                X</p>
+            </Button>
             <h1
                 style={{
                   fontSize: "2rem",
@@ -805,31 +890,29 @@ export default function HomePage() {
           return (
             <Page back>
               <Placeholder>
-                <div onClick={() => setActiveTab("city")}
-              style={{
-              display: "flex",
-              flexDirection: "row",
-              gap: "20px",
-              alignItems: "center", 
-              marginLeft: "auto",
-              marginRight: "auto",}}>
-              <p 
-                style={{  
-                  fontSize: "0.8rem",
-                  color: "#ddd",
-                  position: "absolute",
-                  top: "60px",
-                  right: "20px",
+              <Button onClick={() => setActiveTab("shop")}
+                style={{
+                display: 'flex',
+                width: '100%',
+                position: 'fixed',
+                bottom: 90,
+                background: 'rgba(33, 46, 58, 0)',
+                zIndex: 150,
+              }}
+                name="back"
+              >
+                <p style={{
+                  fontSize: "20px", 
+                  color: "#fff", 
+                  fontWeight: "bold",
                   background: "rgba(0, 0, 0, 0.59)",
                   animation: "fadeIn 1s ease forwards",
+                  border: "2px ridge rgba(255, 255, 255, 0.6)",
                   borderRadius: "50px",
-                  padding: "10px",
                   paddingInline: "15px",
-                  marginBottom: "-40px",
                 }}>
-                x
-              </p>
-            </div>
+                  X</p>
+              </Button>
             <h1
                 style={{
                   fontSize: "2rem",
@@ -955,36 +1038,11 @@ export default function HomePage() {
       return (
         <Page back>
           <Placeholder>
-            <div onClick={() => setActiveTab("city")}
-              style={{
-              display: "flex",
-              flexDirection: "row",
-              gap: "20px",
-              alignItems: "center", 
-              marginLeft: "auto",
-              marginRight: "auto",}}>
-              <p 
-                style={{  
-                  fontSize: "0.8rem",
-                  color: "#ddd",
-                  position: "absolute",
-                  top: "60px",
-                  right: "20px",
-                  background: "rgba(0, 0, 0, 0.59)",
-                  animation: "fadeIn 1s ease forwards",
-                  borderRadius: "50px",
-                  padding: "10px",
-                  paddingInline: "15px",
-                  marginBottom: "-40px",
-                }}>
-                x
-              </p>
-            </div>
             <h1
                 style={{
                   fontSize: "2rem",
                   fontWeight: "bold",
-                  marginTop: "20px",
+                  marginTop: "50px",
                   textAlign: "center",
                   lineHeight: "1",
                   color: "#fff",
@@ -1051,7 +1109,7 @@ export default function HomePage() {
                 ВІДРЕМОНТУВАТИ
               </Card>
 
-              <Card className="page" 
+              <Card className="page" onClick={() => setActiveTab("upgrade")} 
               style={{
               display: "flex",
               flexDirection: "row",
@@ -1070,40 +1128,173 @@ export default function HomePage() {
           </Placeholder>
         </Page>
       ); 
+      case "upgrade":
+        return (
+          <Page back>
+            <Placeholder>
+              <h1
+                  style={{
+                    fontSize: "2rem",
+                    fontWeight: "bold",
+                    marginTop: "50px",
+                    textAlign: "center",
+                    lineHeight: "1",
+                    color: "#fff",
+                  }}
+                >
+                  КОВАЛЬ
+                </h1>
+              <div
+                className="page"
+                style={{
+                  backgroundImage: `url(${blacksmithbg.src})`,
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  animation: "fadeIn 1s ease forwards",
+                  backgroundSize: 'cover', // Покрити весь блок
+                  backgroundPosition: 'center', // Центрувати зображення
+                  height: '100%', // Зайняти всю висоту вікна
+                  color: "#fff", // Текст навколо, щоб бути білішим на фоні
+                }}
+              >
+                <p
+                  style={{
+                    fontSize: "0.8rem",
+                    color: "#ddd",
+                    textAlign: "center",
+                    marginBottom: "20px",
+                    marginTop: "0px",
+                    maxWidth: "600px",
+                    background: "rgba(0, 0, 0, 0.59)",
+                    padding: "5px",
+                    animation: "fadeIn 3s ease forwards",
+                  }}
+                >
+                  Знову щось зламав? Я не можу вічно тебе рятувати!
+                </p>
+                <h1
+                  style={{
+                    fontSize: "1rem",
+                    fontWeight: "bold",
+                    marginBottom: "70px",
+                    marginTop: "5px",
+                    textAlign: "center",
+                    lineHeight: "1",
+                    color: "#fff",
+                  }}
+                >
+                  
+                </h1>
+                <Card className="page"
+                style={{
+                  display: "flex",
+                  flexDirection: "row",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  marginBottom: 20,
+                  gap: "30px",
+                  padding: 5,
+                  color: "#fff",
+                  animation: "fadeIn 0.6s ease forwards",
+                  background: "rgba(0, 0, 0, 0.45)",
+                }}>
+                  ВІДРЕМОНТУВАТИ
+                </Card>
+
+                <Card
+                  className="page"
+                  style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                    marginBottom: 20,
+                    gap: "8px",
+                    padding: 5,
+                    color: "#fff",
+                    background: "rgba(0, 0, 0, 0.59)",
+                  }}>
+                  <div style={{fontSize:18, marginBottom:7}}>ПРОКАЧКА ЗБРОЇ</div>
+                  <div>Виберіть зброю та сувій для прокачки:</div>
+                  {/* Інвентар зброї */}
+                  {inventory.length === 0 && <div style={{color:"#faa"}}>У вас немає зброї</div>}
+                  {/* ВІДОБРАЖЕННЯ СУВОЇВ (можна своїм компонентом. Тут просто кнопка для перевірки) */}
+                  {!hasScroll && <div style={{color: "#ffc025"}}>Немає сувоїв для прокачки</div>}
+                  {/* СЛОТИ ЗБРОЇ */}
+                  <div style={{width:"100%"}}>
+                    {inventory.filter(i=>i.type==="weapon").length ? (
+                      <div style={{display:'flex',flexWrap:'wrap',justifyContent:'center',gap:15}}>
+                        {inventory.filter(i=>i.type==="weapon").map(item=>{
+                          const stats = getUpgradedStats(item, item.upgrade_level);
+                          return (
+                            <Card
+                              key={item.id}
+                              style={{
+                                minWidth: 110,
+                                background: selectedWeapon && selectedWeapon.id === item.id ? "#444a31" : "#272b15",
+                                border: selectedWeapon && selectedWeapon.id === item.id ? "2px solid #9f9" : "1.5px solid #778",
+                                cursor: "pointer",
+                                margin:"6px",
+                              }}
+                              onClick={()=>setSelectedWeapon(item)}
+                            >
+                              <Image src={item.image} width={42} height={42} alt={item.name}/>
+                              <div>{item.name} <span style={{color:'#aff'}}>+{item.upgrade_level??0}</span></div>
+                              <div style={{fontSize:14, color:'#aaf'}}>Атака {stats.damage}/Захист {stats.defense}</div>
+                            </Card>
+                          )
+                        })}
+                      </div>
+                    ) : ""}
+                  </div>
+                  {/* Кнопка прокачки */}
+                  <div style={{marginTop:14,marginBottom:8}}>
+                    <Button
+                      onClick={async () => {
+                        if (!selectedWeapon) return;
+                        setIsUpgrading(true);
+                        // Приклад: використовуємо перший сувій для прокачки
+                        const scrollItem = inventory.find(i => i.type === "scroll");
+                        const useProtectionItem = false; // змініть логіку якщо потрібно
+                        const result = await tryUpgradeWeapon(
+                          selectedWeapon.id,
+                          selectedWeapon.upgrade_level ?? 0,
+                          useProtectionItem
+                        );
+                        setResult(result ? { type: result.result, text: result.result === 'success' ? 'Успішно покращено!' : result.result === 'broken' ? 'Зброя зламалась!' : 'Покращення не вдалося.' } : null);
+                        setIsUpgrading(false);
+                        fetchInventory();
+                      }}
+                      style={{minWidth:99}}
+                      disabled={!selectedWeapon || !hasScroll || isUpgrading}
+                    >
+                      {isUpgrading ? "Покращуємо..." : hasScroll ? "Покращити" : "Немає сувоїв"}
+                    </Button>
+                  </div>
+                  {result && (
+                    <div style={{
+                      color: result.type==='success'?"#5f6": result.type==='fail'?"#f66":"#faf792",
+                      marginTop: 11,
+                      fontWeight: 'bold'
+                    }}>
+                      {result.text}
+                    </div>
+                  )}
+                </Card>
+              </div>
+            </Placeholder>
+          </Page>
+        ); 
     case "guild":
       return (
         <Page back>
           <Placeholder>
-            <div onClick={() => setActiveTab("city")}
-              style={{
-              display: "flex",
-              flexDirection: "row",
-              gap: "20px",
-              alignItems: "center", 
-              marginLeft: "auto",
-              marginRight: "auto",}}>
-              <p 
-                style={{  
-                  fontSize: "0.8rem",
-                  color: "#ddd",
-                  position: "absolute",
-                  top: "60px",
-                  right: "20px",
-                  background: "rgba(0, 0, 0, 0.59)",
-                  animation: "fadeIn 1s ease forwards",
-                  borderRadius: "50px",
-                  padding: "10px",
-                  paddingInline: "15px",
-                  marginBottom: "-40px",
-                }}>
-                x
-              </p>
-            </div>
             <h1
                 style={{
                   fontSize: "2rem",
                   fontWeight: "bold",
-                  marginTop: "20px",
+                  marginTop: "50px",
                   textAlign: "center",
                   lineHeight: "1",
                   color: "#fff",
@@ -1193,36 +1384,11 @@ export default function HomePage() {
       return (
         <Page back>
           <Placeholder>
-            <div onClick={() => setActiveTab("city")}
-              style={{
-              display: "flex",
-              flexDirection: "row",
-              gap: "20px",
-              alignItems: "center", 
-              marginLeft: "auto",
-              marginRight: "auto",}}>
-              <p 
-                style={{  
-                  fontSize: "0.8rem",
-                  color: "#ddd",
-                  position: "absolute",
-                  top: "60px",
-                  right: "20px",
-                  background: "rgba(0, 0, 0, 0.59)",
-                  animation: "fadeIn 1s ease forwards",
-                  borderRadius: "50px",
-                  padding: "10px",
-                  paddingInline: "15px",
-                  marginBottom: "-40px",
-                }}>
-                x
-              </p>
-            </div>
             <h1
                 style={{
                   fontSize: "2rem",
                   fontWeight: "bold",
-                  marginTop: "20px",
+                  marginTop: "50px",
                   textAlign: "center",
                   lineHeight: "1",
                   color: "#fff",
@@ -2043,7 +2209,7 @@ export default function HomePage() {
                     Захист: <strong>{selectedItem.defense}</strong>
                   </p>
                   <p style={{ fontSize: "0.9rem", color: "#ccc", marginBottom: "20px" }}>
-                    Рівень: 1
+                    Рівень: 0
                   </p>
                   <p style={{ fontSize: "0.9rem", color: "#ccc", marginBottom: "50px" }}>
                     Міцність: 10 / 10
@@ -2184,7 +2350,7 @@ export default function HomePage() {
                     textAlign: "center",
                   }}
                 >
-                  <h2 className={` rarity-font-${selectedItem.rarity?.toLowerCase()}`} style={{ fontSize: "1.2rem", marginBottom: "10px" }}>{selectedItem.name}</h2>
+                  <h2 className={` rarity-font-${selectedItem.rarity?.toLowerCase()}`} style={{ fontSize: "1.2rem", marginBottom: "10px" }}>{selectedItem.name} +{selectedItem.upgrade_level}</h2>
                   {selectedItem.image && (
                       <img 
                       src={typeof selectedItem.image === "string" ? selectedItem.image : (selectedItem.image as { src: string }).src}
@@ -2205,7 +2371,7 @@ export default function HomePage() {
                     Захист: <strong>{selectedItem.defense}</strong>
                   </p>
                   <p style={{ fontSize: "0.9rem", color: "#ccc", marginBottom: "20px" }}>
-                    Рівень: 1
+                    Рівень: <strong>{selectedItem.upgrade_level}</strong>
                   </p>
                   <p style={{ fontSize: "0.9rem", color: "#ccc", marginBottom: "20px" }}>
                     Міцність: 10 / 10

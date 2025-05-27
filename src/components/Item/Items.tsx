@@ -1,8 +1,10 @@
 import { WeaponItems } from "./WeaponItem";
 import { ShieldItems } from "./ShieldItem";
-import { PotionItems } from "./PotionItem";
+import { ScrollItems } from "./ScrollItem";
+
 
 export const AllItems = [
     ...WeaponItems,
     ...ShieldItems,
+    ...ScrollItems,
 ];
