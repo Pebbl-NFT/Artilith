@@ -1262,10 +1262,6 @@ export default function HomePage() {
                   }}>
                   <div style={{fontSize:18, marginBottom:17, marginTop: 27}}>ПОКРАЩЕННЯ ЗБРОЇ</div>
                   <div>Виберіть зброю та сувій для прокачки:</div>
-
-                  {/* Інвентар зброї */}
-                  {inventory.length === 0 && <div style={{color:"#faa"}}>У вас немає зброї</div>}
-
                   {/* ВІДОБРАЖЕННЯ СУВОЇВ (можна своїм компонентом. Тут просто кнопка для перевірки) */}
                   {hasScrolls ? (
                     <p>У вас є сувої для покращення!</p>
@@ -1350,8 +1346,9 @@ export default function HomePage() {
                   </div>
 
                   {/* СЛОТИ ЗБРОЇ */}
-                  <div style={{ marginTop: 10 }}>
+                  <div style={{ marginTop: 10, marginBottom: 50, }}>
                     <div style={{ fontWeight: 600 }}>Зброя:</div>
+                    {inventory.length === 0 && <div style={{color:"#faa"}}>У вас немає зброї</div>}
                     <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginTop: 6 }}>
                     {inventory.filter(i=>i.type==="weapon").length ? (
                       <div style={{display:'flex',flexWrap:'wrap',justifyContent:'center',gap:15}}>
