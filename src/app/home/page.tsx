@@ -59,6 +59,7 @@ export default function HomePage() {
   const [level, setLevel] = useState(1);
   const router = useRouter();
   const [showTooltip, setShowTooltip] = useState(false);
+
   type InventoryItemType = {
     id: string;
     item_id: number;
@@ -76,7 +77,20 @@ export default function HomePage() {
   };
 
   const [selectedWeapon, setSelectedWeapon] = useState<InventoryItemType | null>(null);
-  const [selectedScroll, setSelectedScroll] = useState(null);
+  // Define a minimal Item type for scrolls, or adjust as needed
+  type ScrollItemType = {
+    id: string;
+    item_id: number;
+    type: string;
+    name: string;
+    image: string;
+    description: string;
+    price: number;
+    rarity?: string;
+    equipped?: boolean;
+    upgrade_level?: number;
+  };
+  const [selectedScroll, setSelectedScroll] = useState<ScrollItemType | null>(null);
   const [isUpgrading, setIsUpgrading] = useState(false);
   const [result, setResult] = useState<{ type: string; text: string } | null>(null);
 
@@ -284,12 +298,12 @@ export default function HomePage() {
   function getEnchantChance(upgradeLevel: number): number {
     if (upgradeLevel < 1) return 1.0; // 100%
     if (upgradeLevel === 1) return 0.9; // 90%
-    if (upgradeLevel === 2) return 0.6; // 50%
-    if (upgradeLevel >= 3 && upgradeLevel < 4) return 0.5; // 50% (приклад)
-    if (upgradeLevel >= 4 && upgradeLevel < 5) return 0.45; // %
-    if (upgradeLevel >= 5 && upgradeLevel < 6) return 0.30; // %
-    if (upgradeLevel >= 6 && upgradeLevel < 7) return 0.20; // %
-    if (upgradeLevel >= 7 && upgradeLevel < 8) return 0.14; // %
+    if (upgradeLevel === 2) return 0.9; // 80%
+    if (upgradeLevel >= 3 && upgradeLevel < 4) return 0.6; // 60% (приклад)
+    if (upgradeLevel >= 4 && upgradeLevel < 5) return 0.5; // %
+    if (upgradeLevel >= 5 && upgradeLevel < 6) return 0.4; // %
+    if (upgradeLevel >= 6 && upgradeLevel < 7) return 0.3; // %
+    if (upgradeLevel >= 7 && upgradeLevel < 8) return 0.2; // %
     if (upgradeLevel >= 8 && upgradeLevel < 9) return 0.091; // %
     if (upgradeLevel >= 9 && upgradeLevel < 10) return 0.0585; // %
     if (upgradeLevel >= 10 && upgradeLevel < 11) return 0.04; // %
@@ -300,29 +314,38 @@ export default function HomePage() {
     return 0; // не можна більше покращувати
   }
   // Основна функція спроби прокачки предмета
-  async function tryUpgradeWeapon(inventoryId: string, upgradeLevel: number, useProtectionItem: boolean) {
+  async function tryUpgradeWeapon(
+    inventoryId: string,
+    upgradeLevel: number,
+    scrollId: string,
+    useProtectionItem: boolean
+  ) {
     const currentChance = getEnchantChance(upgradeLevel);
     const isSafeUpgrade = upgradeLevel < 4;
-    // Емуляція кидка кубика
     const isSuccess = Math.random() < currentChance;
+
+    // Видаляємо сувій
+    await supabase.from("inventory").delete().eq("id", scrollId);
+
     if (isSuccess) {
-      // успіх: підвищуємо рівень
-      await supabase.from('inventory').update({ upgrade_level: upgradeLevel + 1 }).eq('id', inventoryId);
-      return { result: 'success', newLevel: upgradeLevel + 1 };
+      await supabase
+        .from("inventory")
+        .update({ upgrade_level: upgradeLevel + 1 })
+        .eq("id", inventoryId);
+      return { result: "success", newLevel: upgradeLevel + 1 };
     } else {
       if (isSafeUpgrade) {
-        // нічого, предмет залишився цілий
-        return { result: 'safe_fail', newLevel: upgradeLevel };
+        return { result: "safe_fail", newLevel: upgradeLevel };
       }
       if (useProtectionItem) {
-        // "Захистили" - рівень не підвищився, предмет не зламаний, але використовуємо protection item
-        return { result: 'protected_fail', newLevel: upgradeLevel };
+        return { result: "protected_fail", newLevel: upgradeLevel };
       }
-      // зламався: видаляємо з inventory
-      await supabase.from('inventory').delete().eq('id', inventoryId);
-      return { result: 'broken', newLevel: null };
+      // зламався — видаляємо сам предмет
+      await supabase.from("inventory").delete().eq("id", inventoryId);
+      return { result: "broken", newLevel: null };
     }
   }
+
 
   // Функція обрахунку характеристик героя
   const updateHeroStats = useCallback(() => {
@@ -330,13 +353,8 @@ export default function HomePage() {
     setHeroStats(stats);
   }, [inventory]);
 
-  const [hasScroll, setHasScroll] = useState(false);
-
-  // Вибір сувою з inventory (item.type === 'scroll')
-  useEffect(() => {
-    if (!inventory) return;
-    setHasScroll(!!inventory.find(item => item.type==='scroll'));
-  }, [inventory]);
+// Вибір сувою з inventory (item.type === 'scroll')
+  const hasScrolls = useMemo(() => inventory.some(item => item.type === 'scroll'), [inventory]);
 
   interface UpgradableItem {
     damage: number;
@@ -351,7 +369,7 @@ export default function HomePage() {
   const getUpgradedStats = (base: UpgradableItem, level: number): UpgradedStats => {
     // Наприклад: +15% damage і +8% defense за кожен рівень
     return {
-      damage: Math.round(base.damage * (1 + 0.10 * level)),
+      damage: Math.round(base.damage * (1 + 0.1 * level)),
       defense: Math.round(base.defense * (1 + 0.08 * level)),
     };
   };
@@ -461,6 +479,31 @@ export default function HomePage() {
     fetchPlayers();
   }, []);
 
+  useEffect(() => {
+    const updateSelectedWeapon = async () => {
+      await fetchInventory();
+      const updated = inventory.find(i => i.id === selectedWeapon?.id);
+      setSelectedWeapon(updated ?? null);
+    };
+    if (selectedWeapon) {
+      updateSelectedWeapon();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedWeapon?.id]);
+
+  useEffect(() => {
+    if (selectedWeapon && !inventory.find(i => i.id === selectedWeapon.id)) {
+      setSelectedWeapon(null);
+    }
+  }, [inventory]);
+
+  useEffect(() => {
+    if (!selectedWeapon) return;
+    const updated = inventory.find(i => i.id === selectedWeapon.id);
+    if (updated && updated !== selectedWeapon) {
+      setSelectedWeapon(updated);
+    }
+  }, [inventory]);
 
   // Функція рендеринга контенту для різних вкладок
   const renderContent = () => {
@@ -1071,6 +1114,7 @@ export default function HomePage() {
                   color: "#ddd",
                   textAlign: "center",
                   marginBottom: "20px",
+                  marginLeft: "240px",
                   marginTop: "0px",
                   maxWidth: "600px",
                   background: "rgba(0, 0, 0, 0.59)",
@@ -1154,7 +1198,7 @@ export default function HomePage() {
                   justifyContent: "center",
                   animation: "fadeIn 1s ease forwards",
                   backgroundSize: 'cover', // Покрити весь блок
-                  backgroundPosition: 'center', // Центрувати зображення
+                  backgroundPosition: "top", // Центрувати зображення
                   height: '100%', // Зайняти всю висоту вікна
                   color: "#fff", // Текст навколо, щоб бути білішим на фоні
                 }}
@@ -1165,6 +1209,7 @@ export default function HomePage() {
                     color: "#ddd",
                     textAlign: "center",
                     marginBottom: "20px",
+                    marginLeft: "70px",
                     marginTop: "0px",
                     maxWidth: "600px",
                     background: "rgba(0, 0, 0, 0.59)",
@@ -1172,13 +1217,13 @@ export default function HomePage() {
                     animation: "fadeIn 3s ease forwards",
                   }}
                 >
-                  Знову щось зламав? Я не можу вічно тебе рятувати!
+                  Сумніваюсь що з цього щось вийде!
                 </p>
                 <h1
                   style={{
                     fontSize: "1rem",
                     fontWeight: "bold",
-                    marginBottom: "70px",
+                    marginBottom: "30px",
                     marginTop: "5px",
                     textAlign: "center",
                     lineHeight: "1",
@@ -1202,8 +1247,8 @@ export default function HomePage() {
                 }}>
                   ВІДРЕМОНТУВАТИ
                 </Card>
-
-                <Card
+              </div>
+              <Card
                   className="page"
                   style={{
                     display: "flex",
@@ -1215,62 +1260,58 @@ export default function HomePage() {
                     color: "#fff",
                     background: "rgba(0, 0, 0, 0.59)",
                   }}>
-                  <div style={{fontSize:18, marginBottom:7}}>ПРОКАЧКА ЗБРОЇ</div>
+                  <div style={{fontSize:18, marginBottom:17, marginTop: 27}}>ПОКРАЩЕННЯ ЗБРОЇ</div>
                   <div>Виберіть зброю та сувій для прокачки:</div>
+
                   {/* Інвентар зброї */}
                   {inventory.length === 0 && <div style={{color:"#faa"}}>У вас немає зброї</div>}
+
                   {/* ВІДОБРАЖЕННЯ СУВОЇВ (можна своїм компонентом. Тут просто кнопка для перевірки) */}
-                  {!hasScroll && <div style={{color: "#ffc025"}}>Немає сувоїв для прокачки</div>}
-                  {/* СЛОТИ ЗБРОЇ */}
-                  <div style={{width:"100%"}}>
-                    {inventory.filter(i=>i.type==="weapon").length ? (
-                      <div style={{display:'flex',flexWrap:'wrap',justifyContent:'center',gap:15}}>
-                        {inventory.filter(i=>i.type==="weapon").map(item=>{
-                          const stats = getUpgradedStats(item, item.upgrade_level);
-                          return (
-                            <Card
-                              key={item.id}
-                              style={{
-                                minWidth: 110,
-                                background: selectedWeapon && selectedWeapon.id === item.id ? "#444a31" : "#272b15",
-                                border: selectedWeapon && selectedWeapon.id === item.id ? "2px solid #9f9" : "1.5px solid #778",
-                                cursor: "pointer",
-                                margin:"6px",
-                              }}
-                              onClick={()=>setSelectedWeapon(item)}
-                            >
-                              <Image src={item.image} width={42} height={42} alt={item.name}/>
-                              <div>{item.name} <span style={{color:'#aff'}}>+{item.upgrade_level??0}</span></div>
-                              <div style={{fontSize:14, color:'#aaf'}}>Атака {stats.damage}/Захист {stats.defense}</div>
-                            </Card>
-                          )
-                        })}
-                      </div>
-                    ) : ""}
-                  </div>
+                  {hasScrolls ? (
+                    <p>У вас є сувої для покращення!</p>
+                  ) : (
+                    <p>Немає сувоїв</p>
+                  )}
+
                   {/* Кнопка прокачки */}
                   <div style={{marginTop:14,marginBottom:8}}>
                     <Button
                       onClick={async () => {
-                        if (!selectedWeapon) return;
+                        if (!selectedWeapon || !selectedScroll) return;
                         setIsUpgrading(true);
-                        // Приклад: використовуємо перший сувій для прокачки
-                        const scrollItem = inventory.find(i => i.type === "scroll");
-                        const useProtectionItem = false; // змініть логіку якщо потрібно
+
                         const result = await tryUpgradeWeapon(
                           selectedWeapon.id,
                           selectedWeapon.upgrade_level ?? 0,
-                          useProtectionItem
+                          selectedScroll.id,
+                          false // protection item поки що false
                         );
-                        setResult(result ? { type: result.result, text: result.result === 'success' ? 'Успішно покращено!' : result.result === 'broken' ? 'Зброя зламалась!' : 'Покращення не вдалося.' } : null);
+
+                        setResult(result ? {
+                          type: result.result,
+                          text:
+                            result.result === 'success'
+                              ? 'Успішно покращено!'
+                              : result.result === 'broken'
+                                ? 'Зброя зламалась!'
+                                : 'Покращення не вдалося.'
+                        } : null);
+
+                        setSelectedScroll(null); // Скидаємо сувій після використання
                         setIsUpgrading(false);
-                        fetchInventory();
+
+                        // Оновлюємо інвентар і вибраний предмет
+                        await fetchInventory();
+                        const updated = inventory.find(i => i.id === selectedWeapon.id);
+                        setSelectedWeapon(updated ?? null); // тепер оновлений selectedWeapon
                       }}
-                      style={{minWidth:99}}
-                      disabled={!selectedWeapon || !hasScroll || isUpgrading}
+                      disabled={!selectedWeapon || !selectedScroll || isUpgrading}
                     >
-                      {isUpgrading ? "Покращуємо..." : hasScroll ? "Покращити" : "Немає сувоїв"}
+                      {isUpgrading ? "Покращуємо..." : "Покращити"}
                     </Button>
+                    <div style={{ fontSize: 13, color: '#aaa' }}>
+                      Шанс успіху: {Math.round(getEnchantChance(selectedWeapon?.upgrade_level ?? 0) * 100)}%
+                    </div>
                   </div>
                   {result && (
                     <div style={{
@@ -1281,8 +1322,65 @@ export default function HomePage() {
                       {result.text}
                     </div>
                   )}
-                </Card>
-              </div>
+
+                   {/* Сувої прокачки */}
+                  <div style={{ marginTop: 10 }}>
+                    <div style={{ fontWeight: 600 }}>Сувої прокачки:</div>
+                    <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginTop: 6 }}>
+                      {inventory.filter(i => i.type === "scroll").map(scroll => (
+                        <Card
+                          key={scroll.id}
+                          onClick={() => setSelectedScroll(scroll)}
+                          style={{
+                            padding: 6,
+                            minWidth: 120,
+                            background: selectedScroll?.id === scroll.id ? "#444a31" : "#272b15",
+                            border: selectedScroll?.id === scroll.id ? "2px solid #9f9" : "1px solid #666",
+                            cursor: "pointer",
+                          }}
+                        >
+                          <Image src={scroll.image} width={36} height={36} alt={scroll.name} />
+                          <div style={{ fontSize: 13 }}>{scroll.name}</div>
+                        </Card>
+                      ))}
+                      {inventory.filter(i => i.type === "scroll").length === 0 && (
+                        <div style={{ color: "#ccc" }}>Немає сувоїв</div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* СЛОТИ ЗБРОЇ */}
+                  <div style={{ marginTop: 10 }}>
+                    <div style={{ fontWeight: 600 }}>Зброя:</div>
+                    <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginTop: 6 }}>
+                    {inventory.filter(i=>i.type==="weapon").length ? (
+                      <div style={{display:'flex',flexWrap:'wrap',justifyContent:'center',gap:15}}>
+                        {inventory.filter(i=>i.type==="weapon").map(item=>{
+                          const stats = getUpgradedStats(item, item.upgrade_level);
+                          return (
+                            <Card
+                              key={item.id}
+                              style={{
+                                minWidth: 150,
+                                background: selectedWeapon && selectedWeapon.id === item.id ? "#444a31" : "#272b15",
+                                border: selectedWeapon && selectedWeapon.id === item.id ? "2px solid #9f9" : "1.5px solid #778",
+                                cursor: "pointer",
+                                margin:"6px",
+                              }}
+                              onClick={()=>setSelectedWeapon(item)}
+                            >
+                              <Image src={item.image} width={42} height={42} alt={item.name}/>
+                              <div>{item.name} <span style={{color:'#aff',fontSize:15}}>+{item.upgrade_level??0}</span></div>
+                              <div style={{fontSize:12, color:'#aaf'}}>Атака {stats.damage}/Захист {stats.defense}</div>
+                            </Card>
+                            
+                          )
+                        })}
+                      </div>
+                    ) : ""}
+                    </div>
+                  </div>
+                </Card> 
             </Placeholder>
           </Page>
         ); 
@@ -2264,6 +2362,54 @@ export default function HomePage() {
                     textAlign: "center",
                   }}
                 >
+                  <div 
+                    style={{
+                      position: "relative",
+                      flexDirection: "row",
+                      display: "flex",
+                      justifyContent: "center",
+                      alignItems: "center",
+                      overflow: "visible",
+                      marginBottom: "40px",
+                      marginTop: "-20px",
+                      width: "100%",
+                      height: "100%",
+                      gap: "87%",
+                    }} >
+                    <p onClick={() => {handleDismantle(selectedItem);setSelectedItem(null);}}
+                      style={{  
+                        position: "relative",
+                        flexDirection: "row",
+                        fontSize: "0.7rem",
+                        fontWeight: "lighter",
+                        fontFamily: "Arial, sans-serif",
+                        fontVariantEmoji: "emoji",
+                        color: "#ddd",
+                        background: "rgba(0, 0, 0, 0.35)",
+                        borderRadius: "50px",
+                        padding: "8px",
+                        width: "10px",
+                        height: "10px",
+                      }}>
+                        💥 Розібрати
+                    </p>
+                    <p onClick={() => setSelectedItem(null)}
+                      style={{  
+                        fontSize: "0.8rem",
+                        fontWeight: "lighter",
+                        fontFamily: "Arial, sans-serif",
+                        fontVariantEmoji: "emoji",
+                        color: "#ddd",
+                        position: "inherit",
+                        background: "rgba(0, 0, 0, 0.35)",
+                        borderRadius: "50px",
+                        padding: "8px",
+                        width: "10px",
+                        height: "10px",
+                      }}>
+                        X
+                    </p>
+                  </div>
                   <h2 className={` rarity-font-${selectedItem.rarity?.toLowerCase()}`} style={{ fontSize: "1.2rem", marginBottom: "10px" }}>{selectedItem.name}</h2>
                   {selectedItem.image && (
                       <img 
@@ -2272,54 +2418,21 @@ export default function HomePage() {
                       style={{ width: "130px", height: "80px", objectFit: "contain", marginBottom: "30px", marginTop: "30px", boxShadow: "0 0 40 rgba(253, 253, 253, 0.5)", borderRadius: "50px", }}
                     />
                   )}
-                  <p style={{ fontSize: "0.9rem", color: "#ccc", marginBottom: "20px" }}>
+                  <p style={{ fontSize: "0.8rem", color: "#ccc", marginBottom: "20px" }}>
                     Тип: <strong>{selectedItem.type}</strong>
                   </p>
-                  <p style={{ fontSize: "0.9rem", color: "#ccc", marginBottom: "20px" }}>
+                  <p style={{ fontSize: "0.8rem", color: "#ccc", marginBottom: "20px" }}>
                     Рідкість: <strong>{selectedItem.rarity}</strong>
                   </p>
-                  <p style={{ fontSize: "0.9rem", color: "#ccc", marginBottom: "20px" }}>
+                  <p style={{ fontSize: "0.8rem", color: "#ccc", marginBottom: "20px" }}>
                     Шкода: <strong>{selectedItem.damage}</strong>
                   </p>
-                  <p style={{ fontSize: "0.9rem", color: "#ccc", marginBottom: "20px" }}>
+                  <p style={{ fontSize: "0.8rem", color: "#ccc", marginBottom: "20px" }}>
                     Захист: <strong>{selectedItem.defense}</strong>
                   </p>
-                  <p style={{ fontSize: "0.9rem", color: "#ccc", marginBottom: "20px" }}>
-                    Рівень: 1
-                  </p>
-                  <p style={{ fontSize: "0.9rem", color: "#ccc", marginBottom: "20px" }}>
+                  <p style={{ fontSize: "0.8rem", color: "#ccc", marginBottom: "20px" }}>
                     Міцність: 10 / 10
                   </p>
-                  <div style={{ display: "flex", justifyContent: "center", gap: "20px", marginTop: "50px" }}>
-                    <button onClick={() => {handleDismantle(selectedItem);setSelectedItem(null);}}
-                      style={{
-                        backgroundColor: "#444",
-                        padding: "8px 12px",
-                        border: "none",
-                        borderRadius: "6px",
-                        color: "#fff",
-                        marginTop: "10px",
-                        cursor: "pointer",
-                      }}>
-                        💥 Розібрати 
-                    </button>
-                    <p onClick={() => setSelectedItem(null)}
-                      style={{  
-                        fontSize: "0.8rem",
-                        color: "#ddd",
-                        top: "20px",
-                        right: "20px",
-                        background: "rgba(0, 0, 0, 0.59)",
-                        border:"1px solid rgb(99, 99, 99)",
-                        animation: "fadeIn 1s ease forwards",
-                        borderRadius: "50px",
-                        padding: "10px",
-                        paddingInline: "10px",
-                        paddingTop: "16px",
-                        marginBottom: "0px",
-                      }}>
-                      x
-                    </p>
                     <button onClick={() => {handleEquip(selectedItem);setSelectedItem(null);}}
                       style={{
                         backgroundColor: "#444",
@@ -2329,10 +2442,10 @@ export default function HomePage() {
                         color: "#fff",
                         marginTop: "10px",
                         cursor: "pointer",
+                        width: "100%"
                       }}>
                         🫴 Екіпірувати 
                     </button>
-                  </div>
                 </div>
               )}
 
@@ -2350,6 +2463,54 @@ export default function HomePage() {
                     textAlign: "center",
                   }}
                 >
+                  <div 
+                    style={{
+                      position: "relative",
+                      flexDirection: "row",
+                      display: "flex",
+                      justifyContent: "center",
+                      alignItems: "center",
+                      overflow: "visible",
+                      marginBottom: "40px",
+                      marginTop: "-20px",
+                      width: "100%",
+                      height: "100%",
+                      gap: "87%",
+                    }} >
+                    <p onClick={() => {handleDismantle(selectedItem);setSelectedItem(null);}}
+                      style={{  
+                        position: "relative",
+                        flexDirection: "row",
+                        fontSize: "0.7rem",
+                        fontWeight: "lighter",
+                        fontFamily: "Arial, sans-serif",
+                        fontVariantEmoji: "emoji",
+                        color: "#ddd",
+                        background: "rgba(0, 0, 0, 0.35)",
+                        borderRadius: "50px",
+                        padding: "8px",
+                        width: "10px",
+                        height: "10px",
+                      }}>
+                        💥 Розібрати
+                    </p>
+                    <p onClick={() => setSelectedItem(null)}
+                      style={{  
+                        fontSize: "0.8rem",
+                        fontWeight: "lighter",
+                        fontFamily: "Arial, sans-serif",
+                        fontVariantEmoji: "emoji",
+                        color: "#ddd",
+                        position: "inherit",
+                        background: "rgba(0, 0, 0, 0.35)",
+                        borderRadius: "50px",
+                        padding: "8px",
+                        width: "10px",
+                        height: "10px",
+                      }}>
+                        X
+                    </p>
+                  </div>
                   <h2 className={` rarity-font-${selectedItem.rarity?.toLowerCase()}`} style={{ fontSize: "1.2rem", marginBottom: "10px" }}>{selectedItem.name} +{selectedItem.upgrade_level}</h2>
                   {selectedItem.image && (
                       <img 
@@ -2358,49 +2519,35 @@ export default function HomePage() {
                       style={{ width: "130px", height: "80px", objectFit: "contain", marginBottom: "30px", marginTop: "30px", boxShadow: "0 0 40 rgba(253, 253, 253, 0.5)", borderRadius: "50px", }}
                     />
                   )}
-                  <p style={{ fontSize: "0.9rem", color: "#ccc", marginBottom: "20px" }}>
+                  <p style={{ fontSize: "0.8rem", color: "#ccc", marginBottom: "20px" }}>
                     Тип: <strong>{selectedItem.type}</strong>
                   </p>
-                  <p style={{ fontSize: "0.9rem", color: "#ccc", marginBottom: "20px" }}>
+                  <p style={{ fontSize: "0.8rem", color: "#ccc", marginBottom: "20px" }}>
                     Рідкість: <strong>{selectedItem.rarity}</strong>
                   </p>
-                  <p style={{ fontSize: "0.9rem", color: "#ccc", marginBottom: "20px" }}>
+                  <p style={{ fontSize: "0.8rem", color: "#ccc", marginBottom: "20px" }}>
                     Шкода: <strong>{selectedItem.damage}</strong>
                   </p>
-                  <p style={{ fontSize: "0.9rem", color: "#ccc", marginBottom: "20px" }}>
+                  <p style={{ fontSize: "0.8rem", color: "#ccc", marginBottom: "20px" }}>
                     Захист: <strong>{selectedItem.defense}</strong>
                   </p>
-                  <p style={{ fontSize: "0.9rem", color: "#ccc", marginBottom: "20px" }}>
-                    Рівень: <strong>{selectedItem.upgrade_level}</strong>
-                  </p>
-                  <p style={{ fontSize: "0.9rem", color: "#ccc", marginBottom: "20px" }}>
+                  <p style={{ fontSize: "0.8rem", color: "#ccc", marginBottom: "20px" }}>
                     Міцність: 10 / 10
                   </p>
-                  <div style={{ display: "flex", justifyContent: "center", gap: "50px", marginTop: "50px" }}>
-                    <button onClick={() => {handleUnequip(selectedItem);setSelectedItem(null);}}
-                        style={{
-                          backgroundColor: "#444",
-                          padding: "8px 12px",
-                          border: "none",
-                          borderRadius: "6px",
-                          color: "#fff",
-                          marginTop: "10px",
-                          cursor: "pointer",
-                        }}>
-                          🫳 Зняти </button>
 
-                      <button onClick={() => setSelectedItem(null)}
-                        style={{
-                          backgroundColor: "#444",
-                          padding: "8px 12px",
-                          border: "none",
-                          borderRadius: "6px",
-                          color: "#fff",
-                          marginTop: "10px",
-                          cursor: "pointer",
-                        }}>
-                          Закрити </button>
-                  </div>
+                  <button onClick={() => {handleUnequip(selectedItem);setSelectedItem(null);}}
+                      style={{
+                        backgroundColor: "#444",
+                        padding: "8px 12px",
+                        border: "none",
+                        borderRadius: "6px",
+                        color: "#fff",
+                        marginTop: "10px",
+                        cursor: "pointer",
+                        width: "100%",
+                      }}>
+                        🫳 Зняти 
+                    </button>
                 </div>
               )}
             </div>
