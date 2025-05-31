@@ -1,4 +1,4 @@
-import potion01f from "../../app/_assets/item/potion01f.png";
+import potion01f from "../../app/_assets/item/scroll01a.png";
 
 export const ScrollItems = [
   {
@@ -9,18 +9,7 @@ export const ScrollItems = [
     description: "",
     damage: 0,
     defense: 0,
-    price: 299,
-    image: potion01f.src,
-  },
-  {
-    item_id: 1001,
-    type: "scroll",
-    rarity: 'uncommon',
-    name: "Сувій покращень +",
-    description: "",
-    damage: 0,
-    defense: 0,
-    price: 999,
+    price: 30,
     image: potion01f.src,
   },
 ];
