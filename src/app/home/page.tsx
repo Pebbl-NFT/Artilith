@@ -346,7 +346,6 @@ export default function HomePage() {
     }
   }
 
-
   // Функція обрахунку характеристик героя
   const updateHeroStats = useCallback(() => {
     const stats = getPlayerStats(inventory);
@@ -367,10 +366,10 @@ export default function HomePage() {
   }
 
   const getUpgradedStats = (base: UpgradableItem, level: number): UpgradedStats => {
-    // Наприклад: +15% damage і +8% defense за кожен рівень
+    // Наприклад: +1 damage і +10% defense за кожен рівень
     return {
-      damage: Math.round(base.damage * (1 + 0.1 * level)),
-      defense: Math.round(base.defense * (1 + 0.08 * level)),
+      damage: base.damage + level,
+      defense: Math.round(base.defense * (1 + 0.1 * level)),
     };
   };
 
@@ -453,6 +452,9 @@ export default function HomePage() {
   // Завантажуємо інвентар при зміні userId
   useEffect(() => {
     if (activeTab === "home" && userId) {
+      fetchInventory();
+    }
+    if (activeTab === "blacksmith" && userId) {
       fetchInventory();
     }
   }, [activeTab, userId]);
@@ -2268,6 +2270,7 @@ export default function HomePage() {
         <div style={{ paddingBottom: 100 }}>{renderContent()}</div>
         {selectedItem && (
           <div className="modal-overlay" onClick={() => setSelectedItem(null)}>
+            
               
               {selectedItem.mode === "city" && (
                 <div
@@ -2346,6 +2349,7 @@ export default function HomePage() {
               )}
 
               {selectedItem.mode === "inventory" && (
+                
                 <div
                   className={`item-image rarity-border-${selectedItem.rarity?.toLowerCase()} rarity-shadow-${selectedItem.rarity?.toLowerCase()}`}
                   onClick={(e) => e.stopPropagation()}
@@ -2407,8 +2411,9 @@ export default function HomePage() {
                         X
                     </p>
                   </div>
-                  <h2 className={` rarity-font-${selectedItem.rarity?.toLowerCase()}`} style={{ fontSize: "1.2rem", marginBottom: "10px" }}>{selectedItem.name}</h2>
+                  <h2 className={` rarity-font-${selectedItem.rarity?.toLowerCase()}`} style={{ fontSize: "1.2rem", marginBottom: "10px" }}>{selectedItem.name} +{selectedItem.upgrade_level}</h2>
                   {selectedItem.image && (
+                    
                       <img 
                       src={typeof selectedItem.image === "string" ? selectedItem.image : (selectedItem.image as { src: string }).src}
                       alt={selectedItem.name}
