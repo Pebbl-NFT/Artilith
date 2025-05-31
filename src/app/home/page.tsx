@@ -346,12 +346,6 @@ export default function HomePage() {
     }
   }
 
-  // Функція обрахунку характеристик героя
-  const updateHeroStats = useCallback(() => {
-    const stats = getPlayerStats(inventory);
-    setHeroStats(stats);
-  }, [inventory]);
-
 // Вибір сувою з inventory (item.type === 'scroll')
   const hasScrolls = useMemo(() => inventory.some(item => item.type === 'scroll'), [inventory]);
 
@@ -413,23 +407,23 @@ export default function HomePage() {
 
   const toggleEquip = async (index: number) => {
     const selectedItem = inventory[index];
+
     if (!selectedItem || !userId) return;
-  
+
     const itemType = selectedItem.type;
-  
+
     if (selectedItem.equipped) {
       await supabase
         .from('inventory')
         .update({ equipped: false })
         .eq('user_id', userId)
-        .eq('id', selectedItem.id); // зміна тут
+        .eq('id', selectedItem.id); // Зміна тут
     } else {
-
       // Зняти всі предмети такого типу
       const idsToUnequip = inventory
         .filter(item => item.type === itemType && item.equipped)
         .map(item => item.id);
-  
+
       if (idsToUnequip.length > 0) {
         await supabase
           .from('inventory')
@@ -437,16 +431,17 @@ export default function HomePage() {
           .eq('user_id', userId)
           .in('id', idsToUnequip);
       }
-  
+
       // Екіпірувати поточний
       await supabase
         .from('inventory')
         .update({ equipped: true })
         .eq('user_id', userId)
-        .eq('id', selectedItem.id); // зміна тут
+        .eq('id', selectedItem.id); // Зміна тут
     }
-  
-    await fetchInventory();
+
+    await fetchInventory(); // Оновити інвентар
+    await updateHeroStats(); // Оновити характеристики героя
   };
 
   // Завантажуємо інвентар при зміні userId
@@ -459,12 +454,18 @@ export default function HomePage() {
     }
   }, [activeTab, userId]);
 
+  const [players, setPlayers] = useState<{ id: any; first_name: any; level: any }[]>([]);
+      // Функція обрахунку характеристик героя
+  const updateHeroStats = useCallback(() => {
+    const stats = getPlayerStats(inventory);
+    setHeroStats(stats);
+  }, [inventory]);
+
+  // Виклик функції при зміні інвентарю
   useEffect(() => {
     updateHeroStats();
-  }, [inventory, updateHeroStats]); 
-  
+  }, [inventory, updateHeroStats]);
 
-  const [players, setPlayers] = useState<{ id: any; first_name: any; level: any }[]>([]);
 
   useEffect(() => {
     const fetchPlayers = async () => {
@@ -2349,36 +2350,33 @@ export default function HomePage() {
               )}
 
               {selectedItem.mode === "inventory" && (
-                
-                <div
-                  className={`item-image rarity-border-${selectedItem.rarity?.toLowerCase()} rarity-shadow-${selectedItem.rarity?.toLowerCase()}`}
-                  onClick={(e) => e.stopPropagation()}
-                  style={{
-                    backgroundColor: "#1e1e1e",
-                    padding: "20px",
-                    borderRadius: "10px",
-                    color: "#fff",
-                    maxWidth: "300px",
-                    width: "90%",
-                    textAlign: "center",
-                  }}
-                >
-                  <div 
+                <div className={`item-image rarity-border-${selectedItem.rarity?.toLowerCase()} rarity-shadow-${selectedItem.rarity?.toLowerCase()}`}
+                    onClick={(e) => e.stopPropagation()}
                     style={{
-                      position: "relative",
-                      flexDirection: "row",
-                      display: "flex",
-                      justifyContent: "center",
-                      alignItems: "center",
-                      overflow: "visible",
-                      marginBottom: "40px",
-                      marginTop: "-20px",
-                      width: "100%",
-                      height: "100%",
-                      gap: "87%",
-                    }} >
-                    <p onClick={() => {handleDismantle(selectedItem);setSelectedItem(null);}}
-                      style={{  
+                      backgroundColor: "#1e1e1e",
+                      padding: "20px",
+                      borderRadius: "10px",
+                      color: "#fff",
+                      maxWidth: "300px",
+                      width: "90%",
+                      textAlign: "center",
+                    }}>
+                  
+                  <div style={{
+                    position: "relative",
+                    flexDirection: "row",
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    overflow: "visible",
+                    marginBottom: "40px",
+                    marginTop: "-20px",
+                    width: "100%",
+                    height: "100%",
+                    gap: "87%",
+                  }}>
+                    <p onClick={() => { handleDismantle(selectedItem); setSelectedItem(null); }}
+                      style={{
                         position: "relative",
                         flexDirection: "row",
                         fontSize: "0.7rem",
@@ -2392,10 +2390,11 @@ export default function HomePage() {
                         width: "10px",
                         height: "10px",
                       }}>
-                        💥 Розібрати
+                      💥 Розібрати
                     </p>
+                    
                     <p onClick={() => setSelectedItem(null)}
-                      style={{  
+                      style={{
                         fontSize: "0.8rem",
                         fontWeight: "lighter",
                         fontFamily: "Arial, sans-serif",
@@ -2408,46 +2407,75 @@ export default function HomePage() {
                         width: "10px",
                         height: "10px",
                       }}>
-                        X
+                      X
                     </p>
                   </div>
-                  <h2 className={` rarity-font-${selectedItem.rarity?.toLowerCase()}`} style={{ fontSize: "1.2rem", marginBottom: "10px" }}>{selectedItem.name} +{selectedItem.upgrade_level}</h2>
+
+                  <h2 className={`rarity-font-${selectedItem.rarity?.toLowerCase()}`} style={{ fontSize: "1.2rem", marginBottom: "10px" }}>
+                    {selectedItem.name} +{selectedItem.upgrade_level}
+                  </h2>
+
                   {selectedItem.image && (
-                    
-                      <img 
+                    <img
                       src={typeof selectedItem.image === "string" ? selectedItem.image : (selectedItem.image as { src: string }).src}
                       alt={selectedItem.name}
-                      style={{ width: "130px", height: "80px", objectFit: "contain", marginBottom: "30px", marginTop: "30px", boxShadow: "0 0 40 rgba(253, 253, 253, 0.5)", borderRadius: "50px", }}
+                      style={{
+                        width: "130px",
+                        height: "80px",
+                        objectFit: "contain",
+                        marginBottom: "30px",
+                        marginTop: "30px",
+                        boxShadow: "0 0 40 rgba(253, 253, 253, 0.5)",
+                        borderRadius: "50px",
+                      }}
                     />
                   )}
+
                   <p style={{ fontSize: "0.8rem", color: "#ccc", marginBottom: "20px" }}>
                     Тип: <strong>{selectedItem.type}</strong>
                   </p>
+
                   <p style={{ fontSize: "0.8rem", color: "#ccc", marginBottom: "20px" }}>
                     Рідкість: <strong>{selectedItem.rarity}</strong>
                   </p>
-                  <p style={{ fontSize: "0.8rem", color: "#ccc", marginBottom: "20px" }}>
-                    Шкода: <strong>{selectedItem.damage}</strong>
-                  </p>
-                  <p style={{ fontSize: "0.8rem", color: "#ccc", marginBottom: "20px" }}>
-                    Захист: <strong>{selectedItem.defense}</strong>
-                  </p>
-                  <p style={{ fontSize: "0.8rem", color: "#ccc", marginBottom: "20px" }}>
-                    Міцність: 10 / 10
-                  </p>
-                    <button onClick={() => {handleEquip(selectedItem);setSelectedItem(null);}}
-                      style={{
-                        backgroundColor: "#444",
-                        padding: "8px 12px",
-                        border: "none",
-                        borderRadius: "6px",
-                        color: "#fff",
-                        marginTop: "10px",
-                        cursor: "pointer",
-                        width: "100%"
-                      }}>
-                        🫴 Екіпірувати 
-                    </button>
+
+                  {/* Обчислення покращених характеристик */}
+                  {(() => {
+                    const stats = getUpgradedStats(
+                      {
+                        damage: Number(selectedItem.damage) || 0,
+                        defense: Number(selectedItem.defense) || 0,
+                      },
+                      selectedItem.upgrade_level ?? 0
+                    );
+                    return (
+                      <>
+                        <p style={{ fontSize: "0.8rem", color: "#ccc", marginBottom: "20px" }}>
+                          Шкода: <strong>{stats.damage}</strong>
+                        </p>
+                        <p style={{ fontSize: "0.8rem", color: "#ccc", marginBottom: "20px" }}>
+                          Захист: <strong>{stats.defense}</strong>
+                        </p>
+                        <p style={{ fontSize: "0.8rem", color: "#ccc", marginBottom: "20px" }}>
+                          Міцність: 10 / 10
+                        </p>
+                      </>
+                    );
+                  })()}
+
+                  <button onClick={() => { handleEquip(selectedItem); setSelectedItem(null); }}
+                          style={{
+                            backgroundColor: "#444",
+                            padding: "8px 12px",
+                            border: "none",
+                            borderRadius: "6px",
+                            color: "#fff",
+                            marginTop: "10px",
+                            cursor: "pointer",
+                            width: "100%"
+                          }}>
+                    🫴 Екіпірувати 
+                  </button>
                 </div>
               )}
 
@@ -2527,15 +2555,29 @@ export default function HomePage() {
                   <p style={{ fontSize: "0.8rem", color: "#ccc", marginBottom: "20px" }}>
                     Рідкість: <strong>{selectedItem.rarity}</strong>
                   </p>
-                  <p style={{ fontSize: "0.8rem", color: "#ccc", marginBottom: "20px" }}>
-                    Шкода: <strong>{selectedItem.damage}</strong>
-                  </p>
-                  <p style={{ fontSize: "0.8rem", color: "#ccc", marginBottom: "20px" }}>
-                    Захист: <strong>{selectedItem.defense}</strong>
-                  </p>
-                  <p style={{ fontSize: "0.8rem", color: "#ccc", marginBottom: "20px" }}>
-                    Міцність: 10 / 10
-                  </p>
+                  {/* Обчислення покращених характеристик */}
+                  {(() => {
+                    const stats = getUpgradedStats(
+                      {
+                        damage: Number(selectedItem.damage) || 0,
+                        defense: Number(selectedItem.defense) || 0,
+                      },
+                      selectedItem.upgrade_level ?? 0
+                    );
+                    return (
+                      <>
+                        <p style={{ fontSize: "0.8rem", color: "#ccc", marginBottom: "20px" }}>
+                          Шкода: <strong>{stats.damage}</strong>
+                        </p>
+                        <p style={{ fontSize: "0.8rem", color: "#ccc", marginBottom: "20px" }}>
+                          Захист: <strong>{stats.defense}</strong>
+                        </p>
+                        <p style={{ fontSize: "0.8rem", color: "#ccc", marginBottom: "20px" }}>
+                          Міцність: 10 / 10
+                        </p>
+                      </>
+                    );
+                  })()}
 
                   <button onClick={() => {handleUnequip(selectedItem);setSelectedItem(null);}}
                       style={{
