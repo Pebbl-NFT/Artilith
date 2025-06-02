@@ -16,10 +16,12 @@ export default function BattlePage() {
   const initDataState = useSignal(initData.state);
   const userId = initDataState?.user?.id;
 
-  const [playerStats, setPlayerStats] = useState({ health: 10, attack: 0, defense: 0});
+  const [playerStats, setPlayerStats] = useState({ health: 10, attack: 0, defense: 0 });
+  const [playerHP, setPlayerHP] = useState(10);
+  const [playerDEF, setPlayerDEF] = useState(0);
+  const [isLoading, setIsLoading] = useState(true);
 
   const [inventory, setInventory] = useState<any[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
   const [energy, setEnergy] = useState(0);
   const hasShownToast = useRef(false);
 
@@ -30,8 +32,6 @@ export default function BattlePage() {
   const [enemyStats, setEnemyStats] = useState<Enemy | null>(null);
   const [enemyHP, setEnemyHP] = useState(0);
   const [enemyImage, setEnemyImage] = useState("");
-  const [playerHP, setPlayerHP] = useState(10);
-  const [playerDEF, setPlayerDEF] = useState(0);
   const [enemyDEF, setEnemyDEF] = useState(0);
   const [encounterNumber, setEncounterNumber] = useState(1);
 
@@ -92,26 +92,65 @@ export default function BattlePage() {
       return [...newEntries, ...prev];
     });
   };
+
+  useEffect(() => {
+    if (inventory && inventory.length > 0) {
+      // Оновлюємо характеристики гравця
+      const stats = getPlayerStats(inventory);
+      setPlayerStats(stats);
+
+      // Встановлюємо HP та захист
+      setPlayerHP(stats.health);
+      setPlayerDEF(stats.defense);
+
+      // Оновлюємо характеристики ворога, якщо доступні
+      if (enemyStats) {
+        setEnemyHP(enemyStats.currentHealth);
+        setEnemyDEF(enemyStats.defense);
+      }
+
+      // Знімаємо стан завантаження після завершення
+      setIsLoading(false);
+      setCanAttack(true);
+    }
+  }, [inventory, enemyStats]); // Залежності: inventory і enemyStats
   
   const fetchInventory = async () => {
     if (!userId) return;
-
+    // Вибираємо тільки ті поля, які потрібні для ідентифікації та статусу з таблиці інвентарю
     const { data, error } = await supabase
       .from("inventory")
-      .select("item_id, equipped, id")
-      .eq("user_id", userId)
-      .eq("equipped", true);
+      .select("item_id, equipped, id, upgrade_level") // damage/defense тут не потрібні, якщо вони базові і є в AllItems
+      .eq("user_id", userId);
 
     if (error) {
-      console.error("Помилка при завантаженні екіпіровки:", error.message);
+      console.error("Помилка при завантаженні інвентаря:", error.message);
+      setInventory([]);
       return;
+    }
+    if (!data) {
+        setInventory([]);
+        return;
     }
 
     const formatted = data.map((entry) => {
-      const item = AllItems.find((i) => i.item_id === entry.item_id);
-      return { ...item, id: entry.id, equipped: true };
-    });
+      const itemDetails = AllItems.find((i) => i.item_id === entry.item_id);
 
+      if (!itemDetails) {
+        console.warn(`Деталі для предмета з item_id ${entry.item_id} не знайдено в AllItems.`);
+        return null;
+      }
+
+      // itemDetails вже має базові damage та defense
+      return {
+        ...itemDetails, // Розповсюджуємо всі властивості з AllItems, включаючи базові damage/defense
+        id: entry.id, // ID запису в інвентарі
+        equipped: entry.equipped, // Статус екіпірування
+        upgrade_level: entry.upgrade_level ?? 0, // Рівень покращення
+      };
+    }).filter(item => item !== null);
+
+    console.log("FETCHED AND FORMATTED INVENTORY:", JSON.stringify(formatted, null, 2));
     setInventory(formatted);
   };
 
@@ -495,23 +534,27 @@ export default function BattlePage() {
                 animation: "fadeIn 0.6s ease forwards",
                 fontSize: 15,
               }}
-              >
-                <div style={{ display: "flex", justifyContent: "space-between", width: "50%" }}>
+            >
+              {/* Відображення характеристик */}
+              <div style={{ display: "flex", justifyContent: "space-between", width: "50%" }}>
                 <span>{playerHP} </span>
                 <span>❤️ </span>
-                </div>
-                <div style={{ display: "flex", justifyContent: "space-between", width: "50%" }}>
-                  <span>🗡️ </span>
-                  <span>{playerStats.attack} </span>
-                </div>
-                <div style={{ display: "flex", justifyContent: "space-between", width: "50%" }}>            
-                  <span>🛡️</span>
-                  <span>{playerDEF} </span>
-                </div>
-                <div style={{ display: "flex", justifyContent: "space-between", width: "50%" }}>
+              </div>
+
+              <div style={{ display: "flex", justifyContent: "space-between", width: "50%" }}>
+                <span>🗡️ </span>
+                <span>{playerStats.attack} </span>
+              </div>
+
+              <div style={{ display: "flex", justifyContent: "space-between", width: "50%" }}>
+                <span>🛡️</span>
+                <span>{playerDEF} </span>
+              </div>
+
+              <div style={{ display: "flex", justifyContent: "space-between", width: "50%" }}>
                 <span>⚡</span>
                 <span>{energy}</span>
-                </div>
+              </div>
             </div>
 
             <div style={{
@@ -520,7 +563,7 @@ export default function BattlePage() {
                 justifyContent: "center",
                 alignItems: "center",
                 animation: "fadeIn 0.6s ease forwards",
-                bottom: "10px",
+                bottom: "25px",
                 gap:"20px",
                 width: "100%",
             }}>
@@ -779,7 +822,7 @@ export default function BattlePage() {
                 id="battleResultTitle"
                 style={{
                   fontSize: 40,
-                  marginTop: 20,
+                  marginTop: -20,
                   marginBottom: 32,
                   color: "#fffc",
                 }}
@@ -815,9 +858,12 @@ export default function BattlePage() {
                   justifyContent: "center",
                   alignItems: "center",
                   animation: "fadeIn 0.6s ease forwards",
-                  bottom: "10px",
+                  bottom: "0px",
+                  paddingBottom: 20,
+                  paddingTop: 20,
                   gap:"20px",
                   width: "100%",
+                  backgroundColor: "rgba(0, 0, 0, 0.64)",
               }}>
                 <Link href="/home">
                   <Button

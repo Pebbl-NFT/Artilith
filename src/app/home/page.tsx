@@ -1981,7 +1981,7 @@ export default function HomePage() {
                       // Якщо позиціонували ліворуч: transform: 'translateX(-105%)', // Зсув ліворуч від лівої межі батьківського блоку
                     }}
                   >
-                    Ви знаходите дивне сяйво яке манить до себе, доторкніться до його.
+                    Це ваше місце сил, тут ви можете отримати  додаткові ресурси та енергію.
                   </div>
                 )}
                 </div>
@@ -2038,7 +2038,7 @@ export default function HomePage() {
                  1🪨  1🔷  1⚡
                 </span> 
                 <Link href="" style={{
-                  fontSize: "0.9rem",
+                  fontSize: "0.6rem",
                   fontWeight: "lighter",
                   color: "#fff",
                   textAlign: "center",
@@ -2046,12 +2046,22 @@ export default function HomePage() {
                   fontFamily: "Arial, sans-serif",
                   marginLeft: "auto",
                 }}>
-                  <Button
-                    style={{animation: "fadeIn 0.5s ease forwards", backgroundColor: "#4caf50", width:"100%" }}
+                  <Button style={{
+                  fontSize: "16px",
+                  fontWeight: "lighter",
+                  color: "#fff",
+                  backgroundColor: "#4caf50",
+                  textAlign: "center",
+                  lineHeight: "1",
+                  fontFamily: "Arial, sans-serif",
+                  marginLeft: "auto",
+                  animation: "fadeIn 0.5s ease forwards",
+                }} onClick={() => router.push("/home/battle")}
                   >
-                    {countdown > 0 ? `${formatTime(countdown)}` : "Отримати дари!"}
+                    <p style={{
+                  fontSize: "12px",}}>{countdown > 0 ? `${formatTime(countdown)}` : "Отримати дари!"}</p>
                   </Button>
-              </Link>
+                </Link>
               </div>
             </div>
           </Placeholder>
@@ -2118,7 +2128,8 @@ export default function HomePage() {
                   }}
                 />
               </div>
-              <div>
+              <div style={{
+                  fontSize: "16px",}}>
                   <span style={{
                   position: "relative",
                   flexDirection: "row",
@@ -2133,7 +2144,7 @@ export default function HomePage() {
                  +🪨 +🔷 -1⚡
                 </span>
                   <Button style={{
-                  fontSize: "0.9rem",
+                  fontSize: "16px",
                   fontWeight: "lighter",
                   color: "#fff",
                   backgroundColor: "#4caf50",
@@ -2144,7 +2155,8 @@ export default function HomePage() {
                   animation: "fadeIn 0.5s ease forwards",
                 }} onClick={() => router.push("/home/battle")}
                   >
-                    ⚔️ Почати бій ⚔️
+                    <p style={{
+                  fontSize: "12px",}}>⚔️ В подорож ⚔️</p>
                   </Button>
               </div>
             </div>
