@@ -489,10 +489,11 @@ export default function BattlePage() {
                 flexDirection: "row",
                 justifyContent: "center",
                 alignItems: "center",
-                gap: "40px",
+                gap: "30px",
                 marginBottom: "30px",
                 color: "#fff",
                 animation: "fadeIn 0.6s ease forwards",
+                fontSize: 15,
               }}
               >
                 <div style={{ display: "flex", justifyContent: "space-between", width: "50%" }}>
@@ -514,26 +515,29 @@ export default function BattlePage() {
             </div>
 
             <div style={{
+                position:"absolute",
                 display: "flex",
                 justifyContent: "center",
                 alignItems: "center",
                 animation: "fadeIn 0.6s ease forwards",
+                bottom: "10px",
+                gap:"20px",
+                width: "100%",
             }}>
-                <Button
-                    style={{ animation: "fadeIn 0.6s ease forwards", backgroundColor:"#4caf50" }}
-                    // Переміщуємо обробник handleStartBattle сюди
-                    // Видаляємо старий обробник () => { setShowPreBattle(false); setCanAttack(true); }
-                    onClick={handleStartBattle}
-                >
-                ⚔️ Почати бій ⚔️
+              <Link href="/home">
+                <Button style={{ animation: "fadeIn 0.6s ease forwards",backgroundColor:"#f44336" }}>
+                  Втекти
                 </Button>
-            </div>
-
-            <Link href="/home">
-              <Button style={{ animation: "fadeIn 0.6s ease forwards",marginTop: 12, marginBottom: -20, backgroundColor:"#f44336" }}>
-                Втекти
+              </Link>
+              <Button
+                  style={{ animation: "fadeIn 0.6s ease forwards", backgroundColor:"#4caf50" }}
+                  // Переміщуємо обробник handleStartBattle сюди
+                  // Видаляємо старий обробник () => { setShowPreBattle(false); setCanAttack(true); }
+                  onClick={handleStartBattle}
+              >
+              ⚔️ Почати бій ⚔️
               </Button>
-            </Link>
+            </div>
           </Card>
       </Page>
     );
@@ -766,7 +770,6 @@ export default function BattlePage() {
                 display: "flex", flexDirection: "column",
                 justifyContent: "center", alignItems: "center",
                 color: "#fff", zIndex: 9999,
-                paddingBottom: 30,
               }}
               role="dialog"
               aria-modal="true"
@@ -786,7 +789,7 @@ export default function BattlePage() {
               <h2 style={{ fontSize: 40, margin: 0, marginBottom: 40 }}>
                 {battleResult === "win" ? "Перемога!" : "Поразка!"}
               </h2>
-              <p style={{ fontSize: 16, margin: 0, marginBottom: 40 }}>
+              <p style={{ fontSize: 12, margin: 0, marginBottom: 40 }}>
                 {battleResult === "win"
                   ? "✨ Вам зараховано винагороду! ✨"
                   : "Схоже, не пощастило цього разу..."}
@@ -806,44 +809,54 @@ export default function BattlePage() {
                 📜 {showLog ? "Сховати лог бою" : "Переглянути лог бою"}
               </Button>
 
-              {battleResult === "win" && (
-                <Button
-                  mode="filled"
-                  style={{
-                    marginBottom: 20,
-                    animation: "fadeIn 0.6s ease forwards",
-                    backgroundColor: "#4caf50",
-                    color: "#fff"
-                  }}
-                  aria-label="Наступний ворог"
-                  onClick={() => {
-                    setEncounterNumber(prev => prev + 1);
-                    setPlayerHP(playerStats.health);
-                    setPlayerDEF(playerStats.defense);
-                    setBattleResult(null);
-                    setLog([]);
-                    setShowLog(false);
-                    setTurnTimer(15);
-                    setShowPreBattle(true); // екран підготовки нового бою
-                  }}
-                >
-                  ⚔️ Наступний ворог ⚔️
-                </Button>
-              )}
+              <div style={{
+                  position:"absolute",
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  animation: "fadeIn 0.6s ease forwards",
+                  bottom: "10px",
+                  gap:"20px",
+                  width: "100%",
+              }}>
+                <Link href="/home">
+                  <Button
+                    style={{
+                      backgroundColor: "#f44336",
+                      color: "#fff",
+                      animation: "fadeIn 0.6s ease forwards",
+                    }}
+                    aria-label="Втекти додому"
+                  >
+                    Втекти
+                  </Button>
+                </Link>
 
-              <Link href="/home">
-                <Button
-                  style={{
-                    marginBottom: -20,
-                    backgroundColor: "#f44336",
-                    color: "#fff",
-                    animation: "fadeIn 0.6s ease forwards",
-                  }}
-                  aria-label="Втекти додому"
-                >
-                  Втекти
-                </Button>
-              </Link>
+                {battleResult === "win" && (
+                  
+                  <Button
+                    mode="filled"
+                    style={{
+                      animation: "fadeIn 0.6s ease forwards",
+                      backgroundColor: "#4caf50",
+                      color: "#fff"
+                    }}
+                    aria-label="Далі"
+                    onClick={() => {
+                      setEncounterNumber(prev => prev + 1);
+                      setPlayerHP(playerStats.health);
+                      setPlayerDEF(playerStats.defense);
+                      setBattleResult(null);
+                      setLog([]);
+                      setShowLog(false);
+                      setTurnTimer(15);
+                      setShowPreBattle(true); // екран підготовки нового бою
+                    }}
+                  >
+                    ⚔️ Далі ⚔️
+                  </Button>
+                )}
+              </div>
 
               {showLog && (
                 <div

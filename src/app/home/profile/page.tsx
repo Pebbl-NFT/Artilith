@@ -131,6 +131,7 @@ export default function ProfilePage() {
         justifyContent: 'center',
         alignItems: 'center',
         width: '100%',
+        height:40,
         position: 'fixed',
         bottom: 0,
         background: 'rgb(33, 46, 58)',

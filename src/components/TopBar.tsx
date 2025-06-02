@@ -38,10 +38,11 @@ export default function TopBar({ points, energy, setEnergy }: TopBarProps) {
         backdropFilter: "blur(2px)",
         transition: "filter 0.3s ease",
         pointerEvents: "auto",
-        gap: 5,
+        gap: 0,
         top: 0,
         position: 'fixed',
         zIndex: 10,
+        fontSize: 9,
     }}>
       <div
         style={{
@@ -53,12 +54,12 @@ export default function TopBar({ points, energy, setEnergy }: TopBarProps) {
           padding: 10,
           color: "#fff",
           animation: "fadeIn 0.6s ease forwards",
-          fontSize: 15,
+          fontSize: 12,
         }}
       >
         <div style={{ display: "flex", justifyContent: "space-between", width: "100%" }}>
           <span>💎</span>
-          <span> 0 </span>
+          <span> 0 </span> 
         </div>
       </div>
       <div
@@ -71,7 +72,7 @@ export default function TopBar({ points, energy, setEnergy }: TopBarProps) {
           padding: 10,
           color: "#fff",
           animation: "fadeIn 0.6s ease forwards",
-          fontSize: 15,
+          fontSize: 12,
         }}
       >
         <div style={{ display: "flex", justifyContent: "space-between", width: "100%" }}>
@@ -89,7 +90,7 @@ export default function TopBar({ points, energy, setEnergy }: TopBarProps) {
           padding: 10,
           color: "#fff",
           animation: "fadeIn 0.6s ease forwards",
-          fontSize: 15,
+          fontSize: 12,
         }}
       >
         <div style={{ display: "flex", justifyContent: "space-between", width: "100%" }}>
@@ -107,9 +108,7 @@ export default function TopBar({ points, energy, setEnergy }: TopBarProps) {
           padding: 10,
           color: "#fff",
           animation: "fadeIn 0.6s ease forwards",
-          fontSize: 15,
-          marginLeft: "-20px",
-          marginRight: "-12px",
+          fontSize: 12,
         }}
       >
         <HeroEnergyAutoRegeneration
