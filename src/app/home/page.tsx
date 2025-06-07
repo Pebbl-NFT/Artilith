@@ -526,6 +526,15 @@ export default function HomePage() {
             height: '100%', // Зайняти всю висоту вікна
             color: "#fff", // Текст навколо, щоб бути білішим на фоні
           }} >
+          </Placeholder>
+          <Placeholder style={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            animation: "fadeIn 1s ease forwards",
+            marginTop: "-40px",
+          }} >
             <div onClick={() => setActiveTab("shop")}
               className="page"
               style={{
@@ -550,15 +559,6 @@ export default function HomePage() {
                 ТОРГОВЕЦЬ
               </h1>
             </div>
-          </Placeholder>
-          <Placeholder style={{
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            justifyContent: "center",
-            animation: "fadeIn 1s ease forwards",
-            marginTop: "-40px",
-          }} >
             <div onClick={() => setActiveTab("blacksmith")}
               className="page"
               style={{
@@ -638,18 +638,25 @@ export default function HomePage() {
       return (
         <Page back>
             <Placeholder>
-            <Button onClick={() => setActiveTab("city")}
-              style={{
-              display: 'flex',
-              width: '100%',
-              position: 'fixed',
-              bottom: 90,
-              background: 'rgba(33, 46, 58, 0)',
-              zIndex: 150,
-            }}
-              name="back"
-            >
+            <div onClick={() => setActiveTab("city")}
+              style={{ 
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                width: '100%',
+                height: 50,
+                background: 'rgb(33, 46, 58)',
+                backdropFilter: "blur(2px)",
+                transition: "filter 0.3s ease",
+                pointerEvents: "auto",
+                gap: 0,
+                bottom: 70,
+                position: 'fixed',
+                zIndex: 10,
+                fontSize: 9,
+            }}>
               <p style={{
+                textAlign: "center",
                 fontSize: "20px", 
                 color: "#fff", 
                 fontWeight: "bold",
@@ -657,10 +664,10 @@ export default function HomePage() {
                 animation: "fadeIn 1s ease forwards",
                 border: "2px ridge rgba(255, 255, 255, 0.6)",
                 borderRadius: "50px",
-                paddingInline: "15px",
+                width: '100%',
               }}>
                 X</p>
-            </Button>
+            </div>
             <h1
                 style={{
                   fontSize: "2rem",
@@ -1640,58 +1647,59 @@ export default function HomePage() {
                 textAlign: "center", 
                 color: "#fff", 
                 lineHeight: "1" }}>
-                  ДІМ</h1>
-                <div>
-                  <p
-                    style={{
-                      fontSize: "0.8rem",
-                      fontWeight: "lighter",
-                      fontFamily: "Arial, sans-serif",
-                      fontVariantEmoji: "emoji",
-                      color: "#ddd",
-                      position: "absolute",
-                      top: "-5px", // Позиціонуємо відносно батьківського div з relative
-                      right: "15px", // Позиціонуємо відносно батьківського div з relative
-                      background: "rgba(0, 0, 0, 0.35)",
-                      borderRadius: "50px",
-                      padding: "5px",
-                      width: "10px",
-                      height: "10px",
-                      zIndex: 20, // Переконуємося, що "?" поверх тултіпа, якщо потрібно
-                      cursor: "help", // Змінюємо курсор на знак питання для підказки
-                    }}
-                    onMouseEnter={() => setShowTooltip(true)}
-                    onMouseLeave={() => setShowTooltip(false)}
-                  >
-                    ?
-                  </p>
-                  {showTooltip && ( // Відображаємо тултіп тільки якщо showTooltip === true
-                  <div
-                    style={{
-                      position: "absolute", // Абсолютне позиціонування відносно батьківського div з relative
-                      top: "20px", // Відступ зверху від батьківського div (можливо, потрібно підлаштувати)
-                      right: "30px", // Позиціонуємо праворуч від батьківського div (можливо, потрібно підлаштувати)
-                      // Можна спробувати позиціонувати ліворуч, якщо праворуч заважає:
-                      // left: "0px",
-                      // top: "20px",
-                      background: "rgba(0, 0, 0, 0.85)", // Темний напівпрозорий фон
-                      color: "#fff", // Білий текст
-                      padding: "8px 12px", // Внутрішні відступи
-                      borderRadius: "8px", // Закруглені кути
-                      whiteSpace: "normal", // Дозволяємо тексту переноситись на новий рядок
-                      maxWidth: "300px", // Обмежуємо максимальну ширину тултіпа
-                      zIndex: 15, // Переконуємося, що тултіп під "?" але поверх іншого вмісту
-                      pointerEvents: "none", // Тултіп не перехоплює події миші
-                      fontSize: "0.9rem", // Розмір шрифту
-                      lineHeight: "1.3", // Міжрядковий інтервал
-                      textAlign: "left", // Вирівнювання тексту
-                      transform: 'translateX(5%)', // Невеличкий зсув праворуч від правої межі батьківського блоку
-                      // Якщо позиціонували ліворуч: transform: 'translateX(-105%)', // Зсув ліворуч від лівої межі батьківського блоку
-                    }}
-                  >
-                    Тут ви можете налаштувати свого героя, та підготувати до пригод.
-                  </div>
-                )}
+                  ДІМ
+              </h1>
+              <div>
+                <p
+                  style={{
+                    fontSize: "0.8rem",
+                    fontWeight: "lighter",
+                    fontFamily: "Arial, sans-serif",
+                    fontVariantEmoji: "emoji",
+                    color: "#ddd",
+                    position: "absolute",
+                    top: "-5px", // Позиціонуємо відносно батьківського div з relative
+                    right: "15px", // Позиціонуємо відносно батьківського div з relative
+                    background: "rgba(0, 0, 0, 0.35)",
+                    borderRadius: "50px",
+                    padding: "5px",
+                    width: "10px",
+                    height: "10px",
+                    zIndex: 20, // Переконуємося, що "?" поверх тултіпа, якщо потрібно
+                    cursor: "help", // Змінюємо курсор на знак питання для підказки
+                  }}
+                  onMouseEnter={() => setShowTooltip(true)}
+                  onMouseLeave={() => setShowTooltip(false)}
+                >
+                  ?
+                </p>
+                {showTooltip && ( // Відображаємо тултіп тільки якщо showTooltip === true
+                <div
+                  style={{
+                    position: "absolute", // Абсолютне позиціонування відносно батьківського div з relative
+                    top: "20px", // Відступ зверху від батьківського div (можливо, потрібно підлаштувати)
+                    right: "30px", // Позиціонуємо праворуч від батьківського div (можливо, потрібно підлаштувати)
+                    // Можна спробувати позиціонувати ліворуч, якщо праворуч заважає:
+                    // left: "0px",
+                    // top: "20px",
+                    background: "rgba(0, 0, 0, 0.85)", // Темний напівпрозорий фон
+                    color: "#fff", // Білий текст
+                    padding: "8px 12px", // Внутрішні відступи
+                    borderRadius: "8px", // Закруглені кути
+                    whiteSpace: "normal", // Дозволяємо тексту переноситись на новий рядок
+                    maxWidth: "300px", // Обмежуємо максимальну ширину тултіпа
+                    zIndex: 15, // Переконуємося, що тултіп під "?" але поверх іншого вмісту
+                    pointerEvents: "none", // Тултіп не перехоплює події миші
+                    fontSize: "0.9rem", // Розмір шрифту
+                    lineHeight: "1.3", // Міжрядковий інтервал
+                    textAlign: "left", // Вирівнювання тексту
+                    transform: 'translateX(5%)', // Невеличкий зсув праворуч від правої межі батьківського блоку
+                    // Якщо позиціонували ліворуч: transform: 'translateX(-105%)', // Зсув ліворуч від лівої межі батьківського блоку
+                  }}
+                >
+                  Тут ви можете налаштувати свого героя, та підготувати до пригод.
+                </div>
+              )}
               </div>
 
               <Card className="page">
@@ -1817,7 +1825,7 @@ export default function HomePage() {
                     }}
                     >
 
-                    <Button style={{
+                    <Button onClick={() => setActiveTab("abilities")} style={{
                     border:"1px solid rgb(99, 99, 99)",
                     backgroundColor:"rgba(0, 0, 0, 0)",
                     borderRadius: 8,
@@ -1825,14 +1833,7 @@ export default function HomePage() {
                       <p style={{ fontSize: 12, }} >
                         Здібності
                       </p>
-                    </Button>
-                    <Link href="/home/profile">
-                      <Button style={{
-                        border:"1px solid rgb(99, 99, 99)",
-                        backgroundColor:"rgba(0, 0, 0, 0)",
-                        borderRadius: 8,
-                        }}>
-                        📜<span
+                      <span
                         style={{
                           position: 'absolute',
                           top: -5,
@@ -1844,9 +1845,17 @@ export default function HomePage() {
                           border: '1px solid white',
                         }}
                       />
+                    </Button>
+                    <Link href="/home/profile">
+                      <Button style={{
+                        border:"1px solid rgb(99, 99, 99)",
+                        backgroundColor:"rgba(0, 0, 0, 0)",
+                        borderRadius: 8,
+                        }}>
+                        📜
                       </Button>
                     </Link>
-                    <Button style={{
+                    <Button onClick={() => setActiveTab("task")} style={{
                     border:"1px solid rgb(99, 99, 99)",
                     backgroundColor:"rgba(0, 0, 0, 0)",
                     borderRadius: 8,
@@ -1854,6 +1863,18 @@ export default function HomePage() {
                       <p style={{ fontSize: 12, }} >
                         Завдання
                       </p>
+                      <span
+                        style={{
+                          position: 'absolute',
+                          top: -5,
+                          right: -4,
+                          width: 8,
+                          height: 8,
+                          backgroundColor: '#ff3b30',
+                          borderRadius: '50%',
+                          border: '1px solid white',
+                        }}
+                      />
                     </Button>
                 </div>
               </Card>
@@ -1910,6 +1931,124 @@ export default function HomePage() {
                   ))}
                 </div>
               </div>
+          </Placeholder>
+        </Page>
+      );
+      case "abilities":
+      return (
+        <Page back >
+          <Placeholder style={{
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                justifyContent: "center",
+                marginTop: "-10px",
+                animation: "fadeIn 0.6s ease forwards",
+                paddingInline: 10,
+              }}>
+            <div
+              className="page"
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                justifyContent: "center",
+                marginTop: "40px",
+                animation: "fadeIn 0.6s ease forwards",
+              }}
+            >
+              <h1 style={{ 
+                fontSize: "1rem", 
+                fontWeight: "bold", 
+                marginBottom: "20px", 
+                marginTop: "20px",
+                textAlign: "center", 
+                color: "#fff", 
+                lineHeight: "1" }}>
+                  ЗДІБНОСТІ
+              </h1>
+            </div>
+            <div
+              className="page"
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                justifyContent: "center",
+                marginTop: "10px",
+                animation: "fadeIn 0.6s ease forwards",
+              }}
+            >
+              <h1 style={{ 
+                fontSize: "1rem", 
+                fontWeight: "bold", 
+                marginBottom: "50px", 
+                marginTop: "50px",
+                textAlign: "center", 
+                color: "#fff", 
+                lineHeight: "1" }}>
+                  В робробці
+              </h1>
+            </div>
+          </Placeholder>
+        </Page>
+      );
+      case "task":
+      return (
+        <Page back >
+          <Placeholder style={{
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                justifyContent: "center",
+                marginTop: "-10px",
+                animation: "fadeIn 0.6s ease forwards",
+                paddingInline: 10,
+              }}>
+            <div
+              className="page"
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                justifyContent: "center",
+                marginTop: "40px",
+                animation: "fadeIn 0.6s ease forwards",
+              }}
+            >
+              <h1 style={{ 
+                fontSize: "1rem", 
+                fontWeight: "bold", 
+                marginBottom: "20px", 
+                marginTop: "20px",
+                textAlign: "center", 
+                color: "#fff", 
+                lineHeight: "1" }}>
+                  ЗАВДАННЯ
+              </h1>
+            </div>
+            <div
+              className="page"
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                justifyContent: "center",
+                marginTop: "10px",
+                animation: "fadeIn 0.6s ease forwards",
+              }}
+            >
+              <h1 style={{ 
+                fontSize: "1rem", 
+                fontWeight: "bold", 
+                marginBottom: "50px", 
+                marginTop: "50px",
+                textAlign: "center", 
+                color: "#fff", 
+                lineHeight: "1" }}>
+                  В робробці
+              </h1>
+            </div>
           </Placeholder>
         </Page>
       );
