@@ -638,36 +638,6 @@ export default function HomePage() {
       return (
         <Page back>
             <Placeholder>
-            <div onClick={() => setActiveTab("city")}
-              style={{ 
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                width: '100%',
-                height: 50,
-                background: 'rgb(33, 46, 58)',
-                backdropFilter: "blur(2px)",
-                transition: "filter 0.3s ease",
-                pointerEvents: "auto",
-                gap: 0,
-                bottom: 70,
-                position: 'fixed',
-                zIndex: 10,
-                fontSize: 9,
-            }}>
-              <p style={{
-                textAlign: "center",
-                fontSize: "20px", 
-                color: "#fff", 
-                fontWeight: "bold",
-                background: "rgba(0, 0, 0, 0.59)",
-                animation: "fadeIn 1s ease forwards",
-                border: "2px ridge rgba(255, 255, 255, 0.6)",
-                borderRadius: "50px",
-                width: '100%',
-              }}>
-                X</p>
-            </div>
             <h1
                 style={{
                   fontSize: "2rem",
@@ -734,7 +704,7 @@ export default function HomePage() {
                 padding: 5,
                 color: "#fff",
                 animation: "fadeIn 0.6s ease forwards",
-                background: "rgba(0, 0, 0, 0.45)",
+                background: "rgba(0, 0, 0, 0.7)",
               }}>
                 ЗБРОЯ
               </Card>
@@ -750,9 +720,24 @@ export default function HomePage() {
               padding: 5,
               color: "#fff",
               animation: "fadeIn 0.6s ease forwards",
-              background: "rgba(0, 0, 0, 0.59)",
+              background: "rgba(0, 0, 0, 0.7)",
             }}>
                 БРОНЯ
+              </Card>
+              <Card className="page"
+              style={{
+                display: "flex",
+                flexDirection: "row",
+                justifyContent: "center",
+                alignItems: "center",
+                marginBottom: 20,
+                gap: "30px",
+                padding: 5,
+                color: "#fff",
+                animation: "fadeIn 0.6s ease forwards",
+                background: "rgba(0, 0, 0, 0.7)",
+              }}>
+                CУВОЇ
               </Card>
             </div>
           </Placeholder>
