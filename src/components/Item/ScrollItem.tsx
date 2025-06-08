@@ -5,7 +5,7 @@ export const ScrollItems = [
     item_id: 1000,
     type: "scroll",
     rarity: 'common',
-    name: "Сувій покращень",
+    name: "Старий сувій",
     description: "",
     damage: 0,
     defense: 0,

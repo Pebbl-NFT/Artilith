@@ -35,7 +35,6 @@ import {addInventoryItem} from "@/hooks/useItemActions";
 // Зображення
 import victim from "../_assets/victim.png";
 import travel from "../_assets/travel.png";
-import sword01a from "../_assets/item/sword01a.png";
 import citybg from '../_assets/citybg.jpg';
 import shopbg from '../_assets/shopbg.jpg';
 import blacksmithbg from '../_assets/blacksmithbg.jpg';
@@ -112,7 +111,7 @@ export default function HomePage() {
   // Модальне вікно для підтвердження покупки
   const [selectedItem, setSelectedItem] = useState<SelectedItemType>(null);
   type SelectedItemType = {
-    mode: "city" | "inventory" | "equipped";
+    mode: "city" | "inventory" | "equipped" | "sweapon" |"sshield";
     item_id: number;
     type: string;
     name: string;
@@ -693,37 +692,6 @@ export default function HomePage() {
               >
                 
               </h1>
-              <Card className="page" onClick={() => setActiveTab("weapons")}
-              style={{
-                display: "flex",
-                flexDirection: "row",
-                justifyContent: "center",
-                alignItems: "center",
-                marginBottom: 20,
-                gap: "30px",
-                padding: 5,
-                color: "#fff",
-                animation: "fadeIn 0.6s ease forwards",
-                background: "rgba(0, 0, 0, 0.7)",
-              }}>
-                ЗБРОЯ
-              </Card>
-
-              <Card className="page" onClick={() => setActiveTab("shields")}
-              style={{
-              display: "flex",
-              flexDirection: "row",
-              justifyContent: "center",
-              alignItems: "center",
-              marginBottom: 20,
-              gap: "30px",
-              padding: 5,
-              color: "#fff",
-              animation: "fadeIn 0.6s ease forwards",
-              background: "rgba(0, 0, 0, 0.7)",
-            }}>
-                БРОНЯ
-              </Card>
               <Card className="page"
               style={{
                 display: "flex",
@@ -737,7 +705,84 @@ export default function HomePage() {
                 animation: "fadeIn 0.6s ease forwards",
                 background: "rgba(0, 0, 0, 0.7)",
               }}>
-                CУВОЇ
+                ЗБРОЯ
+                {/* Example: Render a weapon item or map over WeaponItems */}
+                {WeaponItems.length > 0 && (
+                  <ItemCard
+                    mode={"sweapon"}
+                    item_id={WeaponItems[0].item_id}
+                    type={WeaponItems[0].type}
+                    rarity={WeaponItems[0].rarity}
+                    name={WeaponItems[0].name}
+                    image={WeaponItems[0].image}
+                    description={WeaponItems[0].description}
+                    damage={WeaponItems[0].damage ? `${WeaponItems[0].damage}` : "0"}
+                    defense={WeaponItems[0].defense ? `${WeaponItems[0].defense}` : "0"}
+                    price={WeaponItems[0].price}
+                    onBuyRequest={(item) => setSelectedItem(item)}
+                  />
+                )}
+              </Card>
+              <Card className="page"
+                style={{
+                  display: "flex",
+                  flexDirection: "row",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  marginBottom: 20,
+                  gap: "30px",
+                  padding: 5,
+                  color: "#fff",
+                  animation: "fadeIn 0.6s ease forwards",
+                  background: "rgba(0, 0, 0, 0.7)",
+                }}>
+                БРОНЯ
+                {ShieldItems.length > 0 && (
+                  <ItemCard
+                    mode={"sshield"}
+                    item_id={ShieldItems[0].item_id}
+                    type={ShieldItems[0].type}
+                    rarity={ShieldItems[0].rarity}
+                    name={ShieldItems[0].name}
+                    image={ShieldItems[0].image}
+                    description={ShieldItems[0].description}
+                    damage={ShieldItems[0].damage ? `${ShieldItems[0].damage}` : "0"}
+                    defense={ShieldItems[0].defense ? `${ShieldItems[0].defense}` : "0"}
+                    price={ShieldItems[0].price}
+                    onBuyRequest={(item) => setSelectedItem(item)}
+                  />
+                )}
+              </Card>
+              <Card className="page"
+                style={{
+                  display: "flex",
+                  flexDirection: "row",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  marginBottom: 20,
+                  gap: "30px",
+                  padding: 5,
+                  color: "#fff",
+                  animation: "fadeIn 0.6s ease forwards",
+                  background: "rgba(0, 0, 0, 0.7)",
+                }}>
+                СУВОї
+                {/* Example: Render a weapon item or map over WeaponItems */}
+                {WeaponItems.length > 0 && (
+                  <ItemCard
+                    mode={"sweapon"}
+                    item_id={WeaponItems[0].item_id}
+                    type={WeaponItems[0].type}
+                    rarity={WeaponItems[0].rarity}
+                    name={WeaponItems[0].name}
+                    image={WeaponItems[0].image}
+                    description={WeaponItems[0].description}
+                    damage={WeaponItems[0].damage ? `${WeaponItems[0].damage}` : "0"}
+                    defense={WeaponItems[0].defense ? `${WeaponItems[0].defense}` : "0"}
+                    price={WeaponItems[0].price}
+                    onBuyRequest={(item) => setSelectedItem(item)}
+                  />
+                )}
               </Card>
             </div>
           </Placeholder>
@@ -775,303 +820,6 @@ export default function HomePage() {
             </Placeholder>
           </Page>
       );
-      case "weapons":
-        return (
-          <Page back>
-            <Placeholder>
-            <Button onClick={() => setActiveTab("shop")}
-              style={{
-              display: 'flex',
-              width: '100%',
-              position: 'fixed',
-              bottom: 90,
-              background: 'rgba(33, 46, 58, 0)',
-              zIndex: 150,
-            }}
-              name="back"
-            >
-              <p style={{
-                fontSize: "20px", 
-                color: "#fff", 
-                fontWeight: "bold",
-                background: "rgba(0, 0, 0, 0.59)",
-                animation: "fadeIn 1s ease forwards",
-                border: "2px ridge rgba(255, 255, 255, 0.6)",
-                borderRadius: "50px",
-                paddingInline: "15px",
-              }}>
-                X</p>
-            </Button>
-            <h1
-                style={{
-                  fontSize: "2rem",
-                  fontWeight: "bold",
-                  marginTop: "20px",
-                  textAlign: "center",
-                  lineHeight: "1",
-                  color: "#fff",
-                }}
-              >
-                ТОРГОВЕЦЬ
-              </h1>
-            <div
-              className="page"
-              style={{
-                backgroundImage: `url(${shopbg.src})`,
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                justifyContent: "center",
-                animation: "fadeIn 1s ease forwards",
-                backgroundSize: 'cover', // Покрити весь блок
-                backgroundPosition: 'center', // Центрувати зображення
-                height: '100%', // Зайняти всю висоту вікна
-                color: "#fff", // Текст навколо, щоб бути білішим на фоні
-              }}
-            >
-              <p
-                style={{
-                  fontSize: "0.8rem",
-                  color: "#ddd",
-                  textAlign: "center",
-                  marginBottom: "20px",
-                  marginTop: "0px",
-                  maxWidth: "600px",
-                  background: "rgba(0, 0, 0, 0.59)",
-                  padding: "5px",
-                  animation: "fadeIn 2s ease forwards",
-                }}
-              >
-                Не затримуй мене, я маю багато справ!
-              </p>
-              <h1
-                style={{
-                  fontSize: "1rem",
-                  fontWeight: "bold",
-                  marginBottom: "70px",
-                  marginTop: "5px",
-                  textAlign: "center",
-                  lineHeight: "1",
-                  color: "#fff",
-                }}
-              >
-                
-              </h1>
-              <Card className="page" onClick={() => setActiveTab("weapons")}
-              style={{
-                display: "flex",
-                flexDirection: "row",
-                justifyContent: "center",
-                alignItems: "center",
-                marginBottom: 20,
-                gap: "30px",
-                padding: 5,
-                color: "#fff",
-                animation: "fadeIn 0.6s ease forwards",
-                background: "rgba(0, 0, 0, 0.45)",
-              }}>
-                ЗБРОЯ
-              </Card>
-
-              <Card className="page" onClick={() => setActiveTab("shields")}
-              style={{
-              display: "flex",
-              flexDirection: "row",
-              justifyContent: "center",
-              alignItems: "center",
-              marginBottom: 20,
-              gap: "30px",
-              padding: 5,
-              color: "#fff",
-              animation: "fadeIn 0.6s ease forwards",
-              background: "rgba(0, 0, 0, 0.59)",
-            }}>
-                БРОНЯ
-              </Card>
-            </div>
-          </Placeholder>
-            <Placeholder>
-                <div
-                  style={{
-                    marginTop: "-30px",
-                    marginLeft:"-10px",
-                    alignItems: "center",
-                    position: "relative",
-                    display: "grid",
-                    gridTemplateColumns: "repeat(auto-fill, minmax(40px, 1fr))", // Адаптивна сітка
-                    gap: "20px", // Відступ між картками
-                    width: "100%",
-                    animation: "fadeIn 1s ease forwards",
-                  }}
-                >
-                  {WeaponItems.map((item) => (
-                    <ItemCard
-                      mode={"city"}
-                      key={item.item_id}
-                      item_id={item.item_id}
-                      type={item.type}
-                      rarity={item.rarity}
-                      name={item.name}
-                      image={item.image}
-                      description={item.description}
-                      damage={item.damage ? ` ${item.damage}` : "0"}
-                        defense={item.defense ? ` ${item.defense}` : "0"}
-                      price={item.price}
-                      onBuyRequest={(item) => setSelectedItem(item)}
-                    />
-                  ))}
-                </div>
-            </Placeholder>
-          </Page>
-      );
-      case "shields":
-          return (
-            <Page back>
-              <Placeholder>
-              <Button onClick={() => setActiveTab("shop")}
-                style={{
-                display: 'flex',
-                width: '100%',
-                position: 'fixed',
-                bottom: 90,
-                background: 'rgba(33, 46, 58, 0)',
-                zIndex: 150,
-              }}
-                name="back"
-              >
-                <p style={{
-                  fontSize: "20px", 
-                  color: "#fff", 
-                  fontWeight: "bold",
-                  background: "rgba(0, 0, 0, 0.59)",
-                  animation: "fadeIn 1s ease forwards",
-                  border: "2px ridge rgba(255, 255, 255, 0.6)",
-                  borderRadius: "50px",
-                  paddingInline: "15px",
-                }}>
-                  X</p>
-              </Button>
-            <h1
-                style={{
-                  fontSize: "2rem",
-                  fontWeight: "bold",
-                  marginTop: "20px",
-                  textAlign: "center",
-                  lineHeight: "1",
-                  color: "#fff",
-                }}
-              >
-                ТОРГОВЕЦЬ
-              </h1>
-                <div
-                  className="page"
-                  style={{
-                    backgroundImage: `url(${shopbg.src})`,
-                    display: "flex",
-                    flexDirection: "column",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    animation: "fadeIn 1s ease forwards",
-                    backgroundSize: 'cover', // Покрити весь блок
-                    backgroundPosition: 'center', // Центрувати зображення
-                    height: '100%', // Зайняти всю висоту вікна
-                    color: "#fff", // Текст навколо, щоб бути білішим на фоні
-                  }}
-                >
-                  <p
-                    style={{
-                      fontSize: "0.8rem",
-                      color: "#ddd",
-                      textAlign: "center",
-                      marginBottom: "20px",
-                      marginTop: "0px",
-                      maxWidth: "600px",
-                      background: "rgba(0, 0, 0, 0.59)",
-                      padding: "5px",
-                      animation: "fadeIn 2s ease forwards",
-                    }}
-                  >
-                    Не затримуй мене, я маю багато справ!
-                  </p>
-                  <h1
-                    style={{
-                      fontSize: "1rem",
-                      fontWeight: "bold",
-                      marginBottom: "70px",
-                      marginTop: "5px",
-                      textAlign: "center",
-                      lineHeight: "1",
-                      color: "#fff",
-                    }}
-                  >
-                    
-                  </h1>
-                  <Card className="page" onClick={() => setActiveTab("weapons")}
-                  style={{
-                    display: "flex",
-                    flexDirection: "row",
-                    justifyContent: "center",
-                    alignItems: "center",
-                    marginBottom: 20,
-                    gap: "30px",
-                    padding: 5,
-                    color: "#fff",
-                    animation: "fadeIn 0.6s ease forwards",
-                    background: "rgba(0, 0, 0, 0.45)",
-                  }}>
-                    ЗБРОЯ
-                  </Card>
-
-                  <Card className="page" onClick={() => setActiveTab("shields")}
-                  style={{
-                  display: "flex",
-                  flexDirection: "row",
-                  justifyContent: "center",
-                  alignItems: "center",
-                  marginBottom: 20,
-                  gap: "30px",
-                  padding: 5,
-                  color: "#fff",
-                  animation: "fadeIn 0.6s ease forwards",
-                  background: "rgba(0, 0, 0, 0.59)",
-                }}>
-                    БРОНЯ
-                  </Card>
-                </div>
-              </Placeholder>
-              <Placeholder>
-                  <div
-                  style={{
-                    marginTop: "-30px",
-                    marginLeft:"-10px",
-                    alignItems: "center",
-                    position: "relative",
-                    display: "grid",
-                    gridTemplateColumns: "repeat(auto-fill, minmax(40px, 1fr))", // Адаптивна сітка
-                    gap: "20px", // Відступ між картками
-                    width: "100%",
-                  }}
-                >
-                    {ShieldItems.map((item) => (
-                      <ItemCard
-                        mode={"city"}
-                        key={item.item_id}
-                        item_id={item.item_id}
-                        type={item.type}
-                        rarity={item.rarity}
-                        name={item.name}
-                        image={item.image}
-                        description={item.description}
-                        damage={item.damage ? ` ${item.damage}` : "0"}
-                        defense={item.defense ? `${item.defense}` : "0"}
-                        price={item.price}
-                        onBuyRequest={(item) => setSelectedItem(item)}
-                      />
-                    ))}
-                  </div>
-              </Placeholder>
-            </Page>
-        );
     case "blacksmith":
       return (
         <Page back>
@@ -2292,7 +2040,7 @@ export default function HomePage() {
   }
   };
 
-  async function handleEquip(selectedItem: { mode: "city" | "inventory" | "equipped"; item_id: number; type: string; name: string; image: string; description: string; damage?: string; strength?: string; price: number; }) {
+  async function handleEquip(selectedItem: { mode: "city" | "inventory" | "equipped"| "sweapon"| "sshield"; item_id: number; type: string; name: string; image: string; description: string; damage?: string; strength?: string; price: number; }) {
     if (!userId) {
       toast.error("Користувач не знайдений!");
       return;
@@ -2331,7 +2079,7 @@ export default function HomePage() {
     await fetchInventory();
   }
 
-  async function handleDismantle(selectedItem: { mode: "city" | "inventory" | "equipped"; item_id: number; type: string; name: string; image: string; description: string; damage?: string; strength?: string; price: number; }) {
+  async function handleDismantle(selectedItem: { mode: "city" | "inventory" | "equipped"| "sweapon"| "sshield"; item_id: number; type: string; name: string; image: string; description: string; damage?: string; strength?: string; price: number; }) {
     if (!userId) {
       toast.error("Користувач не знайдений!");
       return;
@@ -2369,7 +2117,7 @@ export default function HomePage() {
     await fetchInventory();
   }
 
-  async function handleUnequip(selectedItem: { mode: "city" | "inventory" | "equipped"; item_id: number; type: string; name: string; image: string; description: string; damage?: string; strength?: string; price: number; }) {
+  async function handleUnequip(selectedItem: { mode: "city" | "inventory" | "equipped" | "sweapon"| "sshield"; item_id: number; type: string; name: string; image: string; description: string; damage?: string; strength?: string; price: number; }) {
     if (!userId) {
       toast.error("Користувач не знайдений!");
       return;
@@ -2509,7 +2257,7 @@ export default function HomePage() {
                     marginTop: "-20px",
                     width: "100%",
                     height: "100%",
-                    gap: "87%",
+                    gap: "70%",
                   }}>
                     <p onClick={() => { handleDismantle(selectedItem); setSelectedItem(null); }}
                       style={{
@@ -2523,10 +2271,10 @@ export default function HomePage() {
                         background: "rgba(0, 0, 0, 0.35)",
                         borderRadius: "50px",
                         padding: "8px",
-                        width: "10px",
+                        width: "100%",
                         height: "10px",
                       }}>
-                      💥 Розібрати
+                      Продати
                     </p>
                     
                     <p onClick={() => setSelectedItem(null)}
@@ -2610,14 +2358,151 @@ export default function HomePage() {
                             cursor: "pointer",
                             width: "100%"
                           }}>
-                    🫴 Екіпірувати 
+                    🫴 Взяти
                   </button>
                 </div>
               )}
 
               {selectedItem.mode === "equipped" && (
                 <div
-                  className={`item-image rarity-border-${selectedItem.rarity?.toLowerCase()} rarity-shadow-${selectedItem.rarity?.toLowerCase()}`}
+                  onClick={(e) => e.stopPropagation()}
+                  style={{
+                  backgroundImage: `url('/bg/Cardbg.png')`,
+                  backgroundSize: 'cover',
+                  backgroundPosition: 'center',
+                  backgroundRepeat: 'no-repeat',
+                  padding: "0px",
+                  borderRadius: "10px",
+                  paddingBlock: "-30px",
+                  color: "#fff",
+                  maxWidth: "300px",
+                  width: "100%",
+                  textAlign: "center",
+                }}
+                >
+                  <div 
+                    style={{
+                      position: "relative",
+                      flexDirection: "row",
+                      display: "flex",
+                      justifyContent: "center",
+                      alignItems: "center",
+                      overflow: "visible",
+                      width: "100%",
+                      height: "100%",
+                      gap: "69%",
+                    }} >
+                    <p className={` rarity-font-${selectedItem.rarity?.toLowerCase()}`} 
+                      style={{  
+                        fontSize: "1rem",
+                        fontWeight: "lighter",
+                        fontFamily: "Arial, sans-serif",
+                        position: "inherit",
+                        padding: "5px",
+                        paddingTop:"20px",
+                        paddingLeft:"0px"
+                      }}>
+                        +{selectedItem.upgrade_level}
+                    </p>
+                    <p onClick={() => setSelectedItem(null)}
+                      style={{  
+                        fontSize: "0.8rem",
+                        fontWeight: "lighter",
+                        fontFamily: "Arial, sans-serif",
+                        color: "#ddd",
+                        position: "inherit",
+                        padding: "8px",
+                        paddingTop:"20px",
+                      }}>
+                        X
+                    </p>
+                  </div>
+                  <h2 className={` rarity-font-${selectedItem.rarity?.toLowerCase()}`} style={{ fontSize: "1.2rem", marginBottom: "10px",marginTop:"-20px" }}>{selectedItem.name}</h2>
+                  {selectedItem.image && (
+                      <img 
+                      src={typeof selectedItem.image === "string" ? selectedItem.image : (selectedItem.image as { src: string }).src}
+                      alt={selectedItem.name}
+                      style={{ width: "130px", height: "80px", objectFit: "contain", marginBottom: "30px", marginTop: "30px", boxShadow: "0 0 40 rgba(253, 253, 253, 0.5)", borderRadius: "20px", }}
+                    />
+                  )}
+                  <div style={{objectFit: "contain", marginBottom: "30px", marginTop: "10px", boxShadow: "0 0 40 rgba(253, 253, 253, 0.5)", borderRadius: "20px", border:"1px" }}>
+                  <p style={{ fontSize: "0.8rem", color: "#ccc", marginBottom: "20px" }}>
+                    Тип: <strong>{selectedItem.type}</strong>
+                  </p>
+                  <p style={{ fontSize: "0.8rem", color: "#ccc", marginBottom: "20px" }}>
+                    Рідкість: <strong>{selectedItem.rarity}</strong>
+                  </p>
+                  {/* Обчислення покращених характеристик */}
+                  {(() => {
+                    const stats = getUpgradedStats(
+                      {
+                        damage: Number(selectedItem.damage) || 0,
+                        defense: Number(selectedItem.defense) || 0,
+                      },
+                      selectedItem.upgrade_level ?? 0
+                    );
+                    return (
+                      <>
+                        <p style={{ fontSize: "0.8rem", color: "#ccc", marginBottom: "20px" }}>
+                          Шкода: <strong>{stats.damage}</strong>
+                        </p>
+                        <p style={{ fontSize: "0.8rem", color: "#ccc", marginBottom: "60px" }}>
+                          Захист: <strong>{stats.defense}</strong>
+                        </p>
+                      </>
+                    );
+                  })()}
+                  </div>
+                  
+                    <div 
+                    style={{
+                      position: "relative",
+                      flexDirection: "row",
+                      display: "flex",
+                      justifyContent: "center",
+                      alignItems: "center",
+                      overflow: "visible",
+                      width: "100%",
+                      height: "100%",
+                    }} >
+                    <button onClick={() => {handleUnequip(selectedItem);setSelectedItem(null);}}
+                      style={{
+                        backgroundColor: "#444",
+                        border: "none",
+                        borderRadius: "6px",
+                        fontSize: "0.7rem",
+                        color: "rgb(80, 80, 80)",
+                        background: "rgba(0, 0, 0, 0.06)",
+                        marginTop: "0px",
+                        marginBottom:"25px",
+                        cursor: "pointer",
+                        width: "100%",
+                      }}>
+                        СПОРЯДЖЕНО
+                    </button>
+                    <button onClick={() => {handleUnequip(selectedItem);setSelectedItem(null);}}
+                      style={{
+                        backgroundColor: "#444",
+                        border: "none",
+                        borderRadius: "6px",
+                        fontSize: "0.7rem",
+                        color: "#ffff",
+                        background: "rgba(0, 0, 0, 0.06)",
+                        marginTop: "0px",
+                        marginBottom:"25px",
+                        cursor: "pointer",
+                        width: "100%",
+                      }}>
+                        🫳 ЗНЯТИ
+                    </button>
+                  </div>
+                </div>
+                
+              )}
+
+              {selectedItem.mode === "sweapon" && (
+                <div
+                  className={`item-image rarity-border-common rarity-shadow-common`}
                   onClick={(e) => e.stopPropagation()}
                   style={{
                     backgroundColor: "#1e1e1e",
@@ -2641,12 +2526,11 @@ export default function HomePage() {
                       marginTop: "-20px",
                       width: "100%",
                       height: "100%",
-                      gap: "87%",
+                      gap: "70%",
                     }} >
-                    <p onClick={() => {handleDismantle(selectedItem);setSelectedItem(null);}}
+                    <p
                       style={{  
                         position: "relative",
-                        flexDirection: "row",
                         fontSize: "0.7rem",
                         fontWeight: "lighter",
                         fontFamily: "Arial, sans-serif",
@@ -2655,10 +2539,10 @@ export default function HomePage() {
                         background: "rgba(0, 0, 0, 0.35)",
                         borderRadius: "50px",
                         padding: "8px",
-                        width: "10px",
+                        width: "150px",
                         height: "10px",
                       }}>
-                        💥 Розібрати
+                         ЗБРОЯ
                     </p>
                     <p onClick={() => setSelectedItem(null)}
                       style={{  
@@ -2676,58 +2560,137 @@ export default function HomePage() {
                       }}>
                         X
                     </p>
+                    
                   </div>
-                  <h2 className={` rarity-font-${selectedItem.rarity?.toLowerCase()}`} style={{ fontSize: "1.2rem", marginBottom: "10px" }}>{selectedItem.name} +{selectedItem.upgrade_level}</h2>
-                  {selectedItem.image && (
-                      <img 
-                      src={typeof selectedItem.image === "string" ? selectedItem.image : (selectedItem.image as { src: string }).src}
-                      alt={selectedItem.name}
-                      style={{ width: "130px", height: "80px", objectFit: "contain", marginBottom: "30px", marginTop: "30px", boxShadow: "0 0 40 rgba(253, 253, 253, 0.5)", borderRadius: "50px", }}
+                  <Placeholder>
+                <div
+                  style={{
+                    marginTop: "-30px",
+                    marginLeft:"-10px",
+                    alignItems: "center",
+                    position: "relative",
+                    display: "grid",
+                    gridTemplateColumns: "repeat(auto-fill, minmax(40px, 1fr))", // Адаптивна сітка
+                    gap: "20px", // Відступ між картками
+                    width: "100%",
+                    animation: "fadeIn 1s ease forwards",
+                  }}
+                >
+                  {WeaponItems.map((item) => (
+                    <ItemCard
+                      mode={"city"}
+                      key={item.item_id}
+                      item_id={item.item_id}
+                      type={item.type}
+                      rarity={item.rarity}
+                      name={item.name}
+                      image={item.image}
+                      description={item.description}
+                      damage={item.damage ? ` ${item.damage}` : "0"}
+                        defense={item.defense ? ` ${item.defense}` : "0"}
+                      price={item.price}
+                      onBuyRequest={(item) => setSelectedItem(item)}
                     />
-                  )}
-                  <p style={{ fontSize: "0.8rem", color: "#ccc", marginBottom: "20px" }}>
-                    Тип: <strong>{selectedItem.type}</strong>
-                  </p>
-                  <p style={{ fontSize: "0.8rem", color: "#ccc", marginBottom: "20px" }}>
-                    Рідкість: <strong>{selectedItem.rarity}</strong>
-                  </p>
-                  {/* Обчислення покращених характеристик */}
-                  {(() => {
-                    const stats = getUpgradedStats(
-                      {
-                        damage: Number(selectedItem.damage) || 0,
-                        defense: Number(selectedItem.defense) || 0,
-                      },
-                      selectedItem.upgrade_level ?? 0
-                    );
-                    return (
-                      <>
-                        <p style={{ fontSize: "0.8rem", color: "#ccc", marginBottom: "20px" }}>
-                          Шкода: <strong>{stats.damage}</strong>
-                        </p>
-                        <p style={{ fontSize: "0.8rem", color: "#ccc", marginBottom: "20px" }}>
-                          Захист: <strong>{stats.defense}</strong>
-                        </p>
-                        <p style={{ fontSize: "0.8rem", color: "#ccc", marginBottom: "20px" }}>
-                          Міцність: 10 / 10
-                        </p>
-                      </>
-                    );
-                  })()}
+                  ))}
+                </div>
+            </Placeholder>
+                </div>
+              )}
 
-                  <button onClick={() => {handleUnequip(selectedItem);setSelectedItem(null);}}
-                      style={{
-                        backgroundColor: "#444",
-                        padding: "8px 12px",
-                        border: "none",
-                        borderRadius: "6px",
-                        color: "#fff",
-                        marginTop: "10px",
-                        cursor: "pointer",
-                        width: "100%",
+              {selectedItem.mode === "sshield" && (
+                <div
+                  className={`item-image rarity-border-common rarity-shadow-common`}
+                  onClick={(e) => e.stopPropagation()}
+                  style={{
+                    backgroundColor: "#1e1e1e",
+                    padding: "20px",
+                    borderRadius: "10px",
+                    color: "#fff",
+                    maxWidth: "300px",
+                    width: "90%",
+                    textAlign: "center",
+                  }}
+                >
+                  <div 
+                    style={{
+                      position: "relative",
+                      flexDirection: "row",
+                      display: "flex",
+                      justifyContent: "center",
+                      alignItems: "center",
+                      overflow: "visible",
+                      marginBottom: "40px",
+                      marginTop: "-20px",
+                      width: "100%",
+                      height: "100%",
+                      gap: "70%",
+                    }} >
+                    <p
+                      style={{  
+                        position: "relative",
+                        fontSize: "0.7rem",
+                        fontWeight: "lighter",
+                        fontFamily: "Arial, sans-serif",
+                        fontVariantEmoji: "emoji",
+                        color: "#ddd",
+                        background: "rgba(0, 0, 0, 0.35)",
+                        borderRadius: "50px",
+                        padding: "8px",
+                        width: "150px",
+                        height: "10px",
                       }}>
-                        🫳 Зняти 
-                    </button>
+                         БРОНЯ
+                    </p>
+                    <p onClick={() => setSelectedItem(null)}
+                      style={{  
+                        fontSize: "0.8rem",
+                        fontWeight: "lighter",
+                        fontFamily: "Arial, sans-serif",
+                        fontVariantEmoji: "emoji",
+                        color: "#ddd",
+                        position: "inherit",
+                        background: "rgba(0, 0, 0, 0.35)",
+                        borderRadius: "50px",
+                        padding: "8px",
+                        width: "10px",
+                        height: "10px",
+                      }}>
+                        X
+                    </p>
+                    
+                  </div>
+                  <Placeholder>
+                <div
+                  style={{
+                    marginTop: "-30px",
+                    marginLeft:"-10px",
+                    alignItems: "center",
+                    position: "relative",
+                    display: "grid",
+                    gridTemplateColumns: "repeat(auto-fill, minmax(40px, 1fr))", // Адаптивна сітка
+                    gap: "20px", // Відступ між картками
+                    width: "100%",
+                    animation: "fadeIn 1s ease forwards",
+                  }}
+                >
+                  {ShieldItems.map((item) => (
+                      <ItemCard
+                        mode={"city"}
+                        key={item.item_id}
+                        item_id={item.item_id}
+                        type={item.type}
+                        rarity={item.rarity}
+                        name={item.name}
+                        image={item.image}
+                        description={item.description}
+                        damage={item.damage ? ` ${item.damage}` : "0"}
+                        defense={item.defense ? `${item.defense}` : "0"}
+                        price={item.price}
+                        onBuyRequest={(item) => setSelectedItem(item)}
+                      />
+                    ))}
+                </div>
+            </Placeholder>
                 </div>
               )}
             </div>

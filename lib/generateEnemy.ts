@@ -1,3 +1,4 @@
+export type EnemyType = 'normal' | 'miniBoss' | 'boss';
 export type Enemy = {
   name: string;
   image: string;
@@ -7,8 +8,8 @@ export type Enemy = {
   defense: number;
   critChance: number;
   missChance: number;
+  type: EnemyType; // <--- ДОДАНО
 };
-
 export type EnemyBase = {
   name: string;
   image: string;
@@ -17,8 +18,8 @@ export type EnemyBase = {
   baseDefense: number;
   baseCritChance: number;
   baseMissChance: number;
+  type: EnemyType; // <--- ДОДАНО
 };
-
 export const baseEnemies: EnemyBase[] = [
   {
     name: 'Лісовий розвідник',
@@ -28,6 +29,7 @@ export const baseEnemies: EnemyBase[] = [
     baseDefense: 1,
     baseCritChance: 0.05,
     baseMissChance: 0.1,
+    type: 'normal',
   },
   {
     name: 'Лісовий розвідник',
@@ -37,6 +39,7 @@ export const baseEnemies: EnemyBase[] = [
     baseDefense: 3,
     baseCritChance: 0.05,
     baseMissChance: 0.1,
+    type: 'normal',
   },
   {
     name: 'Лісовий розвідник',
@@ -46,6 +49,7 @@ export const baseEnemies: EnemyBase[] = [
     baseDefense: 4,
     baseCritChance: 0.05,
     baseMissChance: 0.1,
+    type: 'normal',
   },
   {
     name: 'Лісовий розвідник',
@@ -55,6 +59,7 @@ export const baseEnemies: EnemyBase[] = [
     baseDefense: 5,
     baseCritChance: 0.05,
     baseMissChance: 0.1,
+    type: 'normal',
   },
   {
     name: 'Лісовий Захисник',
@@ -64,8 +69,9 @@ export const baseEnemies: EnemyBase[] = [
     baseDefense: 30,
     baseCritChance: 0.05,
     baseMissChance: 0.1,
+    type: 'normal',
   },
-  {
+   {
     name: 'Лісовий Боєць',
     image: '/enemies/forest/forestmonster6.png',
     baseHealth: 85,
@@ -73,10 +79,9 @@ export const baseEnemies: EnemyBase[] = [
     baseDefense: 2,
     baseCritChance: 0.05,
     baseMissChance: 0.1,
+    type: 'normal',
   },
 ];
-
-// Мінібоси
 export const miniBosses: EnemyBase[] = [
   {
     name: 'Лісовий страшило (мінібос)',
@@ -86,9 +91,9 @@ export const miniBosses: EnemyBase[] = [
     baseDefense: 3,
     baseCritChance: 0.12,
     baseMissChance: 0.08,
+    type: 'miniBoss',
   }
 ];
-// Боси
 export const bosses: EnemyBase[] = [
   {
     name: 'Головний Лісовий Древень (Бос)',
@@ -98,46 +103,40 @@ export const bosses: EnemyBase[] = [
     baseDefense: 32,
     baseCritChance: 0.22,
     baseMissChance: 0.04,
+    type: 'boss',
   }
 ];
-
-/**
- * Генерує послідовного ворога для wave-бою:
- * @param encounterNumber Номер поточного бою (1, 2, 3, ...)
- * @param playerLevel Поточний рівень гравця (для масштабу)
- */
 export function generateSequentialEnemy(
   encounterNumber: number,
   playerLevel: number
 ): Enemy {
   let template: EnemyBase;
-  let type: 'normal' | 'miniBoss' | 'boss' = 'normal';
-
+  let enemyType: EnemyType; // Використовуємо визначений тип
+  // Визначаємо тип ворога та вибираємо шаблон
   if (encounterNumber % 20 === 0) {
-    // БОС кожен 20-й
-    template = bosses[(Math.floor(encounterNumber / 20) - 1) % bosses.length];
-    type = 'boss';
+    template = bosses[(Math.floor(encounterNumber / 20) - 1 + bosses.length) % bosses.length]; // Додано + bosses.length для уникнення від'ємного індексу
+    enemyType = 'boss';
   } else if (encounterNumber % 6 === 0) {
-    // Мінібос кожен 6-й (але не 20-й!)
-    template = miniBosses[(Math.floor(encounterNumber / 7) - 1) % miniBosses.length];
-    type = 'miniBoss';
+    template = miniBosses[(Math.floor(encounterNumber / 6) - 1 + miniBosses.length) % miniBosses.length]; // Додано + miniBosses.length
+    enemyType = 'miniBoss';
   } else {
-    // Звичайні вороги — СТРОГО ПО ПОРЯДКУ (НЕ рандом!)
-    template = baseEnemies[(encounterNumber - 1) % baseEnemies.length];
-    type = 'normal';
+    template = baseEnemies[(encounterNumber - 1 + baseEnemies.length) % baseEnemies.length]; // Додано + baseEnemies.length
+    enemyType = 'normal';
   }
-
-  // Масштабування залежить від типу ворога і рівня гравця
-  let scaleFactor = 0.3 + playerLevel * (type === 'boss' ? 0.33 : type === 'miniBoss' ? 0.21 : 0.13);
-
-  return {
+  let scaleFactor = 0.3 + playerLevel * (enemyType === 'boss' ? 0.33 : enemyType === 'miniBoss' ? 0.21 : 0.13);
+  // Забезпечимо, що scaleFactor не надто малий, особливо на низьких рівнях
+  scaleFactor = Math.max(scaleFactor, 0.5); // Мінімальний множник, щоб вороги не були надто слабкими
+  const generatedEnemy: Enemy = {
     name: template.name,
     image: template.image,
-    maxHealth: Math.round(template.baseHealth * scaleFactor),
-    currentHealth: Math.round(template.baseHealth * scaleFactor),
-    damage: Math.round(template.baseDamage * scaleFactor),
+    maxHealth: Math.max(10, Math.round(template.baseHealth * scaleFactor)), // Мінімальне здоров'я
+    currentHealth: Math.max(10, Math.round(template.baseHealth * scaleFactor)),
+    damage: Math.max(1, Math.round(template.baseDamage * scaleFactor)), // Мінімальна шкода
     defense: Math.round(template.baseDefense * scaleFactor),
-    critChance: Math.min(template.baseCritChance + playerLevel * 0.01 + (type === 'boss' ? 0.08 : type === 'miniBoss' ? 0.04 : 0), 0.55),
-    missChance: Math.max(template.baseMissChance - playerLevel * 0.004 - (type === 'boss' ? 0.02 : 0), 0.01),
+    critChance: Math.min(template.baseCritChance + playerLevel * 0.01 + (enemyType === 'boss' ? 0.08 : enemyType === 'miniBoss' ? 0.04 : 0), 0.55),
+    missChance: Math.max(template.baseMissChance - playerLevel * 0.004 - (enemyType === 'boss' ? 0.02 : 0), 0.01),
+    type: enemyType, // <--- ПРИСВОЮЄМО ТИП
   };
+  console.log(`Generated enemy for encounter ${encounterNumber}: ${generatedEnemy.name}, Type: ${generatedEnemy.type}, HP: ${generatedEnemy.maxHealth}`);
+  return generatedEnemy;
 }

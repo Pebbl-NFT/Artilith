@@ -33,7 +33,15 @@ export default function BattlePage() {
   const [enemyHP, setEnemyHP] = useState(0);
   const [enemyImage, setEnemyImage] = useState("");
   const [enemyDEF, setEnemyDEF] = useState(0);
-  const [encounterNumber, setEncounterNumber] = useState(1);
+
+  const [encounterNumber, setEncounterNumber] = useState(1); // Буде завантажено з БД
+  // Додаткові стани для статистики (будуть завантажені та оновлені)
+  const [maxEncounterNumber, setMaxEncounterNumber] = useState(0);
+  const [totalWins, setTotalWins] = useState(0);
+  const [totalLosses, setTotalLosses] = useState(0);
+  const [minibossKills, setMinibossKills] = useState(0);
+  const [bossKills, setBossKills] = useState(0);
+  // const [currentBiome, setCurrentBiome] = useState('forest'); // Для майбутнього
 
   const [isHit, setIsHit] = useState(false);
   const [canAttack, setCanAttack] = useState(true);
@@ -55,29 +63,41 @@ export default function BattlePage() {
 
   // Завантажуємо дані користувача із Supabase
   const fetchUserData = async () => {
-      if (!userId) return;
-
-      const { data, error } = await supabase
-          .from("users")
-          .select("points, click_delay, energy, experience, level")
-          .eq("id", userId)
-          .single();
+    if (!userId) return;
+    setIsLoading(true); // Починаємо завантаження
+    const { data, error } = await supabase
+      .from("users")
+      .select("points, click_delay, energy, experience, level, current_encounter_number, max_encounter_number, total_wins, total_losses, miniboss_kills, boss_kills") // <--- НОВІ ПОЛЯ
+      .eq("id", userId)
+      .single();
 
       if (error) {
-          console.error("Помилка завантаження даних користувача:", error);
-          toast.error("Не вдалося завантажити дані користувача.");
-      } else if (data) {
-          setPoints(data.points);
-          setEnergy(data.energy);
-          setPlayerLevel(data.level);
-          setExperience(data.experience ?? 0);
-
-          if (data.energy <= 0 && !hasShownToast.current) {
-              toast.error("У вас закінчилася енергія ⚡");
-              hasShownToast.current = true;
-          }
+      console.error("Помилка завантаження даних користувача:", error);
+      toast.error("Не вдалося завантажити дані користувача.");
+      // Встановлюємо дефолтні значення, якщо користувач новий або сталася помилка
+      setEncounterNumber(1);
+      // setIsLoading(false); // Завершуємо завантаження тут у разі помилки
+    } else if (data) {
+      setPoints(data.points || 0);
+      setEnergy(data.energy || 0);
+      setPlayerLevel(data.level || 1);
+      setExperience(data.experience || 0);
+      setEncounterNumber(data.current_encounter_number || 1); // <--- ЗАВАНТАЖУЄМО
+      setMaxEncounterNumber(data.max_encounter_number || 0);
+      setTotalWins(data.total_wins || 0);
+      setTotalLosses(data.total_losses || 0);
+      setMinibossKills(data.miniboss_kills || 0);
+      setBossKills(data.boss_kills || 0);
+      if (data.energy <= 0 && !hasShownToast.current) {
+        toast.error("У вас закінчилася енергія ⚡");
+        hasShownToast.current = true;
       }
+    }
+    // setIsLoading(false); // Завершуємо завантаження після успішного отримання даних або помилки
+    // fetchInventory буде викликаний в своєму useEffect, який залежить від userId
+    // setIsLoading буде встановлено в false в useEffect, що залежить від inventory
   };
+
 
   // Використовуйте fetchUserData у useEffect
   useEffect(() => {
@@ -338,34 +358,58 @@ export default function BattlePage() {
   };
 
   useEffect(() => {
-  if (showPreBattle && playerLevel) {
-    const generated = generateSequentialEnemy(encounterNumber, playerLevel);
-    setEnemyStats(generated);
-    setEnemyImage(generated.image);
-    setEnemyHP(generated.maxHealth);
-    setEnemyDEF(generated.defense);
-    setTurnTimer(15);
-    setIsHit(false);
-    setCanAttack(false); // Дозволити напад тільки після "Почати бій"
-  }
-  }, [showPreBattle, playerLevel, encounterNumber]);
-
-  useEffect(() => {
-    fetchInventory();
+    if (showPreBattle && playerLevel && encounterNumber > 0 && userId) { // Переконуємось, що userId є
+      console.log(`Generating enemy for encounter: ${encounterNumber}, player level: ${playerLevel}`);
+      const generated = generateSequentialEnemy(encounterNumber, playerLevel);
+      setEnemyStats(generated);
+      setEnemyImage(generated.image);
+      setEnemyHP(generated.maxHealth); // Встановлюємо максимальне здоров'я як поточне на початку
+      setEnemyDEF(generated.defense);
+      setTurnTimer(15); // Чи скільки у вас там
+      setIsHit(false);
+      // setCanAttack(false); // Атака стане доступною після натискання "Почати бій"
+      setBattleResult(null); // Скидаємо результат попереднього бою
+      setLog([]); // Очищаємо лог бою
+    }
+  }, [showPreBattle, playerLevel, encounterNumber, userId]); // Додали userId як залежність
+  // useEffect для завантаження інвентаря
+   useEffect(() => {
+    if (userId) { // Переконуємось, що userId є перед завантаженням інвентаря
+      fetchInventory();
+    }
   }, [userId]);
 
+    // useEffect для оновлення статів гравця та ворога
+  // Цей useEffect має реагувати на зміни inventory (для статів гравця)
+  // та enemyStats (для початкового встановлення HP/DEF ворога)
   useEffect(() => {
-    const stats = getPlayerStats(inventory);
-    setPlayerStats(stats);
-    setPlayerHP(stats.health);
-    setPlayerDEF(stats.defense);
-    if (enemyStats) {
-      setEnemyHP(enemyStats.currentHealth);
-      setEnemyDEF(enemyStats.defense);
+    // Оновлення статів гравця
+    if (inventory.length > 0) { // Перевіряємо, чи інвентар не порожній
+      const stats = getPlayerStats(inventory);
+      setPlayerStats(stats);
+      setPlayerHP(stats.health); // Встановлюємо HP гравця на максимум відповідно до статів
+      setPlayerDEF(stats.defense);
+    } else {
+      // Якщо інвентар порожній, можна встановити базові стати гравця
+      setPlayerStats({ health: 20, attack: 1, defense: 0 }); // Або інші дефолтні значення
+      setPlayerHP(20);
+      setPlayerDEF(0);
     }
-    setIsLoading(false);
-    setCanAttack(true);
-  }, [inventory]);
+    // Початкове встановлення HP/DEF ворога, коли enemyStats змінюється (новий ворог згенерований)
+    // Це вже робиться в useEffect, що генерує ворога, тому тут це може бути зайвим або викликати конфлікти.
+    // Якщо enemyStats?.currentHealth вже встановлено в generateSequentialEnemy, то тут не треба.
+    // if (enemyStats) {
+    //   setEnemyHP(enemyStats.maxHealth); // Завжди починаємо з повним здоров'ям для нового ворога
+    //   setEnemyDEF(enemyStats.defense);
+    // }
+    // Якщо всі дані завантажені (гравець, інвентар, ворог), то знімаємо isLoading
+    if (userId && inventory.length > 0 && enemyStats) {
+         setIsLoading(false);
+    } else if (userId && !enemyStats && showPreBattle) { // Якщо користувач є, але ворог ще не згенерований на preBattle
+        setIsLoading(false); // Можна теж зняти завантаження, щоб показати кнопку "Почати бій"
+    }
+    // setCanAttack(true); // Це має контролюватися кнопкою "Почати бій" та станом бою
+  }, [inventory, userId]); // Залежність від inventory. enemyStats обробляється в іншому місці.
 
   useEffect(() => {
     return () => {
@@ -373,70 +417,166 @@ export default function BattlePage() {
     };
   }, []);
 
-  useEffect(() => {
-    if (battleResult === "win" && enemyStats) {
-      const { rewardPoints, rewardExp } = calculateReward(enemyStats);
-
-      // Уникнути повторного виклику:
-      updateRewardInSupabase(rewardPoints, rewardExp)
-        .then(() => {
-          toast.success(`+ ${rewardPoints} 🪨 уламків!`);
-          toast.success(`+ ${rewardExp} 🔷 досвіду!`);
-        })
-        .catch((err) => {
-          console.error("Помилка оновлення нагороди:", err);
-          toast.error("Помилка при нарахуванні нагороди!");
+   // Функція для обробки завершення бою (перемога або поразка)
+  const handleBattleEnd = async (win: boolean) => {
+    if (!enemyStats) return;
+    const { rewardPoints, rewardExp, droppedItems } = win ? calculateReward(enemyStats, playerLevel) : { rewardPoints: 0, rewardExp: 0, droppedItems: [] };
+    // Оновлюємо статистику та дані користувача в Supabase
+    await updateUserDataAfterBattle(rewardPoints, rewardExp, win, enemyStats.type);
+    if (win) {
+      toast.success(`Перемога! +${rewardPoints} 🪨, +${rewardExp} 🔷`);
+      if (droppedItems.length > 0) {
+        droppedItems.forEach(item => {
+          // Тут логіка додавання предмета гравцю, наприклад, в іншу таблицю або оновлення JSONB поля
+          toast.success(`Знайдено предмет: ${item.name}!`);
+          // await addItemsToInventorySupabase(userId, [item]); // Приклад
         });
+      }
+      // Перехід до наступного етапу
+      setEncounterNumber(prev => prev + 1);
+    } else {
+      toast.error("Поразка...");
+      // Гравець залишається на тому ж етапі або інша логіка поразки
     }
-  }, [battleResult, enemyStats]);
+    // Скидання стану для наступного бою
+    setShowPreBattle(true); // Показати екран перед боєм для наступного ворога
+    setBattleResult(null); // Скинути результат бою
+    // setCanAttack(false); // Атака буде доступна після "Почати бій"
+    // setIsLoading(true); // Можна встановити, поки генерується новий ворог
+  };
+  // useEffect для обробки результату бою
+  useEffect(() => {
+    if (battleResult === "win") {
+      handleBattleEnd(true);
+      clearInterval(timerRef.current!); // Зупиняємо таймер ходу
+    } else if (battleResult === "lose") {
+      handleBattleEnd(false);
+      clearInterval(timerRef.current!); // Зупиняємо таймер ходу
+    }
+  }, [battleResult]); // Залежність тільки від battleResult
+  // Оновлена функція updateRewardInSupabase (перейменовано та розширено)
+  async function updateUserDataAfterBattle(
+    rewardPoints: number,
+    rewardExp: number,
+    isWin: boolean,
+    defeatedEnemyType: 'normal' | 'miniBoss' | 'boss'
+  ) {
+    if (!userId) return;
+    // Поточні значення з state (вони вже мають бути актуальними після fetchUserData)
+    const currentPoints = points;
+    const currentExperience = experience;
+    const currentLevel = playerLevel;
+    // encounterNumber з state - це номер бою, щойно завершився
+    const encounterJustFinished = encounterNumber;
+    let newPoints = currentPoints + rewardPoints;
+    let newExperience = currentExperience + rewardExp;
+    let newLevel = currentLevel;
+    while (newExperience >= getRequiredExp(newLevel)) {
+      newExperience -= getRequiredExp(newLevel);
+      newLevel++;
+      toast.success(`Новий рівень: ${newLevel}!`);
+    }
+    const updatedStats = {
+      points: newPoints,
+      experience: newExperience,
+      level: newLevel,
+      total_wins: totalWins + (isWin ? 1 : 0),
+      total_losses: totalLosses + (!isWin ? 1 : 0),
+      miniboss_kills: minibossKills + (isWin && defeatedEnemyType === 'miniBoss' ? 1 : 0),
+      boss_kills: bossKills + (isWin && defeatedEnemyType === 'boss' ? 1 : 0),
+      current_encounter_number: isWin ? encounterJustFinished + 1 : encounterJustFinished, // Наступний етап при перемозі
+      max_encounter_number: Math.max(maxEncounterNumber, isWin ? encounterJustFinished : 0), // Оновлюємо макс. етап при перемозі
+    };
+    const { error } = await supabase
+      .from("users")
+      .update(updatedStats)
+      .eq("id", userId);
+    if (error) {
+      console.error("Помилка оновлення даних користувача після бою:", error.message);
+      toast.error("Не вдалося зберегти прогрес.");
+    } else {
+      console.log("Дані користувача успішно оновлено після бою.");
+      // Оновлюємо локальний state цими ж значеннями
+      setPoints(updatedStats.points);
+      setExperience(updatedStats.experience);
+      setPlayerLevel(updatedStats.level);
+      setTotalWins(updatedStats.total_wins);
+      setTotalLosses(updatedStats.total_losses);
+      setMinibossKills(updatedStats.miniboss_kills);
+      setBossKills(updatedStats.boss_kills);
+      // setEncounterNumber оновиться через handleBattleEnd -> setEncounterNumber(prev + 1)
+      setMaxEncounterNumber(updatedStats.max_encounter_number);
+    }
+  }
 
+  // handleStartBattle: коли гравець натискає кнопку "Почати бій"
   const handleStartBattle = async () => {
     if (!userId) {
-        toast.error("Користувач не авторизований");
-        return; // Зупиняємо виконання, якщо користувач не авторизований
+      toast.error("Користувач не авторизований");
+      return;
     }
-
-    // Перевірка енергії ПЕРЕД спробою її зменшити
-    if (energy < 1) {
-        toast.error("Недостатньо енергії ⚡");
-        return; // Зупиняємо виконання, якщо енергії недостатньо
+    if (energy < 1) { // Вартість бою, наприклад, 1 енергія
+      toast.error("Недостатньо енергії ⚡");
+      return;
     }
-
-    // Якщо енергії достатньо, намагаємося її зменшити на сервері/у стані
-    const success = await reduceEnergy(userId, 1); // Припустимо, що reduceEnergy взаємодіє з бекендом/станом
-    
+    const energyCost = 1; // Вартість бою
+    const success = await reduceEnergy(userId, energyCost); // reduceEnergy має повертати true/false
     if (success) {
-        // Якщо енергія успішно зменшена (на сервері або в стані)
-        setEnergy(energy - 1); // Оновлюємо локальний стан енергії
-        toast.success("Використано 1⚡");
-
-        // === ЛОГІКА ПОЧАТКУ БОЮ ===
-        // Переміщуємо сюди дії, які безпосередньо починають бій
-        setShowPreBattle(false); // Ховаємо екран перед боєм
-        setCanAttack(true);      // Дозволяємо атаку (фактично, починаємо бій)
-        // =========================
-
+      setEnergy(prev => prev - energyCost);
+      // toast.success(`Використано ${energyCost}⚡`); // Можна прибрати, якщо reduceEnergy вже показує
+      setShowPreBattle(false); // Ховаємо екран перед боєм, починається сам бій
+      setCanAttack(true);      // Дозволяємо атаку
+      setLog([`Бій розпочато! Етап: ${encounterNumber}`]); // Початковий запис в лог
+      startTurnTimer();      // Запускаємо таймер ходу гравця
     } else {
-        // Якщо зменшення енергії не вдалося (наприклад, помилка мережі)
-        toast.error("Помилка оновлення енергії. Спробуйте пізніше.");
-        // Бій не починається, оскільки енергія не була успішно списана
+      toast.error("Помилка списання енергії. Спробуйте пізніше.");
     }
   };
 
-
-  function calculateReward(enemy: Enemy | null): { rewardPoints: number; rewardExp: number } {
-    if (!enemy) return { rewardPoints: 0, rewardExp: 0 };
-
-    const base = baseEnemies.find((e: EnemyBase) => e.name === enemy.name);
-    if (!base) return { rewardPoints: 0, rewardExp: 0 };
-
-    const baseValue = base.baseHealth + base.baseDamage + base.baseDefense;
-    const scaleFactor = enemy.maxHealth / base.baseHealth;
-
-    const rewardPoints = Math.floor(baseValue * 1 * scaleFactor);
-    const rewardExp = Math.floor(baseValue * 0.5 * scaleFactor);
-
-    return { rewardPoints, rewardExp };
+   // Оновлена функція calculateReward
+  // Предмети поки що просто як імена для прикладу
+  const itemPlaceholders = {
+    common: [{name: "Старий сувій", id: "scroll"}],
+    miniBoss: [{ name: "Есенція мінібоса", id: "essence_miniboss" }, { name: "Рідкісний кристал", id: "crystal_rare"}],
+    boss: [{ name: "Серце Боса", id: "heart_boss" }, {name: "Легендарний артефакт", id: "artifact_legendary"}],
+  };
+  function calculateReward(enemy: Enemy, pLevel: number): { rewardPoints: number; rewardExp: number; droppedItems: {name: string, id: string}[] } {
+    if (!enemy) return { rewardPoints: 0, rewardExp: 0, droppedItems: [] };
+    // Знаходимо базового ворога для отримання базових значень, якщо потрібно
+    // Але оскільки enemy вже має тип, можна просто базувати нагороди на його характеристиках і типі
+    const baseValue = enemy.maxHealth + enemy.damage * 5 + enemy.defense * 3; // Приклад формули базової цінності
+    let rewardPoints = Math.floor(baseValue * 0.1);
+    let rewardExp = Math.floor(baseValue * 0.05);
+    // Бонус за рівень гравця (наприклад, +2% до нагород за кожен рівень гравця)
+    const playerLevelBonus = 1 + (pLevel - 1) * 0.02;
+    rewardPoints = Math.floor(rewardPoints * playerLevelBonus);
+    rewardExp = Math.floor(rewardExp * playerLevelBonus);
+    let droppedItems: {name: string, id: string}[] = [];
+    const randomChance = Math.random(); // 0.0 to < 1.0
+    switch (enemy.type) {
+      case 'miniBoss':
+        rewardPoints = Math.floor(rewardPoints * 1.8); // Більше очок за мінібоса
+        rewardExp = Math.floor(rewardExp * 1.8);
+        if (randomChance < 0.3) { // 30% шанс на предмет мінібоса
+          droppedItems.push(itemPlaceholders.miniBoss[Math.floor(Math.random() * itemPlaceholders.miniBoss.length)]);
+        }
+        break;
+      case 'boss':
+        rewardPoints = Math.floor(rewardPoints * 3.5); // Значно більше за боса
+        rewardExp = Math.floor(rewardExp * 3.5);
+        if (randomChance < 0.75) { // 75% шанс на предмет боса
+           droppedItems.push(itemPlaceholders.boss[Math.floor(Math.random() * itemPlaceholders.boss.length)]);
+        }
+        // Можна гарантовано давати унікальний предмет за першу перемогу над босом (потребує дод. логіки/поля в БД)
+        break;
+      case 'normal':
+      default:
+        if (randomChance < 0.08) { // 8% шанс на звичайний предмет
+          droppedItems.push(itemPlaceholders.common[Math.floor(Math.random() * itemPlaceholders.common.length)]);
+        }
+        break;
+    }
+    return { rewardPoints, rewardExp, droppedItems };
   }
 
   if (showPreBattle) {
