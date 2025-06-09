@@ -60,6 +60,7 @@ export default function BattlePage() {
   const [isEnemyHit, setIsEnemyHit] = useState(false);
 
   const hasMissedTurnRef = useRef(false);
+  const hasProcessedOutcome = useRef(false);
 
   // Завантажуємо дані користувача із Supabase
   const fetchUserData = async () => {
@@ -97,12 +98,6 @@ export default function BattlePage() {
     // fetchInventory буде викликаний в своєму useEffect, який залежить від userId
     // setIsLoading буде встановлено в false в useEffect, що залежить від inventory
   };
-
-
-  // Використовуйте fetchUserData у useEffect
-  useEffect(() => {
-      fetchUserData(); // Викликаємо функцію
-  }, [userId]);
 
   const appendToLog = (newEntries: string[]) => {
     setLog(prev => {
@@ -174,6 +169,11 @@ export default function BattlePage() {
     setInventory(formatted);
   };
 
+  useEffect(() => {
+      fetchUserData(); // Викликаємо функцію
+      fetchInventory();
+  }, [userId]);
+
   function calculateDamage(attack: number, defense: number): { defenseLoss: number; healthLoss: number } {
     const rawDamage = Math.max(attack, 0);
     if (defense >= rawDamage) {
@@ -182,29 +182,6 @@ export default function BattlePage() {
       return { defenseLoss: defense, healthLoss: rawDamage - defense };
     }
   }
-
-  const ProgressBar = ({ value, max, color = "#4ade80" }: { value: number, max: number, color?: string }) => {
-    const percent = Math.max(0, Math.min(100, (value / max) * 100));
-
-    return (
-      <div style={{
-        width: '100%',
-        height: 5,
-        backgroundColor: '#333',
-        borderRadius: 6,
-        border: '1px solid rgb(32, 32, 32)',
-        overflow: 'hidden',
-        marginTop: 0,
-      }}>
-        <div style={{
-          width: `${percent}%`,
-          height: '100%',
-          backgroundColor: color,
-          transition: 'width 0.3s ease',
-        }} />
-      </div>
-    );
-  };
 
   const startTurnTimer = () => {
     if (battleResult) return; // Не запускаємо таймер, якщо бій завершено
@@ -309,12 +286,13 @@ export default function BattlePage() {
         setExperience(newExperience); 
       }
   }
-    // Функція для розрахунку досвіду
+
+  // Функція для розрахунку досвіду
   const getRequiredExp = (level: number): number => {
       return 100 * Math.pow(2, level - 1); // 1 рівень = 100 XP, 2 рівень = 200, 3 рівень = 400 і т.д.
   };
 
-    const handleAttack = () => {
+  const handleAttack = () => {
     if (!enemyStats) return;
     if (!canAttack || playerHP <= 0 || enemyHP <= 0 || battleResult) return;
     setCanAttack(false);
@@ -357,27 +335,24 @@ export default function BattlePage() {
     }, 500);
   };
 
-  useEffect(() => {
-    if (showPreBattle && playerLevel && encounterNumber > 0 && userId) { // Переконуємось, що userId є
-      console.log(`Generating enemy for encounter: ${encounterNumber}, player level: ${playerLevel}`);
-      const generated = generateSequentialEnemy(encounterNumber, playerLevel);
-      setEnemyStats(generated);
-      setEnemyImage(generated.image);
-      setEnemyHP(generated.maxHealth); // Встановлюємо максимальне здоров'я як поточне на початку
-      setEnemyDEF(generated.defense);
-      setTurnTimer(15); // Чи скільки у вас там
-      setIsHit(false);
-      // setCanAttack(false); // Атака стане доступною після натискання "Почати бій"
-      setBattleResult(null); // Скидаємо результат попереднього бою
-      setLog([]); // Очищаємо лог бою
-    }
-  }, [showPreBattle, playerLevel, encounterNumber, userId]); // Додали userId як залежність
-  // useEffect для завантаження інвентаря
-   useEffect(() => {
-    if (userId) { // Переконуємось, що userId є перед завантаженням інвентаря
-      fetchInventory();
-    }
-  }, [userId]);
+useEffect(() => {
+  if (showPreBattle && playerLevel && encounterNumber > 0 && userId) {
+            console.log(`Generating enemy for encounter: ${encounterNumber}, player level: ${playerLevel}`);
+            const generated = generateSequentialEnemy(encounterNumber, playerLevel);
+            setEnemyStats(generated);
+            setEnemyImage(generated.image);
+            setEnemyHP(generated.maxHealth);
+            setEnemyDEF(generated.defense);
+            setTurnTimer(15);
+            setIsHit(false);
+            // *** ВАЖЛИВО: скидаємо результат бою при підготовці до нового ***
+            setBattleResult(null); 
+            // Скидаємо прапор обробки, готуючись до наступного бою
+            hasProcessedOutcome.current = false;
+            setLog([]);
+        }
+    }, [showPreBattle, playerLevel, encounterNumber, userId]);
+    useEffect(() => { return () => { if (timerRef.current) clearInterval(timerRef.current); }; }, []);
 
     // useEffect для оновлення статів гравця та ворога
   // Цей useEffect має реагувати на зміни inventory (для статів гравця)
@@ -419,34 +394,24 @@ export default function BattlePage() {
 
    // Функція для обробки результатів бою (збереження, нагороди)
   const processBattleOutcome = async (isWin: boolean) => {
-    if (!enemyStats || !userId) {
-      console.error("processBattleOutcome викликано без enemyStats або userId. Скидання battleResult.");
-      // Можливо, варто додати логіку для повернення на головний екран або безпечного стану тут,
-      // але поки що просто виходимо, якщо критичні дані відсутні.
-      setBattleResult(null);
-      return;
-    }
-    const { rewardPoints, rewardExp, droppedItems } = isWin ? calculateReward(enemyStats, playerLevel) : { rewardPoints: 0, rewardExp: 0, droppedItems: [] };
-    // Ця функція тепер також оновить локальний encounterNumber
-    await updateUserDataAfterBattle(rewardPoints, rewardExp, isWin, enemyStats.type);
-    if (isWin) {
-      toast.success(`Перемога! +${rewardPoints} 🪨, +${rewardExp} 🔷`);
-      if (droppedItems.length > 0) {
-        droppedItems.forEach(item => {
-          toast.success(`Знайдено предмет: ${item.name}!`);
-          // Логіка додавання предметів
-        });
-      }
-    } else {
-      toast.error("Поразка...");
-    }
-    clearInterval(timerRef.current!); // Зупиняємо таймер ходу
-    // --- ДОДАЙТЕ ЦЕЙ РЯДОК ---
-    // Готуємо екран для наступного бою (або повтору поточного етапу при поразці)
-    setShowPreBattle(true);
-    // --------------------------
-    setBattleResult(null); // Скидаємо стан бою, щоб уникнути повторної обробки
-  };
+        if (!enemyStats || !userId) return;
+        const { rewardPoints, rewardExp, droppedItems } = isWin ? calculateReward(enemyStats, playerLevel) : { rewardPoints: 0, rewardExp: 0, droppedItems: [] };
+        
+        await updateUserDataAfterBattle(rewardPoints, rewardExp, isWin, enemyStats.type);
+
+        if (isWin) {
+            toast.success(`Перемога! +${rewardPoints} 🪨, +${rewardExp} 🔷`);
+            if (droppedItems.length > 0) {
+                droppedItems.forEach(item => {
+                    toast.success(`Знайдено предмет: ${item.name}!`);
+                });
+            }
+        } else {
+            toast.error("Поразка...");
+        }
+        clearInterval(timerRef.current!);
+        // Більше нічого не робимо. UI тепер буде контролюватися `battleResult`
+    };
 
   // useEffect для обробки результату бою (викликає збереження)
   useEffect(() => {
@@ -458,21 +423,22 @@ export default function BattlePage() {
     // Залежності: battleResult та всі стани, які читає updateUserDataAfterBattle неявно,
     // або передавайте їх як параметри в updateUserDataAfterBattle для чистоти.
     // Поточний updateUserDataAfterBattle читає багато станів, тому список залежностей великий:
-  }, [battleResult, enemyStats, playerLevel, userId, points, experience, totalWins, totalLosses, minibossKills, bossKills, encounterNumber, maxEncounterNumber]);
-  // Оновлена функція updateRewardInSupabase (перейменовано та розширено)
+  }, [battleResult]);
+
   async function updateUserDataAfterBattle(
-    rewardPoints: number,
-    rewardExp: number,
-    isWin: boolean,
-    defeatedEnemyType: 'normal' | 'miniBoss' | 'boss'
+      rewardPoints: number,
+      rewardExp: number,
+      isWin: boolean,
+      defeatedEnemyType: 'normal' | 'miniBoss' | 'boss'
   ) {
-    if (!userId) return;
+      if (!userId) return;
+      const encounterJustFinished = encounterNumber;
+      const newEncounterNumber = isWin ? encounterJustFinished + 1 : 1; // При поразці завжди скидаємо на 1
     // Поточні значення з state (вони вже мають бути актуальними після fetchUserData)
     const currentPoints = points;
     const currentExperience = experience;
     const currentLevel = playerLevel;
     // encounterNumber з state - це номер бою, щойно завершився
-    const encounterJustFinished = encounterNumber;
     let newPoints = currentPoints + rewardPoints;
     let newExperience = currentExperience + rewardExp;
     let newLevel = currentLevel;
@@ -489,30 +455,30 @@ export default function BattlePage() {
       total_losses: totalLosses + (!isWin ? 1 : 0),
       miniboss_kills: minibossKills + (isWin && defeatedEnemyType === 'miniBoss' ? 1 : 0),
       boss_kills: bossKills + (isWin && defeatedEnemyType === 'boss' ? 1 : 0),
-      current_encounter_number: isWin ? encounterJustFinished + 1 : encounterJustFinished, // Наступний етап при перемозі
-      max_encounter_number: Math.max(maxEncounterNumber, isWin ? encounterJustFinished : 0), // Оновлюємо макс. етап при перемозі
+      current_encounter_number: newEncounterNumber,
+      max_encounter_number: Math.max(maxEncounterNumber, isWin ? encounterJustFinished : 0),
     };
-    const { error } = await supabase
-      .from("users")
-      .update(updatedStats)
-      .eq("id", userId);
+
+    const { error } = await supabase.from("users").update(updatedStats).eq("id", userId);
+
     if (error) {
-      console.error("Помилка оновлення даних користувача після бою:", error.message);
-      toast.error("Не вдалося зберегти прогрес.");
+        console.error("Помилка оновлення даних:", error.message);
+        toast.error("Не вдалося зберегти прогрес.");
     } else {
-      console.log("Дані користувача успішно оновлено після бою.");
-      // Оновлюємо локальний state цими ж значеннями
-      setPoints(updatedStats.points);
-      setExperience(updatedStats.experience);
-      setPlayerLevel(updatedStats.level);
-      setTotalWins(updatedStats.total_wins);
-      setTotalLosses(updatedStats.total_losses);
-      setMinibossKills(updatedStats.miniboss_kills);
-      setBossKills(updatedStats.boss_kills);
-      // setEncounterNumber оновиться через handleBattleEnd -> setEncounterNumber(prev + 1)
-      setMaxEncounterNumber(updatedStats.max_encounter_number);
+        console.log("Дані користувача успішно оновлено.");
+        // Оновлюємо ВЕСЬ локальний state
+        setPoints(updatedStats.points);
+        setExperience(updatedStats.experience);
+        setPlayerLevel(updatedStats.level);
+        setTotalWins(updatedStats.total_wins);
+        setTotalLosses(updatedStats.total_losses);
+        setMinibossKills(updatedStats.miniboss_kills);
+        setBossKills(updatedStats.boss_kills);
+        // *** Оновлюємо encounterNumber в state ТУТ, а не в кнопці ***
+        setEncounterNumber(updatedStats.current_encounter_number);
+        setMaxEncounterNumber(updatedStats.max_encounter_number);
+      }
     }
-  }
 
   // handleStartBattle: коли гравець натискає кнопку "Почати бій"
   const handleStartBattle = async () => {
@@ -545,6 +511,7 @@ export default function BattlePage() {
     miniBoss: [{ name: "Есенція мінібоса", id: "essence_miniboss" }, { name: "Рідкісний кристал", id: "crystal_rare"}],
     boss: [{ name: "Серце Боса", id: "heart_boss" }, {name: "Легендарний артефакт", id: "artifact_legendary"}],
   };
+
   function calculateReward(enemy: Enemy, pLevel: number): { rewardPoints: number; rewardExp: number; droppedItems: {name: string, id: string}[] } {
     if (!enemy) return { rewardPoints: 0, rewardExp: 0, droppedItems: [] };
     // Знаходимо базового ворога для отримання базових значень, якщо потрібно
@@ -596,59 +563,49 @@ export default function BattlePage() {
       stageText += " (БОС)";
     }
     // Додано колір та забезпечено видимість, налаштуйте стиль за потреби
-    return <div style={{ textAlign: 'center', margin: '10px auto 5px auto', fontWeight: 'bold', color: '#fff', fontSize:'1.1em', textShadow: '1px 1px 2px black' }}>{stageText}</div>;
+    return <div style={{ textAlign: 'center', margin: '10px auto 15px auto', fontWeight: 'bold', color: '#fff', fontSize:'0.9em', textShadow: '1px 1px 2px black' }}>{stageText}</div>;
   };
+
   // --- ОБРОБНИКИ КНОПОК ДЛЯ МОДАЛЬНОГО ВІКНА ---
   const handleWinNext = () => {
-    setEncounterNumber(prev => prev + 1); // fetchEnemyData буде викликано useEffect
-    setPlayerHP(playerStats.health);      // Відновити здоров'я гравця
-    setPlayerDEF(playerStats.defense);     // Відновити захист гравця
-    // Стани скидаються fetchEnemyData або глобально:
-    // setBattleResult(null);
-    // setLog([]);
-    setShowLog(false);
-    setTurnTimer(15);
-    // setShowPreBattle(true); // Це буде оброблено після завершення fetchEnemyData
+      // `encounterNumber` вже оновлено в `updateUserDataAfterBattle`.
+      // Нам потрібно лише відновити гравця і перейти до екрану підготовки.
+      setPlayerHP(playerStats.health);
+      setPlayerDEF(playerStats.defense);
+      setShowPreBattle(true); // Це запустить `useEffect` для генерації нового ворога
   };
+  
   const handleLossRetry = () => {
-    setEncounterNumber(1); // Скинути до етапу 1, fetchEnemyData буде викликано
-    setPlayerHP(playerStats.health); // Відновити здоров'я гравця
-    setPlayerDEF(playerStats.defense); // Відновити захист гравця
-    // Стани скидаються fetchEnemyData або глобально:
-    // setBattleResult(null);
-    // setLog([]);
-    setShowLog(false);
-    setTurnTimer(15);
-    // setShowPreBattle(true); // Це буде оброблено після завершення fetchEnemyData
+      // `encounterNumber` вже скинуто на 1 в `updateUserDataAfterBattle`.
+      setPlayerHP(playerStats.health);
+      setPlayerDEF(playerStats.defense);
+      setShowPreBattle(true); // Це запустить `useEffect` для генерації ворога 1-го етапу
   };
+
   // --- СТАН ЗАВАНТАЖЕННЯ ---
   // Ваша існуюча логіка isLoading була в першому фрагменті.
   // Хорошою практикою є розміщення її на верхньому рівні return.
   // Тут я припускаю, що `fetchEnemyData` встановлює isLoading.
   // Сам екран перед боєм може показувати стан завантаження, якщо enemyStats дорівнює null.
-  if (isLoading && !enemyStats) { // Більш конкретне завантаження для початкового завантаження ворога
-    return (
-      <Page>
-        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', color: '#fff', backgroundColor: '#333' }}>
-            Завантаження бою... Зачекайте, дані завантажуються...
-        </div>
-      </Page>
-    );
+  if (isLoading) { // Використовуємо більш простий варіант завантаження
+      return (
+          <Page>
+              <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', color: '#fff' }}>
+                  Завантаження даних...
+              </div>
+          </Page>
+      );
   }
-  // --- JSX ---
-  // Це ваша існуюча структура JSX зі змінами:
-  // 1. Викликається `renderStageInfo()`.
-  // 2. Кнопки модального вікна результатів бою оновлені для сценаріїв "перемога" та "поразка".
+
   if (showPreBattle) {
-    // Ваш екран перед боєм (здебільшого без змін, переконайтеся, що enemyStats доступний)
-    if (!enemyStats) { // Все ще завантажується конкретний ворог для екрану перед боєм
-        return (
-            <Page>
-                <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', color: '#fff', backgroundColor: '#333' }}>
-                    Генерація ворога... Зачекайте...
-                </div>
-            </Page>
-        );
+    if (!enemyStats) {
+          return (
+              <Page>
+                  <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', color: '#fff' }}>
+                      Генерація ворога...
+                  </div>
+              </Page>
+          );
     }
     return (
       <Page>
@@ -669,7 +626,12 @@ export default function BattlePage() {
               color: "#fff",
               padding: "16px",
               boxSizing: "border-box",
-              overflowY: "auto" // На випадок, якщо вміст переповнюється
+              borderRadius: 0,
+              overflowY: "auto", // На випадок, якщо вміст переповнюється
+              backgroundImage: "url('/bg/bgforestnght.jpg')", // Переміщено у внутрішній div
+              backgroundRepeat: "no-repeat",
+              backgroundSize: "cover",
+              backgroundPosition: "center",
             }}
           >
             {renderStageInfo()} {/* Інформація про етап також на екрані перед боєм */}
@@ -683,7 +645,7 @@ export default function BattlePage() {
                 animation: "fadeIn 0.6s ease forwards", // Визначте fadeIn, якщо не глобально
                 marginTop: 5, // Скоригований відступ
                 marginBottom: 15,
-                fontSize: "1.8em"
+                fontSize: "1.2em"
               }}
             >
               ⚔️ Ви натрапили на ворога ! ⚔️</h2>
@@ -729,7 +691,7 @@ export default function BattlePage() {
                 color: "#fff",
                 animation: "fadeIn 2s ease forwards",
                 marginBottom: "10px", // Скориговано
-                fontSize: "1.5em"
+                fontSize: "1.2em"
               }}
             >
               Ваші характеристики :</h2>
@@ -786,20 +748,20 @@ export default function BattlePage() {
       </Page>
     );
   }
+  
   // --- Екран бою ---
   return (
-    <Page> {/* Видалено проп 'back', якщо він не стандартний або не визначений вашим компонентом Page */}
-      {/* <Placeholder>  Переоцінка, чи повинен Placeholder обгортати весь екран бою */}
+    <Page>
         <Toaster position="top-center" toastOptions={{ duration: 2000 }} />
-      <div // Це ваш головний контейнер екрана бою
+      <div 
         style={{
           position: "fixed", top: 0, left: 0, width: "100%", height: "100%",
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
-          // justifyContent: "center", // Вміст позиціонується абсолютно/flex всередині
           animation: "fadeIn 1s ease forwards", // Визначте fadeIn, якщо не глобально
           color: "#fff", // Колір тексту за замовчуванням для цього вигляду
+          // justifyContent: "center", // Вміст позиціонується абсолютно/flex всередині
           // backgroundImage: "url('/bg/bgforestnght1.jpg')", // Переміщено у внутрішній div
           // backgroundRepeat: "no-repeat",
           // backgroundSize: "cover",
@@ -838,7 +800,7 @@ export default function BattlePage() {
         {/* Зона ворога */}
         <div style={{
             position: "absolute", // Налаштуйте відповідно до потреб вашого макета
-            top: "80px", // Залиште місце для таймера та інформації про етап
+            top: "50%", // Залиште місце для таймера та інформації про етап
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
@@ -999,15 +961,14 @@ export default function BattlePage() {
                  log.map((entry, index) => <div key={index} style={{borderBottom: '1px dashed #333', paddingBottom: '2px', marginBottom: '2px'}}>{entry}</div>)}
             </Card>
         )}
-      </div> {/* Кінець головного контейнера екрана бою */}
-      {/* Модальне вікно результатів бою (ваша існуюча структура, з оновленими обробниками кнопок) */}
-      {/* Цей Card діє як контейнер модального вікна */}
+      </div>
+
         {battleResult && (
         <div // Повноекранне накладення для модального вікна
             style={{
             position: "fixed",
             top: 0, left: 0, width: "100%", height: "100%",
-            backgroundColor: "rgba(0,0,0,0.90)", // Темніше накладення
+            backgroundColor: "rgba(0, 0, 0, 0.96)", // Темніше накладення
             display: "flex", flexDirection: "column",
             justifyContent: "center", alignItems: "center",
             color: "#fff", zIndex: 9999, // Переконайтеся, що воно зверху
@@ -1079,8 +1040,8 @@ export default function BattlePage() {
             )}
             {/* Кнопки дій для модального вікна */}
             <div style={{
-                // position:"absolute", // Не абсолютно, якщо вміст модального вікна плаваючий
-                // bottom: "0px", //
+                position:"absolute", // Не абсолютно, якщо вміст модального вікна плаваючий
+                bottom: "33px", //
                 display: "flex",
                 justifyContent: "center",
                 alignItems: "center",
@@ -1094,7 +1055,7 @@ export default function BattlePage() {
             }}>
             <Link href="/home" style={{flex:1}}>
                 <Button
-                size="l"
+                size="m"
                 stretched
                 style={{
                     // backgroundColor: "#f44336", // Обробляється режимом
@@ -1108,7 +1069,7 @@ export default function BattlePage() {
             </Link>
             {battleResult === "win" && (
                 <Button
-                size="l"
+                size="m"
                 stretched
                 style={{
                     animation: "fadeIn 0.6s ease forwards",
@@ -1124,7 +1085,7 @@ export default function BattlePage() {
             )}
             {battleResult === "lose" && (
                 <Button
-                size="l"
+                size="m"
                 stretched
                 style={{
                     animation: "fadeIn 0.6s ease forwards",
