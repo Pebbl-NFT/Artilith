@@ -371,8 +371,7 @@ export default function BattlePage() {
       setBattleResult(null); // Скидаємо результат попереднього бою
       setLog([]); // Очищаємо лог бою
     }
-  }, [showPreBattle, playerLevel, encounterNumber, userId]);
-
+  }, [showPreBattle, playerLevel, encounterNumber, userId]); // Додали userId як залежність
   // useEffect для завантаження інвентаря
    useEffect(() => {
     if (userId) { // Переконуємось, що userId є перед завантаженням інвентаря
@@ -422,16 +421,14 @@ export default function BattlePage() {
   const processBattleOutcome = async (isWin: boolean) => {
     if (!enemyStats || !userId) {
       console.error("processBattleOutcome викликано без enemyStats або userId. Скидання battleResult.");
-      setBattleResult(null); // Запобігаємо зависанню в такому випадку
+      // Можливо, варто додати логіку для повернення на головний екран або безпечного стану тут,
+      // але поки що просто виходимо, якщо критичні дані відсутні.
+      setBattleResult(null);
       return;
     }
-
     const { rewardPoints, rewardExp, droppedItems } = isWin ? calculateReward(enemyStats, playerLevel) : { rewardPoints: 0, rewardExp: 0, droppedItems: [] };
-
-    // updateUserDataAfterBattle читає багато станів, тому використовує останні значення
-    // при виклику processBattleOutcome.
-    await updateUserDataAfterBattle(rewardPoints, rewardExp, isWin, enemyStats.type); // enemyStats гарантовано не null тут
-
+    // Ця функція тепер також оновить локальний encounterNumber
+    await updateUserDataAfterBattle(rewardPoints, rewardExp, isWin, enemyStats.type);
     if (isWin) {
       toast.success(`Перемога! +${rewardPoints} 🪨, +${rewardExp} 🔷`);
       if (droppedItems.length > 0) {
@@ -441,14 +438,16 @@ export default function BattlePage() {
         });
       }
     } else {
-      toast.error("Поразка..."); // Це саме те повідомлення, що повторюється
+      toast.error("Поразка...");
     }
-
     clearInterval(timerRef.current!); // Зупиняємо таймер ходу
-
-    // НЕ викликаємо setShowPreBattle(true) тут - це залишається правильним для відокремлення логіки скидання UI
-    setBattleResult(null); // <--- ДОДАЙТЕ ЦЕЙ РЯДОК ДЛЯ СКИДАННЯ СТАНУ БОЮ
+    // --- ДОДАЙТЕ ЦЕЙ РЯДОК ---
+    // Готуємо екран для наступного бою (або повтору поточного етапу при поразці)
+    setShowPreBattle(true);
+    // --------------------------
+    setBattleResult(null); // Скидаємо стан бою, щоб уникнути повторної обробки
   };
+
   // useEffect для обробки результату бою (викликає збереження)
   useEffect(() => {
     if (battleResult === "win") {
@@ -601,25 +600,27 @@ export default function BattlePage() {
   };
   // --- ОБРОБНИКИ КНОПОК ДЛЯ МОДАЛЬНОГО ВІКНА ---
   const handleWinNext = () => {
-    setEncounterNumber(prev => prev + 1); // Наступний етап локально
-    setPlayerHP(playerStats.health);
-    setPlayerDEF(playerStats.defense);
+    setEncounterNumber(prev => prev + 1); // fetchEnemyData буде викликано useEffect
+    setPlayerHP(playerStats.health);      // Відновити здоров'я гравця
+    setPlayerDEF(playerStats.defense);     // Відновити захист гравця
+    // Стани скидаються fetchEnemyData або глобально:
+    // setBattleResult(null);
+    // setLog([]);
     setShowLog(false);
-    setTurnTimer(15); // Або ваш стандартний таймер
-    setShowPreBattle(true); // <--- ВАЖЛИВО: показати екран перед боєм
-    // battleResult стане null, коли новий ворог згенерується для pre-battle
+    setTurnTimer(15);
+    // setShowPreBattle(true); // Це буде оброблено після завершення fetchEnemyData
   };
-
   const handleLossRetry = () => {
-    setEncounterNumber(1); // Скинути до етапу 1 локально
-    setPlayerHP(playerStats.health);
-    setPlayerDEF(playerStats.defense);
+    setEncounterNumber(1); // Скинути до етапу 1, fetchEnemyData буде викликано
+    setPlayerHP(playerStats.health); // Відновити здоров'я гравця
+    setPlayerDEF(playerStats.defense); // Відновити захист гравця
+    // Стани скидаються fetchEnemyData або глобально:
+    // setBattleResult(null);
+    // setLog([]);
     setShowLog(false);
-    setTurnTimer(15); // Або ваш стандартний таймер
-    setShowPreBattle(true); // <--- ВАЖЛИВО: показати екран перед боєм
-    // battleResult стане null, коли новий ворог згенерується для pre-battle
+    setTurnTimer(15);
+    // setShowPreBattle(true); // Це буде оброблено після завершення fetchEnemyData
   };
-
   // --- СТАН ЗАВАНТАЖЕННЯ ---
   // Ваша існуюча логіка isLoading була в першому фрагменті.
   // Хорошою практикою є розміщення її на верхньому рівні return.
