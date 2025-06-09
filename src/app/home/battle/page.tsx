@@ -371,7 +371,8 @@ export default function BattlePage() {
       setBattleResult(null); // Скидаємо результат попереднього бою
       setLog([]); // Очищаємо лог бою
     }
-  }, [showPreBattle, playerLevel, encounterNumber, userId]); // Додали userId як залежність
+  }, [showPreBattle, playerLevel, encounterNumber, userId]);
+
   // useEffect для завантаження інвентаря
    useEffect(() => {
     if (userId) { // Переконуємось, що userId є перед завантаженням інвентаря
@@ -417,43 +418,48 @@ export default function BattlePage() {
     };
   }, []);
 
-   // Функція для обробки завершення бою (перемога або поразка)
-  const handleBattleEnd = async (win: boolean) => {
-    if (!enemyStats) return;
-    const { rewardPoints, rewardExp, droppedItems } = win ? calculateReward(enemyStats, playerLevel) : { rewardPoints: 0, rewardExp: 0, droppedItems: [] };
-    // Оновлюємо статистику та дані користувача в Supabase
-    await updateUserDataAfterBattle(rewardPoints, rewardExp, win, enemyStats.type);
-    if (win) {
+   // Функція для обробки результатів бою (збереження, нагороди)
+  const processBattleOutcome = async (isWin: boolean) => {
+    if (!enemyStats || !userId) {
+      console.error("processBattleOutcome викликано без enemyStats або userId. Скидання battleResult.");
+      setBattleResult(null); // Запобігаємо зависанню в такому випадку
+      return;
+    }
+
+    const { rewardPoints, rewardExp, droppedItems } = isWin ? calculateReward(enemyStats, playerLevel) : { rewardPoints: 0, rewardExp: 0, droppedItems: [] };
+
+    // updateUserDataAfterBattle читає багато станів, тому використовує останні значення
+    // при виклику processBattleOutcome.
+    await updateUserDataAfterBattle(rewardPoints, rewardExp, isWin, enemyStats.type); // enemyStats гарантовано не null тут
+
+    if (isWin) {
       toast.success(`Перемога! +${rewardPoints} 🪨, +${rewardExp} 🔷`);
       if (droppedItems.length > 0) {
         droppedItems.forEach(item => {
-          // Тут логіка додавання предмета гравцю, наприклад, в іншу таблицю або оновлення JSONB поля
           toast.success(`Знайдено предмет: ${item.name}!`);
-          // await addItemsToInventorySupabase(userId, [item]); // Приклад
+          // Логіка додавання предметів
         });
       }
-      // Перехід до наступного етапу
-      setEncounterNumber(prev => prev + 1);
     } else {
-      toast.error("Поразка...");
-      // Гравець залишається на тому ж етапі або інша логіка поразки
+      toast.error("Поразка..."); // Це саме те повідомлення, що повторюється
     }
-    // Скидання стану для наступного бою
-    setShowPreBattle(true); // Показати екран перед боєм для наступного ворога
-    setBattleResult(null); // Скинути результат бою
-    // setCanAttack(false); // Атака буде доступна після "Почати бій"
-    // setIsLoading(true); // Можна встановити, поки генерується новий ворог
+
+    clearInterval(timerRef.current!); // Зупиняємо таймер ходу
+
+    // НЕ викликаємо setShowPreBattle(true) тут - це залишається правильним для відокремлення логіки скидання UI
+    setBattleResult(null); // <--- ДОДАЙТЕ ЦЕЙ РЯДОК ДЛЯ СКИДАННЯ СТАНУ БОЮ
   };
-  // useEffect для обробки результату бою
+  // useEffect для обробки результату бою (викликає збереження)
   useEffect(() => {
     if (battleResult === "win") {
-      handleBattleEnd(true);
-      clearInterval(timerRef.current!); // Зупиняємо таймер ходу
+      processBattleOutcome(true);
     } else if (battleResult === "lose") {
-      handleBattleEnd(false);
-      clearInterval(timerRef.current!); // Зупиняємо таймер ходу
+      processBattleOutcome(false);
     }
-  }, [battleResult]); // Залежність тільки від battleResult
+    // Залежності: battleResult та всі стани, які читає updateUserDataAfterBattle неявно,
+    // або передавайте їх як параметри в updateUserDataAfterBattle для чистоти.
+    // Поточний updateUserDataAfterBattle читає багато станів, тому список залежностей великий:
+  }, [battleResult, enemyStats, playerLevel, userId, points, experience, totalWins, totalLosses, minibossKills, bossKills, encounterNumber, maxEncounterNumber]);
   // Оновлена функція updateRewardInSupabase (перейменовано та розширено)
   async function updateUserDataAfterBattle(
     rewardPoints: number,
@@ -579,496 +585,562 @@ export default function BattlePage() {
     return { rewardPoints, rewardExp, droppedItems };
   }
 
+  // --- ФУНКЦІЇ ВІДОБРАЖЕННЯ UI ---
+  // Відображення етапу (інтегровано)
+  const renderStageInfo = () => {
+    if (!enemyStats && !isLoading) return null; // Не відображати, якщо немає ворога і не завантажується
+    if (isLoading && showPreBattle) return null; // Не показувати під час початкового завантаження перед боєм, якщо бажаєте
+    let stageText = `Етап: ${encounterNumber}`;
+    if (enemyStats?.type === 'miniBoss') {
+      stageText += " (Мінібос)";
+    } else if (enemyStats?.type === 'boss') {
+      stageText += " (БОС)";
+    }
+    // Додано колір та забезпечено видимість, налаштуйте стиль за потреби
+    return <div style={{ textAlign: 'center', margin: '10px auto 5px auto', fontWeight: 'bold', color: '#fff', fontSize:'1.1em', textShadow: '1px 1px 2px black' }}>{stageText}</div>;
+  };
+  // --- ОБРОБНИКИ КНОПОК ДЛЯ МОДАЛЬНОГО ВІКНА ---
+  const handleWinNext = () => {
+    setEncounterNumber(prev => prev + 1); // Наступний етап локально
+    setPlayerHP(playerStats.health);
+    setPlayerDEF(playerStats.defense);
+    setShowLog(false);
+    setTurnTimer(15); // Або ваш стандартний таймер
+    setShowPreBattle(true); // <--- ВАЖЛИВО: показати екран перед боєм
+    // battleResult стане null, коли новий ворог згенерується для pre-battle
+  };
+
+  const handleLossRetry = () => {
+    setEncounterNumber(1); // Скинути до етапу 1 локально
+    setPlayerHP(playerStats.health);
+    setPlayerDEF(playerStats.defense);
+    setShowLog(false);
+    setTurnTimer(15); // Або ваш стандартний таймер
+    setShowPreBattle(true); // <--- ВАЖЛИВО: показати екран перед боєм
+    // battleResult стане null, коли новий ворог згенерується для pre-battle
+  };
+
+  // --- СТАН ЗАВАНТАЖЕННЯ ---
+  // Ваша існуюча логіка isLoading була в першому фрагменті.
+  // Хорошою практикою є розміщення її на верхньому рівні return.
+  // Тут я припускаю, що `fetchEnemyData` встановлює isLoading.
+  // Сам екран перед боєм може показувати стан завантаження, якщо enemyStats дорівнює null.
+  if (isLoading && !enemyStats) { // Більш конкретне завантаження для початкового завантаження ворога
+    return (
+      <Page>
+        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', color: '#fff', backgroundColor: '#333' }}>
+            Завантаження бою... Зачекайте, дані завантажуються...
+        </div>
+      </Page>
+    );
+  }
+  // --- JSX ---
+  // Це ваша існуюча структура JSX зі змінами:
+  // 1. Викликається `renderStageInfo()`.
+  // 2. Кнопки модального вікна результатів бою оновлені для сценаріїв "перемога" та "поразка".
   if (showPreBattle) {
+    // Ваш екран перед боєм (здебільшого без змін, переконайтеся, що enemyStats доступний)
+    if (!enemyStats) { // Все ще завантажується конкретний ворог для екрану перед боєм
+        return (
+            <Page>
+                <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', color: '#fff', backgroundColor: '#333' }}>
+                    Генерація ворога... Зачекайте...
+                </div>
+            </Page>
+        );
+    }
     return (
       <Page>
         <Toaster position="top-center" toastOptions={{ duration: 2000 }} />
-          <Card
-            className="page"
+          <Card // Припускаючи, що Card тут є контейнером на всю сторінку
+            className="page" // Переконайтеся, що ваш CSS для .page обробляє цей повноекранний вигляд
             style={{
-              position: "fixed",
+              position: "fixed", // Або використовуйте flex-центрування на Page, якщо бажаєте
               top: 0,
-              left: 1,
+              left: 0,
               width: "100vw",
               height: "100vh",
               display: "flex",
               justifyContent: "center",
               alignItems: "center",
               flexDirection: "column",
+              backgroundColor: "rgba(0,0,0,0.85)", // Темніший фон
               color: "#fff",
-              padding: "16px", // трохи внутрішнього відступу
+              padding: "16px",
               boxSizing: "border-box",
+              overflowY: "auto" // На випадок, якщо вміст переповнюється
             }}
           >
-            <h2 
-              style={{
-                display: "flex",
-                flexDirection: "row",
-                justifyContent: "center",
-                alignItems: "center",
-                color: "#fff",
-                animation: "fadeIn 0.6s ease forwards",
-              }}
-            >
-              ⚔️ Ви натрапили на ворога ! ⚔️</h2>
-
-            <h1 style={{ animation: "fadeIn 3s ease forwards",marginBottom:30, }}>{enemyStats?.name}</h1>
-            <div
-              style={{
-                display: "flex",
-                flexDirection: "row",
-                justifyContent: "center",
-                alignItems: "center",
-                gap: "40px",
-                color: "#fff",
-                animation: "fadeIn 3s ease forwards",
-                marginBottom: "0px"
-              }}
-              >
-                <div style={{ display: "flex", justifyContent: "space-between", width: "50%" }}>
-                  <span>{enemyHP} </span>
-                  <span>❤️ </span>
-                </div>
-                <div style={{ display: "flex", justifyContent: "space-between", width: "50%" }}>
-                  <span>🗡️ </span>
-                  <span>{enemyStats?.damage} </span>
-                </div>
-                <div style={{ display: "flex", justifyContent: "space-between", width: "50%" }}>            
-                  <span>🛡️</span>
-                  <span>{enemyDEF} </span>
-                </div>
-            </div>
-            <img
-              src={enemyImage}
-              style={{
-                marginTop: "50px",
-                marginBottom: "30px",
-                width: "100px",
-                display: "flex",
-                alignItems: "center",
-                animation: "fadeIn 0.6s ease forwards",
-              }}
-            />
-
+            {renderStageInfo()} {/* Інформація про етап також на екрані перед боєм */}
             <h2
               style={{
                 display: "flex",
                 flexDirection: "row",
                 justifyContent: "center",
                 alignItems: "center",
-                gap: "40px",
                 color: "#fff",
-                animation: "fadeIn 0.6s ease forwards",
+                animation: "fadeIn 0.6s ease forwards", // Визначте fadeIn, якщо не глобально
+                marginTop: 5, // Скоригований відступ
+                marginBottom: 15,
+                fontSize: "1.8em"
               }}
-            > 
-              Ваші характеристики :</h2>
+            >
+              ⚔️ Ви натрапили на ворога ! ⚔️</h2>
+            <h1 style={{ animation: "fadeIn 1s ease forwards", marginBottom:20, fontSize: "2.2em", textAlign:"center" }}>{enemyStats?.name}</h1>
             <div
               style={{
                 display: "flex",
                 flexDirection: "row",
                 justifyContent: "center",
                 alignItems: "center",
-                gap: "30px",
-                marginBottom: "30px",
+                gap: "30px", // Зменшений проміжок
                 color: "#fff",
+                animation: "fadeIn 1.5s ease forwards",
+                marginBottom: "20px", // Скоригований відступ
+                fontSize: "1.1em"
+              }}
+              >
+                <div style={{ textAlign: "center" }}> ❤️ {enemyHP}</div>
+                <div style={{ textAlign: "center" }}> 🗡️ {enemyStats?.damage}</div>
+                <div style={{ textAlign: "center" }}> 🛡️ {enemyStats?.defense}</div> {/* Виправлено з enemyDEF */}
+            </div>
+            <img
+              src={enemyImage}
+              alt={enemyStats?.name}
+              style={{
+                marginTop: "10px", // Скоригований відступ
+                marginBottom: "20px", // Скоригований відступ
+                width: "120px", // Скоригований розмір
+                height: "120px",
+                objectFit: "contain",
+                display: "block", // Переконайтеся, що це блок для автоматичних відступів, якщо потрібно
                 animation: "fadeIn 0.6s ease forwards",
-                fontSize: 15,
+                borderRadius: "8px"
+              }}
+            />
+            <h2
+              style={{
+                display: "flex",
+                flexDirection: "row",
+                justifyContent: "center",
+                alignItems: "center",
+                gap: "40px", // Це може бути занадто багато, якщо це просто заголовок
+                color: "#fff",
+                animation: "fadeIn 2s ease forwards",
+                marginBottom: "10px", // Скориговано
+                fontSize: "1.5em"
               }}
             >
-              {/* Відображення характеристик */}
-              <div style={{ display: "flex", justifyContent: "space-between", width: "50%" }}>
-                <span>{playerHP} </span>
-                <span>❤️ </span>
-              </div>
-
-              <div style={{ display: "flex", justifyContent: "space-between", width: "50%" }}>
-                <span>🗡️ </span>
-                <span>{playerStats.attack} </span>
-              </div>
-
-              <div style={{ display: "flex", justifyContent: "space-between", width: "50%" }}>
-                <span>🛡️</span>
-                <span>{playerDEF} </span>
-              </div>
-
-              <div style={{ display: "flex", justifyContent: "space-between", width: "50%" }}>
-                <span>⚡</span>
-                <span>{energy}</span>
-              </div>
+              Ваші характеристики :</h2>
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "row",
+                justifyContent: "center", // Було "space-around"
+                alignItems: "center",
+                gap: "25px", // Зменшений проміжок
+                marginBottom: "30px",
+                color: "#fff",
+                animation: "fadeIn 2.5s ease forwards",
+                fontSize: "1.1em",
+                width: "100%", // Переконайтеся, що займає ширину для правильного центрування елементів
+                maxWidth: "350px" // Максимальна ширина для рядка статистики
+              }}
+            >
+              <div style={{ textAlign: "center" }}> ❤️ {playerHP}</div>
+              <div style={{ textAlign: "center" }}> 🗡️ {playerStats.attack}</div>
+              <div style={{ textAlign: "center" }}> 🛡️ {playerDEF}</div>
+              <div style={{ textAlign: "center" }}> ⚡ {energy}</div>
             </div>
-
             <div style={{
-                position:"absolute",
+                position:"absolute", // Залишено згідно з вашим макетом
                 display: "flex",
                 justifyContent: "center",
                 alignItems: "center",
-                animation: "fadeIn 0.6s ease forwards",
+                animation: "fadeIn 3s ease forwards",
                 bottom: "25px",
+                left: 0, // Переконайтеся, що охоплює ширину для центрування
+                right: 0, // Переконайтеся, що охоплює ширину для центрування
                 gap:"20px",
-                width: "100%",
+                width: "100%", // Явна ширина
+                padding: "0 20px", // Відступ для кнопок на маленьких екранах
+                boxSizing: "border-box"
             }}>
-              <Link href="/home">
-                <Button style={{ animation: "fadeIn 0.6s ease forwards",backgroundColor:"#f44336" }}>
+              <Link href="/home" style={{flex: 1, maxWidth: '150px'}}> {/* Flex для розміру кнопок */}
+                <Button stretched size="l" style={{ animation: "fadeIn 0.6s ease forwards" /* backgroundColor:"#f44336" - використовуйте mode */ }}>
                   Втекти
                 </Button>
               </Link>
               <Button
-                  style={{ animation: "fadeIn 0.6s ease forwards", backgroundColor:"#4caf50" }}
-                  // Переміщуємо обробник handleStartBattle сюди
-                  // Видаляємо старий обробник () => { setShowPreBattle(false); setCanAttack(true); }
+                  stretched
+                  size="l"
+                  style={{ animation: "fadeIn 0.6s ease forwards", flex: 1, maxWidth: '200px' /* backgroundColor:"#4caf50" - використовуйте mode */ }}
                   onClick={handleStartBattle}
+                  disabled={isLoading || energy < 1} // Вимкнути, якщо завантаження або немає енергії
               >
-              ⚔️ Почати бій ⚔️
+              ⚔️ Почати бій {energy < 1 ? "" : "(1⚡)"} ⚔️
               </Button>
             </div>
           </Card>
       </Page>
     );
   }
-  
+  // --- Екран бою ---
   return (
-    <Page back >
-      <Placeholder>
+    <Page> {/* Видалено проп 'back', якщо він не стандартний або не визначений вашим компонентом Page */}
+      {/* <Placeholder>  Переоцінка, чи повинен Placeholder обгортати весь екран бою */}
         <Toaster position="top-center" toastOptions={{ duration: 2000 }} />
-      <div
+      <div // Це ваш головний контейнер екрана бою
         style={{
           position: "fixed", top: 0, left: 0, width: "100%", height: "100%",
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
-          justifyContent: "center",
-          animation: "fadeIn 1s ease forwards",
+          // justifyContent: "center", // Вміст позиціонується абсолютно/flex всередині
+          animation: "fadeIn 1s ease forwards", // Визначте fadeIn, якщо не глобально
+          color: "#fff", // Колір тексту за замовчуванням для цього вигляду
+          // backgroundImage: "url('/bg/bgforestnght1.jpg')", // Переміщено у внутрішній div
+          // backgroundRepeat: "no-repeat",
+          // backgroundSize: "cover",
+          // backgroundPosition: "center",
         }}
-      > 
-        <div
-          style={{
+      >
+        {/* Шар фонового зображення */}
+        <div style={{
             position: "absolute",
             width: "100%",
-            height: "90%", // або більше/менше залежно від дизайну
-            backgroundImage: "url('/bg/bgforestnght1.jpg')",
+            height: "100%", // Охоплює весь екран
+            backgroundImage: "url('/bg/bgforestnght1.jpg')", // Ваш фон
             backgroundRepeat: "no-repeat",
             backgroundSize: "cover",
             backgroundPosition: "center",
-            top: "0px",
-            marginBottom: "0px",
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-          }}
-        >
-          <div style={{
+            zIndex: -1 // За іншим вмістом
+        }}></div>
+        {/* Верхня секція: Таймер ходу + Інформація про етап */}
+        <div style={{
             position: "absolute",
-            width: "100%",
-            top: 0,
-            backgroundRepeat: "no-repeat",
-            backgroundSize: "cover",
-            backgroundPosition: "center",
-            marginTop: "0px",
-            marginBottom: "0px",
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-          }}>
-            <ProgressBar value={turnTimer} max={15} color="#fbbf24" />
-          </div>
-          <div style={{
-                position: "absolute",
-                bottom: 120,
-              }}>
-            <ProgressBar value={enemyHP} max={enemyStats ? enemyStats.currentHealth : 1} color="#f44336" />  
-            <img
-              src={enemyImage}
-              alt={enemyStats?.name}
-              style={{
-                marginLeft: 0,
-                marginTop: 10,
-                marginBottom: 5,
-                width: "140px",
-                height: "140px",
-                objectFit: "contain",
-                animation: isHit ? "hitFlash 0.3s ease" : undefined,
-                cursor: canAttack && !battleResult ? "pointer" : "default",
-                transition: "transform 0.2s ease",
-              }}
-              onClick={() => {
-                if (canAttack && !battleResult) {
-                  setIsHit(true);
-                  handleAttack();
-                  setIsEnemyHit(true);
-                  setTimeout(() => setIsEnemyHit(false), 200);
-                  setTimeout(() => setIsHit(false), 200);
-                }
-              }}
-            />
-            {hitText && (
-              <div
-                key={hitText.id}
-                style={{
-                  position: "absolute",
-                  top: -30,
-                  left: "60%",
-                  transform: "translateX(-50%)",
-                  fontSize: "20px",
-                  color: "#ff4747",
-                  animation: "hit-float 1s ease-out forwards",
-                  pointerEvents: "none",
-                  fontWeight: "bold"
-                }}
-              >
-                - {hitText.value}
-              </div>
-            )}
-          </div>
+            width: "calc(100% - 40px)", // Адаптивна ширина
+            maxWidth: "600px", // Максимальна ширина для смуги таймера
+            top: "10px",
+            left: "50%",
+            transform: "translateX(-50%)",
+            zIndex: 10, // Над фоном
+        }}>
+            {/* ProgressBar таймера ходу - припускаючи, що це компонент, який у вас є */}
+            {/* <ProgressBar value={turnTimer} max={15} color="#fbbf24" /> */}
+            {/* Заміна простим div, якщо ProgressBar не стандартний */}
+             <div style={{ backgroundColor: '#555', borderRadius: '4px', overflow: 'hidden', border: '1px solid #777' }}>
+                <div style={{ width: `${(turnTimer / 15) * 100}%`, backgroundColor: '#fbbf24', height: '10px', transition: 'width 0.5s ease' }}></div>
+            </div>
+            {renderStageInfo()} {/* Інформація про етап відображається тут */}
         </div>
+        {/* Зона ворога */}
+        <div style={{
+            position: "absolute", // Налаштуйте відповідно до потреб вашого макета
+            top: "80px", // Залиште місце для таймера та інформації про етап
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            zIndex: 5,
+        }}>
+            {enemyStats && (
+                <>
+                    <div style={{marginBottom: '5px', fontSize: '1.2em', fontWeight: 'bold', textShadow: '1px 1px 2px black'}}>{enemyStats.name}</div>
+                    {/* Смуга HP ворога - припускаючи компонент ProgressBar */}
+                    {/* <ProgressBar value={enemyHP} max={enemyStats.maxHealth} color="#f44336" /> */}
+                    <div style={{ width: '150px', backgroundColor: '#555', borderRadius: '4px', overflow: 'hidden', border: '1px solid #777', marginBottom: '5px' }}>
+                        <div style={{ width: `${(enemyHP / enemyStats.maxHealth) * 100}%`, backgroundColor: '#f44336', height: '12px', transition: 'width 0.5s ease', textAlign:'center', fontSize:'10px', lineHeight:'12px' }}>
+                            {enemyHP}/{enemyStats.maxHealth}
+                        </div>
+                    </div>
+                    <img
+                      src={enemyImage}
+                      alt={enemyStats?.name}
+                      style={{
+                        // marginLeft: 0, // Центровано батьківським елементом
+                        // marginTop: 10, // Обробляється батьківським проміжком/відступом
+                        marginBottom: 5,
+                        width: "140px",
+                        height: "140px",
+                        objectFit: "contain",
+                        animation: isHit ? "hitFlash 0.3s ease" : undefined, // Визначте анімацію hitFlash
+                        cursor: canAttack && !battleResult && playerHP > 0 ? "pointer" : "default",
+                        transition: "transform 0.2s ease",
+                        filter: playerHP <= 0 ? 'grayscale(100%)' : 'none' // Зробити сірим, якщо гравець переможений
+                      }}
+                      onClick={() => {
+                        if (canAttack && !battleResult && playerHP > 0 && enemyHP > 0) {
+                          setIsHit(true); // Візуальний відгук на ворога
+                          handleAttack();
+                          // setIsEnemyHit(true); // Якщо у вас є окрема анімація для удару по ворогу
+                          // setTimeout(() => setIsEnemyHit(false), 200);
+                          setTimeout(() => setIsHit(false), 300); // Тривалість hitFlash
+                        }
+                      }}
+                    />
+                    {hitText && ( // Анімація тексту шкоди
+                      <div
+                        key={hitText.id} // Ключ React для скидання анімації
+                        style={{
+                          position: "absolute", // Відносно контейнера зображення ворога або цього div
+                          top: "40%", // Налаштуйте для найкращого розміщення
+                          left: "50%",
+                          transform: "translateX(-50%)",
+                          fontSize: "24px",
+                          color: "#ff4747",
+                          fontWeight: "bold",
+                          animation: "hit-float 1s ease-out forwards", // Визначте анімацію hit-float
+                          pointerEvents: "none",
+                          textShadow: '1px 1px 1px black'
+                        }}
+                      >
+                        - {hitText.value}
+                      </div>
+                    )}
+                    {/* Відображення статистики ворога під зображенням */}
+                    <div style={{ display: 'flex', gap: '15px', marginTop: '5px', fontSize: '0.9em', backgroundColor: 'rgba(0,0,0,0.5)', padding: '5px 10px', borderRadius: '5px' }}>
+                        <span>❤️ {enemyHP} / {enemyStats.maxHealth}</span>
+                        <span>🗡️ {enemyStats.damage}</span>
+                        <span>🛡️ {enemyStats.defense}</span>
+                    </div>
+                </>
+            )}
+        </div>
+        {/* Зона гравця та елементи керування - внизу */}
         <div
-          style={{
-            position: "absolute",
-            display: "flex",
-            flexDirection: "row",
-            justifyContent: "center",
-            alignItems: "center",
-            gap: "40px",
-            color: "#fff",
-            bottom: 70,
-            animation: "fadeIn 0.6s ease forwards",
-            backgroundColor: "rgba(0, 0, 0, 0.5)",
-            paddingInline: "100%",
-          }}
-          >
-            <h3 style={{
-            display: "flex",
-            flexDirection: "row",
-            justifyContent: "center",
-            alignItems: "center",
-            color: "#fff",
-            animation: "fadeIn 0.6s ease forwards",
-            fontSize: 14,
-          }}> 
-            {enemyStats?.name}
-          </h3>
-
-            <div style={{ display: "flex", justifyContent: "space-between", width: "50%" }}>
-            <span>❤️ </span>
-            <span>{enemyHP} </span>
-            </div>
-            <div style={{ display: "flex", justifyContent: "space-between", width: "50%" }}>
-              <span>🗡️ </span>
-              <span>{enemyStats?.damage} </span>
-            </div>
-            <div style={{ display: "flex", justifyContent: "space-between", width: "50%" }}>            
-              <span>🛡️</span>
-              <span>{enemyDEF} </span>
-            </div>
-        </div> 
-        <div 
           style={{
             position: "absolute",
             width: "100%",
             bottom: 0,
-            backgroundRepeat: "no-repeat",
-            backgroundSize: "cover",
-            backgroundPosition: "center",
             display: "flex",
-            justifyContent: "center",
+            flexDirection: "column",
             alignItems: "center",
-            backgroundColor: "rgba(0, 0, 0, 0.5)",
+            backgroundColor: "rgba(0, 0, 0, 0.6)", // Напівпрозорий фон для інформації про гравця
+            paddingTop: "5px", // Простір для смуги HP
+            zIndex: 10,
           }}>
-            <div style={{
-            position: "absolute",
-            width: "100%",
-            top: 0,
-            backgroundRepeat: "no-repeat",
-            backgroundSize: "cover",
-            backgroundPosition: "center",
-            marginTop: "0px",
-            marginBottom: "0px",
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-          }}>
-            <ProgressBar value={playerHP} max={playerStats.health} color="rgba(60, 255, 0, 0.73)" />
-            </div>
+            {/* Смуга HP гравця у самому верху цієї нижньої секції */}
+            {playerStats && (
+                 <div style={{ width: '80%', maxWidth:'400px', backgroundColor: '#555', borderRadius: '4px', overflow: 'hidden', border: '1px solid #777', marginBottom: '5px' }}>
+                    <div style={{ width: `${(playerHP / playerStats.health) * 100}%`, backgroundColor: 'rgba(60, 255, 0, 0.73)', height: '12px', transition: 'width 0.5s ease', textAlign:'center', fontSize:'10px', lineHeight:'12px'  }}>
+                        {playerHP}/{playerStats.health}
+                    </div>
+                </div>
+            )}
             <div
             style={{
               display: "flex",
-              flexDirection: "column",
+              flexDirection: "column", // Розмістити заголовок та статистику стовпцем
               justifyContent: "center",
               alignItems: "center",
-              gap: "10px",
-              marginTop: "0px",
+              gap: "5px", // Зменшений проміжок
+              // marginTop: "0px", // Видалено
               marginBottom:10,
               color: "#fff",
-              animation: "fadeIn 0.6s ease forwards",
-              
+              animation: "fadeIn 0.6s ease forwards", // Визначте fadeIn
             }}
-            > 
+            >
               <h2 style={{
-              display: "flex",
-              flexDirection: "column",
-              justifyContent: "center",
-              alignItems: "center",
-              marginTop: 20,
-              marginBottom:5,
-              color: "#fff",
-              animation: "fadeIn 0.6s ease forwards",
-              
-            }}> Ваші характеристики :</h2>
+                  marginTop: 5, // Зменшений відступ
+                  marginBottom:5,
+                  fontSize: "1.2em", // Скоригований розмір
+                  // animation: "fadeIn 0.6s ease forwards", // Вже на батьківському елементі
+              }}> Ваші характеристики :</h2>
               <div
                   style={{
                   display: "flex",
                   flexDirection: "row",
                   justifyContent: "center",
                   alignItems: "center",
-                  gap: "50px",
-                  marginTop: "0px",
-                  marginBottom:0,
-                  color: "#fff",
-                  animation: "fadeIn 0.6s ease forwards",
+                  gap: "20px", // Зменшений проміжок
+                  // marginTop: "0px", // Видалено
+                  // marginBottom:0, // Видалено
+                  // animation: "fadeIn 0.6s ease forwards", // Вже на батьківському елементі
+                  fontSize: "1em" // Скоригований розмір
                 }}
-                > 
-                <div style={{ display: "flex", justifyContent: "space-between", width: "50%" }}>
-                <span>❤️ </span>
-                <span>{playerHP} </span>
-                </div>
-                <div style={{ display: "flex", justifyContent: "space-between", width: "50%" }}>
-                  <span>🗡️ </span>
-                  <span>{playerStats.attack} </span>
-                </div>
-                <div style={{ display: "flex", justifyContent: "space-between", width: "50%" }}>            
-                  <span>🛡️</span>
-                  <span>{playerDEF} </span>
-                </div>
-              </div>
-          </div>
-        </div>
-      </div>
-      </Placeholder>
-      <Card>
-          {battleResult && (
-            <div
-              style={{
-                position: "fixed",
-                top: 0, left: 0, width: "100%", height: "100%",
-                backgroundColor: "rgba(0,0,0,0.95)",
-                display: "flex", flexDirection: "column",
-                justifyContent: "center", alignItems: "center",
-                color: "#fff", zIndex: 9999,
-              }}
-              role="dialog"
-              aria-modal="true"
-              aria-labelledby="battleResultTitle"
-            > <Toaster position="top-center" toastOptions={{ duration: 2000 }} />
-              <h2
-                id="battleResultTitle"
-                style={{
-                  fontSize: 40,
-                  marginTop: -20,
-                  marginBottom: 32,
-                  color: "#fffc",
-                }}
-              >
-                {battleResult === "win" ? "🎊" : "💀"}
-              </h2>
-              <h2 style={{ fontSize: 40, margin: 0, marginBottom: 40 }}>
-                {battleResult === "win" ? "Перемога!" : "Поразка!"}
-              </h2>
-              <p style={{ fontSize: 12, margin: 0, marginBottom: 40 }}>
-                {battleResult === "win"
-                  ? "✨ Вам зараховано винагороду! ✨"
-                  : "Схоже, не пощастило цього разу..."}
-              </p>
-
-              <Button
-                onClick={() => setShowLog(prev => !prev)}
-                style={{
-                  marginBottom: 25,
-                  backgroundColor: "transparent",
-                  border: "1px solid #fff",
-                  borderRadius: 8,
-                  color: "#fff",
-                }}
-                aria-label={showLog ? "Сховати лог бою" : "Показати лог бою"}
-              >
-                📜 {showLog ? "Сховати лог бою" : "Переглянути лог бою"}
-              </Button>
-
-              <div style={{
-                  position:"absolute",
-                  display: "flex",
-                  justifyContent: "center",
-                  alignItems: "center",
-                  animation: "fadeIn 0.6s ease forwards",
-                  bottom: "0px",
-                  paddingBottom: 20,
-                  paddingTop: 20,
-                  gap:"20px",
-                  width: "100%",
-                  backgroundColor: "rgba(0, 0, 0, 0.64)",
-              }}>
-                <Link href="/home">
-                  <Button
-                    style={{
-                      backgroundColor: "#f44336",
-                      color: "#fff",
-                      animation: "fadeIn 0.6s ease forwards",
-                    }}
-                    aria-label="Втекти додому"
-                  >
-                    Втекти
-                  </Button>
-                </Link>
-
-                {battleResult === "win" && (
-                  
-                  <Button
-                    mode="filled"
-                    style={{
-                      animation: "fadeIn 0.6s ease forwards",
-                      backgroundColor: "#4caf50",
-                      color: "#fff"
-                    }}
-                    aria-label="Далі"
-                    onClick={() => {
-                      setEncounterNumber(prev => prev + 1);
-                      setPlayerHP(playerStats.health);
-                      setPlayerDEF(playerStats.defense);
-                      setBattleResult(null);
-                      setLog([]);
-                      setShowLog(false);
-                      setTurnTimer(15);
-                      setShowPreBattle(true); // екран підготовки нового бою
-                    }}
-                  >
-                    ⚔️ Далі ⚔️
-                  </Button>
-                )}
-              </div>
-
-              {showLog && (
-                <div
-                  style={{
-                    marginTop: 20,
-                    maxHeight: 200,
-                    overflowY: "auto",
-                    padding: 12,
-                    border: "1px solid #fff",
-                    borderRadius: 8,
-                    backgroundColor: "#111",
-                    width: "90%",
-                    color: "#fff",
-                  }}
-                  aria-label="Журнал бою"
                 >
-                  {log.length === 0
-                    ? <div style={{ opacity: 0.6 }}>Лог ще порожній</div>
-                    : log.map((entry, idx) => (
-                      <div key={idx}>{entry}</div>
-                    ))}
-                </div>
-              )}
+                {/* Статистика гравця */}
+                <span>❤️ {playerHP}</span>
+                <span>🗡️ {playerStats.attack}</span>
+                <span>🛡️ {playerDEF}</span>
+              </div>
             </div>
-          )}
-        </Card>
+             {/* Кнопка Показати/Сховати лог - розміщена тут для кращого UX під час бою */}
+            <Button
+                size="s"
+                mode="outline" // Або відповідний режим
+                style={{marginTop: '5px', marginBottom: '10px', borderColor: '#888', color: '#ccc'}}
+                onClick={() => setShowLog(!showLog)}
+                disabled={battleResult !== null} // Вимкнути, якщо бій закінчився
+            >
+                {showLog ? "Сховати лог" : "Показати лог"}
+            </Button>
+        </div>
+        {/* Лог бою - з'являється над елементами керування гравця, коли активний */}
+        {showLog && !battleResult && ( // Показувати лог під час бою, лише якщо не в модальному вікні результатів
+            <Card style={{
+                position: 'absolute',
+                bottom: '140px', // Налаштуйте, щоб було над елементами керування гравця
+                width: 'calc(100% - 40px)',
+                maxWidth: '500px',
+                left: '50%',
+                transform: 'translateX(-50%)',
+                maxHeight: '100px', // Зменшена висота
+                overflowY: 'auto',
+                padding: '8px',
+                backgroundColor: 'rgba(0,0,0,0.7)',
+                border: '1px solid #444',
+                borderRadius: '5px',
+                fontSize: '0.8em',
+                zIndex: 15
+            }}>
+                {log.length === 0 ? <div>Лог порожній.</div> :
+                 log.map((entry, index) => <div key={index} style={{borderBottom: '1px dashed #333', paddingBottom: '2px', marginBottom: '2px'}}>{entry}</div>)}
+            </Card>
+        )}
+      </div> {/* Кінець головного контейнера екрана бою */}
+      {/* Модальне вікно результатів бою (ваша існуюча структура, з оновленими обробниками кнопок) */}
+      {/* Цей Card діє як контейнер модального вікна */}
+        {battleResult && (
+        <div // Повноекранне накладення для модального вікна
+            style={{
+            position: "fixed",
+            top: 0, left: 0, width: "100%", height: "100%",
+            backgroundColor: "rgba(0,0,0,0.90)", // Темніше накладення
+            display: "flex", flexDirection: "column",
+            justifyContent: "center", alignItems: "center",
+            color: "#fff", zIndex: 9999, // Переконайтеся, що воно зверху
+            padding: "20px",
+            boxSizing: "border-box"
+            }}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="battleResultTitle"
+        >
+            <Toaster position="top-center" toastOptions={{ duration: 2000 }} />
+            <h2
+            id="battleResultTitle"
+            style={{
+                fontSize: "3em", // Більший емодзі
+                marginTop: 0, // Скоригований відступ
+                marginBottom: 20, // Скоригований відступ
+                color: "#fffc",
+            }}
+            >
+            {battleResult === "win" ? "🎊" : "💀"}
+            </h2>
+            <h2 style={{ fontSize: "2.5em", margin: 0, marginBottom: 20, textAlign: 'center' }}>
+            {battleResult === "win" ? "Перемога!" : "Поразка!"}
+            </h2>
+            <p style={{ fontSize: "1.1em", margin: 0, marginBottom: 30, textAlign: 'center' }}>
+            {battleResult === "win"
+                ? "✨ Вам зараховано винагороду! ✨"
+                : "Схоже, не пощастило цього разу..."}
+            </p>
+            <Button
+            onClick={() => setShowLog(prev => !prev)}
+            mode="outline" // Стиль VKUI
+            style={{
+                marginBottom: 25,
+                // backgroundColor: "transparent", // Обробляється режимом
+                // border: "1px solid #fff", // Обробляється режимом
+                // borderRadius: 8, // Обробляється режимом
+                // color: "#fff", // Обробляється режимом
+            }}
+            aria-label={showLog ? "Сховати лог бою" : "Показати лог бою"}
+            >
+            📜 {showLog ? "Сховати лог бою" : "Переглянути лог бою"}
+            </Button>
+            {/* Відображення логу всередині модального вікна */}
+            {showLog && (
+            <div
+                style={{
+                // marginTop: 20, // Ні, оскільки це умовно
+                maxHeight: 150, // Зменшена висота
+                overflowY: "auto",
+                padding: 12,
+                border: "1px solid #555", // Скоригована рамка
+                borderRadius: 8,
+                backgroundColor: "rgba(0,0,0,0.3)", // Темніший прозорий
+                width: "90%",
+                maxWidth: "400px", // Максимальна ширина для логу
+                color: "#eee", // Світліший текст для логу
+                marginBottom: "20px" // Простір перед кнопками
+                }}
+                aria-label="Журнал бою"
+            >
+                {log.length === 0
+                ? <div style={{ opacity: 0.6 }}>Лог ще порожній</div>
+                : log.map((entry, idx) => (
+                    <div key={idx} style={{paddingBottom: '2px', marginBottom: '2px', borderBottom: '1px dotted #444'}}>{entry}</div>
+                ))}
+            </div>
+            )}
+            {/* Кнопки дій для модального вікна */}
+            <div style={{
+                // position:"absolute", // Не абсолютно, якщо вміст модального вікна плаваючий
+                // bottom: "0px", //
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                animation: "fadeIn 0.6s ease forwards", // Визначте fadeIn
+                // paddingBottom: 20, // Відступ на батьківському елементі
+                // paddingTop: 20, // Відступ на батьківському елементі
+                gap:"15px", // Проміжок між кнопками
+                width: "100%",
+                maxWidth: "400px", // Максимальна ширина для рядка кнопок
+                // backgroundColor: "rgba(0, 0, 0, 0.64)", // Видалено, модальне вікно має фон
+            }}>
+            <Link href="/home" style={{flex:1}}>
+                <Button
+                size="l"
+                stretched
+                style={{
+                    // backgroundColor: "#f44336", // Обробляється режимом
+                    // color: "#fff", // Обробляється режимом
+                    animation: "fadeIn 0.6s ease forwards",
+                }}
+                aria-label="Втекти додому"
+                >
+                Втекти
+                </Button>
+            </Link>
+            {battleResult === "win" && (
+                <Button
+                size="l"
+                stretched
+                style={{
+                    animation: "fadeIn 0.6s ease forwards",
+                    // backgroundColor: "#4caf50", // Обробляється режимом
+                    // color: "#fff" // Обробляється режимом
+                    flex:1 // Зробити кнопки рівної ширини
+                }}
+                aria-label="Далі"
+                onClick={handleWinNext} // Використовувати новий обробник
+                >
+                ⚔️ Далі ⚔️
+                </Button>
+            )}
+            {battleResult === "lose" && (
+                <Button
+                size="l"
+                stretched
+                style={{
+                    animation: "fadeIn 0.6s ease forwards",
+                    // backgroundColor: "#ffc107", // Приклад: бурштиновий колір для "спробувати знову"
+                    // color: "#000"
+                    flex:1 // Зробити кнопки рівної ширини
+                }}
+                aria-label="Спробувати знову"
+                onClick={handleLossRetry} // Використовувати новий обробник
+                >
+                🛡️ Спробувати знову 🛡️
+                </Button>
+            )}
+            </div>
+        </div>
+        )}
+      {/* </Card> Кінець контейнера Card модального вікна - переконайтеся, що цей Card не ламає макет, якщо він не призначений бути обгорткою модального вікна */}
     </Page>
   );
 }
