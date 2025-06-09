@@ -2234,71 +2234,59 @@ export default function HomePage() {
               )}
 
               {selectedItem.mode === "inventory" && (
-                <div className={`item-image rarity-border-${selectedItem.rarity?.toLowerCase()} rarity-shadow-${selectedItem.rarity?.toLowerCase()}`}
+                <div
                     onClick={(e) => e.stopPropagation()}
                     style={{
-                      backgroundColor: "#1e1e1e",
-                      padding: "20px",
-                      borderRadius: "10px",
-                      color: "#fff",
-                      maxWidth: "300px",
-                      width: "90%",
-                      textAlign: "center",
-                    }}>
-                  
-                  <div style={{
-                    position: "relative",
-                    flexDirection: "row",
-                    display: "flex",
-                    justifyContent: "center",
-                    alignItems: "center",
-                    overflow: "visible",
-                    marginBottom: "40px",
-                    marginTop: "-20px",
+                    backgroundImage: `url('/bg/Cardbg.png')`,
+                    backgroundSize: 'cover',
+                    backgroundPosition: 'center',
+                    backgroundRepeat: 'no-repeat',
+                    padding: "0px",
+                    borderRadius: "20px",
+                    maxWidth: "300px",
                     width: "100%",
-                    height: "100%",
-                    gap: "70%",
-                  }}>
-                    <p onClick={() => { handleDismantle(selectedItem); setSelectedItem(null); }}
-                      style={{
-                        position: "relative",
-                        flexDirection: "row",
-                        fontSize: "0.7rem",
+                    textAlign: "center",
+                  }}
+                >
+                  <div >
+                  <div 
+                    style={{
+                      position: "relative",
+                      flexDirection: "row",
+                      display: "flex",
+                      justifyContent: "center",
+                      alignItems: "center",
+                      overflow: "visible",
+                      width: "100%",
+                      height: "100%",
+                      gap: "69%",
+                    }} >
+                    <p className={` rarity-font-${selectedItem.rarity?.toLowerCase()}`} 
+                      style={{  
+                        fontSize: "1rem",
                         fontWeight: "lighter",
                         fontFamily: "Arial, sans-serif",
-                        fontVariantEmoji: "emoji",
-                        color: "#ddd",
-                        background: "rgba(0, 0, 0, 0.35)",
-                        borderRadius: "50px",
-                        padding: "8px",
-                        width: "100%",
-                        height: "10px",
+                        position: "inherit",
+                        padding: "5px",
+                        paddingTop:"20px",
+                        paddingLeft:"0px"
                       }}>
-                      Продати
+                        +{selectedItem.upgrade_level}
                     </p>
-                    
                     <p onClick={() => setSelectedItem(null)}
-                      style={{
+                      style={{  
                         fontSize: "0.8rem",
                         fontWeight: "lighter",
                         fontFamily: "Arial, sans-serif",
-                        fontVariantEmoji: "emoji",
                         color: "#ddd",
                         position: "inherit",
-                        background: "rgba(0, 0, 0, 0.35)",
-                        borderRadius: "50px",
                         padding: "8px",
-                        width: "10px",
-                        height: "10px",
+                        paddingTop:"20px",
                       }}>
-                      X
+                        X
                     </p>
                   </div>
-
-                  <h2 className={`rarity-font-${selectedItem.rarity?.toLowerCase()}`} style={{ fontSize: "1.2rem", marginBottom: "10px" }}>
-                    {selectedItem.name} +{selectedItem.upgrade_level}
-                  </h2>
-
+                  <h2 className={` rarity-font-${selectedItem.rarity?.toLowerCase()}`} style={{ fontSize: "1.2rem", marginBottom: "10px",marginTop:"-20px" }}>{selectedItem.name}</h2>
                   {selectedItem.image && (
                     <img
                       src={typeof selectedItem.image === "string" ? selectedItem.image : (selectedItem.image as { src: string }).src}
@@ -2337,29 +2325,57 @@ export default function HomePage() {
                         <p style={{ fontSize: "0.8rem", color: "#ccc", marginBottom: "20px" }}>
                           Шкода: <strong>{stats.damage}</strong>
                         </p>
-                        <p style={{ fontSize: "0.8rem", color: "#ccc", marginBottom: "20px" }}>
+                        <p style={{ fontSize: "0.8rem", color: "#ccc", marginBottom: "60px" }}>
                           Захист: <strong>{stats.defense}</strong>
-                        </p>
-                        <p style={{ fontSize: "0.8rem", color: "#ccc", marginBottom: "20px" }}>
-                          Міцність: 10 / 10
                         </p>
                       </>
                     );
                   })()}
 
-                  <button onClick={() => { handleEquip(selectedItem); setSelectedItem(null); }}
-                          style={{
-                            backgroundColor: "#444",
-                            padding: "8px 12px",
-                            border: "none",
-                            borderRadius: "6px",
-                            color: "#fff",
-                            marginTop: "10px",
-                            cursor: "pointer",
-                            width: "100%"
-                          }}>
-                    🫴 Взяти
-                  </button>
+                  <div 
+                    style={{
+                      position: "relative",
+                      flexDirection: "row",
+                      display: "flex",
+                      justifyContent: "center",
+                      alignItems: "center",
+                      overflow: "visible",
+                      width: "100%",
+                      height: "100%",
+                    }} 
+                  >
+                    <button onClick={() => { handleDismantle(selectedItem); setSelectedItem(null); }}
+                      style={{
+                        backgroundColor: "#444",
+                        border: "none",
+                        borderRadius: "6px",
+                        fontSize: "0.7rem",
+                        color: "rgb(190, 0, 0)",
+                        background: "rgba(0, 0, 0, 0.06)",
+                        marginTop: "0px",
+                        marginBottom:"25px",
+                        cursor: "pointer",
+                        width: "100%",
+                      }}>
+                       💥 РОЗІБРАТИ 
+                    </button>
+                    <button onClick={() => { handleEquip(selectedItem); setSelectedItem(null); }}
+                      style={{
+                        backgroundColor: "#444",
+                        border: "none",
+                        borderRadius: "6px",
+                        fontSize: "0.7rem",
+                        color: "#ffff",
+                        background: "rgba(0, 0, 0, 0.06)",
+                        marginTop: "0px",
+                        marginBottom:"25px",
+                        cursor: "pointer",
+                        width: "100%",
+                      }}>
+                        🫴 СПОРЯДИТИ
+                    </button>
+                  </div>
+                  </div>
                 </div>
               )}
 
@@ -2454,7 +2470,7 @@ export default function HomePage() {
                   })()}
                   </div>
                   
-                    <div 
+                  <div 
                     style={{
                       position: "relative",
                       flexDirection: "row",
@@ -2464,8 +2480,9 @@ export default function HomePage() {
                       overflow: "visible",
                       width: "100%",
                       height: "100%",
-                    }} >
-                    <button onClick={() => {handleUnequip(selectedItem);setSelectedItem(null);}}
+                    }} 
+                  >
+                    <button
                       style={{
                         backgroundColor: "#444",
                         border: "none",
