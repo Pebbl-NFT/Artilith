@@ -2247,6 +2247,7 @@ export default function HomePage() {
                     maxWidth: "300px",
                     width: "100%",
                     textAlign: "center",
+                    filter: "drop-shadow(0 0px 40px rgb(255, 255, 255))",
                   }}
                 >
                   <div >
@@ -2265,7 +2266,7 @@ export default function HomePage() {
                     <p className={` rarity-font-${selectedItem.rarity?.toLowerCase()}`} 
                       style={{  
                         fontSize: "1rem",
-                        fontWeight: "lighter",
+                        fontWeight: "bolder",
                         fontFamily: "Arial, sans-serif",
                         position: "inherit",
                         padding: "5px",
@@ -2387,6 +2388,7 @@ export default function HomePage() {
                   maxWidth: "300px",
                   width: "100%",
                   textAlign: "center",
+                  filter: "drop-shadow(0 0px 40px rgb(255, 255, 255))",
                 }}
                 >
                   <div 
@@ -2480,7 +2482,6 @@ export default function HomePage() {
                       style={{
                         backgroundColor: "#444",
                         border: "none",
-                        borderRadius: "6px",
                         fontSize: "0.7rem",
                         fontStyle: "italic",
                         fontFamily: "Arial, sans-serif",
@@ -2498,7 +2499,6 @@ export default function HomePage() {
                       style={{
                         backgroundColor: "#444",
                         border: "none",
-                        borderRadius: "6px",
                         fontSize: "0.7rem",
                         color: "#ffff",
                         background: "rgba(0, 0, 0, 0.06)",
