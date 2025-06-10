@@ -40,6 +40,7 @@ import citybg from '../_assets/citybg.jpg';
 import shopbg from '../_assets/shopbg.jpg';
 import blacksmithbg from '../_assets/blacksmithbg.jpg';
 import alleyofheroesnbg from '../_assets/alleyofheroesnbg.jpg';
+import cardbgcommon from '/public/bg/CardbgCommon.png';
 
 
 export default function HomePage() {
@@ -2238,7 +2239,7 @@ export default function HomePage() {
                 <div 
                     onClick={(e) => e.stopPropagation()}
                     style={{
-                    backgroundImage: `url('/bg/CardbgCommon.png')`,
+                    backgroundImage: `url(${cardbgcommon.src})`,
                     backgroundSize: 'cover',
                     backgroundPosition: 'center',
                     backgroundRepeat: 'no-repeat',
@@ -2377,7 +2378,7 @@ export default function HomePage() {
                 <div
                   onClick={(e) => e.stopPropagation()}
                   style={{
-                  backgroundImage: `url('/bg/CardbgCommon.png')`,
+                  backgroundImage: `url(${cardbgcommon.src})`,
                   backgroundSize: 'cover',
                   backgroundPosition: 'center',
                   backgroundRepeat: 'no-repeat',
