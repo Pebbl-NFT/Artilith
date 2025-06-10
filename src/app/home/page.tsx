@@ -2237,7 +2237,7 @@ export default function HomePage() {
                 <div 
                     onClick={(e) => e.stopPropagation()}
                     style={{
-                    backgroundImage: `url('/bg/Cardbgcommon.png')`,
+                    backgroundImage: `url('/bg/cardbgcommon.png')`,
                     backgroundSize: 'cover',
                     backgroundPosition: 'center',
                     backgroundRepeat: 'no-repeat',
