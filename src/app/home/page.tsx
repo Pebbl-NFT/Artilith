@@ -2389,7 +2389,7 @@ export default function HomePage() {
                 <div 
                   onClick={(e) => e.stopPropagation()}
                   style={{
-                    backgroundImage: `url('/bg/Cardbg2.png')`,
+                    backgroundImage: `url('/bg/Cardbg1.png')`,
                     backgroundSize: 'cover',
                     backgroundPosition: 'center',
                     backgroundRepeat: 'no-repeat',
@@ -2403,7 +2403,6 @@ export default function HomePage() {
                     filter: "drop-shadow(0 0px 40px rgb(255, 255, 255))",
                   }}
                 >
-                  <img src="/bg/CardbgCommon.png" style={{ position:"absolute",width: "100%", height: "100%"}} />
                   <div 
                     style={{
                       position: "relative",
