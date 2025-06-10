@@ -2366,7 +2366,7 @@ export default function HomePage() {
                         marginBottom:"25px",
                         cursor: "pointer",
                         width: "100%",
-                      }}>
+                      }}> 
                         🫴 СПОРЯДИТИ
                     </button>
                   </div>
@@ -2378,13 +2378,13 @@ export default function HomePage() {
                 <div
                   onClick={(e) => e.stopPropagation()}
                   style={{
-                  backgroundImage: `url(${cardbgcommon.src})`,
+                  backgroundImage: `url('/bg/CardbgCommon.png')`,
                   backgroundSize: 'cover',
                   backgroundPosition: 'center',
                   backgroundRepeat: 'no-repeat',
                   padding: "0px",
                   borderRadius: "10px",
-                  paddingBlock: "-30px",
+                  paddingBlock: "0px",
                   color: "#fff",
                   maxWidth: "300px",
                   width: "100%",
