@@ -27,6 +27,7 @@ import { supabase } from "@/lib/supabaseClient";
 import { AllItems } from "@/components/Item/Items";
 import { WeaponItems } from "@/components/Item/WeaponItem";
 import { ShieldItems } from "@/components/Item/ShieldItem";
+import { ScrollItems } from "@/components/Item/ScrollItem";
 import { formatTime } from "@/utils/formatTime";
 import { getPlayerStats } from "@/utils/getPlayerStats";
 import { updateUserPoints } from "@/hooks/useUserPoints";
@@ -111,7 +112,7 @@ export default function HomePage() {
   // Модальне вікно для підтвердження покупки
   const [selectedItem, setSelectedItem] = useState<SelectedItemType>(null);
   type SelectedItemType = {
-    mode: "city" | "inventory" | "equipped" | "sweapon" |"sshield";
+    mode: "city" | "inventory" | "equipped" | "sweapon" |"sshield" |"sscroll";
     item_id: number;
     type: string;
     name: string;
@@ -766,20 +767,20 @@ export default function HomePage() {
                   animation: "fadeIn 0.6s ease forwards",
                   background: "rgba(0, 0, 0, 0.7)",
                 }}>
-                СУВОї
+                СУВОЇ
                 {/* Example: Render a weapon item or map over WeaponItems */}
-                {WeaponItems.length > 0 && (
+                {ScrollItems.length > 0 && (
                   <ItemCard
-                    mode={"sweapon"}
-                    item_id={WeaponItems[0].item_id}
-                    type={WeaponItems[0].type}
-                    rarity={WeaponItems[0].rarity}
-                    name={WeaponItems[0].name}
-                    image={WeaponItems[0].image}
-                    description={WeaponItems[0].description}
-                    damage={WeaponItems[0].damage ? `${WeaponItems[0].damage}` : "0"}
-                    defense={WeaponItems[0].defense ? `${WeaponItems[0].defense}` : "0"}
-                    price={WeaponItems[0].price}
+                    mode={"sscroll"}
+                    item_id={ScrollItems[0].item_id}
+                    type={ScrollItems[0].type}
+                    rarity={ScrollItems[0].rarity}
+                    name={ScrollItems[0].name}
+                    image={ScrollItems[0].image}
+                    description={ScrollItems[0].description}
+                    damage={ScrollItems[0].damage ? `${ScrollItems[0].damage}` : "0"}
+                    defense={ScrollItems[0].defense ? `${ScrollItems[0].defense}` : "0"}
+                    price={ScrollItems[0].price}
                     onBuyRequest={(item) => setSelectedItem(item)}
                   />
                 )}
@@ -2040,7 +2041,7 @@ export default function HomePage() {
   }
   };
 
-  async function handleEquip(selectedItem: { mode: "city" | "inventory" | "equipped"| "sweapon"| "sshield"; item_id: number; type: string; name: string; image: string; description: string; damage?: string; strength?: string; price: number; }) {
+  async function handleEquip(selectedItem: { mode: "city" | "inventory" | "equipped"| "sweapon"| "sshield"| "sscroll"; item_id: number; type: string; name: string; image: string; description: string; damage?: string; strength?: string; price: number; }) {
     if (!userId) {
       toast.error("Користувач не знайдений!");
       return;
@@ -2079,7 +2080,7 @@ export default function HomePage() {
     await fetchInventory();
   }
 
-  async function handleDismantle(selectedItem: { mode: "city" | "inventory" | "equipped"| "sweapon"| "sshield"; item_id: number; type: string; name: string; image: string; description: string; damage?: string; strength?: string; price: number; }) {
+  async function handleDismantle(selectedItem: { mode: "city" | "inventory" | "equipped"| "sweapon"| "sshield"| "sscroll"; item_id: number; type: string; name: string; image: string; description: string; damage?: string; strength?: string; price: number; }) {
     if (!userId) {
       toast.error("Користувач не знайдений!");
       return;
@@ -2117,7 +2118,7 @@ export default function HomePage() {
     await fetchInventory();
   }
 
-  async function handleUnequip(selectedItem: { mode: "city" | "inventory" | "equipped" | "sweapon"| "sshield"; item_id: number; type: string; name: string; image: string; description: string; damage?: string; strength?: string; price: number; }) {
+  async function handleUnequip(selectedItem: { mode: "city" | "inventory" | "equipped" | "sweapon"| "sshield"| "sscroll"; item_id: number; type: string; name: string; image: string; description: string; damage?: string; strength?: string; price: number; }) {
     if (!userId) {
       toast.error("Користувач не знайдений!");
       return;
@@ -2383,7 +2384,7 @@ export default function HomePage() {
                 <div
                   onClick={(e) => e.stopPropagation()}
                   style={{
-                  backgroundImage: `url('/bg/Cardbgcommon.png')`,
+                  backgroundImage: `url('/bg/cardbgcommon.png')`,
                   backgroundSize: 'cover',
                   backgroundPosition: 'center',
                   backgroundRepeat: 'no-repeat',
@@ -2710,7 +2711,107 @@ export default function HomePage() {
             </Placeholder>
                 </div>
               )}
+
+              {selectedItem.mode === "sscroll" && (
+                <div
+                  className={`item-image rarity-border-common rarity-shadow-common`}
+                  onClick={(e) => e.stopPropagation()}
+                  style={{
+                    backgroundColor: "#1e1e1e",
+                    padding: "20px",
+                    borderRadius: "10px",
+                    color: "#fff",
+                    maxWidth: "300px",
+                    width: "90%",
+                    textAlign: "center",
+                  }}
+                >
+                  <div 
+                    style={{
+                      position: "relative",
+                      flexDirection: "row",
+                      display: "flex",
+                      justifyContent: "center",
+                      alignItems: "center",
+                      overflow: "visible",
+                      marginBottom: "40px",
+                      marginTop: "-20px",
+                      width: "100%",
+                      height: "100%",
+                      gap: "70%",
+                    }} >
+                    <p
+                      style={{  
+                        position: "relative",
+                        fontSize: "0.7rem",
+                        fontWeight: "lighter",
+                        fontFamily: "Arial, sans-serif",
+                        fontVariantEmoji: "emoji",
+                        color: "#ddd",
+                        background: "rgba(0, 0, 0, 0.35)",
+                        borderRadius: "50px",
+                        padding: "8px",
+                        width: "150px",
+                        height: "10px",
+                      }}>
+                         СУВОЇ
+                    </p>
+                    <p onClick={() => setSelectedItem(null)}
+                      style={{  
+                        fontSize: "0.8rem",
+                        fontWeight: "lighter",
+                        fontFamily: "Arial, sans-serif",
+                        fontVariantEmoji: "emoji",
+                        color: "#ddd",
+                        position: "inherit",
+                        background: "rgba(0, 0, 0, 0.35)",
+                        borderRadius: "50px",
+                        padding: "8px",
+                        width: "10px",
+                        height: "10px",
+                      }}>
+                        X
+                    </p>
+                    
+                  </div>
+                  <Placeholder>
+                <div
+                  style={{
+                    marginTop: "-30px",
+                    marginLeft:"-10px",
+                    alignItems: "center",
+                    position: "relative",
+                    display: "grid",
+                    gridTemplateColumns: "repeat(auto-fill, minmax(40px, 1fr))", // Адаптивна сітка
+                    gap: "20px", // Відступ між картками
+                    width: "100%",
+                    animation: "fadeIn 1s ease forwards",
+                  }}
+                >
+                  {ScrollItems.map((item) => (
+                      <ItemCard
+                        mode={"city"}
+                        key={item.item_id}
+                        item_id={item.item_id}
+                        type={item.type}
+                        rarity={item.rarity}
+                        name={item.name}
+                        image={item.image}
+                        description={item.description}
+                        damage={item.damage ? ` ${item.damage}` : "0"}
+                        defense={item.defense ? `${item.defense}` : "0"}
+                        price={item.price}
+                        onBuyRequest={(item) => setSelectedItem(item)}
+                      />
+                    ))}
+                </div>
+            </Placeholder>
+                </div>
+              )}
             </div>
+
+            
+            
         )}
 
         <BottomBar activeTab={activeTab} setActiveTab={setActiveTab} />

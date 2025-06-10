@@ -2,7 +2,7 @@
 import React from "react";
 
 type ItemCardProps = {
-  mode: "city" | "inventory" | "equipped"| "sweapon"| "sshield";
+  mode: "city" | "inventory" | "equipped"| "sweapon"| "sshield" |"sscroll";
   item_id: number;
   type: string;
   rarity: string;
@@ -182,6 +182,40 @@ export const ItemCard: React.FC<ItemCardProps> = ({
       )}
 
       {mode === "sshield" && (
+        <div>
+          <div>
+              <img onClick={() =>
+              onBuyRequest?.({
+                mode,
+                item_id,
+                type,
+                rarity,
+                name,
+                image,
+                description,
+                damage,
+                defense,
+                price,
+                onBuyRequest,
+                })
+              }
+                src={image}
+                alt={name}
+                width={30}
+                height={30}
+                className={`item-image rarity-border-${rarity?.toLowerCase?.()}`}
+                style={{
+                  backgroundColor: "rgba(255, 255, 255, 0.05)",
+                  padding: "10px",
+                  borderRadius: "10px",
+                  boxShadow:
+                    "rgba(0, 0, 0, 0.3) 0px 19px 38px, rgba(0, 0, 0, 0.22) 0px 15px 12px",
+                }}
+              />
+          </div>
+        </div>
+      )}
+      {mode === "sscroll" && (
         <div>
           <div>
               <img onClick={() =>

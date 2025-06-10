@@ -1,4 +1,4 @@
-import potion01f from "../../app/_assets/item/scroll01a.png";
+import scroll01a from "../../app/_assets/item/scroll01a.png";
 
 export const ScrollItems = [
   {
@@ -10,6 +10,6 @@ export const ScrollItems = [
     damage: 0,
     defense: 0,
     price: 30,
-    image: potion01f.src,
+    image: scroll01a.src,
   },
 ];
