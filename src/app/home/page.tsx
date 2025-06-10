@@ -2239,7 +2239,7 @@ export default function HomePage() {
                 <div
                   onClick={(e) => e.stopPropagation()}
                   style={{
-                    backgroundImage: `url('/bg/CardbgCommon_fixed.png')`,
+                    backgroundImage: `url('/bg/CardbgCommon.png')`,
                     backgroundSize: 'cover',
                     backgroundPosition: 'center',
                     backgroundRepeat: 'no-repeat',
@@ -2253,7 +2253,7 @@ export default function HomePage() {
                     filter: "drop-shadow(0 0px 40px rgb(255, 255, 255))",
                   }}
                 >
-                  <div >
+
                   <div 
                     style={{
                       position: "relative",
@@ -2272,63 +2272,71 @@ export default function HomePage() {
                         fontWeight: "bolder",
                         fontFamily: "Arial, sans-serif",
                         position: "inherit",
-                        padding: "5px",
-                        paddingTop:"20px",
-                        paddingLeft:"0px"
+                        padding: "4px",
+                        marginTop:"30px",
+                        borderRadius: "25px",
+                        alignItems: "center",
+                        background: "rgba(0, 0, 0, 0.5)",
+                        cursor: "default",
                       }}>
                         +{selectedItem.upgrade_level}
                     </p>
                     <p onClick={() => setSelectedItem(null)}
                       style={{  
-                        fontSize: "0.8rem",
-                        fontWeight: "lighter",
+                        fontSize: "1rem",
+                        fontWeight: "bolder",
                         fontFamily: "Arial, sans-serif",
-                        color: "#ddd",
                         position: "inherit",
-                        padding: "8px",
-                        paddingTop:"20px",
+                        padding: "4px",
+                        paddingInline: "8px",
+                        marginTop:"30px",
+                        borderRadius: "25px",
+                        alignItems: "center",
+                        background: "rgba(0, 0, 0, 0.5)",
+                        cursor: "pointer",
                       }}>
-                        X
+                        x
                     </p>
                   </div>
-                  <h2 className={` rarity-font-${selectedItem.rarity?.toLowerCase()}`} style={{ fontSize: "1.2rem", marginBottom: "10px",marginTop:"-20px" }}>{selectedItem.name}</h2>
+                  <h2 className={` rarity-font-${selectedItem.rarity?.toLowerCase()}`} style={{ fontSize: "1.2rem", marginBottom: "10px",marginTop:"-10px",cursor: "default", }}>{selectedItem.name}</h2>
+                 
                   {selectedItem.image && (
-                    <img
+                      <img 
                       src={typeof selectedItem.image === "string" ? selectedItem.image : (selectedItem.image as { src: string }).src}
                       alt={selectedItem.name}
                       style={{ width: "130px", height: "80px", objectFit: "contain", marginBottom: "30px", marginTop: "30px", boxShadow: "0 0 40 rgb(253, 253, 253)", borderRadius: "360px", filter: "drop-shadow(0 0px 22px rgb(255, 255, 255))" }}
                     />
                   )}
 
-                  <p style={{ fontSize: "0.8rem", color: "#ccc", marginBottom: "20px" }}>
-                    Тип: <strong>{selectedItem.type}</strong>
-                  </p>
-
-                  <p style={{ fontSize: "0.8rem", color: "#ccc", marginBottom: "21px" }}>
-                    Рідкість: <strong>{selectedItem.rarity}</strong>
-                  </p>
-
-                  {/* Обчислення покращених характеристик */}
-                  {(() => {
-                    const stats = getUpgradedStats(
-                      {
-                        damage: Number(selectedItem.damage) || 0,
-                        defense: Number(selectedItem.defense) || 0,
-                      },
-                      selectedItem.upgrade_level ?? 0
-                    );
-                    return (
-                      <>
-                        <p style={{ fontSize: "0.8rem", color: "#ccc", marginBottom: "20px" }}>
-                          Шкода: <strong>{stats.damage}</strong>
-                        </p>
-                        <p style={{ fontSize: "0.8rem", color: "#ccc", marginBottom: "60px" }}>
-                          Захист: <strong>{stats.defense}</strong>
-                        </p>
-                      </>
-                    );
-                  })()}
-
+                  <div style={{objectFit: "contain", marginBottom: "30px", marginTop: "10px", boxShadow: "0 0 40 rgba(253, 253, 253, 0.5)", borderRadius: "20px", border:"1px", cursor: "default", }}>
+                    <p style={{ fontSize: "0.8rem", color: "#ccc", marginBottom: "20px", }}>
+                      Тип: <strong>{selectedItem.type}</strong>
+                    </p>
+                    <p style={{ fontSize: "0.8rem", color: "#ccc", marginBottom: "20px" }}>
+                      Рідкість: <strong>{selectedItem.rarity}</strong>
+                    </p>
+                    {/* Обчислення покращених характеристик */}
+                    {(() => {
+                      const stats = getUpgradedStats(
+                        {
+                          damage: Number(selectedItem.damage) || 0,
+                          defense: Number(selectedItem.defense) || 0,
+                        },
+                        selectedItem.upgrade_level ?? 0
+                      );
+                      return (
+                        <>
+                          <p style={{ fontSize: "0.8rem", color: "#ccc", marginBottom: "20px" }}>
+                            Шкода: <strong>{stats.damage}</strong>
+                          </p>
+                          <p style={{ fontSize: "0.8rem", color: "#ccc", marginBottom: "60px" }}>
+                            Захист: <strong>{stats.defense}</strong>
+                          </p>
+                        </>
+                      );
+                    })()}
+                  </div>
+                  
                   <div 
                     style={{
                       position: "relative",
@@ -2345,33 +2353,33 @@ export default function HomePage() {
                       style={{
                         backgroundColor: "#444",
                         border: "none",
-                        borderRadius: "6px",
                         fontSize: "0.7rem",
                         color: "rgb(190, 0, 0)",
                         background: "rgba(0, 0, 0, 0.06)",
-                        marginTop: "0px",
-                        marginBottom:"25px",
+                        borderRadius:20,
+                        marginTop: "-8px",
+                        marginBottom:"28px",
                         cursor: "pointer",
                         width: "100%",
+                        fontWeight: "bolder",
                       }}>
-                       💥 РОЗІБРАТИ 
+                      💥 РОЗІБРАТИ 
                     </button>
                     <button onClick={() => { handleEquip(selectedItem); setSelectedItem(null); }}
                       style={{
                         backgroundColor: "#444",
                         border: "none",
-                        borderRadius: "6px",
                         fontSize: "0.7rem",
                         color: "#ffff",
-                        background: "rgba(0, 0, 0, 0.06)",
-                        marginTop: "0px",
-                        marginBottom:"25px",
+                        background: "rgba(0, 0, 0, 0)",
+                        borderRadius:20,
+                        marginTop: "-8px",
+                        marginBottom:"28px",
                         cursor: "pointer",
                         width: "100%",
-                      }}> 
-                        🫴 СПОРЯДИТИ
+                      }}>
+                        СПОРЯДИТИ 🫴
                     </button>
-                  </div>
                   </div>
                 </div>
               )}
@@ -2380,7 +2388,7 @@ export default function HomePage() {
                 <div
                   onClick={(e) => e.stopPropagation()}
                   style={{
-                    backgroundImage: `url('/bg/Cardbg.png')`,
+                    backgroundImage: `url('/bg/CardbgCommon.png')`,
                     backgroundSize: 'cover',
                     backgroundPosition: 'center',
                     backgroundRepeat: 'no-repeat',
@@ -2394,7 +2402,6 @@ export default function HomePage() {
                     filter: "drop-shadow(0 0px 40px rgb(255, 255, 255))",
                   }}
                 >
-                  <img src="/bg/CardbgCommon_fixed.png" style={{ width: 300 }} />
 
                   <div 
                     style={{
@@ -2414,27 +2421,34 @@ export default function HomePage() {
                         fontWeight: "bolder",
                         fontFamily: "Arial, sans-serif",
                         position: "inherit",
-                        padding: "5px",
-                        paddingTop:"20px",
-                        paddingLeft:"0px"
+                        padding: "4px",
+                        marginTop:"30px",
+                        borderRadius: "25px",
+                        alignItems: "center",
+                        background: "rgba(0, 0, 0, 0.33)",
+                        cursor: "default",
                       }}>
                         +{selectedItem.upgrade_level}
                     </p>
                     <p onClick={() => setSelectedItem(null)}
                       style={{  
-                        fontSize: "0.8rem",
-                        fontWeight: "lighter",
+                        fontSize: "1rem",
+                        fontWeight: "bolder",
                         fontFamily: "Arial, sans-serif",
-                        color: "#ddd",
                         position: "inherit",
-                        padding: "8px",
-                        paddingTop:"20px",
-                        background: "rgba(0, 0, 0, 0.06)",
+                        padding: "4px",
+                        paddingInline: "8px",
+                        marginTop:"30px",
+                        borderRadius: "25px",
+                        alignItems: "center",
+                        background: "rgba(0, 0, 0, 0.33)",
+                        cursor: "pointer",
                       }}>
-                        X
+                        x
                     </p>
                   </div>
-                  <h2 className={` rarity-font-${selectedItem.rarity?.toLowerCase()}`} style={{ fontSize: "1.2rem", marginBottom: "10px",marginTop:"-10px"  }}>{selectedItem.name}</h2>
+                  <h2 className={` rarity-font-${selectedItem.rarity?.toLowerCase()}`} style={{ fontSize: "1.2rem", marginBottom: "10px",marginTop:"-10px",cursor: "default", }}>{selectedItem.name}</h2>
+                 
                   {selectedItem.image && (
                       <img 
                       src={typeof selectedItem.image === "string" ? selectedItem.image : (selectedItem.image as { src: string }).src}
@@ -2442,33 +2456,34 @@ export default function HomePage() {
                       style={{ width: "130px", height: "80px", objectFit: "contain", marginBottom: "30px", marginTop: "30px", boxShadow: "0 0 40 rgb(253, 253, 253)", borderRadius: "360px", filter: "drop-shadow(0 0px 22px rgb(255, 255, 255))" }}
                     />
                   )}
-                  <div style={{objectFit: "contain", marginBottom: "30px", marginTop: "10px", boxShadow: "0 0 40 rgba(253, 253, 253, 0.5)", borderRadius: "20px", border:"1px" }}>
-                  <p style={{ fontSize: "0.8rem", color: "#ccc", marginBottom: "20px" }}>
-                    Тип: <strong>{selectedItem.type}</strong>
-                  </p>
-                  <p style={{ fontSize: "0.8rem", color: "#ccc", marginBottom: "20px" }}>
-                    Рідкість: <strong>{selectedItem.rarity}</strong>
-                  </p>
-                  {/* Обчислення покращених характеристик */}
-                  {(() => {
-                    const stats = getUpgradedStats(
-                      {
-                        damage: Number(selectedItem.damage) || 0,
-                        defense: Number(selectedItem.defense) || 0,
-                      },
-                      selectedItem.upgrade_level ?? 0
-                    );
-                    return (
-                      <>
-                        <p style={{ fontSize: "0.8rem", color: "#ccc", marginBottom: "20px" }}>
-                          Шкода: <strong>{stats.damage}</strong>
-                        </p>
-                        <p style={{ fontSize: "0.8rem", color: "#ccc", marginBottom: "60px" }}>
-                          Захист: <strong>{stats.defense}</strong>
-                        </p>
-                      </>
-                    );
-                  })()}
+
+                  <div style={{objectFit: "contain", marginBottom: "30px", marginTop: "10px", boxShadow: "0 0 40 rgba(253, 253, 253, 0.5)", borderRadius: "20px", border:"1px", cursor: "default", }}>
+                    <p style={{ fontSize: "0.8rem", color: "#ccc", marginBottom: "20px", }}>
+                      Тип: <strong>{selectedItem.type}</strong>
+                    </p>
+                    <p style={{ fontSize: "0.8rem", color: "#ccc", marginBottom: "20px" }}>
+                      Рідкість: <strong>{selectedItem.rarity}</strong>
+                    </p>
+                    {/* Обчислення покращених характеристик */}
+                    {(() => {
+                      const stats = getUpgradedStats(
+                        {
+                          damage: Number(selectedItem.damage) || 0,
+                          defense: Number(selectedItem.defense) || 0,
+                        },
+                        selectedItem.upgrade_level ?? 0
+                      );
+                      return (
+                        <>
+                          <p style={{ fontSize: "0.8rem", color: "#ccc", marginBottom: "20px" }}>
+                            Шкода: <strong>{stats.damage}</strong>
+                          </p>
+                          <p style={{ fontSize: "0.8rem", color: "#ccc", marginBottom: "60px" }}>
+                            Захист: <strong>{stats.defense}</strong>
+                          </p>
+                        </>
+                      );
+                    })()}
                   </div>
                   
                   <div 
@@ -2481,6 +2496,7 @@ export default function HomePage() {
                       overflow: "visible",
                       width: "100%",
                       height: "100%",
+                      gap:20,
                     }} 
                   >
                     <button
@@ -2492,11 +2508,12 @@ export default function HomePage() {
                         fontFamily: "Arial, sans-serif",
                         fontWeight: "bolder",
                         color: "rgb(151, 151, 151)",
-                        background: "rgba(0, 0, 0, 0.06)",
-                        marginTop: "0px",
-                        marginBottom:"25px",
+                        background: "rgba(0, 0, 0, 0.4)",
+                        borderRadius:20,
+                        marginTop: "-8px",
+                        marginBottom:"28px",
                         cursor: "default",
-                        width: "100%",
+                        width: "40%",
                       }}>
                         СПОРЯДЖЕНО
                     </button>
@@ -2506,13 +2523,14 @@ export default function HomePage() {
                         border: "none",
                         fontSize: "0.7rem",
                         color: "#ffff",
-                        background: "rgba(0, 0, 0, 0.06)",
-                        marginTop: "0px",
-                        marginBottom:"25px",
+                        background: "rgba(0, 0, 0, 0.4)",
+                        borderRadius:20,
+                        marginTop: "-8px",
+                        marginBottom:"28px",
                         cursor: "pointer",
-                        width: "100%",
+                        width: "40%",
                       }}>
-                        🫳 ЗНЯТИ
+                        ЗНЯТИ 🫳
                     </button>
                   </div>
                 </div>
