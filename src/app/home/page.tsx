@@ -2385,9 +2385,11 @@ export default function HomePage() {
               )}
 
               {selectedItem.mode === "equipped" && (
-                <div
+                
+                <div 
                   onClick={(e) => e.stopPropagation()}
                   style={{
+                    backgroundImage: `url('/bg/CardbgCommon.png')`,
                     backgroundSize: 'cover',
                     backgroundPosition: 'center',
                     backgroundRepeat: 'no-repeat',
@@ -2401,7 +2403,7 @@ export default function HomePage() {
                     filter: "drop-shadow(0 0px 40px rgb(255, 255, 255))",
                   }}
                 >
-                  <img src="/bg/CardbgCommon_fixed.png" style={{ width: 300 }} />
+                  <img src="/bg/CardbgCommon.png" style={{ position:"absolute",width: "100%", height: "100%"}} />
                   <div 
                     style={{
                       position: "relative",
