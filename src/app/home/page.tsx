@@ -2378,19 +2378,19 @@ export default function HomePage() {
                 <div
                   onClick={(e) => e.stopPropagation()}
                   style={{
-                  backgroundImage: `url('/bg/CardbgCommon.png')`,
-                  backgroundSize: 'cover',
-                  backgroundPosition: 'center',
-                  backgroundRepeat: 'no-repeat',
-                  padding: "0px",
-                  borderRadius: "10px",
-                  paddingBlock: "0px",
-                  color: "#fff",
-                  maxWidth: "300px",
-                  width: "100%",
-                  textAlign: "center",
-                  filter: "drop-shadow(0 0px 40px rgb(255, 255, 255))",
-                }}
+                    backgroundImage: `url('/bg/CardbgCommon.png')`,
+                    backgroundSize: 'cover',
+                    backgroundPosition: 'center',
+                    backgroundRepeat: 'no-repeat',
+                    padding: "0px",
+                    borderRadius: "10px",
+                    color: "#fff",
+                    maxWidth: "300px",
+                    width: "100%",
+                    minHeight: "450px", // додано!
+                    textAlign: "center",
+                    filter: "drop-shadow(0 0px 40px rgb(255, 255, 255))",
+                  }}
                 >
                   <div 
                     style={{
