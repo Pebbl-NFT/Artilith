@@ -2236,17 +2236,19 @@ export default function HomePage() {
               )}
 
               {selectedItem.mode === "inventory" && (
-                <div 
-                    onClick={(e) => e.stopPropagation()}
-                    style={{
-                    backgroundImage: `url(${cardbgcommon.src})`,
+                <div
+                  onClick={(e) => e.stopPropagation()}
+                  style={{
+                    backgroundImage: `url('/bg/Cardbg.png')`,
                     backgroundSize: 'cover',
                     backgroundPosition: 'center',
                     backgroundRepeat: 'no-repeat',
                     padding: "0px",
-                    borderRadius: "20px",
+                    borderRadius: "10px",
+                    color: "#fff",
                     maxWidth: "300px",
                     width: "100%",
+                    minHeight: "450px", // додано!
                     textAlign: "center",
                     filter: "drop-shadow(0 0px 40px rgb(255, 255, 255))",
                   }}
@@ -2378,7 +2380,7 @@ export default function HomePage() {
                 <div
                   onClick={(e) => e.stopPropagation()}
                   style={{
-                    backgroundImage: `url('/bg/CardbgCommon.png')`,
+                    backgroundImage: `url('/bg/Cardbg.png')`,
                     backgroundSize: 'cover',
                     backgroundPosition: 'center',
                     backgroundRepeat: 'no-repeat',
