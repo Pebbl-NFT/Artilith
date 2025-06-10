@@ -2292,15 +2292,7 @@ export default function HomePage() {
                     <img
                       src={typeof selectedItem.image === "string" ? selectedItem.image : (selectedItem.image as { src: string }).src}
                       alt={selectedItem.name}
-                      style={{
-                        width: "130px",
-                        height: "80px",
-                        objectFit: "contain",
-                        marginBottom: "30px",
-                        marginTop: "30px",
-                        boxShadow: "0 0 40 rgba(253, 253, 253, 0.5)",
-                        borderRadius: "50px",
-                      }}
+                      style={{ width: "130px", height: "80px", objectFit: "contain", marginBottom: "30px", marginTop: "30px", boxShadow: "0 0 40 rgb(253, 253, 253)", borderRadius: "360px", filter: "drop-shadow(0 0px 22px rgb(255, 255, 255))" }}
                     />
                   )}
 
@@ -2412,7 +2404,7 @@ export default function HomePage() {
                     <p className={` rarity-font-${selectedItem.rarity?.toLowerCase()}`} 
                       style={{  
                         fontSize: "1rem",
-                        fontWeight: "lighter",
+                        fontWeight: "bolder",
                         fontFamily: "Arial, sans-serif",
                         position: "inherit",
                         padding: "5px",
@@ -2430,16 +2422,17 @@ export default function HomePage() {
                         position: "inherit",
                         padding: "8px",
                         paddingTop:"20px",
+                        background: "rgba(0, 0, 0, 0.06)",
                       }}>
                         X
                     </p>
                   </div>
-                  <h2 className={` rarity-font-${selectedItem.rarity?.toLowerCase()}`} style={{ fontSize: "1.2rem", marginBottom: "10px",marginTop:"-20px" }}>{selectedItem.name}</h2>
+                  <h2 className={` rarity-font-${selectedItem.rarity?.toLowerCase()}`} style={{ fontSize: "1.2rem", marginBottom: "10px",marginTop:"-10px"  }}>{selectedItem.name}</h2>
                   {selectedItem.image && (
                       <img 
                       src={typeof selectedItem.image === "string" ? selectedItem.image : (selectedItem.image as { src: string }).src}
                       alt={selectedItem.name}
-                      style={{ width: "130px", height: "80px", objectFit: "contain", marginBottom: "30px", marginTop: "30px", boxShadow: "0 0 40 rgba(253, 253, 253, 0.5)", borderRadius: "20px", }}
+                      style={{ width: "130px", height: "80px", objectFit: "contain", marginBottom: "30px", marginTop: "30px", boxShadow: "0 0 40 rgb(253, 253, 253)", borderRadius: "360px", filter: "drop-shadow(0 0px 22px rgb(255, 255, 255))" }}
                     />
                   )}
                   <div style={{objectFit: "contain", marginBottom: "30px", marginTop: "10px", boxShadow: "0 0 40 rgba(253, 253, 253, 0.5)", borderRadius: "20px", border:"1px" }}>
@@ -2489,11 +2482,14 @@ export default function HomePage() {
                         border: "none",
                         borderRadius: "6px",
                         fontSize: "0.7rem",
-                        color: "rgb(80, 80, 80)",
+                        fontStyle: "italic",
+                        fontFamily: "Arial, sans-serif",
+                        fontWeight: "bolder",
+                        color: "rgb(151, 151, 151)",
                         background: "rgba(0, 0, 0, 0.06)",
                         marginTop: "0px",
                         marginBottom:"25px",
-                        cursor: "pointer",
+                        cursor: "default",
                         width: "100%",
                       }}>
                         СПОРЯДЖЕНО
