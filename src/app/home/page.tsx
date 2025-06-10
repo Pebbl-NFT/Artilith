@@ -2234,7 +2234,7 @@ export default function HomePage() {
               )}
 
               {selectedItem.mode === "inventory" && (
-                <div
+                <div 
                     onClick={(e) => e.stopPropagation()}
                     style={{
                     backgroundImage: `url('/bg/Cardbgcommon.png')`,
@@ -2307,7 +2307,7 @@ export default function HomePage() {
                     Тип: <strong>{selectedItem.type}</strong>
                   </p>
 
-                  <p style={{ fontSize: "0.8rem", color: "#ccc", marginBottom: "20px" }}>
+                  <p style={{ fontSize: "0.8rem", color: "#ccc", marginBottom: "21px" }}>
                     Рідкість: <strong>{selectedItem.rarity}</strong>
                   </p>
 
