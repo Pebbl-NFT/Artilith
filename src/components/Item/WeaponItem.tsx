@@ -1,6 +1,5 @@
 import sword01a from "../../app/_assets/item/sword01a.png";
 import sword02a from "../../app/_assets/item/sword02a.png";
-import sword01b from "../../app/_assets/item/sword01b.png";
 
 export const WeaponItems = [
     {
