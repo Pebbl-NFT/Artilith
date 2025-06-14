@@ -466,9 +466,9 @@ export default function BattlePage() {
   function calculateReward(enemy: Enemy, pLevel: number): { rewardPoints: number; rewardExp: number; droppedItems: DroppedItemInfo[] } {
     if (!enemy) return { rewardPoints: 0, rewardExp: 0, droppedItems: [] };
     const baseValue = enemy.maxHealth + enemy.damage * 5 + enemy.defense * 3;
-    let rewardPoints = Math.floor(baseValue * 0.1);
-    let rewardExp = Math.floor(baseValue * 0.05);
-    const playerLevelBonus = 1 + (pLevel - 1) * 0.02;
+    let rewardPoints = Math.floor(baseValue * 0.2);
+    let rewardExp = Math.floor(baseValue * 0.1);
+    const playerLevelBonus = 1 + (pLevel - 1) * 0.05;
     rewardPoints = Math.floor(rewardPoints * playerLevelBonus);
     rewardExp = Math.floor(rewardExp * playerLevelBonus);
     let currentDroppedItems: DroppedItemInfo[] = []; // Використовуємо DroppedItemInfo
@@ -477,7 +477,7 @@ export default function BattlePage() {
       case 'miniBoss':
         rewardPoints = Math.floor(rewardPoints * 1.8);
         rewardExp = Math.floor(rewardExp * 1.8);
-        if (randomChance < 0.3 && effectiveMiniBossDrops.length > 0) {
+        if (randomChance < 0.5 && effectiveMiniBossDrops.length > 0) {
           currentDroppedItems.push(effectiveMiniBossDrops[Math.floor(Math.random() * effectiveMiniBossDrops.length)]);
         }
         break;
@@ -490,7 +490,7 @@ export default function BattlePage() {
         break;
       case 'normal':
       default:
-        if (randomChance < 0.09 && effectiveCommonDrops.length > 0) { // 0.09 = 9% шансу випадіння
+        if (randomChance < 0.2 && effectiveCommonDrops.length > 0) { // 0.09 = 9% шансу випадіння
           currentDroppedItems.push(effectiveCommonDrops[Math.floor(Math.random() * effectiveCommonDrops.length)]);
         }
         break;
