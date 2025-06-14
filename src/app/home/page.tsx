@@ -2365,21 +2365,52 @@ export default function HomePage() {
                       }}>
                       💥 РОЗІБРАТИ 
                     </button>
-                    <button onClick={() => { handleEquip(selectedItem); setSelectedItem(null); }}
-                      style={{
-                        backgroundColor: "#444",
-                        border: "none",
-                        fontSize: "0.7rem",
-                        color: "#ffff",
-                        background: "rgba(0, 0, 0, 0)",
-                        borderRadius:20,
-                        marginTop: "-8px",
-                        marginBottom:"28px",
-                        cursor: "pointer",
-                        width: "100%",
-                      }}>
+                    {/* Умовна кнопка: СПОРЯДИТИ або ВИКОРИСТАТИ */}
+                    {(selectedItem.type === 'weapon' || selectedItem.type === 'shield') && (
+                      <button onClick={() => { handleEquip(selectedItem); setSelectedItem(null); }}
+                        style={{
+                          backgroundColor: "#444",
+                          border: "none",
+                          fontSize: "0.7rem",
+                          color: "rgb(0, 255, 98)",
+                          background: "rgba(0, 0, 0, 0)",
+                          borderRadius:20,
+                          marginTop: "-8px",
+                          marginBottom:"28px",
+                          cursor: "pointer",
+                          width: "100%",
+                        }}>
                         СПОРЯДИТИ 🫴
-                    </button>
+                      </button>
+                    )}
+                    {selectedItem.type === 'scroll' && (
+                      <button onClick={() => { 
+                        // Тут має бути ваша функція для використання предмету, наприклад handleUseItem
+                        // handleUseItem(selectedItem); 
+                        console.log("Використати предмет:", selectedItem.name); // Тимчасовий лог
+                        setSelectedItem(null); 
+                      }}
+                        style={{
+                          backgroundColor: "#444",
+                          border: "none",
+                          fontSize: "0.7rem",
+                          color: "rgb(0, 255, 98)",
+                          background: "rgba(0, 0, 0, 0)",
+                          borderRadius:20,
+                          marginTop: "-8px",
+                          marginBottom:"28px",
+                          cursor: "pointer",
+                          width: "100%",
+                        }}>
+                        ✨ ВИКОРИСТАТИ
+                      </button>
+                    )}
+                    {/* Якщо є інші типи предметів, для яких потрібні інші кнопки або їх відсутність, 
+                        можна додати ще умови сюди, або залишити так, щоб для непередбачених типів 
+                        не було другої кнопки. 
+                        Наприклад, якщо предмет не можна ні спорядити, ні використати, 
+                        але можна розібрати, то буде тільки кнопка "РОЗІБРАТИ".
+                    */}
                   </div>
                 </div>
               )}
