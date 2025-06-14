@@ -672,7 +672,7 @@ export default function HomePage() {
                   color: "#ddd",
                   textAlign: "center",
                   marginBottom: "20px",
-                  marginTop: "0px",
+                  marginTop: "50px",
                   maxWidth: "600px",
                   background: "rgba(0, 0, 0, 0.59)",
                   padding: "5px",
@@ -694,6 +694,9 @@ export default function HomePage() {
               >
                 
               </h1>
+            </div>
+          </Placeholder>
+            <Placeholder>
               <Card className="page"
               style={{
                 display: "flex",
@@ -786,39 +789,6 @@ export default function HomePage() {
                   />
                 )}
               </Card>
-            </div>
-          </Placeholder>
-            <Placeholder>
-                <div
-                  style={{
-                    marginTop: "-30px",
-                    marginLeft:"-10px",
-                    alignItems: "center",
-                    position: "relative",
-                    display: "grid",
-                    gridTemplateColumns: "repeat(auto-fill, minmax(40px, 1fr))", // Адаптивна сітка
-                    gap: "20px", // Відступ між картками
-                    width: "100%",
-                    animation: "fadeIn 1s ease forwards",
-                  }}
-                >
-                  {AllItems.map((item) => (
-                    <ItemCard
-                      mode={"city"}
-                      key={item.item_id}
-                      item_id={item.item_id}
-                      type={item.type}
-                      rarity={item.rarity}
-                      name={item.name}
-                      image={item.image}
-                      description={item.description}
-                      damage={item.damage ? ` ${item.damage}` : "0"}
-                        defense={item.defense ? ` ${item.defense}` : "0"}
-                      price={item.price}
-                      onBuyRequest={(item) => setSelectedItem(item)}
-                    />
-                  ))}
-                </div>
             </Placeholder>
           </Page>
       );
