@@ -245,9 +245,9 @@ export default function HomePage() {
     localStorage.setItem("nextClickTime", nextAvailableClick.toString());
     setIsClickable(false);
     updateCountdown(nextAvailableClick);
-    const newPoints = points + 1;
-    const newEnergy = (energy ?? 0) + 1; // Додаємо +1 до енергії, якщо energy null, беремо 0
-    const newClickDelay = clickDelay + 1000;
+    const newPoints = points + 2;
+    const newEnergy = (energy ?? 0) + 2; // Додаємо +1 до енергії, якщо energy null, беремо 0
+    const newClickDelay = clickDelay + 5000;
     setPoints(newPoints);
     setEnergy(newEnergy); // Оновлюємо стан енергії
     setClickDelay(newClickDelay);
@@ -267,7 +267,7 @@ export default function HomePage() {
         imgWrap.classList.remove("active");
       }, 1000);
     }
-    const xpGain = 1; // Кожен клік — +1 XP
+    const xpGain = 5; // Кожен клік — +1 XP
     let newExperience = experience + xpGain;
     let newLevel = level;
     // Підвищення рівня
@@ -290,9 +290,9 @@ export default function HomePage() {
           level: newLevel,
         },
       ], { onConflict: "id" });
-      toast.success(`Вам зараховано + 1 🪨`);
-      toast.success(`Вам зараховано + 1 ⚡`);
-      toast.success(`Вам зараховано + 1 🔷`);
+      toast.success(`Вам зараховано + 2 🪨`);
+      toast.success(`Вам зараховано + 2 ⚡`);
+      toast.success(`Вам зараховано + 5 🔷`);
   };
 
   // Функція для визначення шансів успіху
@@ -1879,7 +1879,7 @@ export default function HomePage() {
                   width: "155px",
                   height: "100%",
                 }} >
-                 1🪨  1🔷  1⚡
+                 5🔷 2⚡ 2🪨
                 </span> 
                 <Link href="" style={{
                   fontSize: "0.6rem",
