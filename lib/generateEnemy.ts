@@ -114,9 +114,9 @@ export function generateSequentialEnemy(
   let enemyType: EnemyType; // Використовуємо визначений тип
   // Визначаємо тип ворога та вибираємо шаблон
   if (encounterNumber % 20 === 0) {
-    template = bosses[(Math.floor(encounterNumber / 20) - 1 + bosses.length) % bosses.length]; // Додано + bosses.length для уникнення від'ємного індексу
+    template = bosses[(Math.floor(encounterNumber / 100) - 1 + bosses.length) % bosses.length];
     enemyType = 'boss';
-  } else if (encounterNumber % 6 === 0) {
+  } else if (encounterNumber % 6 === 0) { 
     template = miniBosses[(Math.floor(encounterNumber / 6) - 1 + miniBosses.length) % miniBosses.length]; // Додано + miniBosses.length
     enemyType = 'miniBoss';
   } else {

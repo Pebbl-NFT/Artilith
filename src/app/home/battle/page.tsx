@@ -465,10 +465,10 @@ export default function BattlePage() {
 
   function calculateReward(enemy: Enemy, pLevel: number): { rewardPoints: number; rewardExp: number; droppedItems: DroppedItemInfo[] } {
     if (!enemy) return { rewardPoints: 0, rewardExp: 0, droppedItems: [] };
-    const baseValue = enemy.maxHealth + enemy.damage * 5 + enemy.defense * 3;
-    let rewardPoints = Math.floor(baseValue * 0.2);
-    let rewardExp = Math.floor(baseValue * 0.1);
-    const playerLevelBonus = 1 + (pLevel - 1) * 0.05;
+    const baseValue = enemy.maxHealth + enemy.damage * 5 + enemy.defense * 3;   
+    let rewardPoints = Math.floor(baseValue * 0.2); // Базова кількість очок, 20% від базового значення
+    let rewardExp = Math.floor(baseValue * 0.1); // Базова кількість досвіду, 10% від базового значення
+    const playerLevelBonus = 1 + (pLevel - 1) * 0.05; // Бонус за рівень гравця, 5% за кожен рівень вище 1
     rewardPoints = Math.floor(rewardPoints * playerLevelBonus);
     rewardExp = Math.floor(rewardExp * playerLevelBonus);
     let currentDroppedItems: DroppedItemInfo[] = []; // Використовуємо DroppedItemInfo
@@ -477,20 +477,20 @@ export default function BattlePage() {
       case 'miniBoss':
         rewardPoints = Math.floor(rewardPoints * 1.8);
         rewardExp = Math.floor(rewardExp * 1.8);
-        if (randomChance < 0.5 && effectiveMiniBossDrops.length > 0) {
+        if (randomChance < 0.4 && effectiveMiniBossDrops.length > 0) {   // 0.5 = 40% шанс випадіння
           currentDroppedItems.push(effectiveMiniBossDrops[Math.floor(Math.random() * effectiveMiniBossDrops.length)]);
         }
         break;
       case 'boss':
         rewardPoints = Math.floor(rewardPoints * 3.5);
         rewardExp = Math.floor(rewardExp * 3.5);
-        if (randomChance < 0.75 && effectiveBossDrops.length > 0) {
+        if (randomChance < 0.9 && effectiveBossDrops.length > 0) {  // 0.9 = 90% шанс випадіння
            currentDroppedItems.push(effectiveBossDrops[Math.floor(Math.random() * effectiveBossDrops.length)]);
         }
         break;
       case 'normal':
       default:
-        if (randomChance < 0.2 && effectiveCommonDrops.length > 0) { // 0.09 = 9% шансу випадіння
+        if (randomChance < 0.2 && effectiveCommonDrops.length > 0) { // 0.2 = 20% шансу випадіння
           currentDroppedItems.push(effectiveCommonDrops[Math.floor(Math.random() * effectiveCommonDrops.length)]);
         }
         break;
@@ -564,7 +564,7 @@ export default function BattlePage() {
               justifyContent: "center",
               alignItems: "center",
               flexDirection: "column",
-              backgroundColor: "rgba(0,0,0,0.85)", // Темніший фон
+              backgroundColor: "rgba(0, 0, 0, 0.95)", // Темніший фон
               color: "#fff",
               padding: "16px",
               boxSizing: "border-box",
@@ -587,11 +587,11 @@ export default function BattlePage() {
                 animation: "fadeIn 0.6s ease forwards", // Визначте fadeIn, якщо не глобально
                 marginTop: 5, // Скоригований відступ
                 marginBottom: 15,
-                fontSize: "1.2em"
+                fontSize: "0.8em"
               }}
             >
               ⚔️ Ви натрапили на ворога ! ⚔️</h2>
-            <h1 style={{ animation: "fadeIn 1s ease forwards", marginBottom:20, fontSize: "2.2em", textAlign:"center" }}>{enemyStats?.name}</h1>
+            <h1 style={{ animation: "fadeIn 1s ease forwards", marginBottom:20, fontSize: "1.6em", textAlign:"center" }}>{enemyStats?.name}</h1>
             <div
               style={{
                 display: "flex",
@@ -602,7 +602,7 @@ export default function BattlePage() {
                 color: "#fff",
                 animation: "fadeIn 1.5s ease forwards",
                 marginBottom: "20px", // Скоригований відступ
-                fontSize: "1.1em"
+                fontSize: "0.9em"
               }}
               >
                 <div style={{ textAlign: "center" }}> ❤️ {enemyHP}</div>
@@ -620,7 +620,7 @@ export default function BattlePage() {
                 objectFit: "contain",
                 display: "block", // Переконайтеся, що це блок для автоматичних відступів, якщо потрібно
                 animation: "fadeIn 0.6s ease forwards",
-                borderRadius: "8px"
+                borderRadius: "8px",
               }}
             />
             <h2
@@ -647,7 +647,7 @@ export default function BattlePage() {
                 marginBottom: "30px",
                 color: "#fff",
                 animation: "fadeIn 2.5s ease forwards",
-                fontSize: "1.1em",
+                fontSize: "0.9em",
                 width: "100%", // Переконайтеся, що займає ширину для правильного центрування елементів
                 maxWidth: "350px" // Максимальна ширина для рядка статистики
               }}
@@ -672,19 +672,18 @@ export default function BattlePage() {
                 boxSizing: "border-box"
             }}>
               <Link href="/home" style={{flex: 1, maxWidth: '150px'}}> {/* Flex для розміру кнопок */}
-                <Button stretched size="l" style={{ animation: "fadeIn 0.6s ease forwards" /* backgroundColor:"#f44336" - використовуйте mode */ }}>
-                  Втекти
-                </Button>
-              </Link>
-              <Button
-                  stretched
-                  size="l"
-                  style={{ animation: "fadeIn 0.6s ease forwards", flex: 1, maxWidth: '200px' /* backgroundColor:"#4caf50" - використовуйте mode */ }}
-                  onClick={handleStartBattle}
-                  disabled={isLoading || energy < 1} // Вимкнути, якщо завантаження або немає енергії
+              <div
+                  style={{ animation: "fadeIn 0.6s ease forwards", maxWidth: '200px', backgroundColor:"#f44336", fontSize: "0.7em", padding: "10px 20px", textAlign: "center", borderRadius: "8px", cursor: canAttack && energy >= 1 ? "pointer" : "not-allowed", color: "#fff", boxShadow: "0 2px 4px rgba(0,0,0,0.2)", transition: "transform 0.2s ease" }}
               >
-              ⚔️ Почати бій {energy < 1 ? "" : "(1⚡)"} ⚔️
-              </Button>
+              Втекти
+              </div>
+              </Link>
+              <div
+                  style={{ animation: "fadeIn 0.6s ease forwards", maxWidth: '200px', backgroundColor:"#4caf50", fontSize: "0.7em", padding: "10px 20px", textAlign: "center", borderRadius: "8px", cursor: canAttack && energy >= 1 ? "pointer" : "not-allowed", color: "#fff", boxShadow: "0 2px 4px rgba(0,0,0,0.2)", transition: "transform 0.2s ease" }}
+                  onClick={handleStartBattle}
+              >
+              ⚔️ Почати бій ⚔️
+              </div>
             </div>
           </Card>
       </Page>
@@ -1015,7 +1014,7 @@ export default function BattlePage() {
                 stretched
                 style={{
                     animation: "fadeIn 0.6s ease forwards",
-                    // backgroundColor: "#4caf50", // Обробляється режимом
+                    backgroundColor: "#4caf50", // Обробляється режимом
                     // color: "#fff" // Обробляється режимом
                     flex:1 // Зробити кнопки рівної ширини
                 }}
