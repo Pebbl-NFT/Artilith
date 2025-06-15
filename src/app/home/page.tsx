@@ -60,6 +60,7 @@ export default function HomePage() {
   const [level, setLevel] = useState(1);
   const router = useRouter();
   const [showTooltip, setShowTooltip] = useState(false);
+  const [selectedItemToUpgrade, setSelectedItemToUpgrade] = useState<InventoryItemType | null>(null); // Замість selectedWeapon
 
   type InventoryItemType = {
     id: string;
@@ -347,9 +348,6 @@ export default function HomePage() {
     }
   }
 
-// Вибір сувою з inventory (item.type === 'scroll')
-  const hasScrolls = useMemo(() => inventory.some(item => item.type === 'scroll'), [inventory]);
-
   interface UpgradableItem {
     damage: number;
     defense: number;
@@ -370,7 +368,7 @@ export default function HomePage() {
 
   // Функція додавання предмета в інвентар
   const fetchInventory = async () => {
-    if (!userId) return;
+    if (!userId) return [];
     setLoading(true);
 
     const { data, error } = await supabase
@@ -386,7 +384,7 @@ export default function HomePage() {
     if (error) {
       console.error("Помилка при завантаженні інвентаря:", error.message);
       setLoading(false);
-      return;
+      return [];
     }
 
     if (data) {
@@ -401,9 +399,12 @@ export default function HomePage() {
       });      
 
       setInventory(formatted);
+      setLoading(false);
+      return formatted;
     }
 
     setLoading(false);
+    return [];
   };
 
   const toggleEquip = async (index: number) => {
@@ -636,163 +637,192 @@ export default function HomePage() {
         </Page>
       );
     case "shop":
-      return (
-        <Page back>
-            <Placeholder>
-            <h1
-                style={{
-                  fontSize: "2rem",
-                  fontWeight: "bold",
-                  marginTop: "50px",
-                  textAlign: "center",
-                  lineHeight: "1",
-                  color: "#fff",
-                }}
-              >
-                ТОРГОВЕЦЬ
-              </h1>
-            <div
-              className="page"
-              style={{
-                backgroundImage: `url(${shopbg.src})`,
+  return (
+      <div // Загальний контейнер сторінки для кращого контролю над фоном та відступами
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          width: "100%",
+          background: `linear-gradient(rgba(18, 15, 23, 0.8), rgba(18, 15, 23, 1)), url(${shopbg.src}) no-repeat center top`, // Градієнт поверх фону
+          backgroundSize: "cover",
+          backgroundAttachment: "fixed", // Фіксований фон для ефекту паралаксу
+          animation: "fadeIn 1s ease-out",
+          color: "#d0c0b0", // Базовий колір тексту
+          paddingBottom: "80px", // Відступ знизу для контенту
+        }}
+      >
+        {/* Заголовок Торговця */}
+        <h1
+          style={{
+            fontSize: "2rem", // Значно більший для ефекту
+            fontFamily: "'Cinzel Decorative', serif", // Приклад готичного шрифту (потрібно підключити)
+            fontWeight: "bold",
+            textAlign: "center",
+            paddingTop: "70px",
+            paddingBottom: "40px",
+            color: "#E0B870", // Колір старого золота
+            textShadow: "3px 3px 6px rgba(0,0,0,0.8), 0 0 10px #FFD700", // Складніша тінь з легким світінням
+            letterSpacing: "2px", // Розрідження літер
+            animation: "fadeInDown 1s ease-out 0.3s backwards", // Анімація появи
+            width: "100%",
+          }}
+        >
+          КРАМНИЦЯ ТОРГОВЦЯ
+        </h1>
+        {/* Блок з "цитатою" торговця - можна розмістити над зображенням або окремо */}
+        <p
+          style={{
+            fontSize: "0.9rem",
+            fontStyle: "italic",
+            color: "#b0a090", // Більш тьмяний колір пергаменту
+            textAlign: "center",
+            maxWidth: "600px",
+            margin: "0 auto 40px auto", // Відступи
+            background: "rgba(10, 5, 15, 0.7)", // Дуже темний фон
+            padding: "15px 25px",
+            borderRadius: "5px",
+            borderLeft: "3px solid #b8860b", // Акцентна рамка зліва
+            boxShadow: "0 4px 8px rgba(0,0,0,0.5)",
+            animation: "fadeInUp 1s ease-out 0.6s backwards",
+          }}
+        >
+          "Не затримуй мене, мандрівнику. Обирай товар, або йди своєю дорогою..."
+        </p>
+        {/* Контейнер для категорій товарів */}
+        <div style={{ display: "flex", flexDirection: "column", gap: "40px",width: "100%", }}>
+          {/* Категорія: ЗБРОЯ */}
+          <section>
+            <h2 style={{
+              fontSize: "1rem",
+              color: "#c0392b", // Криваво-червоний акцент
+              textAlign: "center",
+              marginBottom: "25px",
+              textTransform: "uppercase",
+              letterSpacing: "1px",
+              borderBottom: "2px solid #5a201a",
+              paddingBottom: "10px",
+              textShadow: "1px 1px 3px rgba(0,0,0,0.7)",
+            }}>
+              ЗБРОЯ
+            </h2>
+            {WeaponItems.length > 0 ? (
+              <div style={{
                 display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                justifyContent: "center",
-                animation: "fadeIn 1s ease forwards",
-                backgroundSize: 'cover', // Покрити весь блок
-                backgroundPosition: 'center', // Центрувати зображення
-                height: '100%', // Зайняти всю висоту вікна
-                color: "#fff", // Текст навколо, щоб бути білішим на фоні
-              }}
-            >
-              <p
-                style={{
-                  fontSize: "0.8rem",
-                  color: "#ddd",
-                  textAlign: "center",
-                  marginBottom: "20px",
-                  marginTop: "50px",
-                  maxWidth: "600px",
-                  background: "rgba(0, 0, 0, 0.59)",
-                  padding: "5px",
-                  animation: "fadeIn 2s ease forwards",
-                }}
-              >
-                Не затримуй мене, я маю багато справ!
-              </p>
-              <h1
-                style={{
-                  fontSize: "1rem",
-                  fontWeight: "bold",
-                  marginBottom: "70px",
-                  marginTop: "5px",
-                  textAlign: "center",
-                  lineHeight: "1",
-                  color: "#fff",
-                }}
-              >
-                
-              </h1>
-            </div>
-          </Placeholder>
-            <Placeholder>
-              <Card className="page"
-              style={{
-                display: "flex",
-                flexDirection: "row",
-                justifyContent: "center",
-                alignItems: "center",
-                marginBottom: 20,
-                gap: "30px",
-                padding: 5,
-                color: "#fff",
-                animation: "fadeIn 0.6s ease forwards",
-                background: "rgba(0, 0, 0, 0.7)",
+                flexWrap: "wrap", // Дозволяє переносити картки на новий рядок
+                justifyContent: "center", // Центрує картки
+                gap: "25px", // Відстань між картками
               }}>
-                ЗБРОЯ
-                {/* Example: Render a weapon item or map over WeaponItems */}
-                {WeaponItems.length > 0 && (
-                  <ItemCard
-                    mode={"sweapon"}
-                    item_id={WeaponItems[0].item_id}
-                    type={WeaponItems[0].type}
-                    rarity={WeaponItems[0].rarity}
-                    name={WeaponItems[0].name}
-                    image={WeaponItems[0].image}
-                    description={WeaponItems[0].description}
-                    damage={WeaponItems[0].damage ? `${WeaponItems[0].damage}` : "0"}
-                    defense={WeaponItems[0].defense ? `${WeaponItems[0].defense}` : "0"}
-                    price={WeaponItems[0].price}
-                    onBuyRequest={(item) => setSelectedItem(item)}
-                  />
-                )}
-              </Card>
-              <Card className="page"
-                style={{
-                  display: "flex",
-                  flexDirection: "row",
-                  justifyContent: "center",
-                  alignItems: "center",
-                  marginBottom: 20,
-                  gap: "30px",
-                  padding: 5,
-                  color: "#fff",
-                  animation: "fadeIn 0.6s ease forwards",
-                  background: "rgba(0, 0, 0, 0.7)",
-                }}>
-                БРОНЯ
-                {ShieldItems.length > 0 && (
-                  <ItemCard
-                    mode={"sshield"}
-                    item_id={ShieldItems[0].item_id}
-                    type={ShieldItems[0].type}
-                    rarity={ShieldItems[0].rarity}
-                    name={ShieldItems[0].name}
-                    image={ShieldItems[0].image}
-                    description={ShieldItems[0].description}
-                    damage={ShieldItems[0].damage ? `${ShieldItems[0].damage}` : "0"}
-                    defense={ShieldItems[0].defense ? `${ShieldItems[0].defense}` : "0"}
-                    price={ShieldItems[0].price}
-                    onBuyRequest={(item) => setSelectedItem(item)}
-                  />
-                )}
-              </Card>
-              <Card className="page"
-                style={{
-                  display: "flex",
-                  flexDirection: "row",
-                  justifyContent: "center",
-                  alignItems: "center",
-                  marginBottom: 20,
-                  gap: "30px",
-                  padding: 5,
-                  color: "#fff",
-                  animation: "fadeIn 0.6s ease forwards",
-                  background: "rgba(0, 0, 0, 0.7)",
-                }}>
-                СУВОЇ
-                {/* Example: Render a weapon item or map over WeaponItems */}
-                {ScrollItems.length > 0 && (
-                  <ItemCard
-                    mode={"sscroll"}
-                    item_id={ScrollItems[0].item_id}
-                    type={ScrollItems[0].type}
-                    rarity={ScrollItems[0].rarity}
-                    name={ScrollItems[0].name}
-                    image={ScrollItems[0].image}
-                    description={ScrollItems[0].description}
-                    damage={ScrollItems[0].damage ? `${ScrollItems[0].damage}` : "0"}
-                    defense={ScrollItems[0].defense ? `${ScrollItems[0].defense}` : "0"}
-                    price={ScrollItems[0].price}
-                    onBuyRequest={(item) => setSelectedItem(item)}
-                  />
-                )}
-              </Card>
-            </Placeholder>
-          </Page>
-      );
-    case "blacksmith":
+                {WeaponItems.map((item) => (
+                    <ItemCard
+                      mode={"city"}
+                      key={item.item_id}
+                      item_id={item.item_id}
+                      type={item.type}
+                      rarity={item.rarity}
+                      name={item.name}
+                      image={item.image}
+                      description={item.description}
+                      damage={item.damage ? ` ${item.damage}` : "0"}
+                        defense={item.defense ? ` ${item.defense}` : "0"}
+                      price={item.price}
+                      onBuyRequest={(item) => setSelectedItem(item)}
+                    />
+                  ))}
+              </div>
+            ) : (
+              <p style={{textAlign: 'center', color: '#776', fontStyle: 'italic'}}>Тут порожньо... Зброя скінчилася.</p>
+            )}
+          </section>
+          {/* Категорія: БРОНЯ */}
+          <section>
+            <h2 style={{
+              fontSize: "1rem",
+              color: "#4a708b", // Холодний сталевий синій
+              textAlign: "center",
+              marginBottom: "25px",
+              textTransform: "uppercase",
+              letterSpacing: "1px",
+              borderBottom: "2px solid #2a405b",
+              paddingBottom: "10px",
+              textShadow: "1px 1px 3px rgba(0,0,0,0.7)",
+            }}>
+              БРОНЯ
+            </h2>
+            {ShieldItems.length > 0 ? (
+              <div style={{
+                display: "flex",
+                flexWrap: "wrap",
+                justifyContent: "center",
+                gap: "25px",
+              }}>
+                {ShieldItems.map((item) => (
+                      <ItemCard
+                        mode={"city"}
+                        key={item.item_id}
+                        item_id={item.item_id}
+                        type={item.type}
+                        rarity={item.rarity}
+                        name={item.name}
+                        image={item.image}
+                        description={item.description}
+                        damage={item.damage ? ` ${item.damage}` : "0"}
+                        defense={item.defense ? `${item.defense}` : "0"}
+                        price={item.price}
+                        onBuyRequest={(item) => setSelectedItem(item)}
+                      />
+                    ))}
+              </div>
+            ) : (
+               <p style={{textAlign: 'center', color: '#776', fontStyle: 'italic'}}>Всі обладунки розібрали до вас.</p>
+            )}
+          </section>
+          {/* Категорія: СУВОЇ */}
+          <section>
+            <h2 style={{
+              fontSize: "1rem",
+              color: "#7E5A9B", // Містичний фіолетовий
+              textAlign: "center",
+              marginBottom: "25px",
+              textTransform: "uppercase",
+              letterSpacing: "1px",
+              borderBottom: "2px solid #4E3A6B",
+              paddingBottom: "10px",
+              textShadow: "1px 1px 3px rgba(0,0,0,0.7)",
+            }}>
+              СУВОЇ ТА ЗІЛЛЯ
+            </h2>
+            {ScrollItems.length > 0 ? (
+              <div style={{
+                display: "flex",
+                flexWrap: "wrap",
+                justifyContent: "center",
+                gap: "25px",
+              }}>
+                {ScrollItems.map((item) => (
+                      <ItemCard
+                        mode={"city"}
+                        key={item.item_id}
+                        item_id={item.item_id}
+                        type={item.type}
+                        rarity={item.rarity}
+                        name={item.name}
+                        image={item.image}
+                        description={item.description}
+                        damage={item.damage ? ` ${item.damage}` : "0"}
+                        defense={item.defense ? `${item.defense}` : "0"}
+                        price={item.price}
+                        onBuyRequest={(item) => setSelectedItem(item)}
+                      />
+                    ))}
+              </div>
+            ) : (
+               <p style={{textAlign: 'center', color: '#776', fontStyle: 'italic'}}>Полиці з сувоями та зіллями спорожніли.</p>
+            )}
+          </section>
+        </div>
+      </div>
+  );
+
       return (
         <Page back>
           <Placeholder>
@@ -887,215 +917,273 @@ export default function HomePage() {
           </Placeholder>
         </Page>
       ); 
-      case "upgrade":
+      case "blacksmith":
+        const upgradableItemsFromInventory = inventory.filter(
+          (i) => i.type === "weapon" || i.type === "shield"
+        );
+        const scrollItemsFromInventory = inventory.filter(i => i.type === "scroll");
         return (
           <Page back>
             <Placeholder>
-              <h1
-                  style={{
-                    fontSize: "2rem",
-                    fontWeight: "bold",
-                    marginTop: "50px",
-                    textAlign: "center",
-                    lineHeight: "1",
-                    color: "#fff",
-                  }}
-                >
-                  КОВАЛЬ
-                </h1>
               <div
                 className="page"
                 style={{
                   backgroundImage: `url(${blacksmithbg.src})`,
                   display: "flex",
                   flexDirection: "column",
-                  alignItems: "center",
-                  justifyContent: "center",
+                  alignItems: "top",
+                  justifyContent: "top",
                   animation: "fadeIn 1s ease forwards",
                   backgroundSize: 'cover', // Покрити весь блок
-                  backgroundPosition: "top", // Центрувати зображення
-                  height: '100%', // Зайняти всю висоту вікна
+                  backgroundPosition: 'top', // Центрувати зображення
+                  height: '200px', // Зайняти всю висоту вікна
                   color: "#fff", // Текст навколо, щоб бути білішим на фоні
+                  marginTop: "40px", // Збільшено відступ зверху
                 }}
               >
+                <h1
+                style={{
+                  fontSize: "2.5rem", // Збільшено для акценту
+                  fontWeight: "bold",
+                  marginBottom: "110px",
+                  textAlign: "center",
+                  paddingTop: "0px", // Збільшено відступ зверху
+                  paddingLeft: "55%", // Збільшено відступ зліва
+                  color: "#fff",
+                  textShadow: "2px 2px 4px rgba(0,0,0,0.7)", // Додано тінь для тексту
+                  animation: "fadeIn 1s ease forwards", // Додано анімацію
+                }}
+                >
+                  КОВАЛЬ
+                </h1>
                 <p
                   style={{
-                    fontSize: "0.8rem",
-                    color: "#ddd",
+                    fontSize: "0.9rem", // Трохи збільшено
+                    color: "#e0e0e0", // Світліший сірий
                     textAlign: "center",
-                    marginBottom: "20px",
-                    marginLeft: "70px",
-                    marginTop: "0px",
-                    maxWidth: "600px",
-                    background: "rgba(0, 0, 0, 0.59)",
-                    padding: "5px",
-                    animation: "fadeIn 3s ease forwards",
-                  }}
-                >
-                  Сумніваюсь що з цього щось вийде!
-                </p>
-                <h1
-                  style={{
-                    fontSize: "1rem",
-                    fontWeight: "bold",
                     marginBottom: "30px",
-                    marginTop: "5px",
-                    textAlign: "center",
-                    lineHeight: "1",
-                    color: "#fff",
+                    maxWidth: "600px",
+                    background: "rgba(0, 0, 0, 0.65)", // Трохи темніший фон для кращої читабельності
+                    padding: "10px 15px", // Збільшено падінги
+                    animation: "fadeIn 1.5s ease forwards 0.5s", // Додано затримку анімації
+                    borderRadius: "8px", // Закруглені кути
+                    boxShadow: "0 4px 8px rgba(0,0,0,0.3)", // Додано тінь
                   }}
                 >
-                  
-                </h1>
-                <Card className="page"
-                style={{
-                  display: "flex",
-                  flexDirection: "row",
-                  justifyContent: "center",
-                  alignItems: "center",
-                  marginBottom: 20,
-                  gap: "30px",
-                  padding: 5,
-                  color: "#fff",
-                  animation: "fadeIn 0.6s ease forwards",
-                  background: "rgba(0, 0, 0, 0.45)",
-                }}>
-                  ВІДРЕМОНТУВАТИ
-                </Card>
+                  Тут кується доля... або просто ламається черговий меч. Обирай мудро!
+                </p>
               </div>
-              <Card
-                  className="page"
+              <div
+                style={{ // Переконайтесь, що blacksmithbg.src правильно імпортовано
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  animation: "fadeIn 1s ease forwards",
+                  padding: "0px",
+                }}
+              >
+                {/* <Card className="page" style={{ ... }}>ВІДРЕМОНТУВАТИ</Card> */}
+                <Card // Основна картка для процесу покращення
+                  className="page" // Ви можете використовувати цей клас для загальних стилів карток
                   style={{
                     display: "flex",
                     flexDirection: "column",
                     alignItems: "center",
                     marginBottom: 20,
-                    gap: "8px",
-                    padding: 5,
+                    gap: "20px", // Збільшено відступ між секціями
+                    padding: "25px", // Збільшено падінги
                     color: "#fff",
-                    background: "rgba(0, 0, 0, 0.59)",
-                  }}>
-                  <div style={{fontSize:18, marginBottom:17, marginTop: 27}}>ПОКРАЩЕННЯ ЗБРОЇ</div>
-                  <div>Виберіть зброю та сувій для прокачки:</div>
-                  {/* ВІДОБРАЖЕННЯ СУВОЇВ (можна своїм компонентом. Тут просто кнопка для перевірки) */}
-                  {hasScrolls ? (
-                    <p>У вас є сувої для покращення!</p>
-                  ) : (
-                    <p>Немає сувоїв</p>
-                  )}
-
-                  {/* Кнопка прокачки */}
-                  <div style={{marginTop:14,marginBottom:8}}>
-                    <Button
-                      onClick={async () => {
-                        if (!selectedWeapon || !selectedScroll) return;
-                        setIsUpgrading(true);
-
-                        const result = await tryUpgradeWeapon(
-                          selectedWeapon.id,
-                          selectedWeapon.upgrade_level ?? 0,
-                          selectedScroll.id,
-                          false // protection item поки що false
-                        );
-
-                        setResult(result ? {
-                          type: result.result,
-                          text:
-                            result.result === 'success'
-                              ? 'Успішно покращено!'
-                              : result.result === 'broken'
-                                ? 'Зброя зламалась!'
-                                : 'Покращення не вдалося.'
-                        } : null);
-
-                        setSelectedScroll(null); // Скидаємо сувій після використання
-                        setIsUpgrading(false);
-
-                        // Оновлюємо інвентар і вибраний предмет
-                        await fetchInventory();
-                        const updated = inventory.find(i => i.id === selectedWeapon.id);
-                        setSelectedWeapon(updated ?? null); // тепер оновлений selectedWeapon
-                      }}
-                      disabled={!selectedWeapon || !selectedScroll || isUpgrading}
-                    >
-                      {isUpgrading ? "Покращуємо..." : "Покращити"}
-                    </Button>
-                    <div style={{ fontSize: 13, color: '#aaa' }}>
-                      Шанс успіху: {Math.round(getEnchantChance(selectedWeapon?.upgrade_level ?? 0) * 100)}%
-                    </div>
+                    background: "rgba(10, 20, 30, 0.75)", // Темніший, більш "металевий" фон
+                    borderRadius: "12px", // Більш заокруглені кути
+                    width: "100%",
+                    maxWidth: "700px", // Обмеження максимальної ширини
+                    boxShadow: "0 8px 16px rgba(0,0,0,0.4)", // Більш виражена тінь
+                  }}
+                >
+                  <div style={{ fontSize: "1.8rem", marginBottom: "10px", marginTop: "10px", fontWeight: "bold", color: "#FFD700" }}>
+                    ПОКРАЩЕННЯ СПОРЯДЖЕННЯ
                   </div>
-                  {result && (
-                    <div style={{
-                      color: result.type==='success'?"#5f6": result.type==='fail'?"#f66":"#faf792",
-                      marginTop: 11,
-                      fontWeight: 'bold'
-                    }}>
-                      {result.text}
-                    </div>
-                  )}
-
-                   {/* Сувої прокачки */}
-                  <div style={{ marginTop: 10 }}>
-                    <div style={{ fontWeight: 600 }}>Сувої прокачки:</div>
-                    <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginTop: 6 }}>
-                      {inventory.filter(i => i.type === "scroll").map(scroll => (
-                        <Card
-                          key={scroll.id}
-                          onClick={() => setSelectedScroll(scroll)}
-                          style={{
-                            padding: 6,
-                            minWidth: 120,
-                            background: selectedScroll?.id === scroll.id ? "#444a31" : "#272b15",
-                            border: selectedScroll?.id === scroll.id ? "2px solid #9f9" : "1px solid #666",
-                            cursor: "pointer",
-                          }}
-                        >
-                          <Image src={scroll.image} width={36} height={36} alt={scroll.name} />
-                          <div style={{ fontSize: 13 }}>{scroll.name}</div>
-                        </Card>
-                      ))}
-                      {inventory.filter(i => i.type === "scroll").length === 0 && (
-                        <div style={{ color: "#ccc" }}>Немає сувоїв</div>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* СЛОТИ ЗБРОЇ */}
-                  <div style={{ marginTop: 10, marginBottom: 50, }}>
-                    <div style={{ fontWeight: 600 }}>Зброя:</div>
-                    {inventory.length === 0 && <div style={{color:"#faa"}}>У вас немає зброї</div>}
-                    <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginTop: 6 }}>
-                    {inventory.filter(i=>i.type==="weapon").length ? (
-                      <div style={{display:'flex',flexWrap:'wrap',justifyContent:'center',gap:15}}>
-                        {inventory.filter(i=>i.type==="weapon").map(item=>{
-                          const stats = getUpgradedStats(item, item.upgrade_level);
+                  {/* Секція вибору Предмета (Зброя або Щит) */}
+                  <div style={{ width: '100%' }}>
+                    <h3 style={{ textAlign: 'center', marginBottom: '15px', fontSize: '1.3rem', color: '#C0C0C0' }}>
+                      1. Виберіть Предмет для Покращення:
+                    </h3>
+                    {upgradableItemsFromInventory.length > 0 ? (
+                      <div style={{ display: "flex", flexWrap: "wrap", gap: "15px", justifyContent: "center", padding: "10px", background: "rgba(0,0,0,0.2)", borderRadius: "8px" }}>
+                        {upgradableItemsFromInventory.map(item => {
+                          const stats = getUpgradedStats(item, item.upgrade_level ?? 0); // Передаємо 0, якщо upgrade_level undefined
                           return (
                             <Card
                               key={item.id}
                               style={{
-                                minWidth: 150,
-                                background: selectedWeapon && selectedWeapon.id === item.id ? "#444a31" : "#272b15",
-                                border: selectedWeapon && selectedWeapon.id === item.id ? "2px solid #9f9" : "1.5px solid #778",
+                                padding: "12px",
+                                minWidth: "160px",
+                                maxWidth: "180px",
+                                background: selectedItemToUpgrade?.id === item.id ? "rgba(70, 80, 50, 0.9)" : "rgba(40, 43, 21, 0.8)",
+                                border: selectedItemToUpgrade?.id === item.id ? "2px solid #AFFFAB" : "1.5px solid #778",
                                 cursor: "pointer",
-                                margin:"6px",
+                                borderRadius: "8px",
+                                textAlign: "center",
+                                transition: "transform 0.2s ease, box-shadow 0.2s ease",
+                                boxShadow: selectedItemToUpgrade?.id === item.id ? "0 0 15px #AFFFAB" : "none",
                               }}
-                              onClick={()=>setSelectedWeapon(item)}
+                              onClick={() => setSelectedItemToUpgrade(item)}
+                              onMouseEnter={(e) => e.currentTarget.style.transform = 'translateY(-3px)'}
+                              onMouseLeave={(e) => e.currentTarget.style.transform = 'translateY(0px)'}
                             >
-                              <Image src={item.image} width={42} height={42} alt={item.name}/>
-                              <div>{item.name} <span style={{color:'#aff',fontSize:15}}>+{item.upgrade_level??0}</span></div>
-                              <div style={{fontSize:12, color:'#aaf'}}>Атака {stats.damage}/Захист {stats.defense}</div>
+                              <Image src={item.image} width={48} height={48} alt={item.name} style={{ marginBottom: '8px' }} />
+                              <div style={{ fontWeight: 'bold', color: selectedItemToUpgrade?.id === item.id ? '#FFF' : '#DDD' }}>{item.name} <span style={{ color: '#AFFFAB', fontSize: 15 }}>+{item.upgrade_level ?? 0}</span></div>
+                              <div style={{ fontSize: 12, color: '#A0A0FF' }}>
+                                {/* Умовне відображення характеристик */}
+                                {item.type === "weapon" && `Шкода: ${stats.damage}`}
+                                {item.type === "shield" && `Захист: ${stats.defense}`}
+                                {/* Якщо предмет може мати і те, і інше, можна розширити логіку */}
+                                {item.type !== "weapon" && item.type !== "shield" && `Тип: ${item.type}`}
+                              </div>
                             </Card>
-                            
-                          )
+                          );
                         })}
                       </div>
-                    ) : ""}
-                    </div>
+                    ) : (
+                      <div style={{ color: "#ccc", textAlign: "center", padding: "10px" }}>У вас немає зброї чи щитів для покращення.</div>
+                    )}
                   </div>
-                </Card> 
+                  {/* Секція вибору Сувою (з'являється після вибору предмета) */}
+                  {selectedItemToUpgrade && (
+                    <div style={{ width: '100%', marginTop: '20px' }}>
+                      <h3 style={{ textAlign: 'center', marginBottom: '15px', fontSize: '1.3rem', color: '#C0C0C0' }}>
+                        2. Виберіть Сувій Покращення:
+                      </h3>
+                      {scrollItemsFromInventory.length > 0 ? (
+                        <div style={{ display: "flex", flexWrap: "wrap", gap: "12px", justifyContent: "center", padding: "10px", background: "rgba(0,0,0,0.2)", borderRadius: "8px" }}>
+                          {scrollItemsFromInventory.map(scroll => (
+                            <Card
+                              key={scroll.id}
+                              onClick={() => setSelectedScroll(scroll)}
+                              style={{
+                                padding: "10px",
+                                minWidth: "130px",
+                                background: selectedScroll?.id === scroll.id ? "rgba(70, 80, 50, 0.9)" : "rgba(40, 43, 21, 0.8)",
+                                border: selectedScroll?.id === scroll.id ? "2px solid #AFFFAB" : "1px solid #666",
+                                cursor: "pointer",
+                                borderRadius: "8px",
+                                textAlign: "center",
+                                transition: "transform 0.2s ease, box-shadow 0.2s ease",
+                                boxShadow: selectedScroll?.id === scroll.id ? "0 0 15px #AFFFAB" : "none",
+                              }}
+                              onMouseEnter={(e) => e.currentTarget.style.transform = 'translateY(-3px)'}
+                              onMouseLeave={(e) => e.currentTarget.style.transform = 'translateY(0px)'}
+                            >
+                              <Image src={scroll.image} width={40} height={40} alt={scroll.name} style={{ marginBottom: '5px', borderRadius:'50%',  boxShadow: '0 0 8px rgba(255,255,255,0.3)' }} />
+                              <div style={{ fontSize: 13, color: selectedScroll?.id === scroll.id ? '#FFF' : '#DDD' }}>{scroll.name}</div>
+                            </Card>
+                          ))}
+                        </div>
+                      ) : (
+                        <div style={{ color: "#ccc", textAlign: "center", padding: "10px" }}>Немає сувоїв для покращення.</div>
+                      )}
+                    </div>
+                  )}
+                  {/* Зона дії: Кнопка та Шанс (з'являється після вибору предмета та сувою) */}
+                  {selectedItemToUpgrade && selectedScroll && (
+                    <div style={{ marginTop: "25px", marginBottom: "10px", textAlign: 'center', padding: '20px', background: 'rgba(0,0,0,0.3)', borderRadius: '10px' }}>
+                      <div style={{ fontSize: '1.1rem', color: '#FFD700', marginBottom: '8px' }}>
+                        Обрано: {selectedItemToUpgrade.name} +{selectedItemToUpgrade.upgrade_level ?? 0}
+                      </div>
+                      <div style={{ fontSize: '1rem', color: '#B0E0E6', marginBottom: '15px' }}>
+                        Сувій: {selectedScroll.name}
+                      </div>
+                      <div style={{ fontSize: '1.4rem', color: '#aaa', marginBottom: "15px", fontWeight: 'bold' }}>
+                        Шанс успіху: {Math.round(getEnchantChance(selectedItemToUpgrade.upgrade_level ?? 0) * 100)}%
+                      </div>
+                      <Button
+                        onClick={async () => {
+                          if (!selectedItemToUpgrade || !selectedScroll) return;
+                          setIsUpgrading(true);
+                          setResult(null); // Скидаємо попередній результат
+                          // Тут ваша вже існуюча функція tryUpgradeWeapon
+                          const upgradeOutcome = await tryUpgradeWeapon(
+                            selectedItemToUpgrade.id,
+                            selectedItemToUpgrade.upgrade_level ?? 0,
+                            selectedScroll.id,
+                            false // useProtectionItem
+                          );
+                          // Формування тексту результату стало більш детальним
+                          let resultText = "";
+                          let resultType = upgradeOutcome.result; // success, safe_fail, protected_fail, broken
+                          if (upgradeOutcome.result === 'success') {
+                            resultText = `${selectedItemToUpgrade.name} успішно покращено до +${upgradeOutcome.newLevel}!`;
+                          } else if (upgradeOutcome.result === 'broken') {
+                            resultText = `О ні! ${selectedItemToUpgrade.name} зламався та зник...`;
+                          } else if (upgradeOutcome.result === 'safe_fail') {
+                            resultText = `Покращення ${selectedItemToUpgrade.name} не вдалося, але він залишився цілим.`;
+                            resultType = 'fail'; // Для візуального стилю "невдачі"
+                          } else if (upgradeOutcome.result === 'protected_fail') {
+                            resultText = `Захист спрацював! ${selectedItemToUpgrade.name} не покращився, але й не зламався.`;
+                            resultType = 'fail'; // Для візуального стилю "невдачі"
+                          } else {
+                            resultText = 'Сталася невідома помилка під час покращення.';
+                            resultType = 'error'; // Загальний тип для помилок
+                          }
+                          setResult({ type: resultType, text: resultText });
+                          setSelectedScroll(null); // Скидаємо сувій
+                          setIsUpgrading(false);
+                          await fetchInventory(); // Оновлюємо інвентар
+                          // Оновлюємо вибраний предмет, якщо він не зламався
+                          if (upgradeOutcome.result !== 'broken') {
+                              const updatedItem = inventory.find(i => i.id === selectedItemToUpgrade.id);
+                              setSelectedItemToUpgrade(updatedItem ?? null);
+                          } else {
+                              setSelectedItemToUpgrade(null); // Предмет зник
+                          }
+                        }}
+                        disabled={!selectedItemToUpgrade || !selectedScroll || isUpgrading}
+                        style={{ // Приклад стилів для кнопки
+                          padding: '15px 30px',
+                          fontSize: '1.2rem',
+                          fontWeight: 'bold',
+                          cursor: isUpgrading || !selectedItemToUpgrade || !selectedScroll ? 'not-allowed' : 'pointer',
+                          borderRadius: '8px',
+                          background: isUpgrading ? '#555' : 'linear-gradient(145deg, #ffac41, #ff8c00)',
+                          color: isUpgrading? '#aaa' : '#fff',
+                          border: 'none',
+                          boxShadow: isUpgrading ? 'none' : '0 4px 8px rgba(0,0,0,0.3)',
+                          transition: 'background 0.3s ease, transform 0.1s ease',
+                        }}
+                        onMouseDown={(e) => { if(!isUpgrading) e.currentTarget.style.transform = 'scale(0.98)'; }}
+                        onMouseUp={(e) => { if(!isUpgrading) e.currentTarget.style.transform = 'scale(1)'; }}
+                      >
+                        {isUpgrading ? "КУВАННЯ..." : "⚡ ПОКРАЩИТИ ⚡"}
+                      </Button>
+                    </div>
+                  )}
+                  {/* Відображення результату */}
+                  {result && (
+                    <div style={{
+                      color: result.type === 'success' ? "#86DC3D" : result.type === 'broken' ? "#FFA07A" : (result.type === 'fail' ? "#FFD700" : "#FF6347"),
+                      marginTop: "20px",
+                      padding: "15px",
+                      fontWeight: 'bold',
+                      fontSize: '1.2rem',
+                      textAlign: 'center',
+                      background: `rgba(${
+                        result.type === 'success' ? '46, 204, 113' :
+                        result.type === 'broken' ? '231, 76, 60' :
+                        result.type === 'fail' ? '241, 196, 15' :
+                        '200, 200, 200' // default для error
+                      }, 0.15)`,
+                      borderRadius: '8px',
+                      border: `2px solid ${result.type === 'success' ? "#86DC3D" : result.type === 'broken' ? "#FFA07A" : (result.type === 'fail' ? "#FFD700" : "#FF6347")}`,
+                      animation: `${result.type === 'success' ? 'successGlow' : (result.type === 'fail' || result.type === 'broken' ? 'failShake' : 'fadeIn')} 0.5s ease-in-out`
+                    }}>
+                      {result.text}
+                    </div>
+                  )}
+                </Card>
+              </div>
             </Placeholder>
           </Page>
-        ); 
+        );
     case "guild":
       return (
         <Page back>

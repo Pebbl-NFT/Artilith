@@ -403,3 +403,132 @@ button:hover {
   50% { transform: scale(1.1); filter: brightness(1.5); }
   100% { transform: scale(1); filter: brightness(1); }
 }
+
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes fadeInDown {
+  from { opacity: 0; transform: translateY(-30px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(30px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+
+/* --- Keyframe Animations --- */
+
+/* Animation: fadeIn
+   Standard smooth appearance by changing opacity and a slight Y-axis shift.
+*/
+@keyframes fadeIn {
+  0% {
+    opacity: 0;
+    transform: translateY(15px); /* Slightly more pronounced for dark fantasy emphasis */
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Animation: successGlow
+   Glowing effect associated with success, using a green color.
+   Pulsates the box-shadow.
+*/
+@keyframes successGlow {
+  0%, 100% {
+    box-shadow: 0 0 6px 2px rgba(134, 220, 61, 0.3), /* #86DC3D with alpha */
+                0 0 10px 4px rgba(134, 220, 61, 0.2),
+                inset 0 0 4px rgba(134, 220, 61, 0.2);
+    text-shadow: 0 0 3px rgba(186, 255, 115, 0.5); /* Lighter green text glow */
+  }
+  50% {
+    box-shadow: 0 0 14px 5px rgba(134, 220, 61, 0.7), /* #86DC3D with alpha */
+                0 0 22px 8px rgba(134, 220, 61, 0.5),
+                inset 0 0 8px rgba(134, 220, 61, 0.4);
+    text-shadow: 0 0 6px rgba(186, 255, 115, 0.8);
+  }
+}
+
+/* Animation: failShake
+   Short horizontal shake to indicate failure or error.
+*/
+@keyframes failShake {
+  0%, 100% {
+    transform: translateX(0);
+  }
+  10%, 30%, 50%, 70%, 90% {
+    transform: translateX(-7px); /* Slightly stronger shake */
+  }
+  20%, 40%, 60%, 80% {
+    transform: translateX(7px);
+  }
+}
+
+/* --- Result Block Styling --- */
+
+/* Base class for the result message block */
+.result-block {
+  padding: 18px 25px;
+  margin: 20px auto;
+  border-width: 1px;
+  border-style: solid;
+  border-radius: 4px; /* Sharper edges for a sterner fantasy look */
+  text-align: center;
+  font-family: 'Cinzel Decorative', serif; /* Assuming this font is loaded */
+  font-size: 1.1em;
+  color: #E0E0E0; /* Default light text for dark backgrounds */
+  animation-fill-mode: forwards;
+  animation-timing-function: ease-out;
+  background-color: rgba(10, 5, 15, 0.6); /* Very dark base, slightly transparent */
+  box-shadow: 0 0 15px rgba(0,0,0,0.5) inset; /* Inner shadow for depth */
+}
+
+/* Success State Styling */
+.result-success {
+  border-color: #86DC3D;
+  background-color: rgba(134, 220, 61, 0.1); /* Subtle success green background */
+  color: #b3ff6b; /* Brighter green text for success */
+  /* Apply fadeIn first, then successGlow starts slightly delayed and pulses twice */
+  animation-name: fadeIn, successGlow;
+  animation-duration: 0.6s, 1.6s;
+  animation-timing-function: ease-out, ease-in-out;
+  animation-delay: 0s, 0.4s; /* Glow starts after fade-in is mostly done */
+  animation-iteration-count: 1, 2; /* fadeIn once, successGlow pulses twice */
+}
+
+/* Broken State Styling */
+.result-broken {
+  border-color: #FFA07A; /* Light Salmon */
+  background-color: rgba(255, 160, 122, 0.1); /* Subtle broken item orange background */
+  color: #FFDAB9; /* PeachPuff - a lighter, sorrowful tone */
+  animation-name: fadeIn;
+  animation-duration: 0.6s;
+  /* Optional: could add a subtle visual cue for "broken" like a cracked border image or pseudo-element effect */
+}
+
+/* Fail State Styling (e.g., crafting failed but item not broken) */
+.result-fail {
+  border-color: #FFD700; /* Gold */
+  background-color: rgba(255, 215, 0, 0.1); /* Subtle failure gold background */
+  color: #FFFACD; /* LemonChiffon - lighter gold text */
+  /* Apply fadeIn first, then failShake */
+  animation-name: fadeIn, failShake;
+  animation-duration: 0.6s, 0.7s; /* Shake is quick */
+  animation-timing-function: ease-out, ease-in-out;
+  animation-delay: 0s, 0.3s; /* Shake starts after fade-in is partially done */
+}
+
+/* Error State Styling (e.g., general system error, invalid action) */
+.result-error {
+  border-color: #B00020; /* A deep, ominous red */
+  background-color: rgba(176, 0, 32, 0.15); /* Subtle error red background */
+  color: #E97777; /* Lighter, visible red text */
+  /* Apply fadeIn first, then failShake */
+  animation-name: fadeIn, failShake;
+  animation-duration: 0.6s, 0.7s;
+  animation-timing-function: ease-out, ease-in-out;
+  animation-delay: 0s, 0.3s;
+}
+
+
