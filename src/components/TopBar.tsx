@@ -34,7 +34,7 @@ export default function TopBar({ points, energy, setEnergy }: TopBarProps) {
         alignItems: 'center',
         width: '100%',
         height: 50,
-        background: 'rgb(33, 46, 58)',
+        backgroundColor: "#121015",
         backdropFilter: "blur(2px)",
         transition: "filter 0.3s ease",
         pointerEvents: "auto",

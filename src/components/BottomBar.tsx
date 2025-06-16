@@ -16,7 +16,7 @@ export default function BottomBar({ activeTab, setActiveTab }: { activeTab: stri
         width: '100%',
         position: 'fixed',
         bottom: 0,
-        background: 'rgb(33, 46, 58)',
+        backgroundColor: "#121015",
         borderTop: '1px solid rgb(255, 255, 255)',
         zIndex: 150,
       }}>
@@ -63,7 +63,7 @@ export default function BottomBar({ activeTab, setActiveTab }: { activeTab: stri
               fontSize: 12,
               fontWeight: 'lighter',
               color: activeTab === 'city' ? 'rgb(255, 255, 255)' : 'gray',
-              marginTop: -50,
+              marginTop: -30,
               textAlign: 'center',
             }}
           >
@@ -155,7 +155,7 @@ export default function BottomBar({ activeTab, setActiveTab }: { activeTab: stri
               fontSize: 12,
               fontWeight: 'lighter',
               color: activeTab === 'adventures' ? 'rgb(255, 255, 255)' : 'gray',
-              marginTop: -50,
+              marginTop: -30,
               textAlign: 'center',
             }}
           >
@@ -163,6 +163,6 @@ export default function BottomBar({ activeTab, setActiveTab }: { activeTab: stri
           </Placeholder>
         </div>
       </Button>
-    </div>
+    </div> 
   );
 }
