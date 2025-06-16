@@ -686,7 +686,7 @@ export default function HomePage() {
             animation: "fadeInUp 1s ease-out 0.6s backwards",
           }}
         >
-          "Не затримуй мене, мандрівнику. Обирай товар, або йди своєю дорогою..."
+          Не затримуй мене, мандрівнику. Обирай товар, або йди своєю дорогою...
         </p>
         {/* Контейнер для категорій товарів */}
         <div style={{ display: "flex", flexDirection: "column", gap: "40px",width: "100%", }}>
