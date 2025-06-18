@@ -413,6 +413,24 @@ export default function HomePage() {
     return [];
   };
 
+  // Функція для стекування однакових предметів
+  interface StackableInventoryItem extends InventoryItemType {
+    count: number;
+  }
+
+  const stackItems = (inventory: InventoryItemType[]): StackableInventoryItem[] => {
+    const itemStacks: Record<string, StackableInventoryItem> = {};
+    inventory.forEach((item: InventoryItemType) => {
+      const key = `${item.type}-${item.name}-${item.rarity}-${item.upgrade_level}`;
+      if (!itemStacks[key]) {
+        itemStacks[key] = { ...item, count: 1 }; // Додаємо поле `count`
+      } else {
+        itemStacks[key].count += 1; // Збільшуємо кількість у стеку
+      }
+    });
+    return Object.values(itemStacks); // Повертаємо масив об'єктів
+  };
+
   const toggleEquip = async (index: number) => {
     const selectedItem = inventory[index];
 
@@ -1510,14 +1528,16 @@ export default function HomePage() {
                 </div>
               </Card>
 
-                <h2 style={{
+                <h2
+                  style={{
                     fontSize: "1rem",
                     fontWeight: "bold",
                     marginTop: "50px",
                     marginBottom: "40px",
                     textAlign: "center",
-                    color: "#fff"
-                }}>
+                    color: "#fff",
+                  }}
+                >
                   ІНВЕНТАР
                 </h2>
 
@@ -1530,32 +1550,40 @@ export default function HomePage() {
                     margin: "0 auto",
                   }}
                 >
-                  {/* Повідомлення про порожній інвентар, якщо немає жодного предмета (не тільки неекипірованих) */}
+                  {/* Повідомлення про порожній інвентар */}
                   {inventory.length === 0 && (
-                    <p style={{
-                      fontSize: "1rem",
-                      fontWeight: "lighter",
-                      color: "#ccc",
-                      textAlign: "center",
-                      marginBottom: "20px",
-                      lineHeight: "1.4",
-                      fontFamily: "Arial, sans-serif",
-                      maxWidth: "100%",
-                      gridColumn: "1 / -1" // Розтягнути текст на всю ширину сітки
-                    }}>
+                    <p
+                      style={{
+                        fontSize: "1rem",
+                        fontWeight: "lighter",
+                        color: "#ccc",
+                        textAlign: "center",
+                        marginBottom: "20px",
+                        lineHeight: "1.4",
+                        fontFamily: "Arial, sans-serif",
+                        maxWidth: "100%",
+                        gridColumn: "1 / -1", // Розтягнути текст на всю ширину сітки
+                      }}
+                    >
                       Інвентар порожній — купіть предмети в магазині!
                     </p>
                   )}
 
-                  {/* Відображення неекипірованих предметів за допомогою нового компонента */}
-                  {unequippedItems.map((item, index) => (
+                  {/* Групування однакових предметів у стеки */}
+                  {stackItems(unequippedItems).map((item, index) => (
                     <InventoryItemSlot
-                      key={item.id || index}
+                      key={`${item.type}-${index}`} // Ключ базується на типі та індексі
                       item={item}
                       index={index}
                       fallbackIcon=""
                       onClick={() => {
-                        if (item) setSelectedItem({ ...item, mode: "inventory" });
+                        if (item) setSelectedItem({ 
+                          ...item, 
+                          mode: "inventory",
+                          damage: item.damage !== undefined ? String(item.damage) : undefined,
+                          defense: item.defense !== undefined ? String(item.defense) : undefined,
+                          strength: item.strength !== undefined ? String(item.strength) : undefined,
+                        });
                       }}
                       onEquipToggle={() => toggleEquip(index)}
                     />
@@ -2357,6 +2385,28 @@ export default function HomePage() {
                           border: "none",
                           fontSize: "0.7rem",
                           color: "rgb(0, 255, 98)",
+                          background: "rgba(0, 0, 0, 0)",
+                          borderRadius:20,
+                          marginTop: "-8px",
+                          marginBottom:"28px",
+                          cursor: "pointer",
+                          width: "100%",
+                        }}>
+                        ✨ ВИКОРИСТАТИ
+                      </button>
+                    )}
+                    {selectedItem.type === 'element' && (
+                      <button onClick={() => { 
+                        // Тут має бути ваша функція для використання предмету, наприклад handleUseItem
+                        // handleUseItem(selectedItem); 
+                        console.log("Використати предмет:", selectedItem.name); // Тимчасовий лог
+                        setSelectedItem(null); 
+                      }}
+                        style={{
+                          backgroundColor: "#444",
+                          border: "none",
+                          fontSize: "0.7rem",
+                          color: "rgb(156, 156, 156)",
                           background: "rgba(0, 0, 0, 0)",
                           borderRadius:20,
                           marginTop: "-8px",

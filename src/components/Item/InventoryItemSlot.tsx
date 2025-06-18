@@ -25,82 +25,76 @@ const InventoryItemCard: React.FC<InventoryItemCardProps> = ({
   fallbackIcon,
   onClick,
 }) => {
-  // Логіка визначення джерела зображення
-  const imageSrc =
-    item?.image && typeof item.image === "string"
+  const imageSrc = item?.image
+    ? typeof item.image === "string"
       ? item.image
-      : typeof item?.image === 'object' && item.image !== null && 'src' in item.image
-        ? item.image.src
-        : null; // null, якщо зображення відсутнє або неправильний формат
-
-  // Перевірка наявності предмета (хоча у твоєму map він завжди буде)
-  if (!item) {
-      // Можеш повернути пустий слот або щось інше, якщо цей компонент буде використовуватись для порожніх слотів
-      return (
-        <div style={{ /* Стилі для порожнього слоту */ }}>
-           {/* Можливо, fallbackIcon тут? */}
-        </div>
-      );
-  }
-
+      : "src" in item.image
+      ? item.image.src
+      : null
+    : null;
 
   return (
     <div
-      // key тут краще використовувати у батьківському компоненті в map
       onClick={onClick}
-      className={`relative flex flex-col items-center bg-white/[0.05] rounded-lg p-2 animate-fadeIn opacity-0 rarity-${item.rarity?.toLowerCase()}`}
+      className={`relative flex flex-col items-center bg-white/[0.05] rounded-lg p-2 rarity-${item.rarity?.toLowerCase()}`}
       style={{
         border: "1px solid rgba(255, 255, 255, 0.07)",
         borderRadius: "10px",
-        padding: "20px", // Задаємо внутрішній відступ для картки
-        // animationDelay та інші анімаційні стилі можна прокинути через пропси або залишити тут
-        // animation: "fadeIn 0.7s ease forwards", // Анімацію можна залишити тут
+        padding: "20px",
+        position: "relative",
       }}
-      // Якщо потрібен загальний клік по картці (наприклад, для детального перегляду), додай onClick сюди
-      // onClick={() => alert(`Клік по ${item.name}`)}
     >
-      {/* Контейнер для зображення/іконки та мітки рідкості */}
-      <div style={{
-        width: "100%", // Ширина контейнера зображення
-        aspectRatio: "1 / 1", // Співвідношення сторін 1:1
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        fontSize: "2rem", // Розмір іконки/тексту, якщо немає зображення
-        color: item ? "#fff" : "#777",
-        marginBottom: "10px",
-        position: "relative", // Для позиціонування мітки рідкості
-      }}>
-        {/* Мітка рідкості */}
+      <div
+        style={{
+          width: "100%",
+          aspectRatio: "1 / 1",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          fontSize: "2rem",
+          color: item ? "#fff" : "#777",
+          position: "relative",
+        }}
+      >
         {item.rarity && (
-          <div className="rarity-label">
-            {item.rarity.toUpperCase()}
-          </div>
+          <div className="rarity-label">{item.rarity.toUpperCase()}</div>
         )}
-
-        {/* Зображення предмета або альтернатива */}
+        {/* Зображення предмета */}
         {imageSrc ? (
           <img
             src={imageSrc}
             alt={item.name || "Предмет"}
             className={`item-image rarity-border-${item.rarity?.toLowerCase()}`}
             style={{
-              backgroundColor: "rgba(255, 255, 255, 0.05)", // Фон зображення
-              padding: "10px", // Внутрішній відступ зображення
+              backgroundColor: "rgba(255, 255, 255, 0.05)",
               borderRadius: "10px",
-              // boxShadow: "rgba(0, 0, 0, 0.3) 0px 19px 38px, rgba(0, 0, 0, 0.22) 0px 15px 12px", // Тінь зображення
-              maxWidth: "90%", // Зображення не більше контейнера
-              maxHeight: "90%", // Зображення не більше контейнера
-              objectFit: "contain", // Масштабування зображення
+              maxWidth: "80%",
+              maxHeight: "80%",
+              objectFit: "contain",
             }}
           />
         ) : (
-          // Альтернатива, якщо немає зображення (назва або плейсхолдер)
-          <div style={{ textAlign: 'center' }}>
-            {item.name || "+"} {/* Відобразити назву або "+" */}
-          </div>
+          <div style={{ textAlign: "center" }}>{item.name || "+"}</div>
         )}
       </div>
+      {/* Відображення кількості предметів (якщо більше 1) */}
+      {item.count > 1 && (
+        <span
+          style={{
+            position: "absolute",
+            bottom: "8px",
+            right: "10px",
+            backgroundColor: "rgba(0,0,0,0.8)",
+            color: "#fff",
+            padding: "2px 6px",
+            borderRadius: "12px",
+            fontSize: "0.8rem",
+            fontWeight: "bold",
+          }}
+        >
+          x{item.count}
+        </span>
+      )}
     </div>
   );
 };
