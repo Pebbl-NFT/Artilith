@@ -29,6 +29,7 @@ const Shop: React.FC<ShopProps> = ({ WeaponItems, ShieldItems, ScrollItems, setS
         <div
           style={{
             display: "flex",
+            width: "100%",
             flexWrap: "wrap",
             gap: "15px",
             justifyContent: "center",
@@ -60,6 +61,7 @@ const Shop: React.FC<ShopProps> = ({ WeaponItems, ShieldItems, ScrollItems, setS
           style={{
             display: "flex",
             flexWrap: "wrap",
+            width: "100%",
             gap: "15px",
             justifyContent: "center",
           }}
@@ -90,6 +92,7 @@ const Shop: React.FC<ShopProps> = ({ WeaponItems, ShieldItems, ScrollItems, setS
           style={{
             display: "flex",
             flexWrap: "wrap",
+            width: "100%",
             gap: "15px",
             justifyContent: "center",
           }}
@@ -123,11 +126,8 @@ const Shop: React.FC<ShopProps> = ({ WeaponItems, ShieldItems, ScrollItems, setS
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
-        justifyContent: "flex-start",
-        width: "100%",
         backgroundColor: "#121015", // Темний фон для магазину
         color: "#e0dcca", // Світлий текст
-        minHeight: "100vh",
         padding: "20px",
       }}
     >
@@ -151,8 +151,9 @@ const Shop: React.FC<ShopProps> = ({ WeaponItems, ShieldItems, ScrollItems, setS
         style={{
           display: "flex",
           justifyContent: "center",
-          gap: "20px",
+          gap: "10px",
           marginBottom: "20px",
+          width: "100%",
         }}
       >
         <button

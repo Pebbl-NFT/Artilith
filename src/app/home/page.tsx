@@ -776,16 +776,16 @@ export default function HomePage() {
                   backgroundPosition: 'top', // Центрувати зображення
                   height: '200px', // Зайняти всю висоту вікна
                   color: "#fff", // Текст навколо, щоб бути білішим на фоні
-                  marginTop: "40px", // Збільшено відступ зверху
+                  marginTop: "20px", // Збільшено відступ зверху
                 }}
               >
                 <h1
                 style={{
-                  fontSize: "2.5rem", // Збільшено для акценту
+                  fontSize: "1.6rem", // Збільшено для акценту
                   fontWeight: "bold",
                   marginBottom: "110px",
                   textAlign: "center",
-                  paddingTop: "0px", // Збільшено відступ зверху
+                  paddingTop: "20px", // Збільшено відступ зверху
                   paddingLeft: "55%", // Збільшено відступ зліва
                   color: "#fff",
                   textShadow: "2px 2px 4px rgba(0,0,0,0.7)", // Додано тінь для тексту
@@ -796,7 +796,7 @@ export default function HomePage() {
                 </h1>
                 <p
                   style={{
-                    fontSize: "0.9rem", // Трохи збільшено
+                    fontSize: "0.7rem", // Трохи збільшено
                     color: "#e0e0e0", // Світліший сірий
                     textAlign: "center",
                     marginBottom: "30px",
@@ -838,7 +838,7 @@ export default function HomePage() {
                     boxShadow: "0 8px 16px rgba(0,0,0,0.4)", // Більш виражена тінь
                   }}
                 >
-                  <div style={{ fontSize: "1.8rem", marginBottom: "10px", marginTop: "10px", fontWeight: "bold", color: "#FFD700" }}>
+                  <div style={{ fontSize: "1.6rem", marginBottom: "10px", marginTop: "10px", fontWeight: "bold", color: "#FFD700" }}>
                     ПОКРАЩЕННЯ СПОРЯДЖЕННЯ
                   </div>
                   {/* Секція вибору Предмета (Зброя або Щит) */}
