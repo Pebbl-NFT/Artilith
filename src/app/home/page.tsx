@@ -2406,7 +2406,7 @@ export default function HomePage() {
                           backgroundColor: "#444",
                           border: "none",
                           fontSize: "0.7rem",
-                          color: "rgb(156, 156, 156)",
+                          color: "rgb(0, 255, 98)",
                           background: "rgba(0, 0, 0, 0)",
                           borderRadius:20,
                           marginTop: "-8px",
