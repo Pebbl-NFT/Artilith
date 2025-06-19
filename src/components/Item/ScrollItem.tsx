@@ -12,4 +12,15 @@ export const ScrollItems = [
     price: 30,
     image: scroll01a.src,
   },
+  {
+    item_id: 1001,
+    type: "scroll",
+    rarity: 'rare',
+    name: "Рідкісний сувій",
+    description: "",
+    damage: 0,
+    defense: 0,
+    price: 30000,
+    image: scroll01a.src,
+  },
 ];

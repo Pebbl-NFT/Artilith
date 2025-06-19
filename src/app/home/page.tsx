@@ -302,75 +302,112 @@ export default function HomePage() {
       toast.success(`Вам зараховано + 5 🔷`);
   };
 
-  // Функція для визначення шансів успіху
-  function getEnchantChance(upgradeLevel: number): number {
-    if (upgradeLevel < 1) return 1.0; // 100%
-    if (upgradeLevel === 1) return 0.9; // 90%
-    if (upgradeLevel === 2) return 0.9; // 80%
-    if (upgradeLevel >= 3 && upgradeLevel < 4) return 0.6; // 60% (приклад)
-    if (upgradeLevel >= 4 && upgradeLevel < 5) return 0.5; // %
-    if (upgradeLevel >= 5 && upgradeLevel < 6) return 0.4; // %
-    if (upgradeLevel >= 6 && upgradeLevel < 7) return 0.3; // %
-    if (upgradeLevel >= 7 && upgradeLevel < 8) return 0.2; // %
-    if (upgradeLevel >= 8 && upgradeLevel < 9) return 0.091; // %
-    if (upgradeLevel >= 9 && upgradeLevel < 10) return 0.0585; // %
-    if (upgradeLevel >= 10 && upgradeLevel < 11) return 0.04; // %
-    if (upgradeLevel >= 11 && upgradeLevel < 12) return 0.027; // %
-    if (upgradeLevel >= 12 && upgradeLevel < 13) return 0.0173; // %
-    if (upgradeLevel >= 13 && upgradeLevel < 14) return 0.0116; // %
-    if (upgradeLevel >= 13 && upgradeLevel < 14) return 0.0077; // %
-    return 0; // не можна більше покращувати
+ function getEnchantChance(upgradeLevel: number): number {
+  if (upgradeLevel < 1) return 1.0; // 100%
+  if (upgradeLevel === 1) return 0.9; // 90%
+  if (upgradeLevel === 2) return 0.8; // 80% (виправлено з 0.9 на 0.8 згідно коментаря, якщо це малося на увазі)
+  if (upgradeLevel >= 3 && upgradeLevel < 4) return 0.6; // 60%
+  if (upgradeLevel >= 4 && upgradeLevel < 5) return 0.5; // 50%
+  if (upgradeLevel >= 5 && upgradeLevel < 6) return 0.4; // 40%
+  if (upgradeLevel >= 6 && upgradeLevel < 7) return 0.3; // 30%
+  if (upgradeLevel >= 7 && upgradeLevel < 8) return 0.2; // 20%
+  if (upgradeLevel >= 8 && upgradeLevel < 9) return 0.091; // 9.1%
+  if (upgradeLevel >= 9 && upgradeLevel < 10) return 0.0585; // 5.85%
+  if (upgradeLevel >= 10 && upgradeLevel < 11) return 0.04; // 4%
+  if (upgradeLevel >= 11 && upgradeLevel < 12) return 0.027; // 2.7%
+  if (upgradeLevel >= 12 && upgradeLevel < 13) return 0.0173; // 1.73%
+  if (upgradeLevel >= 13 && upgradeLevel < 14) return 0.0116; // 1.16%
+  // У твоєму оригінальному коді було дві однакові умови для 13-14, я вибрав останню
+  if (upgradeLevel >= 14 && upgradeLevel < 15) return 0.0077; // 0.77%
+  return 0; // не можна більше покращувати або шанс вкрай низький
+}
+
+const RARE_SCROLL_ITEM_ID = 1001; // ID рідкісного сувою, який захищає від поломки
+
+// Основна функція спроби покращення предмета
+async function tryUpgradeWeapon(
+  inventoryId: string, // ID запису предмета в таблиці 'inventory' Supabase
+  upgradeLevel: number,
+  scrollId: string, // ID запису сувою в таблиці 'inventory' Supabase
+  useProtectionItem: boolean // Чи використовується універсальний захисний предмет
+): Promise<{ result: "success" | "fail" | "broken" | "safe_fail" | "protected_fail" | "error"; newLevel?: number | null }> {
+  // 1. Отримуємо інформацію про використаний сувій з інвентарю
+  const { data: scrollData, error: scrollFetchError } = await supabase
+    .from("inventory")
+    .select("item_id")
+    .eq("id", scrollId)
+    .single();
+
+  if (scrollFetchError || !scrollData) {
+    console.error("Помилка при отриманні інформації про сувій або сувій не знайдено:", scrollFetchError?.message);
+    return { result: "error", newLevel: upgradeLevel };
   }
-  // Основна функція спроби прокачки предмета
-  async function tryUpgradeWeapon(
-    inventoryId: string,
-    upgradeLevel: number,
-    scrollId: string,
-    useProtectionItem: boolean
-  ) {
-    const currentChance = getEnchantChance(upgradeLevel);
-    const isSafeUpgrade = upgradeLevel < 4;
-    const isSuccess = Math.random() < currentChance;
 
-    // Видаляємо сувій
-    await supabase.from("inventory").delete().eq("id", scrollId);
+  // 2. Визначаємо, чи використано Рідкісний сувій
+  const isRareScrollUsed = scrollData.item_id === RARE_SCROLL_ITEM_ID;
 
-    if (isSuccess) {
-      await supabase
-        .from("inventory")
-        .update({ upgrade_level: upgradeLevel + 1 })
-        .eq("id", inventoryId);
-      return { result: "success", newLevel: upgradeLevel + 1 };
-    } else {
-      if (isSafeUpgrade) {
-        return { result: "safe_fail", newLevel: upgradeLevel };
-      }
-      if (useProtectionItem) {
-        return { result: "protected_fail", newLevel: upgradeLevel };
-      }
-      // зламався — видаляємо сам предмет
-      await supabase.from("inventory").delete().eq("id", inventoryId);
-      return { result: "broken", newLevel: null };
+  const currentChance = getEnchantChance(upgradeLevel);
+  const isSuccess = Math.random() < currentChance;
+
+  // 3. Видаляємо використаний сувій з інвентарю (незалежно від результату покращення)
+  const { error: deleteScrollError } = await supabase.from("inventory").delete().eq("id", scrollId);
+
+  if (deleteScrollError) {
+    console.error("Помилка при видаленні сувою:", deleteScrollError.message);
+    // Це може бути критична помилка, залежно від вашої логіки.
+    // Наразі, ми продовжуємо, але логуємо проблему.
+  }
+
+  if (isSuccess) {
+    // Успішне покращення
+    await supabase
+      .from("inventory")
+      .update({ upgrade_level: upgradeLevel + 1 })
+      .eq("id", inventoryId);
+    return { result: "success", newLevel: upgradeLevel + 1 };
+  } else {
+    // Покращення не вдалося
+    if (isRareScrollUsed) {
+      // Якщо використано Рідкісний сувій, предмет ніколи не ламається
+      return { result: "safe_fail", newLevel: upgradeLevel };
     }
-  }
 
-  interface UpgradableItem {
-    damage: number;
-    defense: number;
-  }
+    // Існуюча логіка безпечної невдачі для низьких рівнів (якщо предмет не "захищений" Рідкісним сувоєм)
+    const isSafeUpgradeBasedOnLevel = upgradeLevel < 4; // Перейменовано для уникнення конфлікту
+    if (isSafeUpgradeBasedOnLevel) {
+      return { result: "safe_fail", newLevel: upgradeLevel };
+    }
 
-  interface UpgradedStats {
-    damage: number;
-    defense: number;
-  }
+    // Існуюча логіка захисту за допомогою окремого захисного предмета (якщо предмет не "захищений" Рідкісним сувоєм)
+    if (useProtectionItem) {
+      return { result: "protected_fail", newLevel: upgradeLevel };
+    }
 
-  const getUpgradedStats = (base: UpgradableItem, level: number): UpgradedStats => {
-    // Наприклад: +1 damage і +10% defense за кожен рівень
-    return {
-      damage: base.damage + level,
-      defense: Math.round(base.defense * (1 + 0.1 * level)),
-    };
+    // Якщо нічого не врятувало, предмет ламається — видаляємо сам предмет
+    await supabase.from("inventory").delete().eq("id", inventoryId);
+    return { result: "broken", newLevel: null };
+  }
+}
+
+// --- Інтерфейси та допоміжні функції (без змін, залишаємо як є) ---
+
+interface UpgradableItem {
+  damage: number;
+  defense: number;
+}
+
+interface UpgradedStats {
+  damage: number;
+  defense: number;
+}
+
+const getUpgradedStats = (base: UpgradableItem, level: number): UpgradedStats => {
+  // Наприклад: +1 damage і +10% defense за кожен рівень
+  return {
+    damage: base.damage + level,
+    defense: Math.round(base.defense * (1 + 0.1 * level)),
   };
+};
 
   // Функція додавання предмета в інвентар
   const fetchInventory = async () => {
@@ -1646,7 +1683,7 @@ export default function HomePage() {
                 textAlign: "center", 
                 color: "#fff", 
                 lineHeight: "1" }}>
-                  В робробці
+                  В розбробці
               </h1>
             </div>
           </Placeholder>
@@ -2039,7 +2076,7 @@ export default function HomePage() {
     await updateUserPoints(String(userId), newPoints);
     setPoints(newPoints);
 
-    toast.success(`Ви розібрали ${selectedItem.name} і отримали ${dismantleReward} уламків!`);
+    toast.success(`Ви розібрали ${selectedItem.name} та отримали ${dismantleReward} уламків!`);
     await fetchInventory();
   }
 
@@ -2406,7 +2443,7 @@ export default function HomePage() {
                           backgroundColor: "#444",
                           border: "none",
                           fontSize: "0.7rem",
-                          color: "rgb(0, 255, 98)",
+                          color: "rgb(0, 255, 98)", 
                           background: "rgba(0, 0, 0, 0)",
                           borderRadius:20,
                           marginTop: "-8px",
