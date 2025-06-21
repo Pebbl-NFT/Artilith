@@ -58,12 +58,12 @@ if (specificScroll) {
 
 // --- КОНСТАНТИ ДЛЯ TON ---
 const TON_DROP_CHANCE_NORMAL = 0.05; // 5% для звичайних ворогів
-const TON_DROP_CHANCE_MINIBOSS = 0.25; // 25% для мінібосів
-const TON_DROP_CHANCE_BOSS = 0.45; // 45% для босів
+const TON_DROP_CHANCE_MINIBOSS = 0.26; // 26% для мінібосів
+const TON_DROP_CHANCE_BOSS = 0.6; // 60% для босів
 
 const TON_AMOUNT_NORMAL = 0.0001;
-const TON_AMOUNT_MINIBOSS = 0.003;
-const TON_AMOUNT_BOSS = 0.06;
+const TON_AMOUNT_MINIBOSS = 0.0005;
+const TON_AMOUNT_BOSS = 0.5;
 // --- КІНЕЦЬ КОНСТАНТ ДЛЯ TON ---
 
 
@@ -787,7 +787,7 @@ export default function BattlePage() {
         {/* Зона ворога */}
         <div style={{
             position: "absolute", // Налаштуйте відповідно до потреб вашого макета
-            top: "50%", // Залиште місце для таймера та інформації про етап
+            top: "45%", // Залиште місце для таймера та інформації про етап
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
@@ -904,7 +904,7 @@ export default function BattlePage() {
                   alignItems: "center",
                   gap: "20px", // Зменшений проміжок
                   // marginTop: "0px", // Видалено
-                  // marginBottom:0, // Видалено
+                  marginBottom:10, // Видалено
                   // animation: "fadeIn 0.6s ease forwards", // Вже на батьківському елементі
                   fontSize: "1em" // Скоригований розмір
                 }}
@@ -915,39 +915,7 @@ export default function BattlePage() {
                 <span>🛡️ {playerDEF}</span>
               </div>
             </div>
-             {/* Кнопка Показати/Сховати лог - розміщена тут для кращого UX під час бою */}
-            <Button
-                size="s"
-                mode="outline" // Або відповідний режим
-                style={{marginTop: '5px', marginBottom: '10px', borderColor: '#888', color: '#ccc'}}
-                onClick={() => setShowLog(!showLog)}
-                disabled={battleResult !== null} // Вимкнути, якщо бій закінчився
-            >
-                {showLog ? "Сховати лог" : "Показати лог"}
-            </Button>
         </div>
-        {/* Лог бою - з'являється над елементами керування гравця, коли активний */}
-        {showLog && !battleResult && ( // Показувати лог під час бою, лише якщо не в модальному вікні результатів
-            <Card style={{
-                position: 'absolute',
-                bottom: '140px', // Налаштуйте, щоб було над елементами керування гравця
-                width: 'calc(100% - 40px)',
-                maxWidth: '500px',
-                left: '50%',
-                transform: 'translateX(-50%)',
-                maxHeight: '100px', // Зменшена висота
-                overflowY: 'auto',
-                padding: '8px',
-                backgroundColor: 'rgba(0,0,0,0.7)',
-                border: '1px solid #444',
-                borderRadius: '5px',
-                fontSize: '0.8em',
-                zIndex: 15
-            }}>
-                {log.length === 0 ? <div>Лог порожній.</div> :
-                 log.map((entry, index) => <div key={index} style={{borderBottom: '1px dashed #333', paddingBottom: '2px', marginBottom: '2px'}}>{entry}</div>)}
-            </Card>
-        )}
       </div>
 
         {battleResult && (

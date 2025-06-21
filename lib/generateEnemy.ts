@@ -98,7 +98,7 @@ export const bosses: EnemyBase[] = [
   {
     name: 'Головний Лісовий Древень (Бос)',
     image: '/enemies/forest/boss1.png',
-    baseHealth: 2450,
+    baseHealth: 1450,
     baseDamage: 22,
     baseDefense: 32,
     baseCritChance: 0.22,
@@ -123,9 +123,9 @@ export function generateSequentialEnemy(
     template = baseEnemies[(encounterNumber - 1 + baseEnemies.length) % baseEnemies.length]; // Додано + baseEnemies.length
     enemyType = 'normal';
   }
-  let scaleFactor = 0.3 + playerLevel * (enemyType === 'boss' ? 0.33 : enemyType === 'miniBoss' ? 0.21 : 0.13);
+  let scaleFactor = 0.2 + playerLevel * (enemyType === 'boss' ? 0.33 : enemyType === 'miniBoss' ? 0.11 : 0.07);
   // Забезпечимо, що scaleFactor не надто малий, особливо на низьких рівнях
-  scaleFactor = Math.max(scaleFactor, 0.5); // Мінімальний множник, щоб вороги не були надто слабкими
+  scaleFactor = Math.max(scaleFactor, 0.3); // Мінімальний множник, щоб вороги не були надто слабкими
   const generatedEnemy: Enemy = {
     name: template.name,
     image: template.image,
