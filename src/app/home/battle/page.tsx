@@ -7,11 +7,11 @@ import { useSignal, initData } from "@telegram-apps/sdk-react";
 import { supabase } from "@/lib/supabaseClient";
 import { AllItems } from "@/components/Item/Items";
 import { getPlayerStats } from "@/utils/getPlayerStats";
-import { reduceEnergy } from "@/utils/reduceEnergy";
+import { reduceEnergyRPC } from "@/utils/reduceEnergy";
 import { Toaster, toast } from "react-hot-toast";
 import { generateSequentialEnemy, Enemy} from '@/lib/generateEnemy';
 import {addInventoryItem} from "@/hooks/useItemActions";
-import { ScrollItems } from "@/components/Item/ScrollItem";
+import { useEnergy } from '@/context/EnergyContext';
 
 interface DroppedItemInfo {
   item_id: number;
@@ -71,13 +71,13 @@ export default function BattlePage() {
   const initDataState = useSignal(initData.state);
   const userId = initDataState?.user?.id;
 
+  const { energy, spendEnergy } = useEnergy();
   const [playerStats, setPlayerStats] = useState({ health: 10, attack: 0, defense: 0 });
   const [playerHP, setPlayerHP] = useState(10);
   const [playerDEF, setPlayerDEF] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
 
   const [inventory, setInventory] = useState<any[]>([]);
-  const [energy, setEnergy] = useState(0);
   const hasShownToast = useRef(false);
 
   const [points, setPoints] = useState(0);
@@ -132,7 +132,6 @@ export default function BattlePage() {
       setEncounterNumber(1);
     } else if (data) {
       setPoints(data.points || 0);
-      setEnergy(data.energy || 0);
       setPlayerLevel(data.level || 1);
       setExperience(data.experience || 0);
       setEncounterNumber(data.current_encounter_number || 1);
@@ -465,34 +464,38 @@ export default function BattlePage() {
   // handleStartBattle: коли гравець натискає кнопку "Почати бій"
   const handleStartBattle = async () => {
     if (!userId) {
-      toast.error("Користувач не авторизований");
-      return;
-    }
-    // Перевірка, чи попередній бій повністю завершено (hasProcessedOutcome має бути true)
-    // або якщо це перший бій (battleResult === null)
-    if (battleResult !== null && !hasProcessedOutcome.current) {
-        toast.error("Зачекайте, попередній бій ще обробляється.");
+        toast.error("Користувач не авторизований");
         return;
     }
-    if (energy < 1) {
-      toast.error("Недостатньо енергії ⚡");
-      return;
-    }
+
     const energyCost = 1;
-    const success = await reduceEnergy(userId, energyCost);
-    if (success) {
-      setEnergy(prev => prev - energyCost);
-      // Скидання станів для нового бою
-      hasProcessedOutcome.current = false; // Готовність до обробки наступного результату
-      setBattleResult(null);             // Немає результату на початку бою
-      setLog([`Бій розпочато! Етап: ${encounterNumber}`]);
-      setShowPreBattle(false);
-      setCanAttack(true);
-      startTurnTimer();
-    } else {
-      // reduceEnergy вже має показувати помилку
+    
+    // Тепер 'energy' береться з нашого глобального хука useEnergy і завжди актуальне!
+    if (energy < energyCost) {
+        toast.error("Недостатньо енергії ⚡");
+        return;
     }
-  };
+
+    // Викликаємо функцію для витрати енергії з нашого глобального хука.
+    // Вона сама оновить стан і зробить запит до бази даних.
+    const success = await spendEnergy(energyCost);
+
+    if (success) {
+        // Нам більше не потрібно оновлювати стан вручну!
+        // const setEnergy(prev => prev - energyCost); // <-- ЦЕЙ РЯДОК БІЛЬШЕ НЕ ПОТРІБЕН
+
+        // Скидання станів для нового бою
+        hasProcessedOutcome.current = false;
+        setBattleResult(null);
+        setLog([`Бій розпочато! Етап: ${encounterNumber}`]);
+        setShowPreBattle(false);
+        setCanAttack(true);
+        startTurnTimer();
+    } else {
+        // spendEnergy вже має показувати помилку, якщо щось не так
+        toast.error("Не вдалося списати енергію. Спробуйте ще раз.");
+    }
+};
 
   function calculateReward(enemy: Enemy, pLevel: number): { rewardPoints: number; rewardExp: number; droppedItems: DroppedItemInfo[]; droppedTon: number } {
     if (!enemy) return { rewardPoints: 0, rewardExp: 0, droppedItems: [], droppedTon: 0 };

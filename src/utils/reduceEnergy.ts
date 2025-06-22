@@ -1,29 +1,14 @@
-// src/utils/reduceEnergy.ts
 import { supabase } from "@/lib/supabaseClient";
 
-export const reduceEnergy = async (userId: string | number, amount: number = 1) => {
-    const { data: user, error: fetchError } = await supabase
-      .from("users")
-      .select("energy")
-      .eq("id", userId)
-      .single();
+export const reduceEnergyRPC = async (userId: string, amount: number = 1): Promise<boolean> => {
+    const { data, error } = await supabase.rpc('reduce_user_energy', {
+        user_id_param: userId,
+        amount_param: amount
+    });
 
-  if (fetchError || !user) {
-    console.error("Помилка при отриманні енергії:", fetchError?.message);
-    return false;
-  }
-
-  const newEnergy = Math.max(user.energy - amount, 0);
-
-  const { error: updateError } = await supabase
-    .from("users")
-    .update({ energy: newEnergy })
-    .eq("id", userId);
-
-  if (updateError) {
-    console.error("Помилка при збереженні нової енергії:", updateError.message);
-    return false;
-  }
-
-  return true;
+    if (error) {
+        console.error("Помилка при виклику RPC reduce_user_energy:", error.message);
+        return false;
+    }
+    return data;
 };
