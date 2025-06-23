@@ -43,7 +43,7 @@ type AdventureAction =
 // --- 2. ОНОВЛЕНИЙ РЕДЬЮСЕР ---
 const MIMIC_ENEMY_TEMPLATE: Enemy = {
     name: 'Мімік!',
-    image: '/enemies/special/mimic.png',
+    image: '/enemies/special/mimic1.png',
     type: 'miniBoss',
     maxHealth: 150,
     damage: 15,

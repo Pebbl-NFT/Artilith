@@ -28,6 +28,27 @@ const baseEnemies = [
     { name: 'Лісовий розвідник', image: '/enemies/forest/forestmonster2.png', baseHealth: 35, baseDamage: 2, baseDefense: 3, baseCritChance: 0.05, baseMissChance: 0.1 },
     { name: 'Лісовий розвідник', image: '/enemies/forest/forestmonster3.png', baseHealth: 40, baseDamage: 3, baseDefense: 4, baseCritChance: 0.05, baseMissChance: 0.1 },
     { name: 'Лісовий розвідник', image: '/enemies/forest/forestmonster4.png', baseHealth: 50, baseDamage: 4, baseDefense: 5, baseCritChance: 0.05, baseMissChance: 0.1 },
+    // Роль: "Танк" - багато здоров'я та броні, але низька атака.
+    { 
+        name: 'Моховик-Душитель', 
+        image: '/enemies/forest/moss-strangler.png', // Потрібно додати це зображення
+        baseHealth: 120, // Високе здоров'я
+        baseDamage: 2,   // Низька атака
+        baseDefense: 15,  // Висока броня
+        baseCritChance: 0.02, 
+        baseMissChance: 0.15 
+    },
+
+    // Роль: "Скляна гармата" - висока атака, але мало здоров'я та броні.
+    { 
+        name: 'Шипохвіст', 
+        image: '/enemies/forest/spiketail.png', // Потрібно додати це зображення
+        baseHealth: 30,  // Низьке здоров'я
+        baseDamage: 12,  // Висока атака
+        baseDefense: 0,   // Немає броні
+        baseCritChance: 0.10, 
+        baseMissChance: 0.05 
+    },
     { name: 'Лісовий Захисник', image: '/enemies/forest/forestmonster5.png', baseHealth: 60, baseDamage: 5, baseDefense: 30, baseCritChance: 0.05, baseMissChance: 0.1 },
     { name: 'Лісовий Боєць', image: '/enemies/forest/forestmonster6.png', baseHealth: 85, baseDamage: 6, baseDefense: 2, baseCritChance: 0.05, baseMissChance: 0.1 },
 ];
