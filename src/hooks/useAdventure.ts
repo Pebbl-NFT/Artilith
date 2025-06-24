@@ -3,7 +3,7 @@ import { useReducer, useCallback } from 'react';
 import { generateStage, StageContent, Enemy } from '@/game/adventureEngine';
 import { getPlayerStats } from '@/utils/getPlayerStats';
 
-// --- 1. ОНОВЛЕННЯ СТАНІВ ТА ДІЙ ---
+// --- 1. СТАНИ ТА ДІЇ ---
 type AdventureStatus = 'loading' | 'pre_stage' | 'in_battle' | 'event' | 'post_encounter';
 
 type EncounterResult = 
@@ -40,10 +40,10 @@ type AdventureAction =
     | { type: 'RESOLVE_CHEST_EVENT'; payload: { choice: 'open' | 'leave' } }
     | { type: 'NEXT_STAGE' };
 
-// --- 2. ОНОВЛЕНИЙ РЕДЬЮСЕР ---
+// --- 2. РЕДЬЮСЕР ---
 const MIMIC_ENEMY_TEMPLATE: Enemy = {
     name: 'Мімік!',
-    image: '/enemies/special/mimic1.png',
+    image: '/enemies/special/mimic.png', // Потрібно додати це зображення
     type: 'miniBoss',
     maxHealth: 150,
     damage: 15,
@@ -100,7 +100,8 @@ function adventureReducer(state: AdventureState, action: AdventureAction): Adven
             
             const newState = { ...state, isPlayerTurn: false, enemy: { ...state.enemy, currentHP: playerAttackResult.newHealth, currentDEF: playerAttackResult.newDefense } };
             
-            if (!newState.enemy.stats) return newState;
+            if (!newState.enemy.stats) return newState; // Захист від null
+            
             const enemyAttackResult = calculateDamage(newState.enemy.stats.damage, newState.player.currentDEF, newState.player.currentHP);
             if (enemyAttackResult.newHealth <= 0) {
                 return { ...newState, status: 'post_encounter', encounterResult: { type: 'battle', result: 'lose' }, player: { ...newState.player, currentHP: 0 } };
@@ -164,14 +165,37 @@ export function useAdventure() {
 
     const [state, dispatch] = useReducer(adventureReducer, initialState);
 
-    const initialize = useCallback((stageNumber: number, inventory: any[], playerLevel: number) => dispatch({ type: 'INITIALIZE', payload: { stageNumber, inventory, playerLevel } }), []);
-    const startEncounter = useCallback(() => dispatch({ type: 'START_ENCOUNTER' }), []);
-    const playerAttack = useCallback(() => dispatch({ type: 'PLAYER_ATTACK' }), []);
-    const nextStage = useCallback(() => dispatch({ type: 'NEXT_STAGE' }), []);
-    const escapeBattle = useCallback(() => dispatch({ type: 'ESCAPE_BATTLE' }), []);
-    const tickTimer = useCallback(() => dispatch({ type: 'TICK_TIMER' }), []);
-    const timeUp = useCallback(() => dispatch({ type: 'TIME_UP' }), []);
-    const resolveChestEvent = useCallback((choice: 'open' | 'leave') => dispatch({ type: 'RESOLVE_CHEST_EVENT', payload: { choice } }), []);
+    const initialize = useCallback((stageNumber: number, inventory: any[], playerLevel: number) => {
+        dispatch({ type: 'INITIALIZE', payload: { stageNumber, inventory, playerLevel } });
+    }, []);
+
+    const startEncounter = useCallback(() => {
+        dispatch({ type: 'START_ENCOUNTER' });
+    }, []);
+    
+    const playerAttack = useCallback(() => {
+        dispatch({ type: 'PLAYER_ATTACK' });
+    }, []);
+
+    const nextStage = useCallback(() => {
+        dispatch({ type: 'NEXT_STAGE' });
+    }, []);
+
+    const escapeBattle = useCallback(() => {
+        dispatch({ type: 'ESCAPE_BATTLE' });
+    }, []);
+
+    const tickTimer = useCallback(() => {
+        dispatch({ type: 'TICK_TIMER' });
+    }, []);
+
+    const timeUp = useCallback(() => {
+        dispatch({ type: 'TIME_UP' });
+    }, []);
+    
+    const resolveChestEvent = useCallback((choice: 'open' | 'leave') => {
+        dispatch({ type: 'RESOLVE_CHEST_EVENT', payload: { choice } });
+    }, []);
 
     return { state, initialize, startEncounter, playerAttack, nextStage, escapeBattle, tickTimer, timeUp, resolveChestEvent };
 }
