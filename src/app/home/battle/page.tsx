@@ -74,10 +74,18 @@ const styles: { [key: string]: CSSProperties } = {
         fontSize: 24,
         zIndex: 100,
         color: '#fff',
-    }
+    },
+    damageTaken: {
+        animation: 'flash-red 0.5s ease-out'
+    },
 };
 
 // --- ІНТЕРФЕЙСИ (РОЗШИРЕНО) ---
+interface CombatOutcome {
+    type: 'COMBAT_TURN';
+    player_hp_change: number;
+    enemy_hp_change: number;
+}
 interface PlayerStats {
     health: number;
     attack: number;
@@ -98,6 +106,7 @@ type Outcome =
     | { type: 'REWARD'; item: 'points' | 'atl_balance'; amount: number }
     | { type: 'ITEM'; item_id: number; item_name: string }
     | { type: 'BATTLE'; enemy: Enemy }
+    | { type: 'COMBAT_TURN'; player_hp_change: number; enemy_hp_change: number; }
     | null;
 interface AIResponse {
     story: string;
@@ -108,25 +117,33 @@ interface PlayerData {
     level: number;
     character_class: string;
     points: number;
+    health: number;
+    attack: number;
+    defense: number;
+    currentHP: number;
 }
 
 const PlayerStatusBar = ({ playerData }: { playerData: PlayerData | null }) => {
+    const [isDamaged, setIsDamaged] = useState(false);
+
+    useEffect(() => {
+        if (playerData) {
+            setIsDamaged(true);
+            const timer = setTimeout(() => setIsDamaged(false), 500);
+            return () => clearTimeout(timer);
+        }
+    }, [playerData?.currentHP]);
+
     if (!playerData) return null;
 
     return (
         <div style={styles.playerStatusContainer}>
-            <div style={styles.playerStat}>
-                <span>❤️</span>
-                <span>{playerData.currentHP} / {playerData.health}</span>
+            <div style={{...styles.playerStat, ...(isDamaged && { className: 'damage-taken' }) }}>
+                <span className={isDamaged ? 'damage-taken' : ''}>❤️</span>
+                <span className={isDamaged ? 'damage-taken' : ''}>{playerData.currentHP} / {playerData.health}</span>
             </div>
-            <div style={styles.playerStat}>
-                <span>🗡️</span>
-                <span>{playerData.attack}</span>
-            </div>
-            <div style={styles.playerStat}>
-                <span>🛡️</span>
-                <span>{playerData.defense}</span>
-            </div>
+            <div style={styles.playerStat}><span>🗡️</span><span>{playerData.attack}</span></div>
+            <div style={styles.playerStat}><span>🛡️</span><span>{playerData.defense}</span></div>
         </div>
     );
 };
@@ -145,6 +162,7 @@ export default function TextAdventurePage() {
     const [isLoading, setIsLoading] = useState<boolean>(true);
     const [playerData, setPlayerData] = useState<PlayerData | null>(null);
     const [chatHistory, setChatHistory] = useState<any[]>([]);
+    const combatChoices = ["🗡️ Атакувати", "🛡️ Захищатись", "🏃 Втекти"];
 
     // --- Завантажуємо дані гравця ---
     useEffect(() => {
@@ -180,9 +198,15 @@ export default function TextAdventurePage() {
     // --- Формуємо початковий промпт ---
     useEffect(() => {
         if (playerData && chatHistory.length === 0) {
-            const initialSystemPrompt = `Act as a dark fantasy RPG dungeon master. Your response must be ONLY a JSON object like {"story": "...", "choices": ["..."], "outcome": ...}.
-            The player character is a Level ${playerData.level} ${playerData.character_class} with ${playerData.currentHP}/${playerData.health} HP, ${playerData.attack} ATK, ${playerData.defense} DEF.
-            Take their stats into account when generating challenges and describing outcomes. Start the story at a crossroad in a dark forest.`;
+            const initialSystemPrompt = `Act as a dark fantasy RPG dungeon master. Your response must be ONLY a JSON object like {"story": "...", "choices": ["...", "..."], "outcome": ...}.
+            The "outcome" field is crucial.
+            Possible outcomes:
+            - Reward: {"type": "REWARD", "item": "points", "amount": 20}
+            - Initiate Battle: {"type": "BATTLE", "enemy": {"name": "Goblin Scout", "health": 30, "attack": 5}}
+            - Combat Turn: {"type": "COMBAT_TURN", "player_hp_change": -5, "enemy_hp_change": -10} (use negative for damage)
+            - No special outcome: null
+            The player is a Level ${playerData.level} ${playerData.character_class} with ${playerData.currentHP}/${playerData.health} HP, ${playerData.attack} ATK, ${playerData.defense} DEF.
+            Start the story at a crossroad in a dark forest.`;
             
             const initialHistory = [
                 { role: "user", parts: [{ text: initialSystemPrompt }] },
@@ -203,8 +227,30 @@ export default function TextAdventurePage() {
             setEnemy(outcome.enemy);
             setIsInCombat(true);
             setStory(prevStory => `${prevStory}\n\n**Бій починається!** Перед вами ${outcome.enemy.name} (❤️${outcome.enemy.health}).`);
-            setChoices(["🗡️ Атакувати", "🛡️ Захищатись", "🏃 Втекти"]);
-            return; // Виходимо, щоб не показувати сповіщення про нагороду
+            setChoices(combatChoices);
+            return;
+        }
+
+        if (outcome.type === 'COMBAT_TURN') {
+            const newPlayerHP = Math.max(0, playerData.currentHP + outcome.player_hp_change);
+            const newEnemyHP = Math.max(0, enemy ? enemy.health + outcome.enemy_hp_change : 0);
+            
+            setPlayerData(prev => prev ? { ...prev, currentHP: newPlayerHP } : null);
+            setEnemy(prev => prev ? { ...prev, health: newEnemyHP } : null);
+            
+            // Перевірка на завершення бою
+            if (newEnemyHP <= 0) {
+                toast.success(`Ви перемогли ${enemy?.name}!`);
+                setIsInCombat(false);
+                setEnemy(null);
+                // AI має надати варіанти для дослідження
+            } else if (newPlayerHP <= 0) {
+                toast.error("Вас перемогли...");
+                setIsInCombat(false);
+                setEnemy(null);
+                // TODO: Логіка поразки (повернення на старт і т.д.)
+            }
+            return;
         }
         
         toast.loading('Оновлення прогресу...');
@@ -220,10 +266,23 @@ export default function TextAdventurePage() {
                 if (error) throw error;
                 successMessage = `Отримано: ${outcome.amount} ${outcome.item === 'points' ? '🪨' : '🪙'}!`;
             }
-            // TODO: Додати логіку для outcome.type === 'ITEM'
+
+            if (outcome.type === 'ITEM') {
+                const { error } = await supabase
+                    .from('inventory')
+                    .insert({ 
+                        user_id: String(userId), 
+                        item_id: outcome.item_id,
+                        equipped: false, // Нові предмети ніколи не екіпіровані
+                        upgrade_level: 0
+                    });
+                if (error) throw error;
+                
+                successMessage = `Ви знайшли: ${outcome.item_name}!`;
+            }
 
             toast.dismiss();
-            toast.success(successMessage);
+            toast.success(successMessage, { icon: '✨' });
         } catch (error) {
             toast.dismiss();
             toast.error("Помилка збереження прогресу.");
@@ -232,20 +291,21 @@ export default function TextAdventurePage() {
     }, [userId, playerData]);
 
     const handleChoice = useCallback(async (choice: string) => {
-        if (chatHistory.length === 0) {toast.error("Історія ще не завантажена."); return;}
-        if (!playerData) {toast.error("Дані гравця ще не завантажені."); return;}
+        if (!playerData || chatHistory.length === 0) return;
+
+        // --- Перевірка та списання енергії для дій у бою ---
         if (isInCombat) {
             if (energy < 1) {
                 toast.error("Недостатньо енергії для дії! ⚡");
-                return; // Зупиняємо дію, якщо немає енергії
+                return;
             }
-            // Списуємо енергію ПЕРЕД відправкою запиту
             const energySpent = await spendEnergy(1);
             if (!energySpent) {
                 toast.error("Не вдалося списати енергію.");
-                return; // Зупиняємо, якщо сталася помилка
+                return;
             }
         }
+        
         setIsLoading(true);
 
         const promptText = `My character stats: HP ${playerData.currentHP}/${playerData.health}, ATK ${playerData.attack}, DEF ${playerData.defense}. My choice is: "${choice}".`;
@@ -272,7 +332,13 @@ export default function TextAdventurePage() {
                 const parsedResponse: AIResponse = JSON.parse(cleanJsonText);
                 
                 setStory(parsedResponse.story);
-                setChoices(parsedResponse.choices);
+                
+                if (parsedResponse.choices && parsedResponse.choices.length > 0) {
+                    setChoices(parsedResponse.choices);
+                } else if (isInCombat) {
+                    setChoices(combatChoices);
+                }
+                
                 setChatHistory(prev => [...prev, { role: "model", parts: [{ text: cleanJsonText }] }]);
                 
                 if (parsedResponse.outcome) {
@@ -280,33 +346,37 @@ export default function TextAdventurePage() {
                 } else if (isInCombat) {
                     setIsInCombat(false);
                     setEnemy(null);
+                    if (!parsedResponse.choices || parsedResponse.choices.length === 0) {
+                        setChoices(["Йти далі"]);
+                    }
                 }
-            } else {
-                throw new Error("Invalid response structure from AI.");
-            }
+            } else { throw new Error("Invalid response structure from AI."); }
         } catch (error) {
             console.error("Помилка при взаємодії з AI:", error);
             setStory("Темрява згущується... Спробуй зробити інший вибір. (Помилка: " + (error as Error).message + ")");
         } finally {
             setIsLoading(false);
         }
-    }, [chatHistory, userId, playerData, isInCombat, enemy, energy, spendEnergy, processOutcome]);
+    }, [chatHistory, playerData, isInCombat, enemy, energy, spendEnergy, processOutcome]);
+
+    useEffect(() => {
+        if (!isInCombat && playerData && playerData.currentHP < playerData.health) {
+            setPlayerData(prev => prev ? { ...prev, currentHP: prev.health } : null);
+            toast.success("Щось змінилось!", { icon: '✨' });
+        }
+    }, [isInCombat]);
+
 
     return (
         <div style={styles.pageContainer}>
-            <Toaster position="top-center" />
-            {isLoading && (
-                <div style={styles.loadingOverlay as React.CSSProperties}><span>Доля вирішується...</span></div>
-            )}
-
+             <Toaster position="top-center" />
+            {isLoading && ( <div style={styles.loadingOverlay as React.CSSProperties}><span>Доля вирішується...</span></div> )}
             <main style={styles.storyContainer}>
                 <div style={styles.storyContent}>
                     <ReactMarkdown>{story}</ReactMarkdown>
                 </div>
             </main>
-            
             <PlayerStatusBar playerData={playerData} />
-
             <footer style={styles.actionsContainer}>
                 {choices.map((choice, index) => (
                     <button key={index} style={styles.actionButton} onClick={() => handleChoice(choice)} disabled={isLoading || choices.length === 0}>
@@ -314,6 +384,16 @@ export default function TextAdventurePage() {
                     </button>
                 ))}
             </footer>
+             {/* Додаємо стилі для анімації в DOM */}
+            <style>{`
+                @keyframes flash-red {
+                    0% { color: #ff4747; transform: scale(1.1); }
+                    100% { color: #fff; transform: scale(1); }
+                }
+                .damage-taken {
+                    animation: flash-red 0.5s ease-out;
+                }
+            `}</style>
         </div>
     );
 }
