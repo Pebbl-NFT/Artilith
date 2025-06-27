@@ -11,6 +11,7 @@ export const DropItems = [
     defense: 0,
     price: 500,
     image: ton.src,
+    stackable: true,
   },
   {
     item_id: 701,
@@ -22,5 +23,6 @@ export const DropItems = [
     defense: 0,
     price: 2500,
     image: ton.src,
+    stackable: true,
   },
 ];

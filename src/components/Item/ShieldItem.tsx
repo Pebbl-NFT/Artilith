@@ -12,6 +12,7 @@ export const ShieldItems = [
       defense: 8,
       price: 65,
       image: shield01a.src,
+      stackable: false,
     },
     {
       item_id: 100012,
@@ -23,6 +24,7 @@ export const ShieldItems = [
       defense: 9,
       price: 165,
       image: shield01a.src,
+      stackable: false,
     },
     {
       item_id: 100013,
@@ -34,6 +36,7 @@ export const ShieldItems = [
       defense: 10,
       price: 650, 
       image: shield01a.src,
+      stackable: false,
     },
     {
       item_id: 10002,
@@ -45,6 +48,7 @@ export const ShieldItems = [
       defense: 12,
       price: 1600,
       image: shield01b.src,
+      stackable: false,
     },
     {
       item_id: 100021,
@@ -56,6 +60,7 @@ export const ShieldItems = [
       defense: 13,
       price: 7700,
       image: shield01b.src,
+      stackable: false,
     },
     {
       item_id: 100022,
@@ -67,5 +72,6 @@ export const ShieldItems = [
       defense: 14,
       price: 19000,
       image: shield01b.src,
+      stackable: false,
     },
   ]; 

@@ -1,25 +1,24 @@
+// src/hooks/useItemActions.ts
 import { supabase } from "@/lib/supabaseClient";
 
-export const addInventoryItem = async (userId: string, itemId: number, itemName: string) => {
-  const { error } = await supabase
-    .from("inventory")
-    .insert([{ user_id: userId, item_id: itemId, item: itemName }]);
+/**
+ * Додає предмет до інвентаря гравця, викликаючи єдину серверну функцію.
+ */
+export async function addInventoryItem(userId: string, itemId: number): Promise<boolean> {
+    if (!userId || !itemId) {
+        console.error("User ID or Item ID is missing");
+        return false;
+    }
 
-  return !error;
-};
+    const { error } = await supabase.rpc('add_item_to_inventory', {
+        p_user_id: userId,
+        p_item_id: itemId
+    });
 
-export const toggleEquipItem = async (userId: string, inventory: any[], selectedItemId: number, selectedType: string) => {
-  const itemsToUnequip = inventory.filter(i => i.type === selectedType && i.equipped);
-  const idsToUnequip = itemsToUnequip.map(i => i.id);
+    if (error) {
+        console.error("Error calling add_item_to_inventory:", error);
+        return false;
+    }
 
-  if (idsToUnequip.length > 0) {
-    await supabase.from("inventory").update({ equipped: false })
-      .eq("user_id", userId)
-      .in("id", idsToUnequip);
-  }
-
-  await supabase.from("inventory")
-    .update({ equipped: true })
-    .eq("user_id", userId)
-    .eq("id", selectedItemId);
-};
+    return true;
+}

@@ -122,14 +122,20 @@ export function Fountain() {
 
     // <-- НАШІ ЗМІНИ: Оновлено всю JSX структуру
     return (
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px', width: '100%', padding: '0 16px', boxSizing: 'border-box' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px', width: '100%', padding: '0 16px', boxSizing: 'border-box', }}>
             
             {/* --- БЛОК ДЖЕРЕЛА ДАРІВ --- */}
             <Placeholder
-                header="Джерело Дарів"
-                description="Раз на день духи дарують сміливцям цінні ресурси. Випробуй свою удачу!"
-                style={{ width: '100%', marginTop: '20px' }}
-            >
+                style={{ width: '100%', marginTop: '50px', borderRadius: '8px', padding: '16px', backgroundColor: 'rgba(92, 92, 92, 0.1)', boxShadow: '0 2px 4px rgba(15, 15, 15, 0.1)' }}
+            >   
+                <h1 style={{ margin: '16px 0', fontSize: '24px', textAlign: 'center' }}>
+                    Джерело Дарів
+                </h1>
+                <div style={{ color: '#999', marginBottom: '16px', fontFamily: 'monospace' }}>
+                    Отримуйте щоденні нагороди від духів джерела. 
+                    <br />
+                    Ви можете отримувати нагороди кожні 24 години.
+                </div>
                 <Image
                     alt="Джерело Дарів"
                     src={victim}
@@ -137,6 +143,9 @@ export function Fountain() {
                     height={96}
                     style={{ marginBottom: '16px' }}
                 />
+                <div style={{ color: '#999', marginBottom: '16px', fontFamily: 'monospace' }}>
+                    Нагорода: 10-500🪨 | 1-25⚡ | 0-5🪙 | 0-10💎
+                </div>
                 <Button
                     size="l"
                     stretched
@@ -150,10 +159,14 @@ export function Fountain() {
 
             {/* --- БЛОК ПОДОРОЖІ (БІЙ) --- */}
             <Placeholder
-                 header="Подорож у невідоме"
-                 description="Вирушайте в подорож, щоб здобути досвід та славу."
-                 style={{ width: '100%'}}
+                style={{ width: '100%', marginTop: '10px', borderRadius: '8px', padding: '16px', backgroundColor: 'rgba(92, 92, 92, 0.1)', boxShadow: '0 2px 4px rgba(15, 15, 15, 0.1)' }}
             >
+                <h1 style={{ margin: '16px 0', fontSize: '24px', textAlign: 'center' }}>
+                    ⚔️ Подорож ⚔️
+                </h1>
+                <div style={{ color: '#999', marginBottom: '16px', fontFamily: 'monospace' }}>
+                    Відправляйтесь у подорож, виконуйте завдання гільдії, отримуйте винагороди.
+                </div>
                 <Image
                     alt="Подорож"
                     src={travel}
@@ -161,8 +174,11 @@ export function Fountain() {
                     height={96}
                     style={{ marginBottom: '16px' }}
                 />
+                <div style={{ color: '#999', marginBottom: '0px', fontFamily: 'monospace' }}>
+                    Нагорода: +🪨 | +🔷 | +🪙 | +💎
+                </div>
                 <div style={{ color: '#999', marginBottom: '16px', fontFamily: 'monospace' }}>
-                    Нагорода: +🪨 +🔷 | Ціна: -1⚡
+                    Ціна в бою: -⚡
                 </div>
                 <Button
                     size="l"

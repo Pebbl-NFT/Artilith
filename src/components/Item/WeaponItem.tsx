@@ -12,6 +12,7 @@ export const WeaponItems = [
       defense: 0,
       price: 30,
       image: sword01a.src,
+      stackable: false, // <-- Додано
     },
     {
       item_id: 11,
@@ -23,6 +24,7 @@ export const WeaponItems = [
       defense: 0,
       price: 100,
       image: sword01a.src,
+      stackable: false, // <-- Додано
     },
     {
       item_id: 12,
@@ -34,6 +36,7 @@ export const WeaponItems = [
       defense: 0,
       price: 600,
       image: sword01a.src,
+      stackable: false, // <-- Додано
     },
     {
       item_id: 2,
@@ -45,6 +48,7 @@ export const WeaponItems = [
       defense: 1,
       price: 1500,
       image: sword02a.src,
+      stackable: false, // <-- Додано
     },
     {
       item_id: 21,
@@ -56,6 +60,7 @@ export const WeaponItems = [
       defense: 1,
       price: 6500,
       image: sword02a.src,
+      stackable: false, // <-- Додано
     },
     {
       item_id: 22,
@@ -67,5 +72,6 @@ export const WeaponItems = [
       defense: 1,
       price: 15000,
       image: sword02a.src,
+      stackable: false, // <-- Додано
     },
-  ];
+];

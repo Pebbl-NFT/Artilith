@@ -1,102 +1,44 @@
-import React from "react";
+import React from 'react';
+import Image from 'next/image';
+import { MergedInventoryItem } from '@/hooks/useInventory';
 
-// Можеш визначити більш точний тип для предмета, якщо знаєш його структуру
-interface InventoryItem {
-  id?: string | number; // Унікальний ідентифікатор
-  name: string;
-  image?: string | { src: string }; // Може бути string або об'єкт { src: string }
-  rarity?: string; // Рідкість предмета
-  equipped?: boolean; // Чи екіпіровано предмет
-  // Додай інші властивості предмета тут, якщо потрібно
-  [key: string]: any; // Дозволити будь-які інші властивості
+// FIX: Пропси оновлено, щоб приймати єдиний тип і не вимагати зайвого
+interface InventoryItemSlotProps {
+  item: MergedInventoryItem;
+  onClick: () => void;
+  // `index`, `onEquipToggle`, `fallbackIcon` більше не потрібні для цього компонента
 }
 
-interface InventoryItemCardProps {
-  item: InventoryItem; // Тепер очікуємо, що предмет завжди є
-  index: number; // Індекс предмета в масиві для обробника кліку
-  onEquipToggle: (index: number) => void; // Обробник для кнопки екіпірування/зняття
-  onClick?: React.MouseEventHandler<HTMLDivElement>; // Додаємо onClick як необов'язковий проп
-  fallbackIcon: string;
-}
-
-const InventoryItemCard: React.FC<InventoryItemCardProps> = ({
-  item,
-  index,
-  fallbackIcon,
-  onClick,
-}) => {
-  const imageSrc = item?.image
-    ? typeof item.image === "string"
-      ? item.image
-      : "src" in item.image
-      ? item.image.src
-      : null
-    : null;
-
+const InventoryItemSlot: React.FC<InventoryItemSlotProps> = ({ item, onClick }) => {
   return (
     <div
       onClick={onClick}
-      className={`relative flex flex-col items-center bg-white/[0.05] rounded-lg p-2 rarity-${item.rarity?.toLowerCase()}`}
-      style={{
-        border: "1px solid rgba(255, 255, 255, 0.07)",
-        borderRadius: "10px",
-        padding: "20px",
-        position: "relative",
-      }}
+      className={`relative flex flex-col items-center justify-center bg-white/[0.05] rounded-lg p-2 aspect-square cursor-pointer border border-transparent hover:border-yellow-400 transition-all rarity-border-${item.rarity?.toLowerCase()}`}
     >
-      <div
-        style={{
-          width: "100%",
-          aspectRatio: "1 / 1",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          fontSize: "2rem",
-          color: item ? "#fff" : "#777",
-          position: "relative",
-        }}
-      >
-        {item.rarity && (
-          <div className="rarity-label">{item.rarity.toUpperCase()}</div>
-        )}
-        {/* Зображення предмета */}
-        {imageSrc ? (
-          <img
-            src={imageSrc}
-            alt={item.name || "Предмет"}
-            className={`item-image rarity-border-${item.rarity?.toLowerCase()}`}
-            style={{
-              backgroundColor: "rgba(255, 255, 255, 0.05)",
-              borderRadius: "10px",
-              maxWidth: "80%",
-              maxHeight: "80%",
-              objectFit: "contain",
-            }}
-          />
-        ) : (
-          <div style={{ textAlign: "center" }}>{item.name || "+"}</div>
-        )}
-      </div>
-      {/* Відображення кількості предметів (якщо більше 1) */}
-      {item.count > 1 && (
-        <span
-          style={{
-            position: "absolute",
-            bottom: "8px",
-            right: "10px",
-            backgroundColor: "rgba(0,0,0,0.8)",
-            color: "#fff",
-            padding: "2px 6px",
-            borderRadius: "12px",
-            fontSize: "0.8rem",
-            fontWeight: "bold",
-          }}
-        >
-          x{item.count}
+      {item.image_url ? (
+        <Image
+          src={item.image_url}
+          alt={item.name}
+          width={64}
+          height={64}
+          style={{ objectFit: 'contain' }}
+        />
+      ) : (
+        <span className="text-2xl">❓</span>
+      )}
+      <p className="text-xs text-white truncate w-full text-center mt-1">{item.name}</p>
+      {item.quantity > 1 && (
+        <span className="absolute bottom-1 right-1 bg-gray-800 text-white text-xs rounded-full px-2 py-0.5">
+          x{item.quantity}
         </span>
+      )}
+      {item.upgrade_level > 0 && (
+         <span className="absolute top-1 left-1 bg-green-600 text-white text-xs rounded-full px-1.5 py-0.5">
+         +{item.upgrade_level}
+       </span>
       )}
     </div>
   );
 };
 
-export default InventoryItemCard;
+export default InventoryItemSlot;

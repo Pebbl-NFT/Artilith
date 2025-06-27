@@ -9,6 +9,7 @@ export const ScrollItems = [
     description: "",
     price: 30,
     image: scroll01a.src,
+    stackable: true,
   },
   {
     item_id: 1001,
@@ -18,5 +19,6 @@ export const ScrollItems = [
     description: "",
     price: 30000,
     image: scroll01a.src,
+    stackable: true,
   },
 ];
