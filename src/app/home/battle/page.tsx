@@ -34,7 +34,14 @@ interface LogEntry { id: number; message: string; }
 type Outcome =
   | { type: 'REWARD'; item: 'points' | 'atl_balance' | 'ton_balance'; amount: number }
   | { type: 'XP'; amount: number }
-  | { type: 'ITEM'; item_name: string; item_type: string; rarity: string; stats: { damage?: number; defense?: number; } }
+  | { 
+      type: 'ITEM'; 
+      item_name: string; 
+      item_type: string;
+      sub_type: string;
+      rarity: string; 
+      stats: { damage?: number; defense?: number; };
+    } 
   | { type: 'BATTLE'; enemy: Omit<Enemy, 'maxHealth'> }
   | { type: 'COMBAT_TURN'; player_hp_change: number; enemy_hp_change: number; }
   | { type: 'GAME_OVER'; reason: string; } // Новий тип
@@ -122,11 +129,21 @@ export default function TextAdventurePage() {
           - After every successful non-combat player action (exploring, interacting), grant 5-10 XP.
           - After winning a battle, you MUST grant XP equal to the enemy's max health (e.g., enemy with 30 HP gives 30 XP). This should be in addition to any other rewards.
         - Initiate Battle: {"type": "BATTLE", "enemy": {"name": "Goblin Scout", "health": 30, "attack": 5, "defense": 2}}.
-        - Found Item: {"type": "ITEM", "item_name": "...", "item_type": "...", "rarity": "...", "stats": {"damage": 5, "defense": 0}}.
+        // -- ЗМІНА 1: Обмежуємо рідкість тільки до "common" у визначенні --
+        - Found Item: {"type": "ITEM", "item_name": "...", "item_type": "weapon" | "shield" | "artifact" | "key", "sub_type": "...", "rarity": "common", "stats": {...}}.
           RULES FOR ITEMS:
+          - You are free to invent any creative "item_name".
+          - After creating the item, you MUST classify it with a "sub_type".
+          - "sub_type" MUST be a single, lowercase English word that best describes the item's category.
+          - Examples for "weapon": "sword", "axe", "dagger", "mace", "bow", "staff".
+          - Examples for "artifact": "amulet", "ring", "potion", "scroll", "gem".
+          - Examples for "shield": "buckler", "kite_shield", "tower_shield".
+          - If the type is "key", the sub_type can also be "key".
+          - "rarity" affects the quality. A "common" sword might be rusty, a "rare" one might be ornate.
           - "stats" MUST be an object. For 'weapon' or 'shield', provide realistic "damage" and "defense" values. For other types, use {"damage": 0, "defense": 0}.
           - "item_type" MUST be one of: 'weapon', 'shield', 'artifact', 'key'.
-          - "rarity" MUST be one of: 'common', 'uncommon', 'rare'. Adhere to this probability distribution: 'common' should appear in about 91% of items, 'uncommon' in 6%, and 'rare' in 3%.
+          // -- ЗМІНА 2: Замінюємо правило про розподіл на жорстку вказівку --
+          - For now, the "rarity" for ALL generated items MUST be exactly "common".
         - Combat Turn: {"type": "COMBAT_TURN", "player_hp_change": -5, "enemy_hp_change": -10}.
         - No special outcome: null
         When in combat and I send my action, calculate the damage based on stats (damage = ATK - DEF, min 1). Then narrate the exchange vividly.
@@ -134,8 +151,7 @@ export default function TextAdventurePage() {
         - If the battle is over, your "story" must reflect this, and the "choices" array must contain the next appropriate non-combat actions.
         DO NOT show calculations.
         The player is a Level ${playerData.level} ${playerData.character_class}. Start the story at a crossroad in a dark forest.
-        - GAME_OVER: {"type": "GAME_OVER", "reason": "You ran out of energy and fainted."} - Use this when the player has no more energy.`
-      ;
+        - GAME_OVER: {"type": "GAME_OVER", "reason": "You ran out of energy and fainted."} - Use this when the player has no more energy.`;
       
       const initialHistory = [
         { role: "user", parts: [{ text: initialSystemPrompt }] },
@@ -194,30 +210,80 @@ export default function TextAdventurePage() {
                 updateSummary(icon, singleOutcome.amount);
             }
         }
-        
-        if (singleOutcome.type === 'ITEM') {
-            const { data: itemId, error: getItemIdError } = await supabase.rpc('get_or_create_item_id', { 
-                p_name: singleOutcome.item_name, 
-                p_item_type: singleOutcome.item_type, 
-                p_rarity: singleOutcome.rarity, 
-                p_stats: singleOutcome.stats || {} 
-            });
-            if (getItemIdError) throw new Error(`Помилка get_or_create_item_id: ${getItemIdError.message}`);
-            if (!itemId) throw new Error("Не вдалося отримати ID предмета.");
-            const wasAdded = await addInventoryItem(String(userId), itemId);
-            if (!wasAdded) throw new Error(`Не вдалося додати предмет.`);
-            if(wasAdded) {
-                const message = `Знайдено: ${singleOutcome.item_name}`;
-                addToLog(message);
-                updateSummary(singleOutcome.item_name, 1);
-            }
-            toast.success(`Ви знайшли: ${singleOutcome.item_name}!`);
-        }
 
         if (singleOutcome.type === 'GAME_OVER') {
             setStory(singleOutcome.reason);
             setChoices([]);
             setIsGameOver(true);
+        }
+        
+        if (singleOutcome.type === 'ITEM') {
+            // --- ОСНОВНА ЛОГІКА ПОЧИНАЄТЬСЯ ТУТ ---
+
+            // 1. Отримуємо дані від AI
+            const { item_name, item_type, sub_type, rarity, stats } = singleOutcome;
+
+            // 2. Формуємо ключі для пошуку зображення: основний і запасний (fallback)
+            const primaryTemplateKey = `${item_type}_${sub_type}_${rarity}`;
+            const fallbackTemplateKey = `${item_type}_${sub_type}_common`;
+
+            let imageUrl = null;
+
+            // 3. Шукаємо ідеальне зображення в 'image_templates'
+            const { data: primaryTemplate } = await supabase
+                .from('image_templates')
+                .select('image_url')
+                .eq('template_key', primaryTemplateKey)
+                .single();
+            
+            if (primaryTemplate) {
+                imageUrl = primaryTemplate.image_url;
+            } else {
+                // 4. Якщо ідеального немає, шукаємо запасне (common) зображення
+                console.log(`No specific image for ${primaryTemplateKey}, trying fallback ${fallbackTemplateKey}`);
+                const { data: fallbackTemplate } = await supabase
+                    .from('image_templates')
+                    .select('image_url')
+                    .eq('template_key', fallbackTemplateKey)
+                    .single();
+                
+                if (fallbackTemplate) {
+                    imageUrl = fallbackTemplate.image_url;
+                }
+            }
+            
+            // 5. Викликаємо RPC-функцію, щоб створити запис в таблиці 'items'
+            // Ця функція має створити новий унікальний предмет і повернути його ID.
+            // Примітка: вам потрібно буде створити або оновити цю функцію в Supabase (див. нижче)
+            const { data: newItemId, error: createItemError } = await supabase.rpc('get_or_create_item', { 
+                p_name: item_name,
+                p_item_type: item_type,
+                p_sub_type: sub_type,
+                p_rarity: rarity,
+                p_stats: stats || {},
+                p_image_url: imageUrl // Передаємо знайдений URL!
+            });
+
+            if (createItemError) {
+                console.error('Error creating item in DB:', createItemError);
+                throw new Error(`Помилка створення предмета: ${createItemError.message}`);
+            }
+            if (!newItemId) {
+                throw new Error("Не вдалося створити/отримати ID предмета.");
+            }
+
+            // 6. Додаємо предмет до інвентаря гравця
+            const wasAdded = await addInventoryItem(String(userId), newItemId);
+
+            // 7. Показуємо сповіщення та оновлюємо лог
+            if (wasAdded) {
+                const message = `Знайдено: ${item_name}`;
+                addToLog(message);
+                updateSummary(item_name, 1);
+                toast.success(message);
+            } else {
+                throw new Error(`Не вдалося додати предмет до інвентаря.`);
+            }
         }
     }
   }, [userId, playerData, enemy, combatChoices]);
