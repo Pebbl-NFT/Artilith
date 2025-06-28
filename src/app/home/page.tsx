@@ -45,7 +45,7 @@ export default function HomePage() {
   const [players, setPlayers] = useState<{ id: any; first_name: any; level: any }[]>([]);
 
   const username = useMemo(() => initDataState?.user?.firstName || 'User', [initDataState]);
-  const heroStats = useMemo(() => getPlayerStats(inventory), [inventory]);
+  const heroStats = useMemo(() => getPlayerStats(inventory, level), [inventory, level]);
   const equippedItems = useMemo(() => inventory.filter(item => item.equipped), [inventory]);
   const unequippedItems = useMemo(() => inventory.filter(item => !item.equipped), [inventory]);
   
@@ -76,30 +76,90 @@ export default function HomePage() {
   
   async function handleEquip(item: MergedInventoryItem) {
     if (!userId) return;
-    const toUnequip = inventory.find(i => i.equipped && i.item_type === item.item_type);
-    if (toUnequip) {
-      await supabase.from('inventory').update({ equipped: false }).eq('id', toUnequip.id);
-    }
-    await supabase.from('inventory').update({ equipped: true }).eq('id', item.id);
-    toast.success(`Ви спорядили ${item.name}!`);
-    await loadData();
-    setSelectedItem(null);
-  }
+    setSelectedItem(null); // Одразу закриваємо модальне вікно
+    
+    // Викликаємо одну-єдину функцію, яка робить всю магію
+    const { error } = await supabase.rpc('equip_item', {
+        p_user_id: String(userId),
+        p_inventory_id: item.id // Передаємо ID запису в інвентарі
+    });
 
-  async function handleUnequip(item: MergedInventoryItem) {
+    if (error) {
+        toast.error(`Помилка екіпірування: ${error.message}`);
+        console.error("Equip error:", error);
+    } else {
+        toast.success(`Ви спорядили ${item.name}!`);
+    }
+
+    // Оновлюємо дані, щоб побачити фінальний результат
+    await loadData();
+}
+
+async function handleUnequip(item: MergedInventoryItem) {
     if (!userId) return;
-    await supabase.from('inventory').update({ equipped: false }).eq('id', item.id);
+    setSelectedItem(null);
+
+    // Шукаємо, чи існує стак для об'єднання (той самий предмет, того ж рівня, не екіпірований)
+    const existingStack = inventory.find(i => 
+        !i.equipped && 
+        i.item_id === item.item_id &&
+        i.upgrade_level === item.upgrade_level
+    );
+
+    if (existingStack) {
+        // Якщо стак є, об'єднуємо
+        const updates = [
+            // Збільшуємо кількість існуючого стаку
+            supabase
+                .from('inventory')
+                .update({ quantity: existingStack.quantity + item.quantity })
+                .eq('id', existingStack.id),
+            // Видаляємо екіпірований предмет
+            supabase
+                .from('inventory')
+                .delete()
+                .eq('id', item.id)
+        ];
+        await Promise.all(updates);
+    } else {
+        // Якщо стаку немає, просто знімаємо позначку 'equipped'
+        await supabase
+            .from('inventory')
+            .update({ equipped: false })
+            .eq('id', item.id);
+    }
+
     toast.success(`Ви зняли ${item.name}!`);
     await loadData();
-    setSelectedItem(null);
-  }
+}
 
   async function handleDismantle(item: MergedInventoryItem) {
     if (!userId) return;
-    const { error } = await supabase.from('inventory').delete().eq('id', item.id);
-    if (error) {
-      toast.error("Помилка розбору предмета!");
-      return;
+
+    // Перевіряємо кількість предметів у стаку
+    if (item.quantity > 1) {
+      // Якщо предметів більше одного, просто зменшуємо кількість на 1
+      const { error } = await supabase
+        .from('inventory')
+        .update({ quantity: item.quantity - 1 })
+        .eq('id', item.id);
+      
+      if (error) {
+        toast.error("Помилка продажу предмета!");
+        return;
+      }
+
+    } else {
+      // Якщо предмет останній у стаку, видаляємо запис повністю
+      const { error } = await supabase
+        .from('inventory')
+        .delete()
+        .eq('id', item.id);
+
+      if (error) {
+        toast.error("Помилка продажу предмета!");
+        return;
+      }
     }
     const dismantleReward = 15;
     if (dismantleReward > 0) {
@@ -135,14 +195,14 @@ export default function HomePage() {
                   <div style={{position: "absolute",top: "50%",left: "0%",transform: "translate(-80%, -50%)",display: "grid",gridTemplateColumns: "repeat(1, 1fr)",gap: '10px'}}>
                     <EquippedItemSlot 
                       item={equippedItems.find(i => i.item_type === "weapon")} 
-                      fallbackIcon="🗡️"
+                      fallbackIcon=""
                       onClick={(item) => {
                         if (item) setSelectedItem({ ...item, mode: "equipped" });
                       }} 
                     />
                     <EquippedItemSlot 
                       item={equippedItems.find(i => i.item_type === "shield")} 
-                      fallbackIcon="🛡️"
+                      fallbackIcon=""
                       onClick={(item) => {
                         if (item) setSelectedItem({ ...item, mode: "equipped" });
                       }} 

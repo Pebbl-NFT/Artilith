@@ -3,6 +3,16 @@ import React from "react";
 import Image from 'next/image';
 import { MergedInventoryItem } from "@/hooks/useInventory";
 
+// Мапінг для відображення назв рідкості
+const rarityDisplayName: Record<string, string> = {
+  common: "Звичайний",
+  uncommon: "Незвичайний",
+  rare: "Рідкісний",
+  epic: "Епічний",
+  legendary: "Легендарний",
+  // Додайте інші типи рідкості за потреби
+};
+
 // FIX: Пропси оновлено для нової логіки
 type ItemCardProps = {
   mode: "inventory" | "equipped";
@@ -43,6 +53,12 @@ export const ItemCard: React.FC<ItemCardProps> = ({
   if (!item) return null;
 
   const hasStats = item.stats?.damage > 0 || item.stats?.defense > 0;
+  const frameClasses = [
+    'item-frame',
+    `rarity-${item.rarity?.toLowerCase() || 'common'}`
+  ].join(' ');
+
+  const isEquippable = item.item_type === 'weapon' || item.item_type === 'shield';
 
   return (
     <div
@@ -91,16 +107,20 @@ export const ItemCard: React.FC<ItemCardProps> = ({
     </button>
 
       <div>
-        <div style={{ position: 'relative', width: '60%', margin: '0 auto 20px auto',marginTop:"20px", aspectRatio: '1 / 1' }}>
+        <div 
+          className={frameClasses}
+          style={{ width: '50%', margin: '30px auto',borderRadius:'20px' }} // Задаємо розмір та центруємо рамку
+        >
           {item.image_url ? (
             <Image
               src={item.image_url}
               alt={item.name}
-              layout="fill"
-              objectFit="contain"
+              fill // Оновлений синтаксис
+              style={{ objectFit: 'contain',borderRadius:'20px' }} // padding вже є в .item-frame
             />
           ) : <div style={{width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '5rem', opacity: '0.5'}}>❓</div>}
         </div>
+
 
         <h2 className={`rarity-font-${item.rarity?.toLowerCase()}`} 
         style={{
@@ -155,14 +175,15 @@ export const ItemCard: React.FC<ItemCardProps> = ({
 
         <div style={{ margin: '15px 0', display: 'flex', justifyContent: 'space-around', gap: '5px', color: '#ccc', fontSize: 'clamp(0.8rem, 2vw, 0.9rem)' }}>
           <p>Тип: <strong>{item.item_type}</strong></p>
-          <p>Рідкість: <strong className={`rarity-font-${item.rarity?.toLowerCase()}`}>{item.rarity}</strong></p>
+          <p>Рідкість: <strong className={`rarity-font-${item.rarity?.toLowerCase()}`}>{rarityDisplayName[item.rarity] || item.rarity}</strong></p>
         </div>
       </div>
 
       <div style={{ marginLeft:'22px', marginTop: '20px', display: 'flex', flexDirection: 'row', gap: '33px' }}>
-        {mode === 'inventory' && onEquipRequest && (
+        {mode === 'inventory' && onEquipRequest && isEquippable && (
           <button style={buttonStyle('primary')} onClick={() => onEquipRequest(item)}>Спорядити</button>
         )}
+
         {mode === 'equipped' && onUnequipRequest && (
             <button style={buttonStyle('primary')} onClick={() => onUnequipRequest(item)}>Зняти</button>
         )}

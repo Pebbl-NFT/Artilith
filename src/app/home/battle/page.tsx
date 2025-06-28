@@ -8,6 +8,7 @@ import { Toaster, toast } from "react-hot-toast";
 import { useEnergy } from '@/context/EnergyContext';
 import { getPlayerStats } from '@/utils/getPlayerStats';
 import { addInventoryItem } from '@/hooks/useItemActions';
+import { fetchInventory } from '@/hooks/useInventory';
 
 // --- СТИЛІ ---
 const styles: { [key: string]: CSSProperties } = {
@@ -100,16 +101,44 @@ export default function TextAdventurePage() {
 
   useEffect(() => {
     if (!userId) return;
+
     const fetchPlayerData = async () => {
       setIsLoading(true);
-      const { data: userData } = await supabase.from('users').select('level, character_class, points').eq('id', String(userId)).single();
-      const { data: inventoryData } = await supabase.from("inventory").select("item_id, equipped, upgrade_level").eq("user_id", String(userId));
-      const formattedInventory = (inventoryData || []).map((entry) => {       
-      }).filter(Boolean);
-      const playerStats = getPlayerStats(formattedInventory as any[]);
-      setPlayerData({ ...(userData as any), ...playerStats, currentHP: playerStats.health });
-      setIsLoading(false);
+      try {
+        // 1. Одночасно завантажуємо дані користувача та його повний інвентар
+        const [userDataRes, inventoryData] = await Promise.all([
+          supabase.from('users').select('level, character_class, points').eq('id', String(userId)).single(),
+          fetchInventory(String(userId)) // Використовуємо наш правильний хук
+        ]);
+
+        if (userDataRes.error) throw userDataRes.error;
+
+        const userData = userDataRes.data;
+        if (!userData) {
+            toast.error("Не вдалося завантажити дані гравця.");
+            return;
+        }
+
+        // 2. Розраховуємо характеристики, передаючи інвентар І рівень
+        const playerStats = getPlayerStats(inventoryData, userData.level ?? 1);
+
+        // 3. Збираємо всі дані до купи і встановлюємо стан
+        setPlayerData({
+          level: userData.level ?? 1,
+          character_class: userData.character_class,
+          points: userData.points,
+          ...playerStats,
+          currentHP: playerStats.health, // Початкове здоров'я дорівнює максимальному
+        });
+
+      } catch (error: any) {
+        console.error("Помилка завантаження даних гравця:", error);
+        toast.error(`Помилка: ${error.message}`);
+      } finally {
+        setIsLoading(false);
+      }
     };
+
     fetchPlayerData();
   }, [userId]);
   
@@ -214,74 +243,73 @@ export default function TextAdventurePage() {
             setIsGameOver(true);
         }
         
-        if (singleOutcome.type === 'ITEM') {
-            // --- ОСНОВНА ЛОГІКА ПОЧИНАЄТЬСЯ ТУТ ---
+      if (singleOutcome.type === 'ITEM') {
+        // 1. Отримуємо дані від AI
+        const { item_name, item_type, sub_type, rarity, stats } = singleOutcome;
 
-            // 1. Отримуємо дані від AI
-            const { item_name, item_type, sub_type, rarity, stats } = singleOutcome;
-
-            // 2. Формуємо ключі для пошуку зображення: основний і запасний (fallback)
-            const primaryTemplateKey = `${item_type}_${sub_type}_${rarity}`;
-            const fallbackTemplateKey = `${item_type}_${sub_type}_common`;
-
-            let imageUrl = null;
-
-            // 3. Шукаємо ідеальне зображення в 'image_templates'
-            const { data: primaryTemplate } = await supabase
+        // 2. Логіка пошуку зображення (залишається без змін)
+        const primaryTemplateKey = `${item_type}_${sub_type}_${rarity}`;
+        const fallbackTemplateKey = `${item_type}_${sub_type}_common`;
+        let imageUrl = null;
+        const { data: primaryTemplate } = await supabase
+            .from('image_templates')
+            .select('image_url')
+            .eq('template_key', primaryTemplateKey)
+            .single();
+        
+        if (primaryTemplate) {
+            imageUrl = primaryTemplate.image_url;
+        } else {
+            const { data: fallbackTemplate } = await supabase
                 .from('image_templates')
                 .select('image_url')
-                .eq('template_key', primaryTemplateKey)
+                .eq('template_key', fallbackTemplateKey)
                 .single();
-            
-            if (primaryTemplate) {
-                imageUrl = primaryTemplate.image_url;
-            } else {
-                // 4. Якщо ідеального немає, шукаємо запасне (common) зображення
-                console.log(`No specific image for ${primaryTemplateKey}, trying fallback ${fallbackTemplateKey}`);
-                const { data: fallbackTemplate } = await supabase
-                    .from('image_templates')
-                    .select('image_url')
-                    .eq('template_key', fallbackTemplateKey)
-                    .single();
-                
-                if (fallbackTemplate) {
-                    imageUrl = fallbackTemplate.image_url;
-                }
-            }
-            
-            // 5. Викликаємо RPC-функцію, щоб створити запис в таблиці 'items'
-            // Ця функція має створити новий унікальний предмет і повернути його ID.
-            // Примітка: вам потрібно буде створити або оновити цю функцію в Supabase (див. нижче)
-            const { data: newItemId, error: createItemError } = await supabase.rpc('get_or_create_item', { 
-                p_name: item_name,
-                p_item_type: item_type,
-                p_sub_type: sub_type,
-                p_rarity: rarity,
-                p_stats: stats || {},
-                p_image_url: imageUrl // Передаємо знайдений URL!
-            });
-
-            if (createItemError) {
-                console.error('Error creating item in DB:', createItemError);
-                throw new Error(`Помилка створення предмета: ${createItemError.message}`);
-            }
-            if (!newItemId) {
-                throw new Error("Не вдалося створити/отримати ID предмета.");
-            }
-
-            // 6. Додаємо предмет до інвентаря гравця
-            const wasAdded = await addInventoryItem(String(userId), newItemId);
-
-            // 7. Показуємо сповіщення та оновлюємо лог
-            if (wasAdded) {
-                const message = `Знайдено: ${item_name}`;
-                addToLog(message);
-                updateSummary(item_name, 1);
-                toast.success(message);
-            } else {
-                throw new Error(`Не вдалося додати предмет до інвентаря.`);
+            if (fallbackTemplate) {
+                imageUrl = fallbackTemplate.image_url;
             }
         }
+        
+        // 3. Викликаємо RPC, щоб отримати ID унікального предмету
+        const { data: newItemId, error: createItemError } = await supabase.rpc('get_or_create_item', { 
+            p_name: item_name,
+            p_item_type: item_type,
+            p_sub_type: sub_type,
+            p_rarity: rarity,
+            p_stats: stats || {},
+            p_image_url: imageUrl
+        });
+
+        if (createItemError) {
+            toast.error(`Помилка створення предмета: ${createItemError.message}`);
+            console.error('Error creating item definition:', createItemError);
+            return; // Зупиняємо виконання, якщо не вдалося створити предмет
+        }
+        if (!newItemId) {
+            toast.error("Не вдалося отримати ID предмета.");
+            return;
+        }
+
+        // 4. --- ОСНОВНА ЗМІНА ТУТ ---
+        // Викликаємо нашу нову "розумну" RPC-функцію, щоб додати предмет в інвентар.
+        // Вона сама перевірить, чи потрібно створювати новий стак, чи додавати до існуючого.
+        const { error: stackError } = await supabase.rpc('add_or_stack_item', {
+          p_user_id: userId, // Передаємо як є (число)
+          p_item_id: newItemId
+        });
+
+        if (stackError) {
+            toast.error(`Помилка додавання в інвентар: ${stackError.message}`);
+            console.error('Error adding/stacking item to inventory:', stackError);
+            return; // Зупиняємо, якщо не вдалося додати в інвентар
+        }
+
+        // 5. Показуємо сповіщення, якщо все пройшло успішно
+        const message = `Знайдено: ${item_name}`;
+        addToLog(message);
+        updateSummary(item_name, 1);
+        toast.success(message);
+      }
     }
   }, [userId, playerData, enemy, combatChoices]);
 
