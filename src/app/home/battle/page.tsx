@@ -7,7 +7,6 @@ import { supabase } from '@/lib/supabaseClient';
 import { Toaster, toast } from "react-hot-toast";
 import { useEnergy } from '@/context/EnergyContext';
 import { getPlayerStats } from '@/utils/getPlayerStats';
-import { AllItems } from '@/components/Item/Items';
 import { addInventoryItem } from '@/hooks/useItemActions';
 
 // --- СТИЛІ ---
@@ -105,9 +104,7 @@ export default function TextAdventurePage() {
       setIsLoading(true);
       const { data: userData } = await supabase.from('users').select('level, character_class, points').eq('id', String(userId)).single();
       const { data: inventoryData } = await supabase.from("inventory").select("item_id, equipped, upgrade_level").eq("user_id", String(userId));
-      const formattedInventory = (inventoryData || []).map((entry) => {
-          const itemDetails = AllItems.find((i) => i.item_id === entry.item_id);
-          return itemDetails ? { ...itemDetails, ...entry } : null;
+      const formattedInventory = (inventoryData || []).map((entry) => {       
       }).filter(Boolean);
       const playerStats = getPlayerStats(formattedInventory as any[]);
       setPlayerData({ ...(userData as any), ...playerStats, currentHP: playerStats.health });
