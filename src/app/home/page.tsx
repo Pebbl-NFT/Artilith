@@ -14,6 +14,9 @@ import { ItemCard } from "@/components/ItemCard";
 import EquippedItemSlot from "@/components/Item/EquippedItemSlot";
 import InventoryItemSlot from "@/components/Item/InventoryItemSlot";
 import { Fountain } from '@/components/Fountain/Fountain';
+// --- FIX: Імпортуємо нові компоненти та хуки ---
+import { useEnergy } from "@/context/EnergyContext";
+import { EnergyRefillModal } from "@/components/EnergyRefillModal";
 
 // --- ДАНІ ТА ЛОГІКА ---
 import { supabase } from "@/lib/supabaseClient";
@@ -33,6 +36,15 @@ type SelectedItemState = MergedInventoryItem & {
 export default function HomePage() {
   const initDataState = useSignal(initData.state);
   const userId = initDataState?.user?.id;
+
+  // --- FIX: Отримуємо все для модального вікна з EnergyContext ---
+  const { 
+    energy, 
+    maxEnergy, 
+    isModalOpen, 
+    closeEnergyModal, 
+    timeToNextFormatted 
+  } = useEnergy();
 
   const [activeTab, setActiveTab] = useState("home");
   const [loading, setLoading] = useState(true);
@@ -72,7 +84,7 @@ export default function HomePage() {
 
   useEffect(() => {
     loadData();
-  }, [userId]);
+  }, [loadData]);
   
   async function handleEquip(item: MergedInventoryItem) {
     if (!userId) return;
@@ -174,6 +186,12 @@ async function handleUnequip(item: MergedInventoryItem) {
     setSelectedItem(null);
   }
 
+  const handleRefillWithStars = () => {
+    console.log("Trying to purchase energy with Telegram Stars...");
+    toast.success("Функціонал поповнення в розробці!");
+    closeEnergyModal();
+  };
+
   const renderContent = () => {
     if (loading) return <Placeholder>Завантаження...</Placeholder>;
 
@@ -260,6 +278,7 @@ async function handleUnequip(item: MergedInventoryItem) {
         <TopBar points={points} />
         <div style={{ paddingBottom: 100 }}>{renderContent()}</div>
 
+        {/* Картка предмету (модальне вікно) */}
         {selectedItem && (
           <div className="modal-overlay" onClick={() => setSelectedItem(null)}>
             <div onClick={(e) => e.stopPropagation()}>
@@ -274,6 +293,17 @@ async function handleUnequip(item: MergedInventoryItem) {
             </div>
           </div>
         )}
+
+        {/* --- ОСНОВНА ЗМІНА ТУТ: Модальне вікно енергії --- */}
+        <EnergyRefillModal
+          isOpen={isModalOpen}
+          onClose={closeEnergyModal}
+          onRefill={handleRefillWithStars}
+          timeToNextFormatted={timeToNextFormatted}
+          currentEnergy={energy}
+          maxEnergy={maxEnergy}
+        />
+
       </List>
       <BottomBar activeTab={activeTab} setActiveTab={setActiveTab} />
       <Toaster position="top-center" reverseOrder={false} />

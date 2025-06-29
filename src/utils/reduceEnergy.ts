@@ -1,14 +1,16 @@
+// src/utils/reduceEnergy.ts
 import { supabase } from "@/lib/supabaseClient";
 
-export const reduceEnergyRPC = async (userId: string, amount: number = 1): Promise<boolean> => {
-    const { data, error } = await supabase.rpc('reduce_user_energy', {
-        user_id_param: userId,
-        amount_param: amount
+export const reduceEnergyRPC = async (userId: string | number, amount: number): Promise<boolean> => {
+    const { data, error } = await supabase.rpc('reduce_energy', {
+        p_user_id: String(userId),
+        p_amount: amount
     });
 
     if (error) {
-        console.error("Помилка при виклику RPC reduce_user_energy:", error.message);
+        console.error("Error in reduceEnergyRPC:", error);
         return false;
     }
+
     return data;
 };

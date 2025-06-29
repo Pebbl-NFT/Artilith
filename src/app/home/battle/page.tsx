@@ -9,6 +9,7 @@ import { useEnergy } from '@/context/EnergyContext';
 import { getPlayerStats } from '@/utils/getPlayerStats';
 import { addInventoryItem } from '@/hooks/useItemActions';
 import { fetchInventory } from '@/hooks/useInventory';
+import { EnemyStatusBar } from '@/components/Adventure/EnemyStatusBar';
 
 // --- СТИЛІ ---
 const styles: { [key: string]: CSSProperties } = {
@@ -22,15 +23,50 @@ const styles: { [key: string]: CSSProperties } = {
   backButton: { padding: "12px 20px", fontSize: 16, borderRadius: '10px', border: "1px solid rgba(100, 116, 139, 0.7)", background: 'rgba(100, 116, 139, 0.5)', color: "#e0e7ff", cursor: "pointer", transition: "background-color 0.2s ease", fontWeight: 500, textAlign: 'center', marginTop: '10px' },
   loadingOverlay: { position: "fixed", top: 0, left: 0, right: 0, bottom: 0, background: "rgba(10, 5, 20, 0.85)", backdropFilter: 'blur(5px)', display: "flex", alignItems: "center", justifyContent: "center", fontSize: 24, zIndex: 100, color: '#fff' },
   // FIX: Стилі для логу подій
-  logContainer: { padding: '10px 20px', maxHeight: '120px', overflowY: 'auto', backgroundColor: 'rgba(0,0,0,0.3)', borderBottom: '1px solid rgba(129, 140, 248, 0.2)' },
-  logMessage: { fontSize: '14px', color: '#a7b3d9', marginBottom: '4px', animation: 'fadeIn 0.5s ease' }
+  logContainer: { 
+    position: 'fixed',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(10, 5, 20, 0.85)',
+    backdropFilter: 'blur(10px)',
+    zIndex: 110,
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'center',
+    padding: '20px',
+  },
+  logMessage: { 
+    fontSize: '16px', 
+    color: '#c7d2fe', 
+    marginBottom: '8px', 
+    animation: 'fadeIn 0.5s ease',
+    borderBottom: '1px solid rgba(129, 140, 248, 0.1)',
+    paddingBottom: '8px',
+  },
+  logButton: {
+    position: 'absolute',
+    top: '15px',
+    right: '15px',
+    background: 'rgba(129, 140, 248, 0.2)',
+    border: '1px solid rgba(129, 140, 248, 0.5)',
+    color: '#e0e7ff',
+    width: '40px',
+    height: '40px',
+    borderRadius: '50%',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    fontSize: '20px',
+    cursor: 'pointer',
+    zIndex: 50,
+  }
 };
 
 // --- ІНТЕРФЕЙСИ ---
 interface Enemy { name: string; health: number; maxHealth: number; attack: number; defense: number; }
-// FIX: Додано тип для логу
 interface LogEntry { id: number; message: string; }
-// FIX: Додано новий тип для завершення гри
 type Outcome =
   | { type: 'REWARD'; item: 'points' | 'atl_balance' | 'ton_balance'; amount: number }
   | { type: 'XP'; amount: number }
@@ -46,7 +82,12 @@ type Outcome =
   | { type: 'COMBAT_TURN'; player_hp_change: number; enemy_hp_change: number; }
   | { type: 'GAME_OVER'; reason: string; } // Новий тип
   | null;
-interface AIResponse { story: string; choices: string[]; outcome?: Outcome | Outcome[]; }
+interface AIResponse {
+  story: string;
+  choices: string[];
+  outcome?: Outcome | Outcome[];
+  choiceOutcomes?: { [key: string]: Outcome | Outcome[] }; // Ключ - це текст вибору
+}
 interface PlayerData {
   level: number; character_class: string; points: number;
   health: number; attack: number; defense: number; currentHP: number;
@@ -54,12 +95,16 @@ interface PlayerData {
 
 // --- Компонент панелі стану гравця ---
 const PlayerStatusBar = ({ playerData }: { playerData: PlayerData | null }) => {
+  // Використовуємо хук useEnergy прямо тут, щоб завжди мати актуальне значення
+  const { energy } = useEnergy(); 
+
   if (!playerData) return null;
   return (
     <div style={styles.playerStatusContainer}>
       <div style={styles.playerStat}><span>❤️</span><span>{playerData.currentHP} / {playerData.health}</span></div>
       <div style={styles.playerStat}><span>🗡️</span><span>{playerData.attack}</span></div>
       <div style={styles.playerStat}><span>🛡️</span><span>{playerData.defense}</span></div>
+      <div style={styles.playerStat}><span>⚡</span><span>{energy}</span></div>
     </div>
   );
 };
@@ -79,9 +124,12 @@ export default function TextAdventurePage() {
   const [enemy, setEnemy] = useState<Enemy | null>(null);
   const [chatHistory, setChatHistory] = useState<any[]>([]);
   const combatChoices = ["🗡️ Атакувати", "🛡️ Захищатись", "🏃 Втекти"];
+  const [pendingOutcomes, setPendingOutcomes] = useState<{ [key: string]: Outcome | Outcome[] } | null>(null);
   
   // FIX: Стан для логу подій та фінального звіту
   const [eventLog, setEventLog] = useState<LogEntry[]>([]);
+  const [isLogVisible, setIsLogVisible] = useState(false);
+  const [adventureStep, setAdventureStep] = useState(1);
   const [adventureSummary, setAdventureSummary] = useState<Map<string, number>>(new Map());
   const [isGameOver, setIsGameOver] = useState(false);
 
@@ -144,41 +192,68 @@ export default function TextAdventurePage() {
   
   useEffect(() => {
     if (playerData && chatHistory.length === 0) {
-      const initialSystemPrompt = `Act as a dark fantasy RPG dungeon master. Your response must be ONLY a JSON object like {"story": "...", "choices": ["..."], "outcome": ...}.
-        The "outcome" field is crucial. It can be a single outcome object or an array of outcome objects, e.g., "outcome": [{"type": "REWARD", ...}, {"type": "XP", ...}].
-        Possible outcomes:
-        - Reward: {"type": "REWARD", "item": "points" | "atl_balance" | "ton_balance", "amount": ...}.
-          - "points" (regular coins, 10-100) are common.
-          - "atl_balance" (gold coins, 1-5) are rare.
-          - "ton_balance" (blue crystal shards, 0.001-0.01) are extremely rare.
-        - Experience: {"type": "XP", "amount": ...}.
-          - After every successful non-combat player action (exploring, interacting), grant 5-10 XP.
-          - After winning a battle, you MUST grant XP equal to the enemy's max health (e.g., enemy with 30 HP gives 30 XP). This should be in addition to any other rewards.
-        - Initiate Battle: {"type": "BATTLE", "enemy": {"name": "Goblin Scout", "health": 30, "attack": 5, "defense": 2}}.
-        // -- ЗМІНА 1: Обмежуємо рідкість тільки до "common" у визначенні --
-        - Found Item: {"type": "ITEM", "item_name": "...", "item_type": "weapon" | "shield" | "artifact" | "key", "sub_type": "...", "rarity": "common", "stats": {...}}.
-          RULES FOR ITEMS:
-          - You are free to invent any creative "item_name".
-          - After creating the item, you MUST classify it with a "sub_type".
-          - "sub_type" MUST be a single, lowercase English word that best describes the item's category.
-          - Examples for "weapon": "sword", "axe", "dagger", "mace", "bow", "staff".
-          - Examples for "artifact": "amulet", "ring", "potion", "scroll", "gem".
-          - Examples for "shield": "buckler", "kite_shield", "tower_shield".
-          - If the type is "key", the sub_type can also be "key".
-          - "rarity" affects the quality. A "common" sword might be rusty, a "rare" one might be ornate.
-          - "stats" MUST be an object. For 'weapon' or 'shield', provide realistic "damage" and "defense" values. For other types, use {"damage": 0, "defense": 0}.
-          - "item_type" MUST be one of: 'weapon', 'shield', 'artifact', 'key'.
-          // -- ЗМІНА 2: Замінюємо правило про розподіл на жорстку вказівку --
-          - For now, the "rarity" for ALL generated items MUST be exactly "common".
+      const initialSystemPrompt = `Act as a dark fantasy RPG dungeon master. Your response must be ONLY a JSON object.
+        The JSON structure is: {"story": "...", "choices": ["...", "..."], "outcome": ..., "choiceOutcomes": {...}}.
+
+        --- FIELD DESCRIPTIONS ---
+
+        1.  "story": The narrative text describing the current situation.
+        2.  "choices": An array of strings representing the player's possible actions.
+        3.  "outcome": An immediate outcome that happens regardless of the player's choice. Use this for things that happen TO the player, like starting a battle or gaining passive XP. It can be a single object or an array of objects.
+        4.  "choiceOutcomes": **(NEW & IMPORTANT)** An object where keys are the EXACT text from the "choices" array, and values are the outcomes that will happen ONLY if the player makes that specific choice. Use this for rewards the player can choose to take or ignore.
+
+        --- NEW LOGIC FOR REWARDS (ITEMS, POINTS, etc.) ---
+
+        -   **DO NOT** put discoverable items or rewards in the main "outcome" field.
+        -   Instead, describe the potential reward in the "story" and link the reward object to a specific choice in the "choiceOutcomes" field.
+
+        --- EXAMPLE OF NEW LOGIC ---
+
+        Correct Example:
+        {
+          "story": "You defeat the goblin. On the ground, you see a Rusty Dagger.",
+          "choices": ["🗡️ Take the dagger", "🚶 Leave it"],
+          "outcome": { "type": "XP", "amount": 30 }, // Immediate XP for winning the battle
+          "choiceOutcomes": {
+            "🗡️ Take the dagger": { "type": "ITEM", "item_name": "Rusty Dagger", "item_type": "weapon", "sub_type": "dagger", "rarity": "common", "stats": {"damage": 2, "defense": 0} }
+          }
+        }
+        // In this example, the player gets XP immediately, but the dagger is only received if they choose to take it.
+
+        --- OUTCOME TYPES (Unchanged) ---
+
+        -   Reward: {"type": "REWARD", "item": "points" | "atl_balance" | "ton_balance", "amount": ...}.
+        -   Experience: {"type": "XP", "amount": ...}.
+        - Initiate Battle: {"type": "BATTLE", "enemy": {"name": "...", "health": 30, "attack": 5, "defense": 2}}.
+          - The "enemy" object MUST contain "name", "health", "attack", and "defense". All must be numbers, except "name".
+        -   Found Item: {"type": "ITEM", "item_name": "...", "item_type": "...", "sub_type": "...", "rarity": "common", "stats": {...}}.
+            -   RULES FOR ITEMS:
+                -   You are free to invent any creative "item_name".
+                -   You MUST classify it with a "sub_type".
+                -   "sub_type" MUST be a single, lowercase English word.
+                -   For now, the "rarity" for ALL generated items MUST be exactly "common".
         - Combat Turn: {"type": "COMBAT_TURN", "player_hp_change": -5, "enemy_hp_change": -10}.
-        - No special outcome: null
-        When in combat and I send my action, calculate the damage based on stats (damage = ATK - DEF, min 1). Then narrate the exchange vividly.
-        - If the battle is still ongoing, the "choices" array MUST be exactly: ["🗡️ Атакувати", "🛡️ Захищатись", "🏃 Втекти"].
-        - If the battle is over, your "story" must reflect this, and the "choices" array must contain the next appropriate non-combat actions.
-        DO NOT show calculations.
-        The player is a Level ${playerData.level} ${playerData.character_class}. Start the story at a crossroad in a dark forest.
-        - GAME_OVER: {"type": "GAME_OVER", "reason": "You ran out of energy and fainted."} - Use this when the player has no more energy.`;
-      
+          - "player_hp_change" and "enemy_hp_change" are REQUIRED and MUST be numbers (positive for healing, negative for damage).
+        -   No special outcome: null.
+
+        --- RULE FOR THE FINAL BLOW ---
+
+        -   When the player's attack is enough to defeat the enemy (reduce its HP to 0 or less):
+        -   Your "story" MUST describe the victory.
+        -   The "outcome" array MUST contain BOTH of these objects:
+            1.  The final {"type": "COMBAT_TURN", "player_hp_change": 0, "enemy_hp_change": -XX} object that reduces the enemy's health to 0 or less. The damage number XX must be sufficient.
+            2.  The {"type": "XP", "amount": ...} reward for defeating the enemy (equal to the enemy's max health).
+        -   The "choices" array MUST contain appropriate post-battle actions (e.g., ["Оглянути тіло", "Продовжити шлях"]).
+
+        --- GENERAL RULES ---
+
+        -   When in combat (and the enemy is not defeated yet), the "choices" array MUST be exactly: ["🗡️ Атакувати", "🛡️ Захищатись", "🏃 Втекти"].
+        -   DO NOT show calculations.
+        -   The player is a Level ${playerData.level} ${playerData.character_class}.
+        -   GAME_OVER: {"type": "GAME_OVER", "reason": "..."}.
+        -   I will provide the player's current energy in the prompt like "My character stats: Energy: 1, ...".
+        -   If you see that the player's energy is 0 AFTER they perform an action, the story MUST end. The "outcome" for this situation MUST be {"type": "GAME_OVER", "reason": "Ви повністю виснажились і знепритомніли від втоми."}.
+        `;
       const initialHistory = [
         { role: "user", parts: [{ text: initialSystemPrompt }] },
         { role: "model", parts: [{ text: JSON.stringify({ story: "Ти стоїш на роздоріжжі в Темному лісі...", choices: ["Йти на північ", "Йти на схід", "Оглянутись навколо"], outcome: null }) }] }
@@ -189,9 +264,9 @@ export default function TextAdventurePage() {
     }
   }, [playerData, chatHistory.length]);
 
-  const processOutcome = useCallback(async (outcome: Outcome | Outcome[]) => {
-    if (!outcome || !userId || !playerData) return;
-    const outcomes = Array.isArray(outcome) ? outcome : [outcome];
+  const processOutcome = useCallback(async (outcomeToProcess: Outcome | Outcome[]) => {
+    if (!outcomeToProcess || !userId || !playerData) return;
+    const outcomes = Array.isArray(outcomeToProcess) ? outcomeToProcess : [outcomeToProcess];
 
     for (const singleOutcome of outcomes) {
         if (!singleOutcome) continue;
@@ -204,21 +279,36 @@ export default function TextAdventurePage() {
         }
 
         if (singleOutcome.type === 'COMBAT_TURN') {
-            const newPlayerHP = Math.max(0, playerData.currentHP + singleOutcome.player_hp_change);
-            const newEnemyHP = Math.max(0, enemy ? enemy.health + singleOutcome.enemy_hp_change : 0);
-            
-            setPlayerData(prev => prev ? { ...prev, currentHP: newPlayerHP } : null);
-            setEnemy(prev => prev ? { ...prev, health: newEnemyHP } : null);
-            
-            if (newEnemyHP <= 0) {
-                toast.success(`Ви перемогли ${enemy?.name}!`);
-                setIsInCombat(false);
-                setEnemy(null);
-            } else if (newPlayerHP <= 0) {
-                toast.error("Вас перемогли...");
-                setIsInCombat(false);
-                setEnemy(null);
-            }
+          if (!playerData || !enemy) return;
+
+          const playerChange = singleOutcome.player_hp_change ?? 0;
+          const enemyChange = singleOutcome.enemy_hp_change ?? 0;
+
+          const newPlayerHP = Math.max(0, playerData.currentHP + playerChange);
+          const newEnemyHP = Math.max(0, enemy.health + enemyChange);
+
+          setPlayerData(prevData => {
+              if (!prevData) return null;
+              return { ...prevData, currentHP: newPlayerHP };
+          });
+
+          setEnemy(prevEnemy => {
+              if (!prevEnemy) return null;
+              return { ...prevEnemy, health: newEnemyHP };
+          });
+          
+          // Подальша логіка перевірки перемоги/поразки залишається такою ж
+          if (newEnemyHP <= 0) {
+              toast.success(`Ви перемогли ${enemy?.name}!`);
+              setIsInCombat(false);
+              setEnemy(null);
+          } else if (newPlayerHP <= 0) {
+              toast.error("Вас перемогли...");
+              setIsInCombat(false);
+              setEnemy(null);
+              //  outcome для GAME_OVER
+              await processOutcome({ type: 'GAME_OVER', reason: 'Ви загинули в бою.' });
+          }
         }
         
          if (singleOutcome.type === 'REWARD' || singleOutcome.type === 'XP') {
@@ -317,21 +407,33 @@ export default function TextAdventurePage() {
   const handleChoice = useCallback(async (choice: string) => {
     if (!playerData || chatHistory.length === 0 || isGameOver) return;
 
-    // FIX: Правильна перевірка енергії
-    const energyCost = 1; // Кожна дія коштує 1 енергії
-    if (energy < energyCost) {
-        setStory("Герой перевтомився і втратив свідомість, 0⚡");
-        setChoices([]);
-        setIsGameOver(true);
-        return;
+    // 1. Отримуємо найсвіжіше значення енергії
+    const currentEnergy = energy;
+    const energyCost = 1;
+
+    // 2. Якщо енергії недостатньо, просто показуємо повідомлення і виходимо
+    if (currentEnergy < energyCost) {
+      toast.error("Недостатньо енергії для дії!");
+      return; 
     }
     
     setIsLoading(true);
     await spendEnergy(energyCost);
 
-    let promptText = `My choice is: "${choice}". Also, every successful non-combat action should grant 5-10 XP via the {"type": "XP", "amount": ...} outcome.`;
+    // 3. Обробляємо відкладені нагороди, якщо вони є
+    if (pendingOutcomes && pendingOutcomes[choice]) {
+        const outcomeToProcess = pendingOutcomes[choice];
+        await processOutcome(outcomeToProcess);
+        setPendingOutcomes(null); 
+    }
+   
+    // 4. --- ОСНОВНА ЗМІНА ТУТ ---
+    // Формуємо промпт, включаючи в нього актуальну енергію ПІСЛЯ її витрати
+    const energyAfterAction = currentEnergy - energyCost;
+    let promptText = `My choice is: "${choice}". My character stats: Energy: ${energyAfterAction}.`;
+    
     if (isInCombat && enemy) {
-        promptText = `My character stats: HP ${playerData.currentHP}/${playerData.health}, ATK ${playerData.attack}, DEF ${playerData.defense}. My enemy is ${enemy.name} with ${enemy.maxHealth} max HP, ${enemy.attack} ATK, ${enemy.defense} DEF. My chosen action is: "${choice}". Calculate the result and narrate. If this attack defeats the enemy, you MUST include an XP reward: {"type": "XP", "amount": ${enemy.maxHealth}}`;
+        promptText = `My character stats: HP ${playerData.currentHP}/${playerData.health}, ATK ${playerData.attack}, DEF ${playerData.defense}, Energy: ${energyAfterAction}. My enemy is ${enemy.name} with ${enemy.maxHealth} max HP, ${enemy.attack} ATK, ${enemy.defense} DEF. My chosen action is: "${choice}". Calculate the result and narrate. If this attack defeats the enemy, you MUST include an XP reward: {"type": "XP", "amount": ${enemy.maxHealth}}`;
     }
     
     const newHistory = [...chatHistory, { role: "user", parts: [{ text: promptText }] }];
@@ -366,33 +468,53 @@ export default function TextAdventurePage() {
             if (parsedResponse.outcome) {
                 await processOutcome(parsedResponse.outcome);
             }
+            if (parsedResponse.choiceOutcomes) {
+                setPendingOutcomes(parsedResponse.choiceOutcomes);
+            } else {
+                setPendingOutcomes(null); // Очищуємо, якщо нових відкладених нагород немає
+            }
         } else { throw new Error("Invalid AI response structure. Full response: " + JSON.stringify(result)); }
+        setAdventureStep(prev => prev + 1);
     } catch (error: any) {
         console.error("!!! Critical Error in handleChoice !!!");
         console.error("Error Message:", error.message);
         console.error("Last raw response from AI before error:", lastRawResponse || "Not available");
-        setStory("Темрява згущується... Спробуй зробити інший вибір. (Сталася помилка. Перевірте консоль для деталей).");
+        setStory("Темрява згущується... Спробуй зробити інший вибір. (Сталася непередбачувана подія).");
     } finally {
         setIsLoading(false);
     }
-  }, [chatHistory, playerData, isInCombat, enemy, energy, spendEnergy, processOutcome, combatChoices]);
+  }, [chatHistory, playerData, isInCombat, enemy, energy, spendEnergy, processOutcome, combatChoices, pendingOutcomes]);
 
   return (
     <div style={styles.pageContainer}>
       <Toaster position="top-center" />
       {isLoading && ( <div style={styles.loadingOverlay as React.CSSProperties}><span>Доля вирішується...</span></div> )}
       
-      {/* FIX: Контейнер для логу подій */}
-      <div style={styles.logContainer}>
-        {eventLog.map(entry => (
-          <div key={entry.id} style={styles.logMessage}>{entry.message}</div>
-        ))}
-      </div>
+      {/* Кнопка для перегляду логу подій */}
+      <button style={styles.logButton} onClick={() => setIsLogVisible(true)}>
+        📜
+      </button>
+
+      {/* Модальне вікно (оверлей) для логу подій */}
+      {isLogVisible && (
+        <div style={styles.logContainer} onClick={() => setIsLogVisible(false)}>
+          <h3 style={{color: '#fff', textAlign: 'center', marginBottom: '20px'}}>Журнал подій</h3>
+          {eventLog.length > 0 ? eventLog.map(entry => (
+            <div key={entry.id} style={styles.logMessage}>{entry.message}</div>
+          )) : <p style={{textAlign: 'center', color: '#a7b3d9'}}>Журнал порожній.</p>}
+        </div>
+      )}
 
       <main style={styles.storyContainer}>
+        
+        {/* --- ОСНОВНА ЗМІНА ТУТ --- */}
+        {/* Панель стану ворога, яка з'являється тільки в бою */}
+        {isInCombat && <EnemyStatusBar enemy={enemy} stage={adventureStep} />}
+
         <div style={styles.storyContent}>
           <ReactMarkdown>{story}</ReactMarkdown>
-          {/* FIX: Відображення фінального звіту */}
+          
+          {/* Відображення фінального звіту */}
           {isGameOver && (
             <div style={{marginTop: '20px', borderTop: '1px solid #444', paddingTop: '20px'}}>
               <h3>Підсумок пригоди:</h3>
@@ -406,6 +528,7 @@ export default function TextAdventurePage() {
         </div>
       </main>
 
+      {/* Панель стану гравця, тепер з енергією */}
       <PlayerStatusBar playerData={playerData} />
 
       <footer style={styles.actionsContainer}>
@@ -414,6 +537,7 @@ export default function TextAdventurePage() {
               {choice}
           </button>
         ))}
+        
         {/* Кнопка повернення тепер доступна завжди */}
         <button style={styles.backButton} onClick={() => router.push('/home')} disabled={isLoading}>
           🏰 Завершити пригоду
