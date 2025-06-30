@@ -259,6 +259,23 @@ async function handleUnequip(item: MergedInventoryItem) {
             <Card className="page">
                 <div style={{display: "flex",flexDirection: "row",justifyContent: "center",alignItems: "center",marginBottom: -30,gap: "30px",padding: 10,color: "#fff"}}>
                   <p>{username}</p><p>Lv. {level}</p>
+                  <div
+                                    onClick={() => router.push('/home/profile')}
+                                    style={{
+                                        position: 'absolute',
+                                        right: '10px', // Відступ від правого краю
+                                        top: '8%',
+                                        transform: 'translateY(-60%)',
+                                        width: '50px', // Розмір квадрата
+                                        height: '30px', // Розмір квадрата
+                                        display: 'flex',
+                                        justifyContent: 'center',
+                                        alignItems: 'center',
+                                        cursor: 'pointer',
+                                        fontSize: '16px', // Розмір іконки
+                                    }}
+                                > ⚙️
+                                </div>
                 </div>
                 <div style={{display: "flex",flexDirection: "row",justifyContent: "center",alignItems: "center",fontSize: 10,gap: "10px",padding: 10,color: "#fff"}}>
                   <p>🔷 XP :</p>

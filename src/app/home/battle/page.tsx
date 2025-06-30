@@ -72,6 +72,7 @@ type Outcome =
   | { type: 'XP'; amount: number }
   | { 
       type: 'ITEM'; 
+      item_key: string;
       item_name: string; 
       item_type: string;
       sub_type: string;
@@ -219,6 +220,7 @@ export default function TextAdventurePage() {
           }
         }
         // In this example, the player gets XP immediately, but the dagger is only received if they choose to take it.
+        
 
         --- OUTCOME TYPES (Unchanged) ---
 
@@ -226,12 +228,14 @@ export default function TextAdventurePage() {
         -   Experience: {"type": "XP", "amount": ...}.
         - Initiate Battle: {"type": "BATTLE", "enemy": {"name": "...", "health": 30, "attack": 5, "defense": 2}}.
           - The "enemy" object MUST contain "name", "health", "attack", and "defense". All must be numbers, except "name".
-        -   Found Item: {"type": "ITEM", "item_name": "...", "item_type": "...", "sub_type": "...", "rarity": "common", "stats": {...}}.
-            -   RULES FOR ITEMS:
-                -   You are free to invent any creative "item_name".
-                -   You MUST classify it with a "sub_type".
-                -   "sub_type" MUST be a single, lowercase English word.
-                -   For now, the "rarity" for ALL generated items MUST be exactly "common".
+        - Found Item: {"type": "ITEM", "item_key": "...", "item_name": "...", "item_type": "...", "sub_type": "...", "rarity": "common", "stats": {...}}.
+          - RULES FOR ITEMS:
+                - You MUST generate a stable, English, snake_case "item_key". This key must be unique for each base item type (e.g., "health_potion", "iron_sword").
+                - You MUST also generate a translated "item_name" based on the user's language.
+                - You are free to invent any creative "item_name".
+                - You MUST classify it with a "sub_type".
+                - "sub_type" MUST be a single, lowercase English word.
+                - For now, the "rarity" for ALL generated items MUST be exactly "common".
         - Combat Turn: {"type": "COMBAT_TURN", "player_hp_change": -5, "enemy_hp_change": -10}.
           - "player_hp_change" and "enemy_hp_change" are REQUIRED and MUST be numbers (positive for healing, negative for damage).
         -   No special outcome: null.
@@ -297,16 +301,16 @@ export default function TextAdventurePage() {
               return { ...prevEnemy, health: newEnemyHP };
           });
           
-          // Подальша логіка перевірки перемоги/поразки залишається такою ж
+          // Логіка перевірки перемоги/поразки
           if (newEnemyHP <= 0) {
               toast.success(`Ви перемогли ${enemy?.name}!`);
-              setIsInCombat(false);
-              setEnemy(null);
+              setIsInCombat(false); 
+              setEnemy(null);      
           } else if (newPlayerHP <= 0) {
               toast.error("Вас перемогли...");
-              setIsInCombat(false);
-              setEnemy(null);
-              //  outcome для GAME_OVER
+              setIsInCombat(false); 
+              setEnemy(null);      
+              // outcome для GAME_OVER
               await processOutcome({ type: 'GAME_OVER', reason: 'Ви загинули в бою.' });
           }
         }
@@ -334,10 +338,10 @@ export default function TextAdventurePage() {
         }
         
       if (singleOutcome.type === 'ITEM') {
-        // 1. Отримуємо дані від AI
-        const { item_name, item_type, sub_type, rarity, stats } = singleOutcome;
+        // Отримуємо дані від AI
+        const { item_key, item_name, item_type, sub_type, rarity, stats } = singleOutcome;
 
-        // 2. Логіка пошуку зображення (залишається без змін)
+        // Логіка пошуку зображення
         const primaryTemplateKey = `${item_type}_${sub_type}_${rarity}`;
         const fallbackTemplateKey = `${item_type}_${sub_type}_common`;
         let imageUrl = null;
@@ -360,8 +364,9 @@ export default function TextAdventurePage() {
             }
         }
         
-        // 3. Викликаємо RPC, щоб отримати ID унікального предмету
+        // Викликаємо RPC, щоб отримати ID унікального предмету
         const { data: newItemId, error: createItemError } = await supabase.rpc('get_or_create_item', { 
+            p_item_key: item_key,
             p_name: item_name,
             p_item_type: item_type,
             p_sub_type: sub_type,
@@ -380,9 +385,6 @@ export default function TextAdventurePage() {
             return;
         }
 
-        // 4. --- ОСНОВНА ЗМІНА ТУТ ---
-        // Викликаємо нашу нову "розумну" RPC-функцію, щоб додати предмет в інвентар.
-        // Вона сама перевірить, чи потрібно створювати новий стак, чи додавати до існуючого.
         const { error: stackError } = await supabase.rpc('add_or_stack_item', {
           p_user_id: userId, // Передаємо як є (число)
           p_item_id: newItemId
@@ -394,7 +396,7 @@ export default function TextAdventurePage() {
             return; // Зупиняємо, якщо не вдалося додати в інвентар
         }
 
-        // 5. Показуємо сповіщення, якщо все пройшло успішно
+        // Показуємо сповіщення, якщо все пройшло успішно
         const message = `Знайдено: ${item_name}`;
         addToLog(message);
         updateSummary(item_name, 1);
@@ -407,11 +409,11 @@ export default function TextAdventurePage() {
   const handleChoice = useCallback(async (choice: string) => {
     if (!playerData || chatHistory.length === 0 || isGameOver) return;
 
-    // 1. Отримуємо найсвіжіше значення енергії
+    // Отримуємо найсвіжіше значення енергії
     const currentEnergy = energy;
     const energyCost = 1;
 
-    // 2. Якщо енергії недостатньо, просто показуємо повідомлення і виходимо
+    // Якщо енергії недостатньо, просто показуємо повідомлення і виходимо
     if (currentEnergy < energyCost) {
       toast.error("Недостатньо енергії для дії!");
       return; 
@@ -420,14 +422,13 @@ export default function TextAdventurePage() {
     setIsLoading(true);
     await spendEnergy(energyCost);
 
-    // 3. Обробляємо відкладені нагороди, якщо вони є
+    // Обробляємо відкладені нагороди, якщо вони є
     if (pendingOutcomes && pendingOutcomes[choice]) {
         const outcomeToProcess = pendingOutcomes[choice];
         await processOutcome(outcomeToProcess);
         setPendingOutcomes(null); 
     }
    
-    // 4. --- ОСНОВНА ЗМІНА ТУТ ---
     // Формуємо промпт, включаючи в нього актуальну енергію ПІСЛЯ її витрати
     const energyAfterAction = currentEnergy - energyCost;
     let promptText = `My choice is: "${choice}". My character stats: Energy: ${energyAfterAction}.`;
@@ -507,14 +508,11 @@ export default function TextAdventurePage() {
 
       <main style={styles.storyContainer}>
         
-        {/* --- ОСНОВНА ЗМІНА ТУТ --- */}
-        {/* Панель стану ворога, яка з'являється тільки в бою */}
         {isInCombat && <EnemyStatusBar enemy={enemy} stage={adventureStep} />}
 
         <div style={styles.storyContent}>
           <ReactMarkdown>{story}</ReactMarkdown>
           
-          {/* Відображення фінального звіту */}
           {isGameOver && (
             <div style={{marginTop: '20px', borderTop: '1px solid #444', paddingTop: '20px'}}>
               <h3>Підсумок пригоди:</h3>
@@ -528,7 +526,6 @@ export default function TextAdventurePage() {
         </div>
       </main>
 
-      {/* Панель стану гравця, тепер з енергією */}
       <PlayerStatusBar playerData={playerData} />
 
       <footer style={styles.actionsContainer}>
@@ -538,7 +535,6 @@ export default function TextAdventurePage() {
           </button>
         ))}
         
-        {/* Кнопка повернення тепер доступна завжди */}
         <button style={styles.backButton} onClick={() => router.push('/home')} disabled={isLoading}>
           🏰 Завершити пригоду
         </button>
