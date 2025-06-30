@@ -76,7 +76,8 @@ const styles: { [key: string]: CSSProperties } = {
     animation: 'loading-shimmer 2s infinite linear',
   },
   versionText: {
-    position: 'absolute',
+    width: '100%',
+    marginTop: '20px',
     bottom: '10px',
     right: '15px',
     color: 'rgba(255, 255, 255, 0.3)',
@@ -123,9 +124,8 @@ export default function InitDataPage() {
         <div style={styles.progressBar}>
           <div style={styles.progressBarInner}></div>
         </div>
+        <div style={styles.versionText}>v0.31.4</div>
       </div>
-      
-      <div style={styles.versionText}>v0.31.4</div> {/* Напис з версією */}
 
       {/* Анімація для шкали завантаження */}
       <style>{`
