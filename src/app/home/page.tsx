@@ -33,6 +33,14 @@ type SelectedItemState = MergedInventoryItem & {
   mode: "inventory" | "equipped";
 };
 
+declare global {
+  interface Window {
+    Telegram: {
+      WebApp: any;
+    };
+  }
+}
+
 export default function HomePage() {
   const initDataState = useSignal(initData.state);
   const userId = initDataState?.user?.id;
@@ -186,10 +194,55 @@ async function handleUnequip(item: MergedInventoryItem) {
     setSelectedItem(null);
   }
 
-  const handleRefillWithStars = () => {
-    console.log("Trying to purchase energy with Telegram Stars...");
-    toast.success("Функціонал поповнення в розробці!");
-    closeEnergyModal();
+  const handleRefillWithStars = async () => {
+    closeEnergyModal(); // Одразу закриваємо вікно
+
+    // Перевіряємо, чи доступний об'єкт Telegram WebApp
+    if (!window.Telegram?.WebApp) {
+      toast.error("Функція оплати недоступна.");
+      console.error("Telegram WebApp not found.");
+      return;
+    }
+
+    const TWA = window.Telegram.WebApp;
+
+    // --- Параметри покупки ---
+    const starsAmount = 5; // Приклад: скільки зірок коштує поповнення
+    
+    // Показуємо нативне вікно підтвердження від Telegram
+    TWA.showConfirm(`Поповнити енергію за ${starsAmount} ⭐️?`, async (isConfirmed: boolean) => {
+      if (isConfirmed) {
+        // Якщо гравець натиснув "Так"
+        TWA.showProgress(); // Показуємо індикатор завантаження
+
+        try {
+          // ТУТ БУДЕ ВИКЛИК ВАШОГО БЕКЕНДУ
+          // Наприклад, через Supabase Edge Function
+          const { error } = await supabase.functions.invoke('process-star-payment', {
+            body: { stars: starsAmount }
+          });
+
+          if (error) {
+            throw new Error(error.message);
+          }
+          
+          // Якщо все пройшло успішно на бекенді
+          TWA.hideProgress();
+          toast.success("Енергію поповнено!");
+          
+          // Оновлюємо дані, щоб побачити нову енергію
+          // Вам потрібно буде додати функцію syncEnergy до вашого useEnergy хука
+          // і повернути її, щоб викликати звідси.
+          // Або просто викликати loadData(), якщо він оновлює енергію.
+          await loadData(); 
+
+        } catch (err: any) {
+          TWA.hideProgress();
+          TWA.showAlert(`Помилка оплати: ${err.message}`);
+          console.error("Payment processing error:", err);
+        }
+      }
+    });
   };
 
   const renderContent = () => {
