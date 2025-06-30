@@ -1,19 +1,18 @@
-"use client";
+'use client';
 
 import React, { useEffect, useState, CSSProperties } from "react";
-import { Link, Placeholder } from '@telegram-apps/telegram-ui';
+import { Link, Placeholder, Card, Progress } from '@telegram-apps/telegram-ui'; // Progress також потрібно імпортувати
 import { Page } from "@/components/Page";
-import { Progress, Card } from "@telegram-apps/telegram-ui";
 import { useSignal, initData } from "@telegram-apps/sdk-react";
 import { supabase } from "@/lib/supabaseClient";
-import { useEnergy } from '@/context/EnergyContext'; // <-- ЗМІНА: Наш глобальний хук енергії
-import { getRequiredExp } from "@/utils/experience"; // <-- ЗМІНА: Функція для розрахунку XP
-import { calculateVipLevel } from "@/utils/vip"; // <-- ЗМІНА: Наша нова функція для VIP
+import { useEnergy } from '@/context/EnergyContext';
+import { getRequiredExp } from "@/utils/experience";
+import { calculateVipLevel } from "@/utils/vip";
+import { useRouter } from 'next/navigation';
 
 export default function ProfilePage() {
-    // --- ЗМІНА: Підключення до глобального стану енергії ---
+    const router = useRouter(); // <-- 2. Ініціалізуємо роутер
     const { energy } = useEnergy(); 
-    
     const initDataState = useSignal(initData.state);
     const user = initDataState?.user;
     const userId = user?.id;
@@ -53,7 +52,7 @@ export default function ProfilePage() {
     const vipData = calculateVipLevel(userData.atl_balance);
 
     return (
-        <Page>
+        <Page back={() => router.push('/home')}> 
           <Placeholder>
                 <div style={{ textAlign: 'center', animation: "fadeIn 0.5s ease forwards", marginBottom: '20px', width: '50%' }}>
                     {userAvatar && <img src={userAvatar} alt="avatar" style={styles.avatar} />}
