@@ -68,7 +68,7 @@ export const DesktopFallbackPage = () => {
                 objectFit="contain" 
             />
         </div>
-        <h1 style={styles.title}>Looks like you've chosen the wrong path...</h1>
+        <h1 style={styles.title}>Looks like you chosen the wrong path...</h1>
         <p style={styles.subtitle}>
           Ця пригода доступна лише в додатку Telegram.
         </p>
