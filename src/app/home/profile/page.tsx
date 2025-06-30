@@ -53,7 +53,7 @@ export default function ProfilePage() {
     const vipData = calculateVipLevel(userData.atl_balance);
 
     return (
-        <Page back>
+        <Page>
           <Placeholder>
                 <div style={{ textAlign: 'center', animation: "fadeIn 0.5s ease forwards", marginBottom: '20px', width: '50%' }}>
                     {userAvatar && <img src={userAvatar} alt="avatar" style={styles.avatar} />}
