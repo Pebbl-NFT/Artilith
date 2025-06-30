@@ -46,7 +46,7 @@ function RootInner({ children }: PropsWithChildren) {
     const initDataUser = useSignal(initData.user);
     console.log('initDataUser:', initDataUser);
 
-    // <-- НАШІ ЗМІНИ (2/3): Отримуємо userId
+    // <-- НАШІ ЗМІНИ (2/3): Отримуємо userId (у вас це вже було, і це правильно)
     const userId = initDataUser?.id;
 
     useEffect(() => {

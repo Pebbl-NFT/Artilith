@@ -1,17 +1,26 @@
 // src/providers/EnergyProvider.tsx
 "use client";
 import React, { useState, useEffect, useCallback, useMemo, ReactNode } from 'react';
-import { useSignal, initData } from '@telegram-apps/sdk-react';
-import { supabase } from '@/lib/supabaseClient';
-import { EnergyContext } from '@/context/EnergyContext'; // Імпортуємо наше "сховище"
+import { SupabaseClient } from '@supabase/supabase-js'; // Імпортуємо тип
+import { EnergyContext } from '@/context/EnergyContext';
 import { getAndUpdateUserEnergy } from '@/utils/getAndUpdateUserEnergy';
 import { reduceEnergyRPC } from '@/utils/reduceEnergy';
 
 const REGEN_INTERVAL_MS = 10 * 60 * 1000;
 
-export const EnergyProvider = ({ children }: { children: ReactNode }) => {
-  const initDataState = useSignal(initData.state);
-  const userId = initDataState?.user?.id;
+// --- ОСНОВНА ЗМІНА №1: Описуємо нові пропси ---
+interface EnergyProviderProps {
+  children: ReactNode;
+  userId: number | undefined;
+  supabase: SupabaseClient;
+}
+
+export const EnergyProvider = ({ children, userId, supabase }: EnergyProviderProps) => {
+  
+  // --- ОСНОВНА ЗМІНА №2: Видаляємо отримання userId та supabase звідси ---
+  // const initDataState = useSignal(initData.state);
+  // const userId = initDataState?.user?.id;
+  // Тепер ми отримуємо їх з пропсів.
 
   const [energy, setEnergy] = useState(0);
   const [maxEnergy, setMaxEnergy] = useState(20);
@@ -21,12 +30,15 @@ export const EnergyProvider = ({ children }: { children: ReactNode }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [timeToNext, setTimeToNext] = useState(0);
 
-  // Вся ваша логіка з syncEnergy, useEffect[timer], spendEnergy, etc.
+  // Всі інші функції (syncEnergy, useEffect, spendEnergy і т.д.)
+  // залишаються без змін, оскільки вони вже використовують змінні `userId` та `supabase`.
+  
   const syncEnergy = useCallback(async () => {
     if (!userId) {
         setIsLoading(false);
         return;
     };
+    // Ця функція тепер буде використовувати userId, переданий через пропси
     const { currentEnergy, maxEnergy, lastUpdated } = await getAndUpdateUserEnergy(userId);
     setEnergy(currentEnergy);
     setMaxEnergy(maxEnergy);
@@ -37,7 +49,8 @@ export const EnergyProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     syncEnergy();
   }, [syncEnergy]);
-
+  
+  // ... і так далі для всієї іншої логіки ...
   useEffect(() => {
     if (isLoading || !lastUpdated || energy >= maxEnergy) {
         setTimeToNext(0);
@@ -83,7 +96,6 @@ export const EnergyProvider = ({ children }: { children: ReactNode }) => {
     return `${minutes}:${seconds}`;
   }, [timeToNext]);
 
-  // Збираємо все в один об'єкт, який відповідає типу EnergyContextType
   const value = {
     energy,
     maxEnergy,
@@ -96,6 +108,5 @@ export const EnergyProvider = ({ children }: { children: ReactNode }) => {
     timeToNextFormatted
   };
 
-  // Надаємо ці значення всім дочірнім компонентам
   return <EnergyContext.Provider value={value}>{children}</EnergyContext.Provider>;
 };
