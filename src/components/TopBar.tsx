@@ -91,7 +91,7 @@ export default function TopBar({ points }: TopBarProps) {
       </div>
       
       {/* Блок енергії */}
-      <HeroEnergyAutoRegeneration userId={userId} supabase={supabase} />
+      <HeroEnergyAutoRegeneration />
     </div>
   );
 }
