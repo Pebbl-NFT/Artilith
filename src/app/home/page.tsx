@@ -5,6 +5,7 @@ import Image from "next/image";
 import { List, Placeholder, Card } from "@telegram-apps/telegram-ui";
 import { useSignal, initData } from "@telegram-apps/sdk-react";
 import { Toaster, toast } from "react-hot-toast";
+import { useRouter } from 'next/navigation';
 
 // --- КОМПОНЕНТИ ---
 import { Page } from "@/components/Page";
@@ -25,6 +26,7 @@ import { updateUserPoints } from "@/hooks/useUserPoints";
 import { getPlayerStats } from "@/utils/getPlayerStats";
 
 // --- ЗОБРАЖЕННЯ ---
+import shopbg from '../_assets/shopbg.jpg';
 import citybg from '../_assets/citybg.jpg';
 import blacksmithbg from '../_assets/blacksmithbg.jpg';
 import alleyofheroesnbg from '../_assets/alleyofheroesnbg.jpg';
@@ -42,6 +44,7 @@ declare global {
 }
 
 export default function HomePage() {
+  const router = useRouter();
   const initDataState = useSignal(initData.state);
   const userId = initDataState?.user?.id;
 
@@ -304,11 +307,18 @@ async function handleUnequip(item: MergedInventoryItem) {
 
       case "city":
         return (
-          <Page back>
+          <Page back={() => setActiveTab('home')}>
             <Placeholder style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", animation: "fadeIn 1s ease forwards", gap: "20px" }}>
+              
+              {/* --- 3. ОСНОВНА ЗМІНА: Використовуємо router.push --- */}
+              <div onClick={() => router.push('/trade')} className="page" style={{ backgroundImage: `url(${shopbg.src})`, backgroundSize: 'cover', backgroundPosition: 'center', color: 'white', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                <h1>ТОРГІВЛЯ</h1>
+              </div>
+              
               <div onClick={() => setActiveTab("blacksmith")} className="page" style={{ backgroundImage: `url(${blacksmithbg.src})`, backgroundSize: 'cover', backgroundPosition: 'center', color: 'white', display: 'flex', justifyContent: 'center', alignItems: 'center' }}><h1>КОВАЛЬ</h1></div>
               <div onClick={() => setActiveTab("guild")} className="page" style={{ backgroundImage: `url(${citybg.src})`, backgroundSize: 'cover', backgroundPosition: 'center', color: 'white', display: 'flex', justifyContent: 'center', alignItems: 'center' }}><h1>ГІЛЬДІЯ</h1></div>
               <div onClick={() => setActiveTab("alleyofheroes")} className="page" style={{ backgroundImage: `url(${alleyofheroesnbg.src})`, backgroundSize: 'cover', backgroundPosition: 'center', color: 'white', display: 'flex', justifyContent: 'center', alignItems: 'center' }}><h1>АЛЕЯ ГЕРОЇВ</h1></div>
+
             </Placeholder>
           </Page>
         );
@@ -326,7 +336,7 @@ async function handleUnequip(item: MergedInventoryItem) {
   };
 
   return (
-    <Page back={false}>
+    <Page>
       <List>
         <TopBar points={points} />
         <div style={{ paddingBottom: 100 }}>{renderContent()}</div>

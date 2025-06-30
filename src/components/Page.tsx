@@ -1,31 +1,17 @@
+// src/components/Page.tsx
 'use client';
+import React, { type PropsWithChildren } from 'react';
+import { useNativeBackButton } from '@/hooks/useNativeBackButton'; // Імпортуємо наш хук
 
-import { backButton } from '@telegram-apps/sdk-react';
-import { PropsWithChildren, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+interface PageProps {
+  back?: () => void;
+  children: React.ReactNode;
+}
 
-export function Page({ children, back = true }: PropsWithChildren<{
-  /**
-   * True if it is allowed to go back from this page.
-   * @default true
-   */
-  back?: boolean
-}>) {
-  const router = useRouter();
+export function Page({ back, children }: PageProps) {
+  // Викликаємо хук для керування нативною кнопкою "Назад" Telegram
+  useNativeBackButton(back);
 
-  useEffect(() => {
-    if (back) {
-      backButton.show();
-    } else {
-      backButton.hide();
-    }
-  }, [back]);
-
-  useEffect(() => {
-    return backButton.onClick(() => {
-      router.back();
-    });
-  }, [router]);
-
+  // Компонент просто повертає своїх "дітей" без додаткової обгортки
   return <>{children}</>;
 }
