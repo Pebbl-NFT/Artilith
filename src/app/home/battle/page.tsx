@@ -7,7 +7,6 @@ import { supabase } from '@/lib/supabaseClient';
 import { Toaster, toast } from "react-hot-toast";
 import { useEnergy } from '@/context/EnergyContext';
 import { getPlayerStats } from '@/utils/getPlayerStats';
-import { addInventoryItem } from '@/hooks/useItemActions';
 import { fetchInventory } from '@/hooks/useInventory';
 import { EnemyStatusBar } from '@/components/Adventure/EnemyStatusBar';
 
@@ -269,11 +268,11 @@ export default function TextAdventurePage() {
   }, [playerData, chatHistory.length]);
 
   const processOutcome = useCallback(async (outcomeToProcess: Outcome | Outcome[]) => {
-    if (!outcomeToProcess || !userId || !playerData) return;
-    const outcomes = Array.isArray(outcomeToProcess) ? outcomeToProcess : [outcomeToProcess];
+    if (!outcomeToProcess || !userId || !playerData) return;
+    const outcomes = Array.isArray(outcomeToProcess) ? outcomeToProcess : [outcomeToProcess];
 
-    for (const singleOutcome of outcomes) {
-        if (!singleOutcome) continue;
+    for (const singleOutcome of outcomes) {
+        if (!singleOutcome) continue;
 
         if (singleOutcome.type === 'BATTLE') {
             toast(`На вас напав ${singleOutcome.enemy.name}!`, { icon: '⚔️' });
@@ -283,37 +282,40 @@ export default function TextAdventurePage() {
         }
 
         if (singleOutcome.type === 'COMBAT_TURN') {
-          if (!playerData || !enemy) return;
+          if (!playerData || !enemy) return;
 
-          const playerChange = singleOutcome.player_hp_change ?? 0;
-          const enemyChange = singleOutcome.enemy_hp_change ?? 0;
+          const playerChange = singleOutcome.player_hp_change ?? 0;
+          const enemyChange = singleOutcome.enemy_hp_change ?? 0;
 
-          const newPlayerHP = Math.max(0, playerData.currentHP + playerChange);
-          const newEnemyHP = Math.max(0, enemy.health + enemyChange);
+          const newPlayerHP = Math.max(0, playerData.currentHP + playerChange);
+          const newEnemyHP = Math.max(0, enemy.health + enemyChange);
 
-          setPlayerData(prevData => {
-              if (!prevData) return null;
-              return { ...prevData, currentHP: newPlayerHP };
-          });
+          setPlayerData(prevData => {
+              if (!prevData) return null;
+              return { ...prevData, currentHP: newPlayerHP };
+          });
 
-          setEnemy(prevEnemy => {
-              if (!prevEnemy) return null;
-              return { ...prevEnemy, health: newEnemyHP };
-          });
-          
-          // Логіка перевірки перемоги/поразки
-          if (newEnemyHP <= 0) {
-              toast.success(`Ви перемогли ${enemy?.name}!`);
-              setIsInCombat(false); 
-              setEnemy(null);      
-          } else if (newPlayerHP <= 0) {
-              toast.error("Вас перемогли...");
-              setIsInCombat(false); 
-              setEnemy(null);      
-              // outcome для GAME_OVER
-              await processOutcome({ type: 'GAME_OVER', reason: 'Ви загинули в бою.' });
-          }
-        }
+          setEnemy(prevEnemy => {
+              if (!prevEnemy) return null;
+              return { ...prevEnemy, health: newEnemyHP };
+          });
+          
+          // --- ОСЬ ТУТ ВИПРАВЛЕННЯ ---
+          // Логіка перевірки перемоги/поразки
+          if (newEnemyHP <= 0) {
+              toast.success(`Ви перемогли ${enemy?.name}!`);
+              setIsInCombat(false); 
+              // Повністю очищуємо дані про ворога
+              setEnemy(null);      
+          } else if (newPlayerHP <= 0) {
+              toast.error("Вас перемогли...");
+              setIsInCombat(false); 
+              // І тут також очищуємо дані про ворога
+              setEnemy(null);      
+              // Обробка кінця гри
+              await processOutcome({ type: 'GAME_OVER', reason: 'Ви загинули в бою.' });
+          }
+        }
         
          if (singleOutcome.type === 'REWARD' || singleOutcome.type === 'XP') {
             const statName = singleOutcome.type === 'XP' ? 'experience' : singleOutcome.item;
