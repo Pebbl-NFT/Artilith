@@ -156,45 +156,34 @@ async function handleUnequip(item: MergedInventoryItem) {
     await loadData();
 }
 
-  async function handleDismantle(item: MergedInventoryItem) {
-    if (!userId) return;
+  function handleGoToTrade() {
+    router.push('/trade');
+  }
 
-    // Перевіряємо кількість предметів у стаку
-    if (item.quantity > 1) {
-      // Якщо предметів більше одного, просто зменшуємо кількість на 1
-      const { error } = await supabase
-        .from('inventory')
-        .update({ quantity: item.quantity - 1 })
-        .eq('id', item.id);
-      
-      if (error) {
-        toast.error("Помилка продажу предмета!");
-        return;
-      }
-
-    } else {
-      // Якщо предмет останній у стаку, видаляємо запис повністю
-      const { error } = await supabase
-        .from('inventory')
-        .delete()
-        .eq('id', item.id);
-
-      if (error) {
-        toast.error("Помилка продажу предмета!");
-        return;
-      }
+  async function handleCancelListing(item: MergedInventoryItem) {
+    if (!userId) {
+      toast.error("Не вдалося визначити користувача.");
+      return;
     }
-    const dismantleReward = 15;
-    if (dismantleReward > 0) {
-        const newPoints = points + dismantleReward;
-        await updateUserPoints(String(userId), newPoints);
-        setPoints(newPoints);
-        toast.success(`${item.name} розібрано. Отримано ${dismantleReward} уламків!`);
+
+    // Одразу закриваємо вікно для кращого UX
+    setSelectedItem(null); 
+    toast.loading("Скасовуємо лот...");
+
+    const { error } = await supabase.rpc('cancel_market_listing', {
+      p_inventory_id: item.id, // ID предмета з інвентаря
+      p_user_id: String(userId)  // ID поточного гравця
+    });
+
+    toast.dismiss();
+    if (error) {
+      toast.error(`Помилка: ${error.message}`);
     } else {
-        toast.success(`${item.name} розібрано.`);
+      toast.success("Лот знято з продажу!");
     }
+    
+    // Оновлюємо всі дані на сторінці, щоб побачити зміни
     await loadData();
-    setSelectedItem(null);
   }
 
   const handleRefillWithStars = async () => {
@@ -367,8 +356,9 @@ async function handleUnequip(item: MergedInventoryItem) {
                 mode={selectedItem.mode}
                 onEquipRequest={handleEquip}
                 onUnequipRequest={handleUnequip}
-                onSellRequest={handleDismantle}
+                onSellRequest={handleGoToTrade}
                 onClose={() => setSelectedItem(null)}
+                onCancelSellRequest={handleCancelListing}
               />
             </div>
           </div>

@@ -3,38 +3,36 @@ import React from "react";
 import Image from 'next/image';
 import { MergedInventoryItem } from "@/hooks/useInventory";
 
-// Мапінг для відображення назв рідкості
 const rarityDisplayName: Record<string, string> = {
   common: "Звичайний",
   uncommon: "Незвичайний",
   rare: "Рідкісний",
   epic: "Епічний",
   legendary: "Легендарний",
-  // Додайте інші типи рідкості за потреби
 };
 
-// FIX: Пропси оновлено для нової логіки
+// 1. === Додаємо новий пропс onCancelSellRequest ===
 type ItemCardProps = {
   mode: "inventory" | "equipped";
   item: MergedInventoryItem;
   onEquipRequest: (item: MergedInventoryItem) => void;
   onUnequipRequest: (item: MergedInventoryItem) => void;
   onSellRequest: (item: MergedInventoryItem) => void;
-  onClose: () => void; // Додано пропс для закриття
+  onCancelSellRequest: (item: MergedInventoryItem) => void; // Новий пропс
+  onClose: () => void;
 };
 
-// Стилі для кнопок
 const buttonStyle = (type: 'primary' | 'danger') => ({
   backgroundColor: type === 'primary' ? "rgba(81, 81, 85, 0.4)" : "rgba(81, 81, 85, 0.4)",
   border: "none",
   padding: "10px 20px",
-  fontSize: "clamp(0.9rem, 2.5vw, 1rem)", // Адаптивний розмір шрифту
+  fontSize: "clamp(0.9rem, 2.5vw, 1rem)",
   color: "#fff",
   borderRadius: "28px",
   cursor: "pointer",
   transition: "all 0.2s ease",
-  width: '133px', // Задаємо фіксовану ширину
-  height: '35px', // і висоту
+  width: '133px',
+  height: '35px',
   fontWeight: 'bold',
   textTransform: 'uppercase' as const,
   display: 'flex',
@@ -48,7 +46,8 @@ export const ItemCard: React.FC<ItemCardProps> = ({
   onEquipRequest,
   onUnequipRequest,
   onSellRequest,
-  onClose, // Отримуємо функцію закриття
+  onCancelSellRequest, // Отримуємо новий пропс
+  onClose,
 }) => {
   if (!item) return null;
 
@@ -64,7 +63,7 @@ export const ItemCard: React.FC<ItemCardProps> = ({
     <div
       onClick={(e) => e.stopPropagation()}
       style={{
-        position: 'relative', // Потрібно для абсолютного позиціонування кнопки закриття
+        position: 'relative',
         backgroundImage: `url('/bg/Cardbg1.png')`,
         backgroundSize: 'cover',
         backgroundPosition: 'center',
@@ -81,42 +80,42 @@ export const ItemCard: React.FC<ItemCardProps> = ({
         justifyContent: 'space-between'
       }}
     >
-      {/* FIX: Додано кнопку закриття (хрестик) */}
       <button
         onClick={onClose}
         style={{
-            position: 'absolute',
-            top: '18px',
-            right: '35px',
-            background: 'rgba(0, 0, 0, 0.33)',
-            borderRadius: '60px',
-            color: 'white',
-            width: '20px',
-            height: '35px',
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            fontSize: '1.4rem',
-            lineHeight: '1',
-            zIndex: 10,
+          position: 'absolute',
+          top: '18px',
+          right: '35px',
+          background: 'rgba(0, 0, 0, 0.33)',
+          borderRadius: '60px',
+          color: 'white',
+          width: '20px',
+          height: '35px',
+          cursor: 'pointer',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          fontSize: '1.4rem',
+          lineHeight: '1',
+          zIndex: 10,
         }}
         aria-label="Закрити"
-    >
+      >
         &times;
-    </button>
+      </button>
 
       <div>
         <div 
           className={frameClasses}
-          style={{ width: '50%', margin: '30px auto',borderRadius:'20px' }} // Задаємо розмір та центруємо рамку
+          style={{ width: '50%', margin: '30px auto',borderRadius:'20px', position: 'relative' }} // Додано position: relative
         >
+          {item.is_listed && <div style={{position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontWeight: 'bold', borderRadius: '20px'}}>На продажі</div>}
           {item.image_url ? (
             <Image
               src={item.image_url}
               alt={item.name}
-              fill // Оновлений синтаксис
-              style={{ objectFit: 'contain',borderRadius:'20px' }} // padding вже є в .item-frame
+              fill
+              style={{ objectFit: 'contain',borderRadius:'20px' }}
             />
           ) : <div style={{width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '5rem', opacity: '0.5'}}>❓</div>}
         </div>
@@ -180,15 +179,33 @@ export const ItemCard: React.FC<ItemCardProps> = ({
       </div>
 
       <div style={{ marginLeft:'22px', marginTop: '20px', display: 'flex', flexDirection: 'row', gap: '33px' }}>
-        {mode === 'inventory' && onEquipRequest && isEquippable && (
-          <button style={buttonStyle('primary')} onClick={() => onEquipRequest(item)}>Спорядити</button>
-        )}
+    {mode === 'inventory' && onEquipRequest && isEquippable && (
+        <button 
+            style={{...buttonStyle('primary'), opacity: item.is_listed ? 0.5 : 1}} 
+            onClick={() => onEquipRequest(item)}
+            disabled={item.is_listed}
+        >
+            {/* === ЗМІНА ТУТ === */}
+            {/* Змінюємо текст кнопки, якщо предмет на продажі */}
+            {item.is_listed ? 'Продаж' : 'Спорядити'}
+        </button>
+    )}
 
-        {mode === 'equipped' && onUnequipRequest && (
-            <button style={buttonStyle('primary')} onClick={() => onUnequipRequest(item)}>Зняти</button>
-        )}
-        <button style={buttonStyle('danger')} onClick={() => onSellRequest(item)}>Продати</button>
-      </div>
+    {mode === 'equipped' && onUnequipRequest && (
+        <button style={buttonStyle('primary')} onClick={() => onUnequipRequest(item)}>Зняти</button>
+    )}
+
+    {/* Ця логіка залишається без змін */}
+    {item.is_listed ? (
+        <button style={buttonStyle('danger')} onClick={() => onCancelSellRequest(item)}>
+            Скасувати
+        </button>
+    ) : (
+        <button style={buttonStyle('danger')} onClick={() => onSellRequest(item)}>
+            Продати
+        </button>
+    )}
+</div>
     </div>
   );
 };

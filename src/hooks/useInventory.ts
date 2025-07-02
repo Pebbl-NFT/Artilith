@@ -1,31 +1,34 @@
 import { supabase } from "@/lib/supabaseClient";
 
-// FIX: Додаємо 'sub_type' до інтерфейсу предмета в інвентарі
+
 export interface MergedInventoryItem {
-  id: number; 
-  equipped: boolean;
-  upgrade_level: number;
-  quantity: number;
-  item_id: number;
-  name: string;
-  item_type: string;
-  sub_type: string | null; // <-- ОСНОВНА ЗМІНА 1
-  rarity: string;
-  stats: any; 
-  image_url: string | null;
+  id: number;
+  equipped: boolean;
+  upgrade_level: number;
+  quantity: number;
+  item_id: number;
+  name: string;
+  item_type: string;
+  sub_type: string | null;
+  rarity: string;
+  stats: any;
+  image_url: string | null;
+  item_key: string | null;
+  is_listed: boolean;
 }
 
-// FIX: Додаємо 'sub_type' до типу для внутрішнього запиту
+
 type InventoryRow = {
   id: number;
-  equipped: boolean;
-  upgrade_level: number;
-  quantity: number;
+  equipped: boolean;
+  upgrade_level: number;
+  quantity: number;
+  is_listed: boolean;
   items: {
     id: number;
     name: string;
     item_type: string;
-    sub_type: string | null; // <-- ОСНОВНА ЗМІНА 2
+    sub_type: string | null; 
     rarity: string;
     stats: any;
     image_url: string | null;
@@ -33,35 +36,36 @@ type InventoryRow = {
 };
 
 export const fetchInventory = async (userId: string): Promise<MergedInventoryItem[]> => {
-  if (!userId) return [];
+  if (!userId) return [];
 
-  // FIX: Додаємо 'sub_type' до select-запиту
-  const { data, error } = await supabase
-    .from("inventory")
-    .select<string, InventoryRow>(`
-      id, equipped, upgrade_level, quantity,
-      items ( id, name, item_type, sub_type, rarity, stats, image_url ) 
-    `) // <-- ОСНОВНА ЗМІНА 3
-    .eq("user_id", String(userId));
+  const { data, error } = await supabase
+    .from("inventory")
+    .select<string, any>(`
+      id, equipped, upgrade_level, quantity, is_listed,
+      items ( id, name, item_type, sub_type, rarity, stats, image_url ) 
+    `) 
+    .eq("user_id", String(userId));
 
-  if (error) {
-    console.error("Помилка при завантаженні інвентаря:", error.message);
-    return [];
-  }
+  if (error) {
+    console.error("Помилка при завантаженні інвентаря:", error.message);
+    return [];
+  }
   
-  return data
-    .filter((entry): entry is InventoryRow & { items: NonNullable<InventoryRow['items']> } => entry.items !== null)
-    .map((entry) => ({
-      id: entry.id,
-      equipped: entry.equipped,
-      upgrade_level: entry.upgrade_level,
-      quantity: entry.quantity,
-      item_id: entry.items.id,
-      name: entry.items.name,
-      item_type: entry.items.item_type,
-      sub_type: entry.items.sub_type, // <-- ОСНОВНА ЗМІНА 4
-      rarity: entry.items.rarity,
-      stats: entry.items.stats,
-      image_url: entry.items.image_url,
-    }));
+  return data
+    .filter((entry) => entry.items !== null)
+    .map((entry) => ({
+      id: entry.id,
+      equipped: entry.equipped,
+      upgrade_level: entry.upgrade_level,
+      quantity: entry.quantity,
+      item_id: entry.items.id,
+      name: entry.items.name,
+      item_type: entry.items.item_type,
+      sub_type: entry.items.sub_type,
+      rarity: entry.items.rarity,
+      stats: entry.items.stats,
+      image_url: entry.items.image_url,
+      item_key: null, 
+      is_listed: entry.is_listed,
+    }));
 };
