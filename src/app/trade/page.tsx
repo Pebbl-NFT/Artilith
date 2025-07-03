@@ -54,14 +54,21 @@ export default function TradePage() {
 
         const { data: listingsData, error: listingsError } = await supabase
             .from('market_listings')
-            .select(`*, items ( * )`) // <-- Запитуємо всі поля з items
+            .select(`*, items!market_listings_item_id_fkey ( * )`)
             .eq('is_active', true)
             .neq('seller_id', String(userId))
             .order('created_at', { ascending: false });
+            console.log('Дані з Supabase:', listingsData);
+            console.error('Помилка з Supabase:', listingsError);
 
-        if (listingsData) {
-            const transformedData = listingsData.map(l => ({...l, items: l.items[0]})).filter(Boolean);
-            setListings(transformedData as any);
+        if (listingsError) {
+            console.error("Помилка завантаження лотів:", listingsError);
+            toast.error("Не вдалося завантажити лоти.");
+        } else if (listingsData) {
+            // Просто передаємо дані напряму, оскільки їх структура вже правильна.
+            // Додатково відфільтруємо лоти, у яких з якоїсь причини відсутній предмет.
+            const validListings = listingsData.filter(listing => listing.items);
+            setListings(validListings as MarketListing[]);
         }
 
         if (view === 'sell') {
@@ -220,10 +227,13 @@ export default function TradePage() {
 
 // --- ОНОВЛЕНИЙ КОМПОНЕНТ-АДАПТЕР ---
 const MarketListingCard = ({ listing, onClick }: { listing: MarketListing; onClick: () => void }) => {
-    // Перетворюємо об'єкт лота (listing.items) на щось, що зрозуміє InventoryItemSlot
+    if (!listing.items) {
+        return null; 
+    }
+    
     const itemForSlot: MergedInventoryItem = {
         id: listing.items.id,
-        item_id: listing.items.id, // or use listing.items.item_id if available
+        item_id: listing.items.id,
         name: listing.items.name,
         image_url: listing.items.image_url ?? '',
         rarity: listing.items.rarity,
@@ -234,7 +244,7 @@ const MarketListingCard = ({ listing, onClick }: { listing: MarketListing; onCli
         equipped: false,
         quantity: 1,
         upgrade_level: 0,
-        is_listed: true, // Mark as listed since it's on the market
+        is_listed: true,
     };
     
     return (

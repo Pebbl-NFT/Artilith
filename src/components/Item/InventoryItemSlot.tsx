@@ -10,41 +10,36 @@ export interface InventoryItemSlotProps {
 }
 
 const InventoryItemSlot: React.FC<InventoryItemSlotProps> = ({ item, onClick, price }) => {
-  // --- СТИЛІ ---
-
-  // Стиль для рамки, щоб вона могла бути батьківським елементом для оверлею
   const frameStyle: React.CSSProperties = {
-    position: 'relative', // Це обов'язково для позиціонування дочірнього оверлею
+    position: 'relative',
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
     overflow: 'hidden',
   };
 
-  // Стиль для самої плашки "На продажі"
   const saleOverlayStyle: React.CSSProperties = {
     position: 'absolute',
-    top: '50%',
+    top: '80%',
     left: '50%',
     transform: 'translate(-50%, -50%) rotate(-10deg)',
     width: '120%',
     padding: '5px 0',
     backgroundColor: 'rgba(30, 30, 30, 0.85)',
     backdropFilter: 'blur(2px)',
-    WebkitBackdropFilter: 'blur(2px)', // для підтримки Safari
+    WebkitBackdropFilter: 'blur(2px)',
     color: '#fff',
     textAlign: 'center',
-    fontSize: '14px',
+    fontSize: '10px',
     fontWeight: 'bold',
     textTransform: 'uppercase',
     letterSpacing: '1.5px',
     borderTop: '1px solid rgba(255, 255, 255, 0.6)',
     borderBottom: '1px solid rgba(255, 255, 255, 0.6)',
     pointerEvents: 'none',
+    zIndex: 10, // <--- ОСЬ ВИРІШЕННЯ
   };
   
-  // --- КІНЕЦЬ СТИЛІВ ---
-
   const frameClasses = [
     'item-frame',
     `rarity-${item.rarity?.toLowerCase() || 'common'}`,
@@ -54,13 +49,11 @@ const InventoryItemSlot: React.FC<InventoryItemSlotProps> = ({ item, onClick, pr
 
   return (
     <div onClick={onClick} className="inventory-slot-wrapper">
-      {/* Застосовуємо стиль до рамки */}
       <div className={frameClasses} style={frameStyle}>
         
         {item.is_listed && (
-          // Застосовуємо стиль до оверлею
           <div style={saleOverlayStyle}>
-            На продажі
+            Продається
           </div>
         )}
 
