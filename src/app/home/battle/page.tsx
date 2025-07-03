@@ -338,15 +338,80 @@ export default function TextAdventurePage() {
                 setIsGameOver(true);
                 setIsInCombat(false); // На випадок, якщо гра завершилась не через бій
                 setEnemy(null);
-                break;
+            break;
             
             case 'ITEM':
-                // Ваша логіка для 'ITEM' залишається тут без змін...
-                // (я її прибрав для стислості, але ви її залиште)
-                break;
+                  
+        
+            if (singleOutcome.type === 'ITEM') {
+              // Отримуємо дані від AI
+              const { item_key, item_name, item_type, sub_type, rarity, stats } = singleOutcome;
+
+              // Логіка пошуку зображення
+              const primaryTemplateKey = `${item_type}_${sub_type}_${rarity}`;
+              const fallbackTemplateKey = `${item_type}_${sub_type}_common`;
+              let imageUrl = null;
+              const { data: primaryTemplate } = await supabase
+                  .from('image_templates')
+                  .select('image_url')
+                  .eq('template_key', primaryTemplateKey)
+                  .single();
+              
+              if (primaryTemplate) {
+                  imageUrl = primaryTemplate.image_url;
+              } else {
+                  const { data: fallbackTemplate } = await supabase
+                      .from('image_templates')
+                      .select('image_url')
+                      .eq('template_key', fallbackTemplateKey)
+                      .single();
+                  if (fallbackTemplate) {
+                      imageUrl = fallbackTemplate.image_url;
+                  }
+              }
+              
+              // Викликаємо RPC, щоб отримати ID унікального предмету
+              const { data: newItemId, error: createItemError } = await supabase.rpc('get_or_create_item', { 
+                  p_item_key: item_key,
+                  p_name: item_name,
+                  p_item_type: item_type,
+                  p_sub_type: sub_type,
+                  p_rarity: rarity,
+                  p_stats: stats || {},
+                  p_image_url: imageUrl
+              });
+
+              if (createItemError) {
+                  toast.error(`Помилка створення предмета: ${createItemError.message}`);
+                  console.error('Error creating item definition:', createItemError);
+                  return; // Зупиняємо виконання, якщо не вдалося створити предмет
+              }
+              if (!newItemId) {
+                  toast.error("Не вдалося отримати ID предмета.");
+                  return;
+              }
+
+              const { error: stackError } = await supabase.rpc('add_or_stack_item', {
+                p_user_id: userId, // Передаємо як є (число)
+                p_item_id: newItemId
+              });
+
+              if (stackError) {
+                  toast.error(`Помилка додавання в інвентар: ${stackError.message}`);
+                  console.error('Error adding/stacking item to inventory:', stackError);
+                  return; // Зупиняємо, якщо не вдалося додати в інвентар
+              }
+
+              // Показуємо сповіщення, якщо все пройшло успішно
+              const message = `Знайдено: ${item_name}`;
+              addToLog(message);
+              updateSummary(item_name, 1);
+              toast.success(message);
+
+              break;
         }
     }
-}, [userId, isInCombat, combatChoices]); // Спрощені залежності
+}}, [userId, isInCombat, combatChoices]); // Спрощені залежності
 
   
   const handleChoice = useCallback(async (choice: string) => {
