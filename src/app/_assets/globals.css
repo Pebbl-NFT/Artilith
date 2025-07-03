@@ -592,4 +592,25 @@ button:hover {
   animation-delay: 0s, 0.3s;
 }
 
+/* --- Сітка для сторінки торгівлі --- */
+.item-grid {
+  display: grid;
+  /* Створює адаптивні колонки: кожна мінімум 100px, 
+     і заповнює доступний простір */
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  gap: 20px;
+  width: 100%;
+}
+
+.grid-placeholder {
+  /* Розтягуємо повідомлення на всю ширину сітки */
+  grid-column: 1 / -1; 
+  padding: 3rem 1rem;
+  text-align: center;
+  /* Використовуємо вашу змінну для приглушеного кольору */
+  color: var(--muted-color); 
+  font-style: italic;
+  font-size: 1rem;
+}
+
 
