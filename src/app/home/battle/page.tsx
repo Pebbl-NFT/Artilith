@@ -267,6 +267,12 @@ export default function TextAdventurePage() {
     }
   }, [playerData, chatHistory.length]);
 
+  useEffect(() => {
+    if (isInCombat && enemy === null) {
+      setIsInCombat(false);
+    }
+  }, [enemy, isInCombat])
+
   const processOutcome = useCallback(async (outcomeToProcess: Outcome | Outcome[]) => {
     if (!outcomeToProcess || !userId) return;
     const outcomes = Array.isArray(outcomeToProcess) ? outcomeToProcess : [outcomeToProcess];
@@ -283,162 +289,107 @@ export default function TextAdventurePage() {
                 break;
 
             case 'COMBAT_TURN':
-                // Оновлюємо здоров'я гравця
                 setPlayerData(prevData => {
                     if (!prevData) return null;
                     const newPlayerHP = Math.max(0, prevData.currentHP + (singleOutcome.player_hp_change ?? 0));
-                    
-                    if (newPlayerHP <= 0 && isInCombat) { // Перевіряємо, чи гравець ще в бою
-                        toast.error("Вас перемогли...");
-                        setIsGameOver(true); // Завершуємо гру
+                    if (newPlayerHP <= 0) {
+                       // Логіка поразки тепер тут, але без setIsInCombat
+                       toast.error("Вас перемогли...");
+                       setIsGameOver(true);
                     }
                     return { ...prevData, currentHP: newPlayerHP };
                 });
 
-                // Оновлюємо здоров'я ворога і перевіряємо на перемогу
                 setEnemy(prevEnemy => {
-                    if (!prevEnemy) return null; // Якщо ворога вже немає, нічого не робимо
-
+                    if (!prevEnemy) return null;
                     const newEnemyHP = Math.max(0, prevEnemy.health + (singleOutcome.enemy_hp_change ?? 0));
-
-                    // Якщо ворога переможено, завершуємо бій і повертаємо null
                     if (newEnemyHP <= 0) {
                         toast.success(`Ви перемогли ${prevEnemy.name}!`);
-                        setIsInCombat(false); // <--- Завершуємо бій
-                        return null; // <--- Прибираємо ворога (і його статус-бар)
+                        return null; // Прибираємо ворога, useEffect подбає про решту
                     }
-
-                    // Інакше просто оновлюємо здоров'я ворога
                     return { ...prevEnemy, health: newEnemyHP };
                 });
                 break;
 
             case 'REWARD':
-            case 'XP':
+            case 'XP': {
                 const statName = singleOutcome.type === 'XP' ? 'experience' : singleOutcome.item;
                 const { error } = await supabase.rpc('increment_user_stat', { 
                     p_user_id: String(userId), p_stat_name: statName, p_increment_value: singleOutcome.amount 
                 });
                 if (!error) {
                     let icon = '🎁';
-                    if (singleOutcome.type === 'REWARD') {
-                        if(singleOutcome.item === 'points') icon = '🪨'; 
-                        else if(singleOutcome.item === 'atl_balance') icon = '🪙'; 
-                        else if(singleOutcome.item === 'ton_balance') icon = '💎';
-                    } else if (singleOutcome.type === 'XP') icon = '🔷';
+                    if (singleOutcome.type === 'REWARD' && singleOutcome.item === 'points') icon = '🪨';
+                    else if (singleOutcome.type === 'XP') icon = '🔷';
                     const message = `+${singleOutcome.amount} ${icon}`;
                     addToLog(message);
                     updateSummary(icon, singleOutcome.amount);
                 }
                 break;
+            }
 
             case 'GAME_OVER':
                 setStory(singleOutcome.reason);
                 setChoices([]);
                 setIsGameOver(true);
-                setIsInCombat(false); // На випадок, якщо гра завершилась не через бій
+                setIsInCombat(false);
                 setEnemy(null);
-            break;
+                break;
             
-            case 'ITEM':
-                  
-        
-            if (singleOutcome.type === 'ITEM') {
-              // Отримуємо дані від AI
-              const { item_key, item_name, item_type, sub_type, rarity, stats } = singleOutcome;
+            case 'ITEM': {
+                const { item_key, item_name, item_type, sub_type, rarity, stats } = singleOutcome;
+                let imageUrl: string | null = null;
+                const primaryTemplateKey = `${item_type}_${sub_type}_${rarity}`;
+                const { data: primaryTemplate } = await supabase.from('image_templates').select('image_url').eq('template_key', primaryTemplateKey).single();
+                if (primaryTemplate) imageUrl = primaryTemplate.image_url;
 
-              // Логіка пошуку зображення
-              const primaryTemplateKey = `${item_type}_${sub_type}_${rarity}`;
-              const fallbackTemplateKey = `${item_type}_${sub_type}_common`;
-              let imageUrl = null;
-              const { data: primaryTemplate } = await supabase
-                  .from('image_templates')
-                  .select('image_url')
-                  .eq('template_key', primaryTemplateKey)
-                  .single();
-              
-              if (primaryTemplate) {
-                  imageUrl = primaryTemplate.image_url;
-              } else {
-                  const { data: fallbackTemplate } = await supabase
-                      .from('image_templates')
-                      .select('image_url')
-                      .eq('template_key', fallbackTemplateKey)
-                      .single();
-                  if (fallbackTemplate) {
-                      imageUrl = fallbackTemplate.image_url;
-                  }
-              }
-              
-              // Викликаємо RPC, щоб отримати ID унікального предмету
-              const { data: newItemId, error: createItemError } = await supabase.rpc('get_or_create_item', { 
-                  p_item_key: item_key,
-                  p_name: item_name,
-                  p_item_type: item_type,
-                  p_sub_type: sub_type,
-                  p_rarity: rarity,
-                  p_stats: stats || {},
-                  p_image_url: imageUrl
-              });
+                const { data: newItemId, error: createItemError } = await supabase.rpc('get_or_create_item', { 
+                    p_item_key: item_key, p_name: item_name, p_item_type: item_type,
+                    p_sub_type: sub_type, p_rarity: rarity, p_stats: stats || {}, p_image_url: imageUrl
+                });
 
-              if (createItemError) {
-                  toast.error(`Помилка створення предмета: ${createItemError.message}`);
-                  console.error('Error creating item definition:', createItemError);
-                  return; // Зупиняємо виконання, якщо не вдалося створити предмет
-              }
-              if (!newItemId) {
-                  toast.error("Не вдалося отримати ID предмета.");
-                  return;
-              }
+                if (createItemError || !newItemId) {
+                    toast.error("Помилка створення предмета.");
+                    console.error('Error creating item:', createItemError);
+                    break;
+                }
 
-              const { error: stackError } = await supabase.rpc('add_or_stack_item', {
-                p_user_id: userId, // Передаємо як є (число)
-                p_item_id: newItemId
-              });
-
-              if (stackError) {
-                  toast.error(`Помилка додавання в інвентар: ${stackError.message}`);
-                  console.error('Error adding/stacking item to inventory:', stackError);
-                  return; // Зупиняємо, якщо не вдалося додати в інвентар
-              }
-
-              // Показуємо сповіщення, якщо все пройшло успішно
-              const message = `Знайдено: ${item_name}`;
-              addToLog(message);
-              updateSummary(item_name, 1);
-              toast.success(message);
-
-              break;
+                const { error: stackError } = await supabase.rpc('add_or_stack_item', { p_user_id: userId, p_item_id: newItemId });
+                if (stackError) {
+                    toast.error(`Помилка додавання в інвентар: ${stackError.message}`);
+                    break;
+                }
+                
+                const message = `Знайдено: ${item_name}`;
+                addToLog(message);
+                updateSummary(item_name, 1);
+                toast.success(message);
+                break;
+            }
         }
     }
-}}, [userId, isInCombat, combatChoices]); // Спрощені залежності
+  }, [userId, combatChoices, addToLog, updateSummary]); // Оновлені залежності
 
   
   const handleChoice = useCallback(async (choice: string) => {
-    if (!playerData || chatHistory.length === 0 || isGameOver) return;
-
-    // Отримуємо найсвіжіше значення енергії
-    const currentEnergy = energy;
-    const energyCost = 1;
-
-    // Якщо енергії недостатньо, просто показуємо повідомлення і виходимо
-    if (currentEnergy < energyCost) {
-      toast.error("Недостатньо енергії для дії!");
-      return; 
+    if (!playerData || isLoading || isGameOver) return;
+    if (energy < 1) {
+        toast.error("Недостатньо енергії для дії!");
+        return; 
     }
     
     setIsLoading(true);
-    await spendEnergy(energyCost);
-
-    // Обробляємо відкладені нагороди, якщо вони є
+    await spendEnergy(1);
+    
+    // --- ВИПРАВЛЕННЯ БАГУ #1 ---
+    // Обробляємо відкладену нагороду, ЯКЩО вона є, і очищуємо її.
+    // Тепер це не буде конфліктувати з основним `outcome`.
     if (pendingOutcomes && pendingOutcomes[choice]) {
-        const outcomeToProcess = pendingOutcomes[choice];
-        await processOutcome(outcomeToProcess);
+        await processOutcome(pendingOutcomes[choice]);
         setPendingOutcomes(null); 
     }
-   
-    // Формуємо промпт, включаючи в нього актуальну енергію ПІСЛЯ її витрати
-    const energyAfterAction = currentEnergy - energyCost;
+    
+    const energyAfterAction = energy - 1;
     let promptText = `My choice is: "${choice}". My character stats: Energy: ${energyAfterAction}.`;
     
     if (isInCombat && enemy) {
@@ -470,31 +421,26 @@ export default function TextAdventurePage() {
             const cleanedJsonString = jsonMatch[0].replace(/,\s*([}\]])/g, "$1");
             const parsedResponse: AIResponse = JSON.parse(cleanedJsonString);
             
-            // 1. СПОЧАТКУ обробляємо логіку гри (завершення бою, нагороди)
+            // Змінено порядок
             if (parsedResponse.outcome) {
                 await processOutcome(parsedResponse.outcome);
             }
-            if (parsedResponse.choiceOutcomes) {
-                setPendingOutcomes(parsedResponse.choiceOutcomes);
-            } else {
-                setPendingOutcomes(null); // Очищуємо, якщо нових відкладених нагород немає
-            }
+            // Оновлюємо відкладені нагороди для НАСТУПНОГО кроку
+            setPendingOutcomes(parsedResponse.choiceOutcomes ?? null);
 
-            // 2. ПОТІМ оновлюємо історію, історію чату та вибори
             setChatHistory([...newHistory, { role: "model", parts: [{ text: jsonMatch[0] }] }]);
             setStory(parsedResponse.story);
             setChoices(parsedResponse.choices ?? []);
-        } else { throw new Error("Invalid AI response structure. Full response: " + JSON.stringify(result)); }
+
+        } else { throw new Error("Invalid AI response structure."); }
         setAdventureStep(prev => prev + 1);
     } catch (error: any) {
-        console.error("!!! Critical Error in handleChoice !!!");
-        console.error("Error Message:", error.message);
-        console.error("Last raw response from AI before error:", lastRawResponse || "Not available");
+        console.error("!!! Critical Error in handleChoice !!!", error);
         setStory("Темрява згущується... Спробуй зробити інший вибір. (Сталася непередбачувана подія).");
     } finally {
         setIsLoading(false);
     }
-  }, [chatHistory, playerData, isInCombat, enemy, energy, spendEnergy, processOutcome, combatChoices, pendingOutcomes]);
+  }, [chatHistory, playerData, isLoading, isGameOver, energy, spendEnergy, isInCombat, enemy, processOutcome, pendingOutcomes]);
 
   return (
     <div style={styles.pageContainer}>
