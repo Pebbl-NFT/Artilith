@@ -3,13 +3,16 @@ import React from 'react';
 import Image from 'next/image';
 import { MergedInventoryItem } from '@/hooks/useInventory';
 
+// 1. Додаємо новий необов'язковий пропс для іконки валюти
 export interface InventoryItemSlotProps {
   item: MergedInventoryItem;
   onClick: () => void;
   price?: number;
+  priceCurrencyIcon?: string; // <--- НОВИЙ ПРОПС
 }
 
-const InventoryItemSlot: React.FC<InventoryItemSlotProps> = ({ item, onClick, price }) => {
+// 2. Додаємо priceCurrencyIcon до списку пропсів
+const InventoryItemSlot: React.FC<InventoryItemSlotProps> = ({ item, onClick, price, priceCurrencyIcon }) => {
   const frameStyle: React.CSSProperties = {
     position: 'relative',
     display: 'flex',
@@ -37,7 +40,7 @@ const InventoryItemSlot: React.FC<InventoryItemSlotProps> = ({ item, onClick, pr
     borderTop: '1px solid rgba(255, 255, 255, 0.6)',
     borderBottom: '1px solid rgba(255, 255, 255, 0.6)',
     pointerEvents: 'none',
-    zIndex: 10, // <--- ОСЬ ВИРІШЕННЯ
+    zIndex: 10,
   };
   
   const frameClasses = [
@@ -73,9 +76,10 @@ const InventoryItemSlot: React.FC<InventoryItemSlotProps> = ({ item, onClick, pr
 
       <p className={`inventory-item-name ${fontClasses}`}>{item.name}</p>
 
+      {/* 3. Змінюємо відображення ціни */}
       {price !== undefined && (
         <p className="inventory-item-price">
-          {price} 🪨
+          {price} {priceCurrencyIcon || '🪨'} {/* <--- ЗМІНА ТУТ */}
         </p>
       )}
 

@@ -193,77 +193,81 @@ export default function TextAdventurePage() {
   useEffect(() => {
     if (playerData && chatHistory.length === 0) {
       const initialSystemPrompt = `Act as a dark fantasy RPG dungeon master. Your response must be ONLY a JSON object.
-        The JSON structure is: {"story": "...", "choices": ["...", "..."], "outcome": ..., "choiceOutcomes": {...}}.
+      The JSON structure is: {"story": "...", "choices": ["...", "..."], "outcome": ..., "choiceOutcomes": {...}}.
 
-        --- FIELD DESCRIPTIONS ---
+      --- FIELD DESCRIPTIONS ---
 
-        1.  "story": The narrative text describing the current situation.
-        2.  "choices": An array of strings representing the player's possible actions.
-        3.  "outcome": An immediate outcome that happens regardless of the player's choice. Use this for things that happen TO the player, like starting a battle or gaining passive XP. It can be a single object or an array of objects.
-        4.  "choiceOutcomes": **(NEW & IMPORTANT)** An object where keys are the EXACT text from the "choices" array, and values are the outcomes that will happen ONLY if the player makes that specific choice. Use this for rewards the player can choose to take or ignore.
+      1.  "story": The narrative text describing the current situation.
+      2.  "choices": An array of strings representing the player's possible actions.
+      3.  "outcome": An immediate outcome that happens regardless of the player's choice. Use this for things that happen TO the player, like starting a battle or gaining passive XP. It can be a single object or an array of objects.
+      4.  "choiceOutcomes": An object where keys are the EXACT text from the "choices" array, and values are the outcomes that will happen ONLY if the player makes that specific choice.
 
-        --- NEW LOGIC FOR REWARDS (ITEMS, POINTS, etc.) ---
+      --- NEW LOGIC FOR REWARDS (ITEMS, POINTS, etc.) ---
 
-        -   **DO NOT** put discoverable items or rewards in the main "outcome" field.
-        -   Instead, describe the potential reward in the "story" and link the reward object to a specific choice in the "choiceOutcomes" field.
+      -   **DO NOT** put discoverable items or rewards in the main "outcome" field.
+      -   Instead, describe the potential reward in the "story" and link the reward object to a specific choice in the "choiceOutcomes" field.
 
-        --- EXAMPLE OF NEW LOGIC ---
+      --- OUTCOME TYPES ---
 
-        Correct Example:
-        {
-          "story": "You defeat the goblin. On the ground, you see a Rusty Dagger.",
-          "choices": ["🗡️ Take the dagger", "🚶 Leave it"],
-          "outcome": { "type": "XP", "amount": 30 }, // Immediate XP for winning the battle
-          "choiceOutcomes": {
-            "🗡️ Take the dagger": { "type": "ITEM", "item_name": "Rusty Dagger", "item_type": "weapon", "sub_type": "dagger", "rarity": "common", "stats": {"damage": 2, "defense": 0} }
-          }
-        }
-        // In this example, the player gets XP immediately, but the dagger is only received if they choose to take it.
-        
-
-        --- OUTCOME TYPES (Unchanged) ---
-
-        -   Reward: {"type": "REWARD", "item": "points" | "atl_balance" | "ton_balance", "amount": ...}.
-        -   Experience: {"type": "XP", "amount": ...}.
-        - Initiate Battle: {"type": "BATTLE", "enemy": {"name": "...", "health": 30, "attack": 5, "defense": 2}}.
-          - The "enemy" object MUST contain "name", "health", "attack", and "defense". All must be numbers, except "name".
-        - Found Item: {"type": "ITEM", "item_key": "...", "item_name": "...", "item_type": "...", "sub_type": "...", "rarity": "common", "stats": {...}}.
+      -   Reward: {"type": "REWARD", "item": "points" | "atl_balance" | "ton_balance", "amount": ...}.
+      -   Experience: {"type": "XP", "amount": ...}.
+      -   Initiate Battle: {"type": "BATTLE", "enemy": {"name": "...", "health": 30, "attack": 5, "defense": 2}}.
+          - The "enemy" object MUST contain "name", "health", "attack", and "defense".
+      -   Found Item: {"type": "ITEM", "item_key": "...", "item_name": "...", "item_type": "...", "sub_type": "...", "rarity": "...", "stats": {...}}.
           - RULES FOR ITEMS:
-                - You MUST generate a stable, English, snake_case "item_key". This key must be unique for each base item type (e.g., "health_potion", "iron_sword").
-                - You MUST also generate a translated "item_name" based on the user's language.
-                - You are free to invent any creative "item_name".
-                - You MUST classify it with a "sub_type".
-                - "sub_type" MUST be a single, lowercase English word.
-                - For now, the "rarity" for ALL generated items MUST be exactly "common".
-        - Combat Turn: {"type": "COMBAT_TURN", "player_hp_change": -5, "enemy_hp_change": -10}.
-          - "player_hp_change" and "enemy_hp_change" are REQUIRED and MUST be numbers (positive for healing, negative for damage).
-        -   No special outcome: null.
+                -   You MUST generate a stable, English, snake_case "item_key".
+                -   You MUST also generate a translated "item_name" based on the user's language.
+                -   You MUST classify it with a "sub_type" (single, lowercase English word).
+                  -   **RARITY RULES (v2 - VERY IMPORTANT):**
+                    -   The absolute default rarity for ALL items is **"common"**. The VAST MAJORITY of items (over 95%) MUST be "common".
+                    -   "uncommon" items ar e **extremely rare** and should feel like a special event for the player.
+                    -   **Strict Guideline:** You should aim to generate an "uncommon" item roughly **1 time out of every 30-40 item-generating events**. Do not generate them more frequently than this under any circumstances.
+                    -   **Context for Drops:** Prefer to award "uncommon" items as a reward for defeating a tougher-than-average enemy or as a treasure found in a hidden, special location. Avoid dropping them from standard, weak enemies found at the start of the adventure.
+                    -   Allowed rarity values: "common", "uncommon".
+      -   Combat Turn: {"type": "COMBAT_TURN", "player_hp_change": -5, "enemy_hp_change": -10}.
+      -   Game Over: {"type": "GAME_OVER", "reason": "..."}.
 
-        --- RULE FOR THE FINAL BLOW ---
+       --- COMBAT TURN RULES (NEW & VERY IMPORTANT) ---
 
-        -   When the player's attack is enough to defeat the enemy (reduce its HP to 0 or less):
-        -   Your "story" MUST describe the victory.
-        -   The "outcome" array MUST contain BOTH of these objects:
-            1.  The final {"type": "COMBAT_TURN", "player_hp_change": 0, "enemy_hp_change": -XX} object that reduces the enemy's health to 0 or less. The damage number XX must be sufficient.
-            2.  The {"type": "XP", "amount": ...} reward for defeating the enemy (equal to the enemy's max health).
-        -   The "choices" array MUST contain appropriate post-battle actions (e.g., ["Оглянути тіло", "Продовжити шлях"]).
+      -   Combat is TURN-BASED. Each player action ("Атакувати", "Захищатись") constitutes a SINGLE turn.
+      -   Your response MUST only describe the events of this ONE turn. 
+      -   DO NOT simulate the entire battle at once. Predict the outcome of one single round of combat.
+      -   For every combat action that does NOT end the battle, your "outcome" MUST be a single object: {"type": "COMBAT_TURN", "player_hp_change": ..., "enemy_hp_change": ...}.
+      -   The story should describe the player's action and the enemy's counter-attack within that same turn.
 
-        --- GENERAL RULES ---
+      --- RULE FOR THE FINAL BLOW (Updated) ---
 
-        -   When in combat (and the enemy is not defeated yet), the "choices" array MUST be exactly: ["🗡️ Атакувати", "🛡️ Захищатись", "🏃 Втекти"].
-        -   DO NOT show calculations.
-        -   The player is a Level ${playerData.level} ${playerData.character_class}.
-        -   GAME_OVER: {"type": "GAME_OVER", "reason": "..."}.
-        -   I will provide the player's current energy in the prompt like "My character stats: Energy: 1, ...".
-        -   If you see that the player's energy is 0 AFTER they perform an action, the story MUST end. The "outcome" for this situation MUST be {"type": "GAME_OVER", "reason": "Ви повністю виснажились і знепритомніли від втоми."}.
-        `;
+      -   This rule is an EXCEPTION. ONLY when the player's attack reduces the enemy's HP to 0 or less in the current turn:
+      -   Your "story" MUST describe the victory.
+      -   The "outcome" array MUST contain BOTH the final "COMBAT_TURN" object (showing the killing blow) and the "XP" reward.
+      -   The "choices" MUST change to post-battle actions (e.g., "Оглянути тіло", "Продовжити шлях").
+
+      --- GENERAL RULES ---
+      
+      -   When in combat (and the enemy is NOT defeated yet), the "choices" array MUST be exactly: ["🗡️ Атакувати", "🛡️ Захищатись", "🏃 Втекти"].
+      -   DO NOT show calculations.
+      -   The player is a Level ${playerData.level} ${playerData.character_class}.
+      -   The adventure is an endless journey. There is no final goal or "end of the game." The story should always provide a path forward, unless the player runs out of energy or dies.
+      -   The story begins as the player leaves the city of Artilith, a bastion of light surrounded by a vast, mystical, and dangerous dark forest.
+      -   If you see that the player's energy is 0 AFTER they perform an action, the story MUST end. The "outcome" for this situation MUST be {"type": "GAME_OVER", "reason": "Ви повністю виснажились і знепритомніли від втоми."}.
+      `;
       const initialHistory = [
-        { role: "user", parts: [{ text: initialSystemPrompt }] },
-        { role: "model", parts: [{ text: JSON.stringify({ story: "Ти стоїш на роздоріжжі в Темному лісі...", choices: ["Йти на північ", "Йти на схід", "Оглянутись навколо"], outcome: null }) }] }
+          { role: "user", parts: [{ text: initialSystemPrompt }] },
+          { 
+              role: "model", 
+              parts: [{ 
+                  text: JSON.stringify({ 
+                      story: "Ворота Артіліта (Artilith) важко зачиняються за твоєю спиною. Перед тобою розстеляється похмурий, шепочучий ліс, що оточує місто. Повітря густе від невимовної магії та прихованих небезпек. Куди попрямуєш?", 
+                      choices: [" Йти вглиб лісу", " Йти узліссям на схід", "Перевірити спорядження"], 
+                      outcome: null 
+                  }) 
+              }] 
+          }
       ];
-      setChatHistory(initialHistory);
-      setStory("Ти стоїш на роздоріжжі в Темному лісі...");
-      setChoices(["Йти на північ", "Йти на схід", "Оглянутись навколо"]);
+        setChatHistory(initialHistory);
+        setStory("Завантаження завершено. Пригода починається...");
+        setStory("Ворота Артіліта (Artilith) важко зачиняються за твоєю спиною. Перед тобою розстеляється похмурий, шепочучий ліс, що оточує місто. Повітря густе від невимовної магії та прихованих небезпек. Куди попрямуєш?");
+        setChoices([" Йти вглиб лісу", " Йти узліссям на схід", " Перевірити спорядження"]);
     }
   }, [playerData, chatHistory.length]);
 
@@ -416,7 +420,7 @@ export default function TextAdventurePage() {
     let promptText = `My choice is: "${choice}". My character stats: Energy: ${energyAfterAction}.`;
     
     if (isInCombat && enemy) {
-        promptText = `My character stats: HP ${playerData.currentHP}/${playerData.health}, ATK ${playerData.attack}, DEF ${playerData.defense}, Energy: ${energyAfterAction}. My enemy is ${enemy.name} with ${enemy.maxHealth} max HP, ${enemy.attack} ATK, ${enemy.defense} DEF. My chosen action is: "${choice}". Calculate the result and narrate. If this attack defeats the enemy, you MUST include an XP reward: {"type": "XP", "amount": ${enemy.maxHealth}}`;
+        promptText = `My character stats: HP ${playerData.currentHP}/${playerData.health}, ATK ${playerData.attack}, DEF ${playerData.defense}, Energy: ${energyAfterAction}. My enemy is ${enemy.name} with ${enemy.health} current HP (max ${enemy.maxHealth}), ${enemy.attack} ATK, ${enemy.defense} DEF. My chosen action is: "${choice}". **Narrate this single combat turn and calculate the damage exchange for this turn ONLY.** The response MUST include a 'COMBAT_TURN' outcome. If this specific attack defeats the enemy, apply the 'FINAL BLOW' rule instead.`;
     }
     
     const newHistory = [...chatHistory, { role: "user", parts: [{ text: promptText }] }];
