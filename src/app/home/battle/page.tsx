@@ -277,64 +277,72 @@ export default function TextAdventurePage() {
     if (!outcomeToProcess || !userId) return;
     const outcomes = Array.isArray(outcomeToProcess) ? outcomeToProcess : [outcomeToProcess];
 
+    // Робимо копії станів, щоб працювати з актуальними даними
+    let currentPlayerData = playerData;
+    let currentEnemy = enemy;
+
     for (const singleOutcome of outcomes) {
         if (!singleOutcome) continue;
 
         switch (singleOutcome.type) {
             case 'BATTLE':
                 toast(`На вас напав ${singleOutcome.enemy.name}!`, { icon: '⚔️' });
-                setEnemy({ ...singleOutcome.enemy, maxHealth: singleOutcome.enemy.health });
+                const newEnemy = { ...singleOutcome.enemy, maxHealth: singleOutcome.enemy.health };
+                setEnemy(newEnemy);
                 setIsInCombat(true);
                 setChoices(combatChoices);
+                currentEnemy = newEnemy;
                 break;
 
             case 'COMBAT_TURN':
-                setPlayerData(prevData => {
-                    if (!prevData) return null;
-                    const newPlayerHP = Math.max(0, prevData.currentHP + (singleOutcome.player_hp_change ?? 0));
-                    if (newPlayerHP <= 0) {
-                       // Логіка поразки тепер тут, але без setIsInCombat
-                       toast.error("Вас перемогли...");
-                       setIsGameOver(true);
-                    }
-                    return { ...prevData, currentHP: newPlayerHP };
-                });
+                if (!currentPlayerData || !currentEnemy) break;
+                
+                const playerChange = singleOutcome.player_hp_change ?? 0;
+                const enemyChange = singleOutcome.enemy_hp_change ?? 0;
 
-                setEnemy(prevEnemy => {
-                    if (!prevEnemy) return null;
-                    const newEnemyHP = Math.max(0, prevEnemy.health + (singleOutcome.enemy_hp_change ?? 0));
-                    if (newEnemyHP <= 0) {
-                        toast.success(`Ви перемогли ${prevEnemy.name}!`);
-                        return null; // Прибираємо ворога, useEffect подбає про решту
-                    }
-                    return { ...prevEnemy, health: newEnemyHP };
-                });
-                break;
-
-            case 'REWARD':
-            case 'XP': {
-                const statName = singleOutcome.type === 'XP' ? 'experience' : singleOutcome.item;
-                const { error } = await supabase.rpc('increment_user_stat', { 
-                    p_user_id: String(userId), p_stat_name: statName, p_increment_value: singleOutcome.amount 
-                });
-                if (!error) {
-                    let icon = '🎁';
-                    if (singleOutcome.type === 'REWARD' && singleOutcome.item === 'points') icon = '🪨';
-                    else if (singleOutcome.type === 'XP') icon = '🔷';
-                    const message = `+${singleOutcome.amount} ${icon}`;
-                    addToLog(message);
-                    updateSummary(icon, singleOutcome.amount);
+                const newPlayerHP = Math.max(0, currentPlayerData.currentHP + playerChange);
+                const newEnemyHP = Math.max(0, currentEnemy.health + enemyChange);
+                
+                currentPlayerData = { ...currentPlayerData, currentHP: newPlayerHP };
+                currentEnemy = { ...currentEnemy, health: newEnemyHP };
+                
+                if (newEnemyHP <= 0) {
+                    toast.success(`Ви перемогли ${currentEnemy.name}!`);
+                    currentEnemy = null; 
+                } else if (newPlayerHP <= 0) {
+                    toast.error("Вас перемогли...");
+                    // Викликаємо GAME_OVER, але не робимо return, щоб стан оновився в кінці
+                    await processOutcome({ type: 'GAME_OVER', reason: 'Ви загинули в бою.' });
                 }
                 break;
-            }
 
-            case 'GAME_OVER':
-                setStory(singleOutcome.reason);
-                setChoices([]);
-                setIsGameOver(true);
-                setIsInCombat(false);
-                setEnemy(null);
+            // --- ЗМІНА: Об'єднано REWARD та XP ---
+            case 'REWARD':
+            case 'XP': {
+                const isXp = singleOutcome.type === 'XP';
+                const statName = isXp ? 'experience' : singleOutcome.item;
+                const amount = singleOutcome.amount;
+
+                const { error } = await supabase.rpc('increment_user_stat', { 
+                    p_user_id: String(userId), p_stat_name: statName, p_increment_value: amount 
+                });
+                
+                if (error) {
+                    toast.error(`Помилка нарахування: ${error.message}`);
+                    break;
+                }
+
+                let icon = '🎁';
+                if (isXp) icon = '🔷';
+                else if (singleOutcome.item === 'points') icon = '🪨';
+                else if (singleOutcome.item === 'atl_balance') icon = '🪙';
+                else if (singleOutcome.item === 'ton_balance') icon = '💎';
+                
+                const message = `+${amount} ${icon}`;
+                addToLog(message);
+                updateSummary(icon, amount);
                 break;
+            }
             
             case 'ITEM': {
                 const { item_key, item_name, item_type, sub_type, rarity, stats } = singleOutcome;
@@ -365,10 +373,25 @@ export default function TextAdventurePage() {
                 updateSummary(item_name, 1);
                 toast.success(message);
                 break;
-            }
+              }
+
+          case 'GAME_OVER':
+                setStory(singleOutcome.reason);
+                setChoices([]);
+                setIsGameOver(true);
+                setIsInCombat(false);
+                setEnemy(null);
+                // Одразу оновлюємо стан, не чекаючи кінця функції
+                setPlayerData(currentPlayerData);
+                return; // Завершуємо виконання
         }
     }
-  }, [userId, combatChoices, addToLog, updateSummary]); // Оновлені залежності
+
+    // Після циклу один раз оновлюємо глобальний стан
+    setPlayerData(currentPlayerData);
+    setEnemy(currentEnemy);
+
+}, [userId, playerData, enemy, combatChoices, addToLog, updateSummary]); // <-- Правильні залежності
 
   
   const handleChoice = useCallback(async (choice: string) => {

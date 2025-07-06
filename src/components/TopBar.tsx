@@ -1,11 +1,9 @@
-import { useMemo, useEffect, useState } from 'react';
+import { useMemo, useEffect, useState, useCallback } from 'react';
 import { useSignal, initData } from '@telegram-apps/sdk-react';
-// Update the path below to the correct relative path if the file exists elsewhere, for example:
+import Image from 'next/image'; // <-- 1. Імпортуємо компонент Image
 import HeroEnergyAutoRegeneration from '@/hooks/HeroEnergyAutoRegeneration';
-// Or, if the file does not exist, create it at src/components/hooks/HeroEnergyAutoRegeneration.tsx
 import { supabase } from "@/lib/supabaseClient";
 import { toast } from "react-hot-toast";
-import { useCallback } from 'react';
 
 interface TopBarProps {
     points: number;
@@ -15,46 +13,38 @@ export default function TopBar({ points }: TopBarProps) {
   const initDataState = useSignal(initData.state);
   const userId = initDataState?.user?.id;
 
-  // Стан для балансів
   const [tonBalance, setTonBalance] = useState<number>(0);
-  const [atlBalance, setAtlBalance] = useState<number>(0); // <-- ЗМІНА: Додано стан для ATL
+  const [atlBalance, setAtlBalance] = useState<number>(0);
 
-  // <-- ЗМІНА: Створено одну універсальну функцію для завантаження будь-якого балансу
   const fetchBalance = useCallback(async (balanceColumn: 'ton_balance' | 'atl_balance', setBalanceState: (value: number) => void) => {
     if (!userId) return;
-
     try {
       const { data, error } = await supabase
         .from("users")
         .select(balanceColumn)
         .eq("id", String(userId))
         .single();
-
-      if (error) {
-        console.error(`Error fetching ${balanceColumn}:`, error.message);
-        setBalanceState(0);
-      } else if (data) {
-        // Явно типізуємо data, щоб уникнути помилки TypeScript
-        const typedData = data as Record<'ton_balance' | 'atl_balance', number | null>;
+      if (error) throw error;
+      if (data) {
+        const typedData = data as Record<typeof balanceColumn, number | null>;
         const balance = typedData[balanceColumn] || 0;
         setBalanceState(parseFloat(Number(balance).toFixed(4)));
       } else {
         setBalanceState(0);
       }
-    } catch (err) {
-      console.error(`Unexpected error fetching ${balanceColumn}:`, err);
+    } catch (err: any) {
+      console.error(`Error fetching ${balanceColumn}:`, err.message);
       toast.error("An unexpected error occurred while loading balances.");
       setBalanceState(0);
     }
-  }, [userId]); // useCallback залежить тільки від userId
+  }, [userId]);
 
   useEffect(() => {
     if (userId) {
-      // <-- ЗМІНА: Викликаємо універсальну функцію для обох балансів
       fetchBalance('ton_balance', setTonBalance);
       fetchBalance('atl_balance', setAtlBalance);
     }
-  }, [userId, fetchBalance]); // Додаємо fetchBalance до залежностей
+  }, [userId, fetchBalance]);
 
   return (
     <div className='top-bar' style={{
@@ -71,22 +61,21 @@ export default function TopBar({ points }: TopBarProps) {
       padding: '0 10px',
       boxSizing: 'border-box'
     }}>
-      {/* Блок TON балансу */}
+      {/* Блок TON балансу (залишаємо емодзі, бо іконки немає) */}
       <div style={{ display: "flex", alignItems: "center", gap: "5px", color: "#fff", fontSize: 12 }}>
         <span>💎</span>
         <span>{tonBalance.toFixed(4)}</span>
       </div>
 
-      {/* Блок ATL балансу */}
+      {/* --- ЗМІНА 2: Блок ATL балансу з новою іконкою --- */}
       <div style={{ display: "flex", alignItems: "center", gap: "5px", color: "#fff", fontSize: 12 }}>
-        <span>🪙</span>
-        {/* <-- ЗМІНА: Відображаємо реальний баланс ATL замість 0 */}
+        <Image src="/coin/atl_g.png" alt="ATL" width={16} height={16} />
         <span>{atlBalance.toFixed(4)}</span>
       </div>
 
-      {/* Блок очок */}
+      {/* --- ЗМІНА 3: Блок очок з новою іконкою --- */}
       <div style={{ display: "flex", alignItems: "center", gap: "5px", color: "#fff", fontSize: 12 }}>
-        <span>🪨</span>
+        <Image src="/coin/atl_s.png" alt="Points" width={16} height={16} />
         <span>{points}</span>
       </div>
       
@@ -95,5 +84,3 @@ export default function TopBar({ points }: TopBarProps) {
     </div>
   );
 }
-
-/* Removed erroneous local useCallback definition that was shadowing React's useCallback */
