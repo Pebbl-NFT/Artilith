@@ -114,7 +114,7 @@ export default function InitDataPage() {
         <div style={styles.progressBar}>
           <div style={styles.progressBarInner}></div>
         </div>
-        <div style={styles.versionText}>v0.31.4</div>
+        <div style={styles.versionText}>alpha 0.31.7</div>
       </div>
       <style>{`
         @keyframes loading-shimmer {
