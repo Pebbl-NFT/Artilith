@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState, useCallback, useMemo } from "react";
+import React, { useEffect, useState, useCallback, useMemo, CSSProperties } from "react";
 import Image from "next/image";
 import { List, Placeholder, Card } from "@telegram-apps/telegram-ui";
 import { useSignal, initData } from "@telegram-apps/sdk-react";
@@ -62,8 +62,17 @@ export default function HomePage() {
   const [inventory, setInventory] = useState<MergedInventoryItem[]>([]);
   const [selectedItem, setSelectedItem] = useState<SelectedItemState | null>(null);
   
-  const [points, setPoints] = useState(0);
+  const [userData, setUserData] = useState({
+  points: 0,
+  level: 1,
+  experience: 0,
+  atl_balance: 0,
+  ton_balance: 0,
+  });
+
+  // Add level, points, and experience as separate state variables
   const [level, setLevel] = useState(1);
+  const [points, setPoints] = useState(0);
   const [experience, setExperience] = useState(0);
   const [players, setPlayers] = useState<{ id: any; first_name: any; level: any }[]>([]);
 
@@ -78,15 +87,13 @@ export default function HomePage() {
     if (!userId) return;
     setLoading(true);
     const [userDataRes, inventoryDataRes, playersDataRes] = await Promise.all([
-      supabase.from("users").select("points, level, experience").eq("id", String(userId)).single(),
+      supabase.from("users").select("points, level, experience, atl_balance, ton_balance").eq("id", String(userId)).single(),
       fetchInventoryHook(String(userId)),
       supabase.from("users").select("id, first_name, level").order("level", { ascending: false })
     ]);
     
     if (userDataRes.data) {
-      setPoints(userDataRes.data.points);
-      setLevel(userDataRes.data.level ?? 1);
-      setExperience(userDataRes.data.experience ?? 0);
+      setUserData(userDataRes.data);
     }
     setInventory(inventoryDataRes);
     if(playersDataRes.data) setPlayers(playersDataRes.data);
@@ -247,7 +254,7 @@ async function handleUnequip(item: MergedInventoryItem) {
              <h1 style={{ fontSize: "2rem", fontWeight: "bold", color: "#fff", marginTop:"80px" }}>ДІМ</h1>
             <Card className="page">
                 <div style={{display: "flex",flexDirection: "row",justifyContent: "center",alignItems: "center",marginBottom: -30,gap: "30px",padding: 10,color: "#fff"}}>
-                  <p>{username}</p><p>Lv. {level}</p>
+                  <p>{username}</p><p>Lv. {userData.level}</p>
                   <div
                     onClick={() => router.push('/home/profile')}
                     style={{
@@ -268,7 +275,7 @@ async function handleUnequip(item: MergedInventoryItem) {
                 </div>
                 <div style={{display: "flex",flexDirection: "row",justifyContent: "center",alignItems: "center",fontSize: 10,gap: "10px",padding: 10,color: "#fff"}}>
                   <p>🔷 XP :</p>
-                  <strong>{experience} / {getRequiredExp(level)} 🔷</strong>
+                  <strong>{userData.experience} / {getRequiredExp(userData.level)} 🔷</strong>
                 </div>
                 <div style={{position: "relative",display: "flex",flexDirection: "column",alignItems: "center",justifyContent: "center",marginTop: 10,marginBottom: 30,color: "#fff"}}>
                   <Image src="/hero/heroidle.png" alt="Персонаж" width={270} height={270} style={{ objectFit: "contain" , marginRight:-50, marginLeft: -30 }}/>
@@ -312,22 +319,35 @@ async function handleUnequip(item: MergedInventoryItem) {
         );
 
       case "city":
-        return (
-          <Page back={() => setActiveTab('home')}>
-            <Placeholder style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", animation: "fadeIn 1s ease forwards", gap: "20px" }}>
-              
-              {/* --- 3. ОСНОВНА ЗМІНА: Використовуємо router.push --- */}
-              <div onClick={() => router.push('/trade')} className="page" style={{ backgroundImage: `url(${shopbg.src})`, backgroundSize: 'cover', backgroundPosition: 'center', color: 'white', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-                <h1>ТОРГІВЛЯ</h1>
-              </div>
-              
-              <div onClick={() => setActiveTab("blacksmith")} className="page" style={{ backgroundImage: `url(${blacksmithbg.src})`, backgroundSize: 'cover', backgroundPosition: 'center', color: 'white', display: 'flex', justifyContent: 'center', alignItems: 'center' }}><h1>КОВАЛЬ</h1></div>
-              <div onClick={() => setActiveTab("guild")} className="page" style={{ backgroundImage: `url(${citybg.src})`, backgroundSize: 'cover', backgroundPosition: 'center', color: 'white', display: 'flex', justifyContent: 'center', alignItems: 'center' }}><h1>ГІЛЬДІЯ</h1></div>
-              <div onClick={() => setActiveTab("alleyofheroes")} className="page" style={{ backgroundImage: `url(${alleyofheroesnbg.src})`, backgroundSize: 'cover', backgroundPosition: 'center', color: 'white', display: 'flex', justifyContent: 'center', alignItems: 'center' }}><h1>АЛЕЯ ГЕРОЇВ</h1></div>
-
-            </Placeholder>
-          </Page>
-        );
+      return (
+          <div style={styles.cityContainer}>
+              <h1 style={styles.cityTitle}>Місто</h1>
+              <CityNavigationCard 
+                  title="Торгівля"
+                  description="Купуйте та продавайте предмети"
+                  imageUrl={shopbg.src}
+                  onClick={() => router.push('/trade')}
+              />
+              <CityNavigationCard 
+                  title="Коваль"
+                  description="Покращуйте своє спорядження"
+                  imageUrl={blacksmithbg.src}
+                  onClick={() => { /* дія для Коваля */ }}
+              />
+              <CityNavigationCard 
+                  title="Гільдія"
+                  description="Об'єднуйтесь з іншими гравцями"
+                  imageUrl={citybg.src}
+                  onClick={() => { /* дія для Гільдії */ }}
+              />
+              <CityNavigationCard 
+                  title="Алея Героїв"
+                  description="Переглядайте таблиці лідерів"
+                  imageUrl={alleyofheroesnbg.src}
+                  onClick={() => { /* дія для Алеї */ }}
+              />
+          </div>
+      );
       
       case "adventures":
         return (
@@ -344,8 +364,12 @@ async function handleUnequip(item: MergedInventoryItem) {
   return (
     <Page>
       <List>
-        <TopBar points={points} />
-        <div style={{ paddingBottom: 100 }}>{renderContent()}</div>
+        <TopBar 
+          points={userData.points} 
+          atl_balance={userData.atl_balance}
+          ton_balance={userData.ton_balance}
+        />
+        <div style={{ paddingBottom: 100, paddingTop: 70 }}>{renderContent()}</div>
 
         {/* Картка предмету (модальне вікно) */}
         {selectedItem && (
@@ -380,3 +404,80 @@ async function handleUnequip(item: MergedInventoryItem) {
     </Page>
   );
 }
+
+// --- НОВИЙ КОМПОНЕНТ ДЛЯ НАВІГАЦІЇ В МІСТІ ---
+interface CityNavigationCardProps {
+    title: string;
+    description: string;
+    imageUrl: string;
+    onClick: () => void;
+}
+
+const CityNavigationCard: React.FC<CityNavigationCardProps> = ({ title, description, imageUrl, onClick }) => {
+    return (
+        <div style={styles.cityCard} onClick={onClick}>
+            <div style={styles.cityCardThumbnail}>
+                <Image src={imageUrl} alt={title} layout="fill" objectFit="cover" />
+            </div>
+            <div style={styles.cityCardContent}>
+                <h3 style={styles.cityCardTitle}>{title}</h3>
+                <p style={styles.cityCardDescription}>{description}</p>
+            </div>
+        </div>
+    );
+}
+
+// --- НОВІ СТИЛІ ---
+const styles: { [key: string]: CSSProperties } = {
+    cityContainer: {
+        padding: '15px',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '15px',
+    },
+    cityCard: {
+    display: 'flex',
+    flexDirection: 'column', // <--- ОСНОВНА ЗМІНА: тепер елементи йдуть зверху вниз
+    alignItems: 'center',    // Центрує все по горизонталі
+    gap: '12px',              // Відстань між картинкою і текстом
+    background: 'rgba(255, 255, 255, 0.05)',
+    border: '1px solid rgba(255, 255, 255, 0.1)',
+    borderRadius: '12px',
+    padding: '16px',
+    cursor: 'pointer',
+    transition: 'background-color 0.2s ease, transform 0.2s ease',
+    width: '100%', // Картка займає всю ширину контейнера
+    boxSizing: 'border-box',
+},
+cityCardThumbnail: {
+    width: '100%',
+    height: '220px', // <--- Збільште це значення (було 80px)
+    borderRadius: '8px',
+    overflow: 'hidden',
+    position: 'relative',
+},
+cityCardContent: {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center', // Центрує текст
+},
+cityCardTitle: {
+    margin: 0,
+    fontSize: '1.2rem',
+    fontWeight: 'bold',
+    color: '#fff',
+},
+cityCardDescription: {
+    margin: '4px 0 0 0',
+    fontSize: '0.9rem',
+    color: '#a7b3d9',
+},
+cityTitle: {
+    fontFamily: "'Cinzel', serif",
+    textAlign: 'center', // <--- Цей рядок центрує текст
+    fontSize: '2.5rem',
+    color: '#fefce8',
+    margin: '0 0 20px 0', // Відступ знизу
+    textShadow: '0 0 10px rgba(250, 204, 21, 0.5)'
+},
+};

@@ -178,7 +178,7 @@ export function Fountain() {
                     Нагорода: +🪨 | +🔷 | +🪙 | +💎
                 </div>
                 <div style={{ color: '#999', marginBottom: '16px', fontFamily: 'monospace' }}>
-                    Ціна в бою: -⚡
+                    Ціна дії: -1⚡
                 </div>
                 <Button
                     size="l"

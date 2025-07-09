@@ -81,6 +81,8 @@ type Outcome =
   | { type: 'BATTLE'; enemy: Omit<Enemy, 'maxHealth'> }
   | { type: 'COMBAT_TURN'; player_hp_change: number; enemy_hp_change: number; }
   | { type: 'GAME_OVER'; reason: string; } // Новий тип
+  | { type: 'FLEE' }
+  | { type: 'BATTLE_END' }
   | null;
 interface AIResponse {
   story: string;
@@ -132,6 +134,7 @@ export default function TextAdventurePage() {
   const [adventureStep, setAdventureStep] = useState(1);
   const [adventureSummary, setAdventureSummary] = useState<Map<string, number>>(new Map());
   const [isGameOver, setIsGameOver] = useState(false);
+  const [enemiesDefeatedInSession, setEnemiesDefeatedInSession] = useState(0);
 
   // FIX: Функція для додавання повідомлень в лог
   const addToLog = (message: string) => {
@@ -191,91 +194,90 @@ export default function TextAdventurePage() {
   }, [userId]);
   
   useEffect(() => {
+    // Цей хук відповідає за ініціалізацію чату, коли дані гравця завантажені
     if (playerData && chatHistory.length === 0) {
-      const initialSystemPrompt = `Act as a dark fantasy RPG dungeon master. Your response must be ONLY a JSON object.
-      The JSON structure is: {"story": "...", "choices": ["...", "..."], "outcome": ..., "choiceOutcomes": {...}}.
+        
+        // --- ВАЖЛИВО: Визначаємо промт ТУТ, всередині if ---
+        // Тепер playerData гарантовано існує, і помилок не буде
+        const initialSystemPrompt = `Act as a dark fantasy RPG dungeon master. Your response must be ONLY a JSON object.
+The JSON structure is: {"story": "...", "choices": ["...", "..."], "outcome": ..., "choiceOutcomes": {...}}.
 
-      --- FIELD DESCRIPTIONS ---
+--- CORE RULES HIERARCHY (VERY IMPORTANT) ---
+1.  **GAME OVER & FINAL BLOW rules are TOP PRIORITY.** They override all other rules.
+2.  **FLEEING rule is second priority.**
+3.  All other rules follow.
 
-      1.  "story": The narrative text describing the current situation.
-      2.  "choices": An array of strings representing the player's possible actions.
-      3.  "outcome": An immediate outcome that happens regardless of the player's choice. Use this for things that happen TO the player, like starting a battle or gaining passive XP. It can be a single object or an array of objects.
-      4.  "choiceOutcomes": An object where keys are the EXACT text from the "choices" array, and values are the outcomes that will happen ONLY if the player makes that specific choice.
+--- FIELD DESCRIPTIONS ---
+1.  "story": The narrative text describing the current situation.
+2.  "choices": An array of strings representing the player's possible actions.
+3.  "outcome": An immediate outcome that happens regardless of the player's choice. It can be a single object or an array of objects.
+4.  "choiceOutcomes": An object where keys are the EXACT text from the "choices" array, and values are outcomes that happen ONLY if the player makes that specific choice.
 
-      --- NEW LOGIC FOR REWARDS (ITEMS, POINTS, etc.) ---
+--- OUTCOME TYPES ---
+- Reward: {"type": "REWARD", "item": "points" | "atl_balance" | "ton_balance" | "energy", "amount": ...}.
+-   Experience: {"type": "XP", "amount": ...}.
+-   Initiate Battle: {"type": "BATTLE", "enemy": {"name": "...", "health": 30, "attack": 5, "defense": 2}}.
+-   Found Item: {"type": "ITEM", "item_key": "...", "item_name": "...", "item_type": "...", "sub_type": "...", "rarity": "...", "stats": {...}}.
+-   Combat Turn: {"type": "COMBAT_TURN", "player_hp_change": ..., "enemy_hp_change": ...}.
+-   Game Over: {"type": "GAME_OVER", "reason": "..."}.
+-   Flee: {"type": "FLEE"}.
+-   BATTLE_END: {"type": "BATTLE_END"}.
 
-      -   **DO NOT** put discoverable items or rewards in the main "outcome" field.
-      -   Instead, describe the potential reward in the "story" and link the reward object to a specific choice in the "choiceOutcomes" field.
+--- XP & REWARD LOGIC (LOYAL RULES) ---
+-   The player should be rewarded with a small amount of XP (e.g., 5 to 10) for making progress.
+-   **Non-Combat Actions:** For any choice made outside of combat, the "outcome" array SHOULD contain an XP object. e.g., [{"type": "XP", "amount": 5}].
+-   **Combat Actions:** For a standard combat turn (that is not a final blow), the "outcome" array MUST contain TWO objects: [{"type": "COMBAT_TURN", ...}, {"type": "XP", "amount": 5}].
+-   **Other rewards** (points, atl_balance, etc.) should still be given out according to their own rarity rules (e.g., for winning, finding treasures), not necessarily on every turn.
+-   **Energy:** Energy is **NOT** a random drop. It can **ONLY** be awarded when the player makes a specific choice to rest or recover (e.g., "Відпочити біля джерела", "Помедитувати").
+    -   When you offer such a choice, you MUST link the energy reward to it using the \`choiceOutcomes\` field.
+    -   The amount should be small (e.g., 2 to 7).
 
-      --- OUTCOME TYPES ---
+--- RULE FOR THE FINAL BLOW (TOP PRIORITY) ---
+-   This rule OVERRIDES all other combat rules. 
+-   ONLY when the player's attack reduces the enemy's HP to 0 or less:
+    -   The "story" MUST describe the victory.
+    -   The "outcome" array MUST contain THREE objects in this order: 
+        1. The final "COMBAT_TURN" object showing the killing blow.
+        2. The "XP" reward for winning the battle (usually enemy's max health).
+        3. A "BATTLE_END" object: \`{"type": "BATTLE_END"}\`. THIS IS MANDATORY.
+    -   The "choices" array MUST be replaced with appropriate POST-BATTLE actions.
 
-      -   Reward: {"type": "REWARD", "item": "points" | "atl_balance" | "ton_balance", "amount": ...}.
-      -   Experience: {"type": "XP", "amount": ...}.
-      -   Initiate Battle: {"type": "BATTLE", "enemy": {"name": "...", "health": 30, "attack": 5, "defense": 2}}.
-          - The "enemy" object MUST contain "name", "health", "attack", and "defense".
-      -   Found Item: {"type": "ITEM", "item_key": "...", "item_name": "...", "item_type": "...", "sub_type": "...", "rarity": "...", "stats": {...}}.
-          - RULES FOR ITEMS:
-                -   You MUST generate a stable, English, snake_case "item_key".
-                -   You MUST also generate a translated "item_name" based on the user's language.
-                -   You MUST classify it with a "sub_type" (single, lowercase English word).
-                  -   **RARITY RULES (v2 - VERY IMPORTANT):**
-                    -   The absolute default rarity for ALL items is **"common"**. The VAST MAJORITY of items (over 95%) MUST be "common".
-                    -   "uncommon" items ar e **extremely rare** and should feel like a special event for the player.
-                    -   **Strict Guideline:** You should aim to generate an "uncommon" item roughly **1 time out of every 30-40 item-generating events**. Do not generate them more frequently than this under any circumstances.
-                    -   **Context for Drops:** Prefer to award "uncommon" items as a reward for defeating a tougher-than-average enemy or as a treasure found in a hidden, special location. Avoid dropping them from standard, weak enemies found at the start of the adventure.
-                    -   Allowed rarity values: "common", "uncommon".
-      -   Combat Turn: {"type": "COMBAT_TURN", "player_hp_change": -5, "enemy_hp_change": -10}.
-      -   Game Over: {"type": "GAME_OVER", "reason": "..."}.
+--- RULE FOR FLEEING (HIGH PRIORITY) ---
+-   If the player's choice is "🏃 Втекти":
+-   There is a **30% CHANCE that the escape FAILS**.
+    -   If it FAILS: The "story" must describe the failure. The "outcome" MUST be a single 'COMBAT_TURN' object where the player takes damage.
+-   If it SUCCEEDS:
+    -   The "story" must describe a successful escape with a penalty.
+    -   The "outcome" array MUST contain TWO objects:
+        1. \`{"type": "FLEE"}\`
+        2. A penalty object: \`{"type": "REWARD", "item": "points", "amount": -X}\` where X is a small random integer between 5 and 15.
+    -   The "choices" array MUST be replaced with post-escape actions.
 
-       --- COMBAT TURN RULES (NEW & VERY IMPORTANT) ---
+--- GENERAL RULES ---
+-   When in combat AND the enemy is NOT defeated in the current turn, the "choices" array MUST be exactly: ["🗡️ Атакувати", "🛡️ Захищатись", "🏃 Втекти"].
+-   The player is a Level ${playerData.level} ${playerData.character_class}.
+-   The adventure is an endless journey.
+-   If player energy reaches 0, the outcome MUST be {"type": "GAME_OVER", "reason": "Ви повністю виснажились і знепритомніли від втоми."}.
+`;
 
-      -   Combat is TURN-BASED. Each player action ("Атакувати", "Захищатись") constitutes a SINGLE turn.
-      -   Your response MUST only describe the events of this ONE turn. 
-      -   DO NOT simulate the entire battle at once. Predict the outcome of one single round of combat.
-      -   For every combat action that does NOT end the battle, your "outcome" MUST be a single object: {"type": "COMBAT_TURN", "player_hp_change": ..., "enemy_hp_change": ...}.
-      -   The story should describe the player's action and the enemy's counter-attack within that same turn.
-
-      --- RULE FOR THE FINAL BLOW (Updated) ---
-
-      -   This rule is an EXCEPTION. ONLY when the player's attack reduces the enemy's HP to 0 or less in the current turn:
-      -   Your "story" MUST describe the victory.
-      -   The "outcome" array MUST contain BOTH the final "COMBAT_TURN" object (showing the killing blow) and the "XP" reward.
-      -   The "choices" MUST change to post-battle actions (e.g., "Оглянути тіло", "Продовжити шлях").
-
-      --- GENERAL RULES ---
-      
-      -   When in combat (and the enemy is NOT defeated yet), the "choices" array MUST be exactly: ["🗡️ Атакувати", "🛡️ Захищатись", "🏃 Втекти"].
-      -   DO NOT show calculations.
-      -   The player is a Level ${playerData.level} ${playerData.character_class}.
-      -   The adventure is an endless journey. There is no final goal or "end of the game." The story should always provide a path forward, unless the player runs out of energy or dies.
-      -   The story begins as the player leaves the city of Artilith, a bastion of light surrounded by a vast, mystical, and dangerous dark forest.
-      -   If you see that the player's energy is 0 AFTER they perform an action, the story MUST end. The "outcome" for this situation MUST be {"type": "GAME_OVER", "reason": "Ви повністю виснажились і знепритомніли від втоми."}.
-      `;
-      const initialHistory = [
-          { role: "user", parts: [{ text: initialSystemPrompt }] },
-          { 
-              role: "model", 
-              parts: [{ 
-                  text: JSON.stringify({ 
-                      story: "Ворота Артіліта (Artilith) важко зачиняються за твоєю спиною. Перед тобою розстеляється похмурий, шепочучий ліс, що оточує місто. Повітря густе від невимовної магії та прихованих небезпек. Куди попрямуєш?", 
-                      choices: [" Йти вглиб лісу", " Йти узліссям на схід", "Перевірити спорядження"], 
-                      outcome: null 
-                  }) 
-              }] 
-          }
-      ];
+        const initialHistory = [
+            { role: "user", parts: [{ text: initialSystemPrompt }] },
+            { 
+                role: "model", 
+                parts: [{ 
+                    text: JSON.stringify({ 
+                        story: "Ворота Артіліта (Artilith) важко зачиняються за твоєю спиною. Перед тобою розстеляється похмурий, шепочучий ліс...", 
+                        choices: ["Йти вглиб лісу", "Йти узліссям на схід", "Перевірити спорядження"], 
+                        outcome: [{"type": "XP", "amount": 5}] 
+                    }) 
+                }] 
+            }
+        ];
         setChatHistory(initialHistory);
-        setStory("Завантаження завершено. Пригода починається...");
         setStory("Ворота Артіліта (Artilith) важко зачиняються за твоєю спиною. Перед тобою розстеляється похмурий, шепочучий ліс, що оточує місто. Повітря густе від невимовної магії та прихованих небезпек. Куди попрямуєш?");
-        setChoices([" Йти вглиб лісу", " Йти узліссям на схід", " Перевірити спорядження"]);
+        setChoices(["Йти вглиб лісу", "Йти узліссям на схід", "Перевірити спорядження"]);
     }
-  }, [playerData, chatHistory.length]);
-
-  useEffect(() => {
-    if (isInCombat && enemy === null) {
-      setIsInCombat(false);
-    }
-  }, [enemy, isInCombat])
+}, [playerData, chatHistory.length]);
 
   const processOutcome = useCallback(async (outcomeToProcess: Outcome | Outcome[]) => {
     if (!outcomeToProcess || !userId) return;
@@ -312,6 +314,8 @@ export default function TextAdventurePage() {
                 
                 if (newEnemyHP <= 0) {
                     toast.success(`Ви перемогли ${currentEnemy.name}!`);
+                    setEnemiesDefeatedInSession(prev => prev + 1);
+                    setIsInCombat(false);
                     currentEnemy = null; 
                 } else if (newPlayerHP <= 0) {
                     toast.error("Вас перемогли...");
@@ -319,6 +323,17 @@ export default function TextAdventurePage() {
                     await processOutcome({ type: 'GAME_OVER', reason: 'Ви загинули в бою.' });
                 }
                 break;
+
+                case 'BATTLE_END':
+                    setIsInCombat(false);
+                    setEnemy(null);
+                    break;
+
+                case 'FLEE':
+                    toast("Ви втекли з бою!", { icon: "🏃" });
+                    setIsInCombat(false);
+                    setEnemy(null);
+                    break;
 
             // --- ЗМІНА: Об'єднано REWARD та XP ---
             case 'REWARD':
@@ -342,7 +357,9 @@ export default function TextAdventurePage() {
                 else if (singleOutcome.item === 'atl_balance') icon = '🪙';
                 else if (singleOutcome.item === 'ton_balance') icon = '💎';
                 
-                const message = `+${amount} ${icon}`;
+                const sign = amount >= 0 ? '+' : '';
+                const message = `${sign}${amount} ${icon}`;
+
                 addToLog(message);
                 updateSummary(icon, amount);
                 break;
@@ -385,6 +402,7 @@ export default function TextAdventurePage() {
                 setIsGameOver(true);
                 setIsInCombat(false);
                 setEnemy(null);
+                saveAdventureStats(); 
                 // Одразу оновлюємо стан, не чекаючи кінця функції
                 setPlayerData(currentPlayerData);
                 return; // Завершуємо виконання
@@ -402,15 +420,12 @@ export default function TextAdventurePage() {
     if (!playerData || isLoading || isGameOver) return;
     if (energy < 1) {
         toast.error("Недостатньо енергії для дії!");
-        return; 
+        return;
     }
-    
+
     setIsLoading(true);
     await spendEnergy(1);
     
-    // --- ВИПРАВЛЕННЯ БАГУ #1 ---
-    // Обробляємо відкладену нагороду, ЯКЩО вона є, і очищуємо її.
-    // Тепер це не буде конфліктувати з основним `outcome`.
     if (pendingOutcomes && pendingOutcomes[choice]) {
         await processOutcome(pendingOutcomes[choice]);
         setPendingOutcomes(null); 
@@ -448,11 +463,9 @@ export default function TextAdventurePage() {
             const cleanedJsonString = jsonMatch[0].replace(/,\s*([}\]])/g, "$1");
             const parsedResponse: AIResponse = JSON.parse(cleanedJsonString);
             
-            // Змінено порядок
             if (parsedResponse.outcome) {
                 await processOutcome(parsedResponse.outcome);
             }
-            // Оновлюємо відкладені нагороди для НАСТУПНОГО кроку
             setPendingOutcomes(parsedResponse.choiceOutcomes ?? null);
 
             setChatHistory([...newHistory, { role: "model", parts: [{ text: jsonMatch[0] }] }]);
@@ -467,7 +480,23 @@ export default function TextAdventurePage() {
     } finally {
         setIsLoading(false);
     }
-  }, [chatHistory, playerData, isLoading, isGameOver, energy, spendEnergy, isInCombat, enemy, processOutcome, pendingOutcomes]);
+}, [chatHistory, playerData, isLoading, isGameOver, energy, spendEnergy, isInCombat, enemy, processOutcome, pendingOutcomes]);
+
+  const saveAdventureStats = useCallback(async () => {
+      // Не зберігаємо, якщо гравець нічого не зробив
+      if (!userId || adventureStep <= 1 && enemiesDefeatedInSession === 0) return;
+
+      await supabase.rpc('update_user_adventure_stats', {
+          p_user_id: String(userId),
+          p_session_stage_reached: adventureStep,
+          p_session_enemies_defeated: enemiesDefeatedInSession
+      });
+  }, [userId, adventureStep, enemiesDefeatedInSession]);
+
+  const handleEndAdventure = async () => {
+      await saveAdventureStats();
+      router.push('/home');
+  };
 
   return (
     <div style={styles.pageContainer}>
@@ -518,9 +547,9 @@ export default function TextAdventurePage() {
           </button>
         ))}
         
-        <button style={styles.backButton} onClick={() => router.push('/home')} disabled={isLoading}>
-          🏰 Завершити пригоду
-        </button>
+        <button style={styles.backButton} onClick={handleEndAdventure} disabled={isLoading}>
+            🏰 Завершити пригоду
+        </button> 
       </footer>
         <style>{`
             @keyframes flash-red { 0% { color: #ff4747; transform: scale(1.1); } 100% { color: #fff; transform: scale(1); } }

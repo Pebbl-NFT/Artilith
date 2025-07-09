@@ -8,7 +8,7 @@ export interface InventoryItemSlotProps {
   item: MergedInventoryItem;
   onClick: () => void;
   price?: number;
-  priceCurrencyIcon?: string; // <--- НОВИЙ ПРОПС
+  priceCurrencyIcon?: React.ReactNode;
 }
 
 // 2. Додаємо priceCurrencyIcon до списку пропсів

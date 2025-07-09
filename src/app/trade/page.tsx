@@ -33,7 +33,6 @@ interface MarketListing {
 
 // --- Стилі ---
 const styles: { [key: string]: CSSProperties } = {
-  // ... (ваші існуючі стилі залишаються тут)
   pageContainer: { minHeight: '100vh', backgroundImage: `url('/bg/market_bg.jpg')`, backgroundSize: 'cover', backgroundPosition: 'center', backgroundAttachment: 'fixed', color: '#e0e7ff', fontFamily: "'Spectral', serif", },
   contentWrapper: { padding: '70px 15px 100px 15px', },
   title: { fontFamily: "'Cinzel', serif", textAlign: 'center', fontSize: '2rem', marginBottom: '20px', color: '#fefce8', textShadow: '0 0 10px rgba(250, 204, 21, 0.5), 0 0 20px rgba(250, 204, 21, 0.3)', },
@@ -45,23 +44,87 @@ const styles: { [key: string]: CSSProperties } = {
   modalContent: { background: `url('/bg/parchment_bg.jpg')`, backgroundSize: 'cover', color: '#2c1d12', padding: '30px', borderRadius: '8px', border: '2px solid #5a3a22', boxShadow: '0 10px 30px rgba(0,0,0,0.5)', width: '90%', maxWidth: '400px', textAlign: 'center', },
   modalTitle: { fontFamily: "'Cinzel', serif", fontSize: '1.8rem', marginBottom: '15px', },
   modalItemName: { fontSize: '1.2rem', fontWeight: 'bold', marginBottom: '20px', },
-  modalInput: { width: '100%', padding: '12px', border: '2px solid #8c6b52', borderRadius: '6px', background: 'rgba(255, 250, 230, 0.8)', textAlign: 'center', fontSize: '1.5rem', color: '#2c1d12', fontWeight: 'bold', margin: '15px 0', },
+  modalInput: {
+    width: '90%',                   // <--- ЗМІНА: Робимо поле трохи вужчим
+    margin: '15px auto 25px auto',  // <--- ЗМІНА: 'auto' центрує поле по горизонталі
+    padding: '12px',
+    border: '2px solid #8c6b52',
+    borderRadius: '6px',
+    background: 'rgba(255, 250, 230, 0.8)',
+    textAlign: 'center',
+    fontSize: '1.5rem',
+    color: '#2c1d12',
+    fontWeight: 'bold',
+    boxSizing: 'border-box',        // <--- ДОДАНО: Для правильного розрахунку ширини
+},
   modalButton: { width: '100%', padding: '15px', border: '2px solid #2c1d12', borderRadius: '8px', background: '#5a3a22', color: '#fefce8', fontSize: '1.2rem', fontWeight: 'bold', cursor: 'pointer', marginTop: '10px', },
   modalButtonSecondary: { background: 'transparent', border: 'none', color: '#5a3a22', marginTop: '15px', cursor: 'pointer', },
   currencySelector: { display: 'flex', justifyContent: 'space-around', margin: '20px 0', },
-  currencyButton: { padding: '10px 15px', border: '2px solid #8c6b52', background: 'rgba(255, 250, 230, 0.8)', borderRadius: '8px', cursor: 'pointer', fontSize: '1.5rem', },
+  currencyButton: {
+    padding: '10px', // Зменшено падінг для кращого вигляду з іконкою
+    border: '2px solid #8c6b52',
+    background: 'rgba(255, 250, 230, 0.8)',
+    borderRadius: '8px',
+    cursor: 'pointer',
+    // Додано для центрування іконки
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    height: '60px', // Фіксована висота
+    width: '60px',  // Фіксована ширина
+},
   activeCurrencyButton: { background: '#5a3a22', color: '#fefce8', borderColor: '#2c1d12' },
-  // Нові стилі для фільтрів
   filtersContainer: { display: 'flex', gap: '10px', marginBottom: '20px' },
-  selectControl: { flex: 1, padding: '10px', background: 'rgba(10, 5, 20, 0.7)', border: '1px solid rgba(129, 140, 248, 0.2)', color: '#e0e7ff', borderRadius: '8px', fontSize: '1rem' }
+  selectControl: { flex: 1, padding: '10px', background: 'rgba(10, 5, 20, 0.7)', border: '1px solid rgba(129, 140, 248, 0.2)', color: '#e0e7ff', borderRadius: '8px', fontSize: '1rem' },
+  filterButtonGroup: {
+    display: 'flex',
+    background: 'rgba(10, 5, 20, 0.7)',
+    borderRadius: '8px',
+    padding: '4px',
+    border: '1px solid rgba(129, 140, 248, 0.2)',
+},
+filterButton: {
+    flex: 1,
+    background: 'transparent',
+    border: 'none',
+    color: '#a7b3d9',
+    padding: '8px',
+    cursor: 'pointer',
+    borderRadius: '6px',
+    transition: 'background-color 0.2s ease',
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    fontSize: '1rem',
+    fontWeight: 'bold',
+},
+activeFilterButton: {
+    background: 'rgba(129, 140, 248, 0.2)',
+    color: '#fefce8',
+},
 };
 
-const getPriceDisplay = (listing: MarketListing): { price: number; icon: string } => {
+const getPriceDisplay = (listing: MarketListing): { price: number; icon: React.ReactNode } => {
     switch (listing.currency) {
-        case 'points': return { price: listing.price_points ?? 0, icon: '🪨' };
-        case 'atl_balance': return { price: listing.price_atl ?? 0, icon: '🪙' };
-        case 'ton_balance': return { price: listing.price_ton ?? 0, icon: '💎' };
-        default: return { price: 0, icon: '' };
+        // --- ЗМІНИ ТУТ ---
+        case 'points': 
+            return { 
+                price: listing.price_points ?? 0, 
+                icon: <img src="/coin/atl_s.png" alt="Points" width={14} height={14} /> 
+            };
+        case 'atl_balance': 
+            return { 
+                price: listing.price_atl ?? 0, 
+                icon: <img src="/coin/atl_g.png" alt="ATL" width={14} height={14} /> 
+            };
+        case 'ton_balance': 
+            return { 
+                price: listing.price_ton ?? 0, 
+                icon: '💎' // Залишаємо емодзі, бо іконки для TON немає
+            };
+        // --- КІНЕЦЬ ЗМІН ---
+        default: 
+            return { price: 0, icon: '' };
     }
 }
 
@@ -70,7 +133,7 @@ export default function TradePage() {
     const initDataState = useSignal(initData.state);
     const userId = initDataState?.user?.id;
 
-    // --- Стан компонента ---
+    // --- Стан ---
     const [listings, setListings] = useState<MarketListing[]>([]);
     const [myListings, setMyListings] = useState<MarketListing[]>([]);
     const [userInventory, setUserInventory] = useState<MergedInventoryItem[]>([]);
@@ -82,56 +145,49 @@ export default function TradePage() {
     const [sellPrice, setSellPrice] = useState('');
     const [sellCurrency, setSellCurrency] = useState<Currency>('points');
     const [isProcessing, setIsProcessing] = useState(false);
-
-    // --- Стан для кількості ---
     const [sellQuantity, setSellQuantity] = useState('1');
-
-    const [confirmation, setConfirmation] = useState<{
-        isOpen: boolean;
-        message: React.ReactNode;
-        onConfirm: () => void;
-    } | null>(null);
+    const [confirmation, setConfirmation] = useState<{ isOpen: boolean; message: React.ReactNode; onConfirm: () => void; } | null>(null);
     
-    // --- Стан для фільтрів та сортування ---
+    // --- Стан фільтрів ---
     const [sortOption, setSortOption] = useState<SortOption>('newest');
     const [filterType, setFilterType] = useState('all');
+    const [filterCurrency, setFilterCurrency] = useState('all'); // <-- Новий фільтр
 
-    // При відкритті модального вікна продажу, встановлюємо кількість = 1
-    useEffect(() => {
-        if (itemToSell) {
-            setSellQuantity('1');
-        }
-    }, [itemToSell]);
+    useEffect(() => { if (itemToSell) { setSellQuantity('1'); } }, [itemToSell]);
 
-        // --- Завантаження даних ---
     const loadPageData = useCallback(async () => {
         if (!userId) return;
         setLoading(true);
 
-        // Завантаження балансів (завжди)
         const { data: userData } = await supabase.from('users').select('points, atl_balance, ton_balance').eq('id', String(userId)).single();
-        if (userData) setBalances(userData as { points: number; atl_balance: number; ton_balance: number });
+        if (userData) setBalances(userData as any);
 
-        // Логіка для вкладки "Купити"
         if (view === 'buy') {
             let query = supabase
                 .from('market_listings')
-                .select(`*, items!inner(*)`) // !inner(*) відфільтрує лоти, якщо предмет був видалений
+                .select(`*, items!inner(*)`)
                 .eq('is_active', true)
                 .neq('seller_id', String(userId));
             
-            // Застосування фільтрації
             if (filterType !== 'all') {
                 query = query.eq('items.item_type', filterType);
             }
 
-            // Застосування сортування
+            // --- ОНОВЛЕНА ЛОГІКА ФІЛЬТРАЦІЇ ТА СОРТУВАННЯ ---
+            if (filterCurrency !== 'all') {
+                query = query.eq('currency', filterCurrency);
+            }
+
             if (sortOption === 'newest') {
                 query = query.order('created_at', { ascending: false });
-            } else if (sortOption === 'price_asc') {
-                query = query.order('price_points', { ascending: true }).order('price_atl', { ascending: true });
-            } else if (sortOption === 'price_desc') {
-                query = query.order('price_points', { ascending: false, nullsFirst: false }).order('price_atl', { ascending: false, nullsFirst: false });
+            } else if (sortOption.startsWith('price_') && filterCurrency !== 'all') {
+                const isAsc = sortOption === 'price_asc';
+                let priceColumn: 'price_points' | 'price_atl' | 'price_ton' = 'price_points';
+                
+                if (filterCurrency === 'atl_balance') priceColumn = 'price_atl';
+                else if (filterCurrency === 'ton_balance') priceColumn = 'price_ton';
+                
+                query = query.order(priceColumn, { ascending: isAsc });
             }
 
             const { data, error } = await query;
@@ -142,34 +198,21 @@ export default function TradePage() {
             }
         }
         
-        // Логіка для вкладки "Продати"
         if (view === 'sell') {
             const inventoryData = await fetchInventory(String(userId));
             setUserInventory(inventoryData.filter(item => !item.equipped && !item.is_listed));
         }
 
-        // Логіка для вкладки "Мої лоти"
         if (view === 'my_listings') {
-            const { data, error } = await supabase
-                .from('market_listings')
-                .select(`*, items!inner(*)`)
-                .eq('is_active', true)
-                .eq('seller_id', String(userId))
-                .order('created_at', { ascending: false });
-            
-            if (error) {
-                toast.error("Не вдалося завантажити ваші лоти.");
-            } else {
-                setMyListings(data as MarketListing[]);
-            }
+            const { data, error } = await supabase.from('market_listings').select(`*, items!inner(*)`).eq('is_active', true).eq('seller_id', String(userId)).order('created_at', { ascending: false });
+            if (error) { toast.error("Не вдалося завантажити ваші лоти."); } 
+            else { setMyListings(data as MarketListing[]); }
         }
         
         setLoading(false);
-    }, [userId, view, sortOption, filterType]);
+    }, [userId, view, sortOption, filterType, filterCurrency]); // <-- Додано filterCurrency в залежності
 
-    useEffect(() => {
-        loadPageData();
-    }, [loadPageData]);
+    useEffect(() => { loadPageData(); }, [loadPageData]);
 
     // --- Обробники подій ---
     const handlePurchase = async () => {
@@ -278,7 +321,7 @@ export default function TradePage() {
         <Page>
             <div style={styles.pageContainer}>
                 <List>
-                    <TopBar points={balances.points} />
+                    <TopBar points={balances.points} atl_balance={balances.atl_balance} ton_balance={balances.ton_balance} />
                     <div style={styles.contentWrapper}> 
                         <h2 style={styles.title}>Торговий Майданчик</h2>
                         
@@ -298,7 +341,40 @@ export default function TradePage() {
                                     <option value="gloves">Рукавиці</option>
                                     <option value="boots">Черевики</option>
                                 </select>
-                                <select value={sortOption} onChange={(e) => setSortOption(e.target.value as SortOption)} style={styles.selectControl}>
+                                
+                                <div style={styles.filterButtonGroup}>
+                                    <button 
+                                        style={{...styles.filterButton, ...(filterCurrency === 'all' ? styles.activeFilterButton : {})}} 
+                                        onClick={() => setFilterCurrency('all')}
+                                    >
+                                        Всі
+                                    </button>
+                                    <button 
+                                        style={{...styles.filterButton, ...(filterCurrency === 'ton_balance' ? styles.activeFilterButton : {})}} 
+                                        onClick={() => setFilterCurrency('ton_balance')}
+                                    >
+                                        💎
+                                    </button>
+                                    <button 
+                                        style={{...styles.filterButton, ...(filterCurrency === 'atl_balance' ? styles.activeFilterButton : {})}} 
+                                        onClick={() => setFilterCurrency('atl_balance')}
+                                    >
+                                        <img src="/coin/atl_g.png" alt="ATL" width={16} height={16} />
+                                    </button>
+                                    <button 
+                                        style={{...styles.filterButton, ...(filterCurrency === 'points' ? styles.activeFilterButton : {})}} 
+                                        onClick={() => setFilterCurrency('points')}
+                                    >
+                                        <img src="/coin/atl_s.png" alt="Points" width={16} height={16} />
+                                    </button>
+                                </div>
+
+                                <select 
+                                    value={sortOption} 
+                                    onChange={(e) => setSortOption(e.target.value as SortOption)} 
+                                    style={styles.selectControl}
+                                    disabled={sortOption.startsWith('price_') && filterCurrency === 'all'} // Блокуємо, якщо не обрано валюту
+                                >
                                     <option value="newest">Спочатку нові</option>
                                     <option value="price_asc">Ціна: за зростанням</option>
                                     <option value="price_desc">Ціна: за спаданням</option>
@@ -361,7 +437,13 @@ export default function TradePage() {
                         <div style={styles.currencySelector}>
                             {(['points', 'atl_balance', 'ton_balance'] as Currency[]).map(c => (
                                 <button key={c} onClick={() => setSellCurrency(c)} style={{...styles.currencyButton, ...(sellCurrency === c ? styles.activeCurrencyButton : {})}}>
-                                    {c === 'points' ? '🪨' : c === 'atl_balance' ? '🪙' : '💎'}
+                                    {/* --- ЗМІНА ТУТ --- */}
+                                    {c === 'points' 
+                                        ? <img src="/coin/atl_s.png" alt="Points" width={28} height={28} /> 
+                                        : c === 'atl_balance' 
+                                        ? <img src="/coin/atl_g.png" alt="ATL" width={28} height={28} /> 
+                                        : '💎'
+                                    }
                                 </button>
                             ))}
                         </div>
