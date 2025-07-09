@@ -6,5 +6,5 @@ export const locales = [defaultLocale, 'en'] as const;
 
 export const localesMap = [
   { key: 'en', title: 'English' },
-  { key: 'ua', title: 'Українська' },
+  { key: 'uk', title: 'Українська' },
 ];

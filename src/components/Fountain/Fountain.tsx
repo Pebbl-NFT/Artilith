@@ -120,6 +120,17 @@ export function Fountain() {
     const buttonText = status === 'ready' ? "Отримати дари!" : formatTime(cooldown);
     const isButtonDisabled = status !== 'ready' || isClaiming;
 
+    const handleStartAdventure = () => {
+        // Перевіряємо, чи доступний об'єкт аналітики
+        if (window.Telegram?.WebApp?.Analytics) {
+            // Відправляємо подію в аналітику Telegram
+            window.Telegram.WebApp.Analytics.logEvent('start_adventure_button_click');
+        }
+
+        // Виконуємо перехід на сторінку пригоди
+        router.push('/home/battle');
+    };
+
     // <-- НАШІ ЗМІНИ: Оновлено всю JSX структуру
     return (
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px', width: '100%', padding: '0 16px', boxSizing: 'border-box', }}>
@@ -183,7 +194,7 @@ export function Fountain() {
                 <Button
                     size="l"
                     stretched
-                    onClick={() => router.push('/home/battle')}
+                    onClick={handleStartAdventure} // <--- Змінено тут
                 >
                     ⚔️ В подорож ⚔️
                 </Button>
