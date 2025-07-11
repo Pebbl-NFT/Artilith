@@ -43,17 +43,6 @@ declare global {
   }
 }
 
-useEffect(() => {
-  // Цей код виконається один раз при завантаженні сторінки
-  if (typeof window !== 'undefined' && window.Telegram?.WebApp) {
-    // Повідомляємо Telegram, що додаток готовий
-    window.Telegram.WebApp.ready();
-    
-    // Це також активує аналітику
-    console.log("Telegram WebApp SDK is ready.");
-  }
-}, []);
-
 export default function HomePage() {
   const router = useRouter();
   const initDataState = useSignal(initData.state);
@@ -114,6 +103,17 @@ export default function HomePage() {
   useEffect(() => {
     loadData();
   }, [loadData]);
+
+  useEffect(() => {
+    // Цей код виконається один раз при завантаженні сторінки
+    if (typeof window !== 'undefined' && window.Telegram?.WebApp) {
+      // Повідомляємо Telegram, що додаток готовий
+      window.Telegram.WebApp.ready();
+      
+      // Це також активує аналітику
+      console.log("Telegram WebApp SDK is ready.");
+    }
+  }, []);
   
   async function handleEquip(item: MergedInventoryItem) {
     if (!userId) return;
