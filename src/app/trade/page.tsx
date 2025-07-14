@@ -12,6 +12,7 @@ import BottomBar from '@/components/BottomBar';
 import InventoryItemSlot from '@/components/Item/InventoryItemSlot';
 import { MergedInventoryItem, fetchInventory } from '@/hooks/useInventory';
 import { ConfirmationModal } from '@/components/ConfirmationModal';
+import { ActionCard } from './ActionCard';
 
 // --- Типи ---
 type Currency = 'points' | 'atl_balance' | 'ton_balance';
@@ -33,20 +34,115 @@ interface MarketListing {
 
 // --- Стилі ---
 const styles: { [key: string]: CSSProperties } = {
-  pageContainer: { minHeight: '100vh', backgroundImage: `url('/bg/market_bg.jpg')`, backgroundSize: 'cover', backgroundPosition: 'center', backgroundAttachment: 'fixed', color: '#e0e7ff', fontFamily: "'Spectral', serif", },
-  contentWrapper: { padding: '70px 15px 100px 15px', },
-  title: { fontFamily: "'Cinzel', serif", textAlign: 'center', fontSize: '2rem', marginBottom: '20px', color: '#fefce8', textShadow: '0 0 10px rgba(250, 204, 21, 0.5), 0 0 20px rgba(250, 204, 21, 0.3)', },
-  viewSwitcher: { display: 'flex', justifyContent: 'center', marginBottom: '15px', background: 'rgba(10, 5, 20, 0.5)', borderRadius: '12px', padding: '5px', border: '1px solid rgba(129, 140, 248, 0.2)', },
-  switcherButton: { flex: 1, padding: '10px 15px', background: 'transparent', border: 'none', color: '#a7b3d9', fontSize: '1rem', cursor: 'pointer', transition: 'all 0.3s ease', borderRadius: '8px', fontWeight: 'bold', },
-  activeButton: { background: 'rgba(129, 140, 248, 0.2)', color: '#fefce8', boxShadow: 'inset 0 0 10px rgba(129, 140, 248, 0.3)', },
-  gridContainer: { padding: '20px', background: 'rgba(10, 5, 20, 0.6)', backdropFilter: 'blur(5px)', borderRadius: '12px', border: '1px solid rgba(129, 140, 248, 0.2)', minHeight: '300px', },
-  modalOverlay: { position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(10, 5, 20, 0.85)', backdropFilter: 'blur(10px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100, },
-  modalContent: { background: `url('/bg/parchment_bg.jpg')`, backgroundSize: 'cover', color: '#2c1d12', padding: '30px', borderRadius: '8px', border: '2px solid #5a3a22', boxShadow: '0 10px 30px rgba(0,0,0,0.5)', width: '90%', maxWidth: '400px', textAlign: 'center', },
-  modalTitle: { fontFamily: "'Cinzel', serif", fontSize: '1.8rem', marginBottom: '15px', },
-  modalItemName: { fontSize: '1.2rem', fontWeight: 'bold', marginBottom: '20px', },
+  // --- Головний контейнер сторінки ---
+  pageContainer: {
+    minHeight: '100vh',
+    backgroundImage: `url('/bg/market_bg.jpg')`,
+    backgroundSize: 'cover',
+    backgroundPosition: 'center',
+    backgroundAttachment: 'fixed',
+    color: '#e0e7ff',
+    fontFamily: "'Spectral', serif",
+  },
+  contentWrapper: {
+    padding: '60px 15px 100px 15px', // Зменшено верхній відступ
+  },
+  title: {
+    fontFamily: "'Cinzel', serif",
+    textAlign: 'center',
+    fontSize: 'clamp(1.8rem, 6vw, 2.2rem)', // Адаптивний шрифт
+    marginBottom: '20px',
+    color: '#fefce8',
+    textShadow: '0 0 10px rgba(250, 204, 21, 0.5), 0 0 20px rgba(250, 204, 21, 0.3)',
+  },
+  
+  // --- Перемикач вкладок (Купити/Продати) ---
+  viewSwitcher: {
+    display: 'flex',
+    marginBottom: '20px',
+    background: 'rgba(10, 5, 20, 0.5)',
+    borderRadius: '12px',
+    padding: '5px',
+    border: '1px solid rgba(129, 140, 248, 0.2)',
+  },
+  switcherButton: {
+    flex: 1,
+    padding: '10px 5px', // Зменшено горизонтальний падінг
+    background: 'transparent',
+    border: 'none',
+    color: '#a7b3d9',
+    fontSize: 'clamp(0.9rem, 4vw, 1rem)', // Адаптивний шрифт
+    cursor: 'pointer',
+    transition: 'all 0.3s ease',
+    borderRadius: '8px',
+    fontWeight: 'bold',
+  },
+  activeButton: {
+    background: 'rgba(129, 140, 248, 0.2)',
+    color: '#fefce8',
+    boxShadow: 'inset 0 0 10px rgba(129, 140, 248, 0.3)',
+  },
+
+  // --- Контейнер для фільтрів та сітки ---
+  filtersContainer: {
+    display: 'flex',
+    flexWrap: 'wrap', // Дозволяє переносити на новий рядок
+    gap: '10px',
+    marginBottom: '20px',
+  },
+  selectControl: {
+    flex: '1 1 150px', // Дозволяє елементу зменшуватись і рости
+    padding: '10px',
+    background: 'rgba(10, 5, 20, 0.7)',
+    border: '1px solid rgba(129, 140, 248, 0.2)',
+    color: '#e0e7ff',
+    borderRadius: '8px',
+    fontSize: '1rem'
+  },
+  gridContainer: {
+    padding: '15px',
+    background: 'rgba(10, 5, 20, 0.6)',
+    backdropFilter: 'blur(5px)',
+    borderRadius: '12px',
+    border: '1px solid rgba(129, 140, 248, 0.2)',
+    minHeight: '300px',
+  },
+  
+  // --- Стилі для модальних вікон ---
+  modalOverlay: {
+    position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+    background: 'rgba(10, 5, 20, 0.85)',
+    backdropFilter: 'blur(10px)',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    zIndex: 1100,
+  },
+  modalContent: {
+    background: `url('/bg/parchment_bg.jpg')`,
+    backgroundSize: 'cover',
+    color: '#2c1d12',
+    padding: '25px', // Зменшено падінг для мобільних
+    borderRadius: '12px',
+    border: '2px solid #5a3a22',
+    boxShadow: '0 10px 30px rgba(0,0,0,0.5)',
+    width: '90%',
+    maxWidth: '380px',
+    textAlign: 'center',
+  },
+  modalTitle: {
+    fontFamily: "'Cinzel', serif",
+    fontSize: 'clamp(1.5rem, 5vw, 1.8rem)',
+    marginBottom: '15px',
+  },
+  modalItemName: {
+    fontSize: 'clamp(1rem, 4vw, 1.2rem)',
+    fontWeight: 'bold',
+    marginBottom: '20px',
+  },
   modalInput: {
-    width: '90%',                   // <--- ЗМІНА: Робимо поле трохи вужчим
-    margin: '15px auto 25px auto',  // <--- ЗМІНА: 'auto' центрує поле по горизонталі
+    width: '100%', // Займає всю ширину
+    margin: '15px 0 25px 0',
     padding: '12px',
     border: '2px solid #8c6b52',
     borderRadius: '6px',
@@ -55,8 +151,8 @@ const styles: { [key: string]: CSSProperties } = {
     fontSize: '1.5rem',
     color: '#2c1d12',
     fontWeight: 'bold',
-    boxSizing: 'border-box',        // <--- ДОДАНО: Для правильного розрахунку ширини
-},
+    boxSizing: 'border-box',
+  },
   modalButton: { width: '100%', padding: '15px', border: '2px solid #2c1d12', borderRadius: '8px', background: '#5a3a22', color: '#fefce8', fontSize: '1.2rem', fontWeight: 'bold', cursor: 'pointer', marginTop: '10px', },
   modalButtonSecondary: { background: 'transparent', border: 'none', color: '#5a3a22', marginTop: '15px', cursor: 'pointer', },
   currencySelector: { display: 'flex', justifyContent: 'space-around', margin: '20px 0', },
@@ -70,12 +166,11 @@ const styles: { [key: string]: CSSProperties } = {
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
-    height: '60px', // Фіксована висота
-    width: '60px',  // Фіксована ширина
+    height: '35px', // Фіксована висота
+    width: '35px',  // Фіксована ширина
 },
   activeCurrencyButton: { background: '#5a3a22', color: '#fefce8', borderColor: '#2c1d12' },
-  filtersContainer: { display: 'flex', gap: '10px', marginBottom: '20px' },
-  selectControl: { flex: 1, padding: '10px', background: 'rgba(10, 5, 20, 0.7)', border: '1px solid rgba(129, 140, 248, 0.2)', color: '#e0e7ff', borderRadius: '8px', fontSize: '1rem' },
+
   filterButtonGroup: {
     display: 'flex',
     background: 'rgba(10, 5, 20, 0.7)',
@@ -102,11 +197,27 @@ activeFilterButton: {
     background: 'rgba(129, 140, 248, 0.2)',
     color: '#fefce8',
 },
+actionCardButton: {
+    backgroundColor: "rgba(0, 0, 0, 0.74)",
+    border: "1px solid rgba(0, 0, 0, 0.2)",
+    padding: "12px 20px",
+    fontSize: "clamp(1rem, 3vw, 1.1rem)",
+    color: "#fff",
+    borderRadius: "28px",
+    cursor: "pointer",
+    transition: "all 0.2s ease",
+    width: '100%',
+    fontWeight: 'bold',
+    textTransform: 'uppercase',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: '10px'
+  },
 };
 
 const getPriceDisplay = (listing: MarketListing): { price: number; icon: React.ReactNode } => {
     switch (listing.currency) {
-        // --- ЗМІНИ ТУТ ---
         case 'points': 
             return { 
                 price: listing.price_points ?? 0, 
@@ -120,9 +231,8 @@ const getPriceDisplay = (listing: MarketListing): { price: number; icon: React.R
         case 'ton_balance': 
             return { 
                 price: listing.price_ton ?? 0, 
-                icon: '💎' // Залишаємо емодзі, бо іконки для TON немає
+                icon: '💎'
             };
-        // --- КІНЕЦЬ ЗМІН ---
         default: 
             return { price: 0, icon: '' };
     }
@@ -410,51 +520,70 @@ export default function TradePage() {
                 </List>
             </div>
 
-            {/* Модальні вікна залишаються без змін */}
-            {selectedListing && ( <div style={styles.modalOverlay} onClick={() => !isProcessing && setSelectedListing(null)}> <div style={styles.modalContent} onClick={(e) => e.stopPropagation()}> <h3 style={styles.modalTitle}>Придбати предмет</h3> <p style={styles.modalItemName} className={`rarity-font-${selectedListing.items.rarity?.toLowerCase()}`}>{selectedListing.items.name}</p> <p>Ціна: <strong>{getPriceDisplay(selectedListing).price} {getPriceDisplay(selectedListing).icon}</strong></p> <div style={{marginTop: '20px'}}> <button style={styles.modalButton} onClick={handlePurchase} disabled={isProcessing}>{isProcessing ? 'Купуємо...' : 'Купити'}</button> <button style={styles.modalButtonSecondary} onClick={() => setSelectedListing(null)} disabled={isProcessing}>Скасувати</button> </div> </div> </div> )}
-            {itemToSell && (
-                <div style={styles.modalOverlay} onClick={() => !isProcessing && setItemToSell(null)}>
-                    <div style={styles.modalContent} onClick={(e) => e.stopPropagation()}>
-                        <h3 style={styles.modalTitle}>Виставити на продаж</h3>
-                        <p style={styles.modalItemName} className={`rarity-font-${itemToSell.rarity?.toLowerCase()}`}>{itemToSell.name}</p>
-                        
-                        {/* Поле для вибору кількості */}
-                        {itemToSell.quantity > 1 && (
-                            <div>
-                                <label style={{ fontWeight: 'bold' }}>Кількість (доступно: {itemToSell.quantity})</label>
-                                <input 
-                                    type="number"
-                                    value={sellQuantity}
-                                    onChange={(e) => setSellQuantity(e.target.value)}
-                                    min="1"
-                                    max={itemToSell.quantity}
-                                    style={styles.modalInput}
-                                />
-                            </div>
-                        )}
+             {/* --- ОНОВЛЕННЯ: Модальні вікна тепер використовують ActionCard --- */}
 
-                        <label style={{ fontWeight: 'bold', marginTop: '15px', display: 'block' }}>Ціна за 1 шт.</label>
-                        <div style={styles.currencySelector}>
-                            {(['points', 'atl_balance', 'ton_balance'] as Currency[]).map(c => (
-                                <button key={c} onClick={() => setSellCurrency(c)} style={{...styles.currencyButton, ...(sellCurrency === c ? styles.activeCurrencyButton : {})}}>
-                                    {/* --- ЗМІНА ТУТ --- */}
-                                    {c === 'points' 
-                                        ? <img src="/coin/atl_s.png" alt="Points" width={28} height={28} /> 
-                                        : c === 'atl_balance' 
-                                        ? <img src="/coin/atl_g.png" alt="ATL" width={28} height={28} /> 
-                                        : '💎'
-                                    }
-                                </button>
-                            ))}
+            {/* 1. Модальне вікно для купівлі предмета */}
+            {selectedListing && (
+                <div style={styles.modalOverlay} onClick={() => !isProcessing && setSelectedListing(null)}>
+                    <ActionCard
+                        item={{ // Перетворюємо дані лота у формат, зрозумілий для картки
+                            id: selectedListing.items.id, item_id: selectedListing.items.id, name: selectedListing.items.name, image_url: selectedListing.items.image_url ?? '',
+                            rarity: selectedListing.items.rarity, item_key: selectedListing.items.item_key ?? '', item_type: selectedListing.items.item_type,
+                            sub_type: selectedListing.items.sub_type ?? '', stats: selectedListing.items.stats ?? {}, equipped: false, quantity: 1, upgrade_level: 0, is_listed: true,
+                        }}
+                        onClose={() => setSelectedListing(null)}
+                    >
+                        {/* Вміст, що вставляється в ActionCard: ціна та кнопка "Купити" */}
+                        <div style={{ color: 'white', padding: '10px', background: 'rgba(0,0,0,0.3)', borderRadius: '8px', marginBottom: '30px', border: '1px solid rgba(255,255,255,0.1)' }}>
+                            Ціна: <strong style={{ fontSize: '1.2em' }}>{getPriceDisplay(selectedListing).price}</strong> {getPriceDisplay(selectedListing).icon}
                         </div>
-                        
-                        <input type="number" placeholder="Ваша ціна" value={sellPrice} onChange={(e) => setSellPrice(e.target.value)} style={styles.modalInput} />
-                        
-                        <button style={styles.modalButton} onClick={handleListItem} disabled={isProcessing}>{isProcessing ? 'Виставляємо...' : 'На ринок'}</button>
-                        <button style={styles.modalButtonSecondary} onClick={() => setItemToSell(null)} disabled={isProcessing}>Скасувати</button>
-                    </div>
+                        <button style={styles.actionCardButton} onClick={handlePurchase} disabled={isProcessing}>
+                            {isProcessing ? 'Обробка...' : 'Купити'}
+                        </button>
+                    </ActionCard>
                 </div>
             )}
+
+            {/* 2. Модальне вікно для виставлення предмета на продаж */}
+            {itemToSell && (
+                <div style={styles.modalOverlay} onClick={() => !isProcessing && setItemToSell(null)}>
+                    <ActionCard
+                        item={itemToSell}
+                        onClose={() => setItemToSell(null)}
+                    >
+                        {/* Вміст, що вставляється в ActionCard: поля для ціни, кількості та кнопка "Виставити" */}
+                        <div style={{ color: 'white', display: 'flex', flexDirection: 'column', gap: '15px', textAlign: 'left' }}>
+                            {itemToSell.quantity > 1 && (
+                                <div>
+                                    <label>Кількість (доступно: {itemToSell.quantity})</label>
+                                    <input type="number" value={sellQuantity} onChange={(e) => setSellQuantity(e.target.value)} min="1" max={itemToSell.quantity}
+                                        style={{ ...styles.modalInput, background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.2)', color: 'white', width: '100%', boxSizing: 'border-box', margin: '5px 0 0 0' }}
+                                    />
+                                </div>
+                            )}
+                             <div>
+                                <div style={{...styles.currencySelector, justifyContent: 'center', gap: '10px', margin: '10px 0'}}>
+                                    {(['points', 'atl_balance', 'ton_balance'] as Currency[]).map(c => (
+                                        <button key={c} onClick={() => setSellCurrency(c)} style={{ ...styles.currencyButton, ...(sellCurrency === c ? styles.activeCurrencyButton : {}) }}>
+                                            {c === 'points' ? <img src="/coin/atl_s.png" alt="Points" width={28} height={28} /> : c === 'atl_balance' ? <img src="/coin/atl_g.png" alt="ATL" width={28} height={28} /> : '💎'}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+                            <div>
+                                <input type="number" placeholder="Ваша ціна" value={sellPrice} onChange={(e) => setSellPrice(e.target.value)}
+                                    style={{ ...styles.modalInput, background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(255, 255, 255, 0.57)', color: 'white', width: '100%', boxSizing: 'border-box', margin: '5px 0 25px 0' }}
+                                />
+                            </div>
+                            <button style={styles.actionCardButton} onClick={handleListItem} disabled={isProcessing}>
+                                {isProcessing ? 'Виставляємо...' : 'Виставити на ринок'}
+                            </button>
+                        </div>
+                    </ActionCard>
+                </div>
+            )}
+
+            {/* Модальне вікно підтвердження для зняття лотів залишається без змін */}
             {confirmation && (
                 <ConfirmationModal
                     isOpen={confirmation.isOpen}

@@ -384,7 +384,7 @@ async function handleUnequip(item: MergedInventoryItem) {
 
         {/* Картка предмету (модальне вікно) */}
         {selectedItem && (
-          <div className="modal-overlay" onClick={() => setSelectedItem(null)}>
+          <div style={styles.modalOverlay} onClick={() => setSelectedItem(null)}>
             <div onClick={(e) => e.stopPropagation()}>
               <ItemCard
                 item={selectedItem}
@@ -491,4 +491,14 @@ cityTitle: {
     margin: '0 0 20px 0', // Відступ знизу
     textShadow: '0 0 10px rgba(250, 204, 21, 0.5)'
 },
+modalOverlay: {
+    position: 'fixed',
+    inset: 0, // Сучасний аналог top: 0, right: 0, bottom: 0, left: 0
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    backdropFilter: 'blur(8px)',
+    zIndex: 1100, // Має бути вище, ніж z-index у BottomBar
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
 };

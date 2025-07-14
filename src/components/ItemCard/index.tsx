@@ -32,7 +32,7 @@ const buttonStyle = (type: 'primary' | 'danger') => ({
   cursor: "pointer",
   transition: "all 0.2s ease",
   width: '133px',
-  height: '35px',
+  height: '40px',
   fontWeight: 'bold',
   textTransform: 'uppercase' as const,
   display: 'flex',
@@ -74,10 +74,10 @@ export const ItemCard: React.FC<ItemCardProps> = ({
         maxWidth: "340px",
         minHeight: "500px",
         textAlign: "center",
-        filter: "drop-shadow(0 0px 25px rgba(180, 180, 255, 0.4))",
+        filter: "drop-shadow(0 0px 25px rgba(255, 255, 255, 0.4))",
         display: 'flex',
         flexDirection: 'column',
-        justifyContent: 'space-between'
+        justifyContent: 'space-between',
       }}
     >
       <button
@@ -165,7 +165,7 @@ export const ItemCard: React.FC<ItemCardProps> = ({
             width: '77%',
             margin: '0 auto 20px auto',
             gap: '8px',
-            border: '1px solid rgba(255,255,255,0.1)'
+            border: '1px solid rgba(0, 0, 0, 0.1)'
           }}>
             {item.stats?.damage > 0 && <p style={{margin: 0}}>🗡️ Шкода: <strong>{item.stats.damage}</strong></p>}
             {item.stats?.defense > 0 && <p style={{margin: 0}}>🛡️ Захист: <strong>{item.stats.defense}</strong></p>}
@@ -195,7 +195,6 @@ export const ItemCard: React.FC<ItemCardProps> = ({
         <button style={buttonStyle('primary')} onClick={() => onUnequipRequest(item)}>Зняти</button>
     )}
 
-    {/* Ця логіка залишається без змін */}
     {item.is_listed ? (
         <button style={buttonStyle('danger')} onClick={() => onCancelSellRequest(item)}>
             Скасувати
