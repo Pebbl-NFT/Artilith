@@ -262,7 +262,7 @@ async function handleUnequip(item: MergedInventoryItem) {
       case "home":
         return (
           <div style={{ padding: '0 16px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '20px' }}>
-             <h1 style={{ fontSize: "2rem", fontWeight: "bold", color: "#fff", marginTop:"80px" }}>ДІМ</h1>
+             <h1 style={{ fontSize: "2rem", fontWeight: "bold", color: "#fff", marginTop:"10px" }}>ДІМ</h1>
             <Card className="page">
                 <div style={{display: "flex",flexDirection: "row",justifyContent: "center",alignItems: "center",marginBottom: -30,gap: "30px",padding: 10,color: "#fff"}}>
                   <p>{username}</p><p>Lv. {userData.level}</p>
