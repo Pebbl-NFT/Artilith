@@ -288,7 +288,7 @@ export default function TextAdventurePage() {
                 parts: [{ 
                     text: JSON.stringify({ 
                         story: "Ворота Артіліта (Artilith) важко зачиняються за твоєю спиною. Перед тобою розстеляється похмурий, шепочучий ліс...", 
-                        choices: ["Йти вглиб лісу", "Йти узліссям на схід", "Перевірити спорядження"], 
+                        choices: ["Йти вглиб лісу", "Йти узліссям на схід", "Перевірити спорядження", "Йти дорогою на південь"], 
                         outcome: [{"type": "XP", "amount": 5}] 
                     }) 
                 }] 
@@ -296,7 +296,7 @@ export default function TextAdventurePage() {
         ];
         setChatHistory(initialHistory);
         setStory("Ворота Артіліта (Artilith) важко зачиняються за твоєю спиною. Перед тобою розстеляється похмурий, шепочучий ліс, що оточує місто. Повітря густе від невимовної магії та прихованих небезпек. Куди попрямуєш?");
-        setChoices(["Йти вглиб лісу", "Йти узліссям на схід", "Перевірити спорядження"]);
+        setChoices(["Йти вглиб лісу", "Йти узліссям на схід", "Йти дорогою на південь"]);
     }
 }, [playerData, chatHistory.length]);
 
@@ -307,6 +307,7 @@ export default function TextAdventurePage() {
     // Робимо копії станів, щоб працювати з актуальними даними
     let currentPlayerData = playerData;
     let currentEnemy = enemy;
+    let gameOverTriggered = false;
 
     for (const singleOutcome of outcomes) {
         if (!singleOutcome) continue;
@@ -333,28 +334,44 @@ export default function TextAdventurePage() {
                 currentPlayerData = { ...currentPlayerData, currentHP: newPlayerHP };
                 currentEnemy = { ...currentEnemy, health: newEnemyHP };
                 
-                if (newEnemyHP <= 0) {
-                    toast.success(`Ви перемогли ${currentEnemy.name}!`);
-                    setEnemiesDefeatedInSession(prev => prev + 1);
-                    setIsInCombat(false);
-                    currentEnemy = null; 
-                } else if (newPlayerHP <= 0) {
-                    toast.error("Вас перемогли...");
-                    // Викликаємо GAME_OVER, але не робимо return, щоб стан оновився в кінці
-                    await processOutcome({ type: 'GAME_OVER', reason: 'Ви загинули в бою.' });
-                }
+                if (newPlayerHP <= 0) {
+                    // Замість рекурсивного виклику, ми просто обробимо це як GAME_OVER
+                    toast.error("Вас перемогли...");
+                    setStory('Ви загинули в бою.');
+                    setChoices([]);
+                    setIsGameOver(true);
+                    setIsInCombat(false);
+                    setEnemy(null);
+                    saveAdventureStats();
+                    gameOverTriggered = true; // Встановлюємо прапорець
+                } else if (newEnemyHP <= 0) {
+                    toast.success(`Ви перемогли ${currentEnemy.name}!`);
+                    setEnemiesDefeatedInSession(prev => prev + 1);
+                    setIsInCombat(false);
+                    currentEnemy = null; 
+                }
+                break;
+
+            case 'GAME_OVER': // <-- ЗМІНА: Цей блок тепер буде головним для завершення гри
+                setStory(singleOutcome.reason);
+                setChoices([]);
+                setIsGameOver(true);
+                setIsInCombat(false);
+                setEnemy(null);
+                saveAdventureStats(); 
+                gameOverTriggered = true; // Встановлюємо прапорець
+                break;
+
+            case 'BATTLE_END':
+                setIsInCombat(false);
+                setEnemy(null);
                 break;
 
-                case 'BATTLE_END':
-                    setIsInCombat(false);
-                    setEnemy(null);
-                    break;
-
-                case 'FLEE':
-                    toast("Ви втекли з бою!", { icon: "🏃" });
-                    setIsInCombat(false);
-                    setEnemy(null);
-                    break;
+            case 'FLEE':
+                toast("Ви втекли з бою!", { icon: "🏃" });
+                setIsInCombat(false);
+                setEnemy(null);
+                break;
 
             // --- ЗМІНА: Об'єднано REWARD та XP ---
             case 'REWARD':
@@ -431,13 +448,16 @@ export default function TextAdventurePage() {
                 setPlayerData(currentPlayerData);
                 return; // Завершуємо виконання
         }
+
+        if (gameOverTriggered) break;
     }
 
     // Після циклу один раз оновлюємо глобальний стан
     setPlayerData(currentPlayerData);
     setEnemy(currentEnemy);
 
-}, [userId, playerData, enemy, combatChoices, addToLog, updateSummary]); // <-- Правильні залежності
+    return gameOverTriggered;
+}, [userId, playerData, enemy, combatChoices, addToLog, updateSummary]);
 
   
   const handleChoice = useCallback(async (choice: string) => {
@@ -451,9 +471,13 @@ export default function TextAdventurePage() {
     await spendEnergy(1);
     
     if (pendingOutcomes && pendingOutcomes[choice]) {
-        await processOutcome(pendingOutcomes[choice]);
-        setPendingOutcomes(null); 
-    }
+        const gameDidEnd = await processOutcome(pendingOutcomes[choice]);
+        if (gameDidEnd) {
+            setIsLoading(false);
+            return; // <-- ЗМІНА: Зупиняємо функцію, якщо гра закінчилась
+        }
+        setPendingOutcomes(null); 
+    }
     
     const energyAfterAction = energy - 1;
     let promptText = `My choice is: "${choice}". My character stats: Energy: ${energyAfterAction}.`;
@@ -488,8 +512,13 @@ export default function TextAdventurePage() {
             const parsedResponse: AIResponse = JSON.parse(cleanedJsonString);
             
             if (parsedResponse.outcome) {
-                await processOutcome(parsedResponse.outcome);
-            }
+                // <-- ЗМІНА: Перевіряємо результат
+                const gameDidEnd = await processOutcome(parsedResponse.outcome);
+                if (gameDidEnd) {
+                    setIsLoading(false);
+                    return; // Негайно виходимо
+                }
+            }
             setPendingOutcomes(parsedResponse.choiceOutcomes ?? null);
 
             setChatHistory([...newHistory, { role: "model", parts: [{ text: jsonMatch[0] }] }]);

@@ -22,7 +22,6 @@ import { EnergyRefillModal } from "@/components/EnergyRefillModal";
 // --- ДАНІ ТА ЛОГІКА ---
 import { supabase } from "@/lib/supabaseClient";
 import { MergedInventoryItem, fetchInventory as fetchInventoryHook } from "@/hooks/useInventory";
-import { updateUserPoints } from "@/hooks/useUserPoints";
 import { getPlayerStats } from "@/utils/getPlayerStats";
 
 // --- ЗОБРАЖЕННЯ ---
