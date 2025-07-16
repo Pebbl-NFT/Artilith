@@ -331,32 +331,39 @@ async function handleUnequip(item: MergedInventoryItem) {
       case "city":
       return (
           <div style={styles.cityContainer}>
-              <h1 style={styles.cityTitle}>Місто</h1>
-              <CityNavigationCard 
-                  title="Торгівля"
-                  description="Купуйте та продавайте предмети"
-                  imageUrl={shopbg.src}
-                  onClick={() => router.push('/trade')}
-              />
-              <CityNavigationCard 
-                  title="Коваль"
-                  description="Покращуйте своє спорядження"
-                  imageUrl={blacksmithbg.src}
-                  onClick={() => { /* дія для Коваля */ }}
-              />
-              <CityNavigationCard 
-                  title="Гільдія"
-                  description="Об'єднуйтесь з іншими гравцями"
-                  imageUrl={citybg.src}
-                  onClick={() => { /* дія для Гільдії */ }}
-              />
-              <CityNavigationCard 
-                  title="Алея Героїв"
-                  description="Переглядайте таблиці лідерів"
-                  imageUrl={alleyofheroesnbg.src}
-                  onClick={() => { /* дія для Алеї */ }}
-              />
-          </div>
+            <h1 style={styles.cityTitle}>Місто</h1>
+            <CityNavigationCard 
+                title="Торгівля"
+                description="Купуйте та продавайте предмети"
+                imageUrl={shopbg.src}
+                onClick={() => router.push('/trade')}
+            />
+
+            {false && (
+                <CityNavigationCard 
+                    title="Коваль"
+                    description="Покращуйте своє спорядження"
+                    imageUrl={blacksmithbg.src}
+                    onClick={() => { /* дія для Коваля */ }}
+                />
+            )}
+
+            {false && (
+                <CityNavigationCard 
+                    title="Гільдія"
+                    description="Об'єднуйтесь з іншими гравцями"
+                    imageUrl={citybg.src}
+                    onClick={() => { /* дія для Гільдії */ }}
+                />
+            )}
+
+            <CityNavigationCard 
+                title="Алея Героїв"
+                description="Переглядайте таблиці лідерів"
+                imageUrl={alleyofheroesnbg.src}
+                onClick={() => router.push('/rankings')}
+            />
+        </div>
       );
       
       case "adventures":
