@@ -3,18 +3,25 @@ import React from 'react';
 import Image from 'next/image';
 import { MergedInventoryItem } from '@/hooks/useInventory';
 
-// 1. Додаємо новий необов'язковий пропс для іконки валюти
 export interface InventoryItemSlotProps {
   item: MergedInventoryItem;
   onClick: () => void;
   price?: number;
   priceCurrencyIcon?: React.ReactNode;
+  hideName?: boolean; // <-- 1. Додаємо новий необов'язковий пропс
 }
 
-// 2. Додаємо priceCurrencyIcon до списку пропсів
-const InventoryItemSlot: React.FC<InventoryItemSlotProps> = ({ item, onClick, price, priceCurrencyIcon }) => {
+const InventoryItemSlot: React.FC<InventoryItemSlotProps> = ({ 
+  item, 
+  onClick, 
+  price, 
+  priceCurrencyIcon, 
+  hideName = false // <-- 2. Отримуємо пропс, за замовчуванням він false
+}) => {
   const frameStyle: React.CSSProperties = {
     position: 'relative',
+    width: '100%',
+    flexGrow: 1,
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
@@ -51,15 +58,20 @@ const InventoryItemSlot: React.FC<InventoryItemSlotProps> = ({ item, onClick, pr
   const fontClasses = `rarity-font-${item.rarity?.toLowerCase() || 'common'}`;
 
   return (
-    <div onClick={onClick} className="inventory-slot-wrapper">
+    <div 
+      onClick={onClick} 
+      className="inventory-slot-wrapper" 
+      style={{
+        width: '100%',
+        height: '100%',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+      }}
+    >
       <div className={frameClasses} style={frameStyle}>
         
-        {item.is_listed && (
-          <div style={saleOverlayStyle}>
-            Продається
-          </div>
-        )}
-
+        {item.is_listed && ( <div style={saleOverlayStyle}> Продається </div> )}
         {item.equipped && <div className="equipped-indicator" title="Екіпіровано"></div>}
 
         {item.image_url ? (
@@ -67,28 +79,24 @@ const InventoryItemSlot: React.FC<InventoryItemSlotProps> = ({ item, onClick, pr
             src={item.image_url}
             alt={item.name}
             fill
-            style={{ objectFit: 'contain', borderRadius: '10px' }}
+            style={{ objectFit: 'contain', borderRadius: '10px'}}
           />
         ) : (
           <span className="text-4xl text-slate-500">?</span>
         )}
       </div>
 
-      <p className={`inventory-item-name ${fontClasses}`}>{item.name}</p>
+      {/* 3. Обертаємо назву в умову: показуємо, тільки якщо hideName=false */}
+      {!hideName && <p className={`inventory-item-name ${fontClasses}`}>{item.name}</p>}
 
-      {/* 3. Змінюємо відображення ціни */}
       {price !== undefined && (
         <p className="inventory-item-price">
-          {price} {priceCurrencyIcon || '🪨'} {/* <--- ЗМІНА ТУТ */}
+          {price} {priceCurrencyIcon || '🪨'}
         </p>
       )}
 
-      {item.quantity > 1 && (
-        <span className="quantity-indicator">x{item.quantity}</span>
-      )}
-      {item.upgrade_level > 0 && (
-        <span className="upgrade-indicator">+{item.upgrade_level}</span>
-      )}
+      {item.quantity > 1 && ( <span className="quantity-indicator">x{item.quantity}</span> )}
+      {item.upgrade_level > 0 && ( <span className="upgrade-indicator">+{item.upgrade_level}</span> )}
     </div>
   );
 };

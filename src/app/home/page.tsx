@@ -333,20 +333,25 @@ async function handleUnequip(item: MergedInventoryItem) {
           <div style={styles.cityContainer}>
             <h1 style={styles.cityTitle}>Місто</h1>
             <CityNavigationCard 
+                title="Алея Героїв"
+                description="Переглядайте таблиці лідерів"
+                imageUrl={alleyofheroesnbg.src}
+                onClick={() => router.push('/rankings')}
+            />
+
+            <CityNavigationCard 
                 title="Торгівля"
                 description="Купуйте та продавайте предмети"
                 imageUrl={shopbg.src}
                 onClick={() => router.push('/trade')}
             />
 
-            {false && (
-                <CityNavigationCard 
-                    title="Коваль"
-                    description="Покращуйте своє спорядження"
-                    imageUrl={blacksmithbg.src}
-                    onClick={() => { /* дія для Коваля */ }}
-                />
-            )}
+            <CityNavigationCard 
+                title="Коваль"
+                description="Покращуйте своє спорядження"
+                imageUrl={blacksmithbg.src}
+                onClick={() => router.push('/blacksmith')}
+            />
 
             {false && (
                 <CityNavigationCard 
@@ -356,13 +361,6 @@ async function handleUnequip(item: MergedInventoryItem) {
                     onClick={() => { /* дія для Гільдії */ }}
                 />
             )}
-
-            <CityNavigationCard 
-                title="Алея Героїв"
-                description="Переглядайте таблиці лідерів"
-                imageUrl={alleyofheroesnbg.src}
-                onClick={() => router.push('/rankings')}
-            />
         </div>
       );
       

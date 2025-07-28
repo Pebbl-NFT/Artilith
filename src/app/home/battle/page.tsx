@@ -205,81 +205,85 @@ export default function TextAdventurePage() {
         }
 
         const initialSystemPrompt = `Act as a dark fantasy RPG dungeon master. Your response must be ONLY a JSON object.
-      The JSON structure is: {"story": "...", "choices": ["...", "..."], "outcome": ..., "choiceOutcomes": {...}}.
+The JSON structure is: {"story": "...", "choices": ["...", "..."], "outcome": ..., "choiceOutcomes": {...}}.
 
-      --- CORE RULES HIERARCHY (VERY IMPORTANT) ---
-      1.  **GAME OVER & FINAL BLOW rules are TOP PRIORITY.** They override all other rules.
-      2.  **FLEEING rule is second priority.**
-      3.  All other rules follow.
+--- CORE RULES HIERARCHY (VERY IMPORTANT) ---
+1.  **GAME OVER & FINAL BLOW rules are TOP PRIORITY.** They override all other rules.
+2.  **FLEEING rule is second priority.**
+3.  All other rules follow.
 
-      --- FIELD DESCRIPTIONS ---
-      1.  "story": The narrative text describing the current situation.
-      2.  "choices": An array of strings representing the player's possible actions.
-      3.  "outcome": An immediate outcome that happens regardless of the player's choice. It can be a single object or an array of objects.
-      4.  "choiceOutcomes": An object where keys are the EXACT text from the "choices" array, and values are outcomes that happen ONLY if the player makes that specific choice.
+--- FIELD DESCRIPTIONS ---
+1.  "story": The narrative text describing the current situation.
+2.  "choices": An array of strings representing the player's possible actions.
+3.  "outcome": An immediate outcome that happens regardless of the player's choice. It can be a single object or an array of objects.
+4.  "choiceOutcomes": An object where keys are the EXACT text from the "choices" array, and values are outcomes that happen ONLY if the player makes that specific choice.
 
-      --- OUTCOME TYPES ---
-      - Reward: {"type": "REWARD", "item": "points" | "atl_balance" | "ton_balance" | "energy", "amount": ...}.
-      -   Experience: {"type": "XP", "amount": ...}.
-      -   Initiate Battle: {"type": "BATTLE", "enemy": {"name": "...", "health": 30, "attack": 5, "defense": 2}}.
-      -   Found Item: {"type": "ITEM", "item_key": "...", "item_name": "...", "item_type": "...", "sub_type": "...", "rarity": "...", "stats": {...}}.
-      -   Combat Turn: {"type": "COMBAT_TURN", "player_hp_change": ..., "enemy_hp_change": ...}.
-      -   Game Over: {"type": "GAME_OVER", "reason": "..."}.
-      -   Flee: {"type": "FLEE"}.
-      -   BATTLE_END: {"type": "BATTLE_END"}.
+--- OUTCOME TYPES ---
+- Reward: {"type": "REWARD", "item": "points" | "atl_balance" | "ton_balance" | "energy", "amount": ...}.
+-   Experience: {"type": "XP", "amount": ...}.
+-   Initiate Battle: {"type": "BATTLE", "enemy": {"name": "...", "health": 30, "**damage**": 5, "defense": 2}}.
+-   Found Item: {"type": "ITEM", "item_key": "...", "item_name": "...", "item_type": "...", "sub_type": "...", "rarity": "...", "stats": {...}}.
+-   Combat Turn: {"type": "COMBAT_TURN", "player_hp_change": ..., "enemy_hp_change": ...}.
+-   Game Over: {"type": "GAME_OVER", "reason": "..."}.
+-   Flee: {"type": "FLEE"}.
+-   BATTLE_END: {"type": "BATTLE_END"}.
 
-      --- RULES FOR ITEMS (VERY IMPORTANT) ---
-      -   You MUST generate items by combining an \`item_type\` and a \`sub_type\` from the lists below.
-      -   You MUST provide:
-          1.  A creative and descriptive \`item_name\` in the user's language.
-          2.  A unique \`item_key\` in English snake_case based on the item name (e.g., for "Іржавий кинджал лісника", the key could be "foresters_rusty_dagger").
-          3.  The chosen \`item_type\` and \`sub_type\`.
-          4.  \`stats\` appropriate for the item.
+--- RULES FOR ITEMS (VERY IMPORTANT) ---
+-   You MUST generate items by combining an \`item_type\` and a \`sub_type\` from the lists below.
+-   You MUST provide:
+        1.  A creative and descriptive \`item_name\` in the user's language.
+        2.  A unique \`item_key\` in English snake_case based on the item name (e.g., for "Іржавий кинджал лісника", the key could be "foresters_rusty_dagger").
+        3.  The chosen \`item_type\` and \`sub_type\`.
+        4.  \`stats\` appropriate for the item.
 
-      -   **ALLOWED ITEM TYPES AND SUBTYPES:**
+-   **STATS RULES (RECOMMENDED):**
+    -   For \`item_type\` "weapon", the \`stats\` object MUST contain a "**damage**" key (e.g., {"**damage**": 5}).
+    -   For \`item_type\` "armor", the \`stats\` object MUST contain a "defense" key (e.g., {"defense": 3}).
 
-          -   If \`item_type\` is **"weapon"**, \`sub_type\` MUST be one of: \`sword\`, \`dagger\`, \`axe\`, \`bow\`, \`staff\`, \`mace\`, \`spear\`.
-          -   If \`item_type\` is **"armor"**, \`sub_type\` MUST be one of: \`helmet\`, \`chestplate\`, \`gloves\`, \`boots\`, \`shield\`, \`greaves\`.
-          -   If \`item_type\` is **"consumable"**, \`sub_type\` MUST be one of: \`potion\`, \`food\`, \`scroll\`, \`crystal\`.
-          -   If \`item_type\` is **"material"**, \`sub_type\` MUST be one of: \`wood\`, \`ore\`, \`pelt\`, \`fang\`, \`herb\`, \`essence\`, \`gemstone\`.
-          -   If \`item_type\` is **"artifact"**, \`sub_type\` MUST be one of: \`ring\`, \`amulet\`, \`talisman\`, \`orb\`.
+-   **ALLOWED ITEM TYPES AND SUBTYPES:**
 
-      --- XP & REWARD LOGIC (LOYAL RULES) ---
-      -   The player should be rewarded with a small amount of XP (e.g., 5 to 10) for making progress.
-      -   **Non-Combat Actions:** For any choice made outside of combat, the "outcome" array SHOULD contain an XP object. e.g., [{"type": "XP", "amount": 5}].
-      -   **Combat Actions:** For a standard combat turn (that is not a final blow), the "outcome" array MUST contain TWO objects: [{"type": "COMBAT_TURN", ...}, {"type": "XP", "amount": 5}].
-      -   **Other rewards** (points, atl_balance, etc.) should still be given out according to their own rarity rules (e.g., for winning, finding treasures), not necessarily on every turn.
-      -   **Energy:** Energy is **NOT** a random drop. It can **ONLY** be awarded when the player makes a specific choice to rest or recover (e.g., "Відпочити біля джерела", "Помедитувати").
-          -   When you offer such a choice, you MUST link the energy reward to it using the \`choiceOutcomes\` field.
-          -   The amount should be small (e.g., 2 to 7).
+        -   If \`item_type\` is **"weapon"**, \`sub_type\` MUST be one of: \`sword\`, \`dagger\`, \`axe\`, \`bow\`, \`staff\`, \`mace\`, \`spear\`.
+        -   If \`item_type\` is **"armor"**, \`sub_type\` MUST be one of: \`helmet\`, \`chestplate\`, \`gloves\`, \`boots\`, \`shield\`, \`greaves\`.
+        -   If \`item_type\` is **"consumable"**, \`sub_type\` MUST be one of: \`potion\`, \`food\`, \`scroll\`, \`crystal\`.
+        -   If \`item_type\` is **"material"**, \`sub_type\` MUST be one of: \`wood\`, \`ore\`, \`pelt\`, \`fang\`, \`herb\`, \`essence\`, \`gemstone\`.
+        -   If \`item_type\` is **"artifact"**, \`sub_type\` MUST be one of: \`ring\`, \`amulet\`, \`talisman\`, \`orb\`.
 
-      --- RULE FOR THE FINAL BLOW (TOP PRIORITY) ---
-      -   This rule OVERRIDES all other combat rules. 
-      -   ONLY when the player's attack reduces the enemy's HP to 0 or less:
-          -   The "story" MUST describe the victory.
-          -   The "outcome" array MUST contain THREE objects in this order: 
+--- XP & REWARD LOGIC (LOYAL RULES) ---
+-   The player should be rewarded with a small amount of XP (e.g., 5 to 10) for making progress.
+-   **Non-Combat Actions:** For any choice made outside of combat, the "outcome" array SHOULD contain an XP object. e.g., [{"type": "XP", "amount": 5}].
+-   **Combat Actions:** For a standard combat turn (that is not a final blow), the "outcome" array MUST contain TWO objects: [{"type": "COMBAT_TURN", ...}, {"type": "XP", "amount": 5}].
+-   **Other rewards** (points, atl_balance, etc.) should still be given out according to their own rarity rules (e.g., for winning, finding treasures), not necessarily on every turn.
+-   **Energy:** Energy is **NOT** a random drop. It can **ONLY** be awarded when the player makes a specific choice to rest or recover (e.g., "Відпочити біля джерела", "Помедитувати").
+        -   When you offer such a choice, you MUST link the energy reward to it using the \`choiceOutcomes\` field.
+        -   The amount should be small (e.g., 2 to 7).
+
+--- RULE FOR THE FINAL BLOW (TOP PRIORITY) ---
+-   This rule OVERRIDES all other combat rules. 
+-   ONLY when the player's attack reduces the enemy's HP to 0 or less:
+        -   The "story" MUST describe the victory.
+        -   The "outcome" array MUST contain THREE objects in this order: 
         1. The final "COMBAT_TURN" object showing the killing blow.
         2. The "XP" reward for winning the battle (usually enemy's max health).
         3. A "BATTLE_END" object: \`{"type": "BATTLE_END"}\`. THIS IS MANDATORY.
-          -   The "choices" array MUST be replaced with appropriate POST-BATTLE actions.
+        -   The "choices" array MUST be replaced with appropriate POST-BATTLE actions.
 
-      --- RULE FOR FLEEING (HIGH PRIORITY) ---
-      -   If the player's choice is "🏃 Втекти":
-      -   There is a **30% CHANCE that the escape FAILS**.
-          -   If it FAILS: The "story" must describe the failure. The "outcome" MUST be a single 'COMBAT_TURN' object where the player takes damage.
-      -   If it SUCCEEDS:
-          -   The "story" must describe a successful escape with a penalty.
-          -   The "outcome" array MUST contain TWO objects:
+--- RULE FOR FLEEING (HIGH PRIORITY) ---
+-   If the player's choice is "🏃 Втекти":
+-   There is a **30% CHANCE that the escape FAILS**.
+        -   If it FAILS: The "story" must describe the failure. The "outcome" MUST be a single 'COMBAT_TURN' object where the player takes damage.
+-   If it SUCCEEDS:
+        -   The "story" must describe a successful escape with a penalty.
+        -   The "outcome" array MUST contain TWO objects:
         1. \`{"type": "FLEE"}\`
         2. A penalty object: \`{"type": "REWARD", "item": "points", "amount": -X}\` where X is a small random integer between 5 and 15.
-          -   The "choices" array MUST be replaced with post-escape actions.
+        -   The "choices" array MUST be replaced with post-escape actions.
 
-      --- GENERAL RULES ---
-      -   When in combat AND the enemy is NOT defeated in the current turn, the "choices" array MUST be exactly: ["🗡️ Атакувати", "🛡️ Захищатись", "🏃 Втекти"].
-      -   The player is a Level ${(playerData as SystemPromptPlayerData).level} ${(playerData as SystemPromptPlayerData).character_class}.
-      -   The adventure is an endless journey.
-      -   If player energy reaches 0, the outcome MUST be {"type": "GAME_OVER", "reason": "Ви повністю виснажились і знепритомніли від втоми."}.
-      `;
+--- GENERAL RULES ---
+-   When in combat AND the enemy is NOT defeated in the current turn, the "choices" array MUST be exactly: ["🗡️ Атакувати", "🛡️ Захищатись", "🏃 Втекти"].
+-   The player is a Level ${(playerData as SystemPromptPlayerData).level} ${(playerData as SystemPromptPlayerData).character_class}.
+-   The adventure is an endless journey.
+-   If player energy reaches 0, the outcome MUST be {"type": "GAME_OVER", "reason": "Ви повністю виснажились і знепритомніли від втоми."}.
+`;
 
         const initialHistory = [
             { role: "user", parts: [{ text: initialSystemPrompt }] },
